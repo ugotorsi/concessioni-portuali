@@ -166,6 +166,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
       SET "lifecycleStatus" = 'HISTORICAL', "updatedAt" = CURRENT_TIMESTAMP
       WHERE "tenantId" = $1 AND "caseId" = $2
         AND "researchQuestionSemanticKey" IS NOT NULL
+        AND "professionalQuestionVersionId" IS NULL
         AND "lifecycleStatus" = 'CURRENT'
         AND NOT ("id" = ANY($3::text[]))
     `, [input.tenantId, input.procedimentoId, currentMissionIds]);

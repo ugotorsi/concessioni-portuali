@@ -1333,3 +1333,13 @@ export const ResearchCompletionState = {
 } as const
 
 export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typeof ResearchCompletionState]
+
+
+export const ProfessionalLegalQuestionVersionStatus = {
+  DRAFT: 'DRAFT',
+  APPROVED: 'APPROVED',
+  SUPERSEDED: 'SUPERSEDED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ProfessionalLegalQuestionVersionStatus = (typeof ProfessionalLegalQuestionVersionStatus)[keyof typeof ProfessionalLegalQuestionVersionStatus]

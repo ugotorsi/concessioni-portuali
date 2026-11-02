@@ -47,6 +47,7 @@ export type ResearchMissionRecordMinAggregateOutputType = {
   missionFingerprint: string | null
   knowledgeRevisionId: string | null
   firstKnowledgeRevisionId: string | null
+  professionalQuestionVersionId: string | null
   legalIssueSemanticKey: string | null
   researchQuestionSemanticKey: string | null
   lifecycleStatus: $Enums.ResearchMissionLifecycleStatus | null
@@ -75,6 +76,7 @@ export type ResearchMissionRecordMaxAggregateOutputType = {
   missionFingerprint: string | null
   knowledgeRevisionId: string | null
   firstKnowledgeRevisionId: string | null
+  professionalQuestionVersionId: string | null
   legalIssueSemanticKey: string | null
   researchQuestionSemanticKey: string | null
   lifecycleStatus: $Enums.ResearchMissionLifecycleStatus | null
@@ -104,6 +106,7 @@ export type ResearchMissionRecordCountAggregateOutputType = {
   missionFingerprint: number
   knowledgeRevisionId: number
   firstKnowledgeRevisionId: number
+  professionalQuestionVersionId: number
   legalIssueSemanticKey: number
   researchQuestionSemanticKey: number
   referenceDateBasis: number
@@ -143,6 +146,7 @@ export type ResearchMissionRecordMinAggregateInputType = {
   missionFingerprint?: true
   knowledgeRevisionId?: true
   firstKnowledgeRevisionId?: true
+  professionalQuestionVersionId?: true
   legalIssueSemanticKey?: true
   researchQuestionSemanticKey?: true
   lifecycleStatus?: true
@@ -171,6 +175,7 @@ export type ResearchMissionRecordMaxAggregateInputType = {
   missionFingerprint?: true
   knowledgeRevisionId?: true
   firstKnowledgeRevisionId?: true
+  professionalQuestionVersionId?: true
   legalIssueSemanticKey?: true
   researchQuestionSemanticKey?: true
   lifecycleStatus?: true
@@ -200,6 +205,7 @@ export type ResearchMissionRecordCountAggregateInputType = {
   missionFingerprint?: true
   knowledgeRevisionId?: true
   firstKnowledgeRevisionId?: true
+  professionalQuestionVersionId?: true
   legalIssueSemanticKey?: true
   researchQuestionSemanticKey?: true
   referenceDateBasis?: true
@@ -317,6 +323,7 @@ export type ResearchMissionRecordGroupByOutputType = {
   missionFingerprint: string | null
   knowledgeRevisionId: string | null
   firstKnowledgeRevisionId: string | null
+  professionalQuestionVersionId: string | null
   legalIssueSemanticKey: string | null
   researchQuestionSemanticKey: string | null
   referenceDateBasis: runtime.JsonValue | null
@@ -370,6 +377,7 @@ export type ResearchMissionRecordWhereInput = {
   missionFingerprint?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   knowledgeRevisionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   firstKnowledgeRevisionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
+  professionalQuestionVersionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   legalIssueSemanticKey?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   researchQuestionSemanticKey?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   referenceDateBasis?: Prisma.JsonNullableFilter<"ResearchMissionRecord">
@@ -396,6 +404,7 @@ export type ResearchMissionRecordWhereInput = {
   adverseMissionRequirement?: Prisma.XOR<Prisma.ResearchAdverseRequirementNullableScalarRelationFilter, Prisma.ResearchAdverseRequirementWhereInput> | null
   knowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
   firstKnowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
+  professionalQuestionVersion?: Prisma.XOR<Prisma.ProfessionalLegalQuestionVersionNullableScalarRelationFilter, Prisma.ProfessionalLegalQuestionVersionWhereInput> | null
 }
 
 export type ResearchMissionRecordOrderByWithRelationInput = {
@@ -412,6 +421,7 @@ export type ResearchMissionRecordOrderByWithRelationInput = {
   missionFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   knowledgeRevisionId?: Prisma.SortOrderInput | Prisma.SortOrder
   firstKnowledgeRevisionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  professionalQuestionVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   legalIssueSemanticKey?: Prisma.SortOrderInput | Prisma.SortOrder
   researchQuestionSemanticKey?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceDateBasis?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -438,11 +448,13 @@ export type ResearchMissionRecordOrderByWithRelationInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementOrderByWithRelationInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionOrderByWithRelationInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionOrderByWithRelationInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionOrderByWithRelationInput
 }
 
 export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   payloadFingerprint?: string
+  professionalQuestionVersionId?: string
   activeExecutionId?: string
   id_tenantId?: Prisma.ResearchMissionRecordIdTenantIdCompoundUniqueInput
   AND?: Prisma.ResearchMissionRecordWhereInput | Prisma.ResearchMissionRecordWhereInput[]
@@ -484,7 +496,8 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   adverseMissionRequirement?: Prisma.XOR<Prisma.ResearchAdverseRequirementNullableScalarRelationFilter, Prisma.ResearchAdverseRequirementWhereInput> | null
   knowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
   firstKnowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
-}, "id" | "payloadFingerprint" | "activeExecutionId" | "id_tenantId">
+  professionalQuestionVersion?: Prisma.XOR<Prisma.ProfessionalLegalQuestionVersionNullableScalarRelationFilter, Prisma.ProfessionalLegalQuestionVersionWhereInput> | null
+}, "id" | "payloadFingerprint" | "professionalQuestionVersionId" | "activeExecutionId" | "id_tenantId">
 
 export type ResearchMissionRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -500,6 +513,7 @@ export type ResearchMissionRecordOrderByWithAggregationInput = {
   missionFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   knowledgeRevisionId?: Prisma.SortOrderInput | Prisma.SortOrder
   firstKnowledgeRevisionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  professionalQuestionVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   legalIssueSemanticKey?: Prisma.SortOrderInput | Prisma.SortOrder
   researchQuestionSemanticKey?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceDateBasis?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -538,6 +552,7 @@ export type ResearchMissionRecordScalarWhereWithAggregatesInput = {
   missionFingerprint?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   knowledgeRevisionId?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   firstKnowledgeRevisionId?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
+  professionalQuestionVersionId?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   legalIssueSemanticKey?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   researchQuestionSemanticKey?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   referenceDateBasis?: Prisma.JsonNullableWithAggregatesFilter<"ResearchMissionRecord">
@@ -590,6 +605,7 @@ export type ResearchMissionRecordCreateInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateInput = {
@@ -606,6 +622,7 @@ export type ResearchMissionRecordUncheckedCreateInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -666,6 +683,7 @@ export type ResearchMissionRecordUpdateInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateInput = {
@@ -682,6 +700,7 @@ export type ResearchMissionRecordUncheckedUpdateInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -720,6 +739,7 @@ export type ResearchMissionRecordCreateManyInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -776,6 +796,7 @@ export type ResearchMissionRecordUncheckedUpdateManyInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -821,6 +842,7 @@ export type ResearchMissionRecordCountOrderByAggregateInput = {
   missionFingerprint?: Prisma.SortOrder
   knowledgeRevisionId?: Prisma.SortOrder
   firstKnowledgeRevisionId?: Prisma.SortOrder
+  professionalQuestionVersionId?: Prisma.SortOrder
   legalIssueSemanticKey?: Prisma.SortOrder
   researchQuestionSemanticKey?: Prisma.SortOrder
   referenceDateBasis?: Prisma.SortOrder
@@ -854,6 +876,7 @@ export type ResearchMissionRecordMaxOrderByAggregateInput = {
   missionFingerprint?: Prisma.SortOrder
   knowledgeRevisionId?: Prisma.SortOrder
   firstKnowledgeRevisionId?: Prisma.SortOrder
+  professionalQuestionVersionId?: Prisma.SortOrder
   legalIssueSemanticKey?: Prisma.SortOrder
   researchQuestionSemanticKey?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
@@ -882,6 +905,7 @@ export type ResearchMissionRecordMinOrderByAggregateInput = {
   missionFingerprint?: Prisma.SortOrder
   knowledgeRevisionId?: Prisma.SortOrder
   firstKnowledgeRevisionId?: Prisma.SortOrder
+  professionalQuestionVersionId?: Prisma.SortOrder
   legalIssueSemanticKey?: Prisma.SortOrder
   researchQuestionSemanticKey?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
@@ -901,14 +925,14 @@ export type ResearchMissionRecordSumOrderByAggregateInput = {
   stateVersion?: Prisma.SortOrder
 }
 
-export type ResearchMissionRecordScalarRelationFilter = {
-  is?: Prisma.ResearchMissionRecordWhereInput
-  isNot?: Prisma.ResearchMissionRecordWhereInput
-}
-
 export type ResearchMissionRecordNullableScalarRelationFilter = {
   is?: Prisma.ResearchMissionRecordWhereInput | null
   isNot?: Prisma.ResearchMissionRecordWhereInput | null
+}
+
+export type ResearchMissionRecordScalarRelationFilter = {
+  is?: Prisma.ResearchMissionRecordWhereInput
+  isNot?: Prisma.ResearchMissionRecordWhereInput
 }
 
 export type ResearchMissionRecordCreateNestedManyWithoutTenantInput = {
@@ -1001,6 +1025,38 @@ export type EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput = {
 
 export type EnumResearchMissionStatusFieldUpdateOperationsInput = {
   set?: $Enums.ResearchMissionStatus
+}
+
+export type ResearchMissionRecordCreateNestedOneWithoutProfessionalQuestionVersionInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutProfessionalQuestionVersionInput
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+}
+
+export type ResearchMissionRecordUncheckedCreateNestedOneWithoutProfessionalQuestionVersionInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutProfessionalQuestionVersionInput
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+}
+
+export type ResearchMissionRecordUpdateOneWithoutProfessionalQuestionVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutProfessionalQuestionVersionInput
+  upsert?: Prisma.ResearchMissionRecordUpsertWithoutProfessionalQuestionVersionInput
+  disconnect?: Prisma.ResearchMissionRecordWhereInput | boolean
+  delete?: Prisma.ResearchMissionRecordWhereInput | boolean
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResearchMissionRecordUpdateToOneWithWhereWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUpdateWithoutProfessionalQuestionVersionInput>, Prisma.ResearchMissionRecordUncheckedUpdateWithoutProfessionalQuestionVersionInput>
+}
+
+export type ResearchMissionRecordUncheckedUpdateOneWithoutProfessionalQuestionVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutProfessionalQuestionVersionInput
+  upsert?: Prisma.ResearchMissionRecordUpsertWithoutProfessionalQuestionVersionInput
+  disconnect?: Prisma.ResearchMissionRecordWhereInput | boolean
+  delete?: Prisma.ResearchMissionRecordWhereInput | boolean
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResearchMissionRecordUpdateToOneWithWhereWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUpdateWithoutProfessionalQuestionVersionInput>, Prisma.ResearchMissionRecordUncheckedUpdateWithoutProfessionalQuestionVersionInput>
 }
 
 export type ResearchMissionRecordCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
@@ -1236,6 +1292,7 @@ export type ResearchMissionRecordCreateWithoutTenantInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutTenantInput = {
@@ -1251,6 +1308,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutTenantInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1318,6 +1376,7 @@ export type ResearchMissionRecordScalarWhereInput = {
   missionFingerprint?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   knowledgeRevisionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   firstKnowledgeRevisionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
+  professionalQuestionVersionId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   legalIssueSemanticKey?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   researchQuestionSemanticKey?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   referenceDateBasis?: Prisma.JsonNullableFilter<"ResearchMissionRecord">
@@ -1369,6 +1428,7 @@ export type ResearchMissionRecordCreateWithoutAssignedActorInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput = {
@@ -1384,6 +1444,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1434,6 +1495,174 @@ export type ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput = 
   data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateManyMutationInput, Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorInput>
 }
 
+export type ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput = {
+  id: string
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+}
+
+export type ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput = {
+  id: string
+  tenantId?: string | null
+  assignedActorId?: string | null
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  knowledgeRevisionId?: string | null
+  firstKnowledgeRevisionId?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
+}
+
+export type ResearchMissionRecordCreateOrConnectWithoutProfessionalQuestionVersionInput = {
+  where: Prisma.ResearchMissionRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+}
+
+export type ResearchMissionRecordUpsertWithoutProfessionalQuestionVersionInput = {
+  update: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutProfessionalQuestionVersionInput>
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutProfessionalQuestionVersionInput>
+  where?: Prisma.ResearchMissionRecordWhereInput
+}
+
+export type ResearchMissionRecordUpdateToOneWithWhereWithoutProfessionalQuestionVersionInput = {
+  where?: Prisma.ResearchMissionRecordWhereInput
+  data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutProfessionalQuestionVersionInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutProfessionalQuestionVersionInput>
+}
+
+export type ResearchMissionRecordUpdateWithoutProfessionalQuestionVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+}
+
+export type ResearchMissionRecordUncheckedUpdateWithoutProfessionalQuestionVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
+}
+
 export type ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput = {
   id: string
   contractVersion: string
@@ -1469,6 +1698,7 @@ export type ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInpu
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
@@ -1485,6 +1715,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRe
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1559,6 +1790,7 @@ export type ResearchMissionRecordUpdateWithoutTechnicalSourceResearchRecordsInpu
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
@@ -1575,6 +1807,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRe
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1633,6 +1866,7 @@ export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutExecutionAttemptsInput = {
@@ -1649,6 +1883,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutExecutionAttemptsInput = 
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1723,6 +1958,7 @@ export type ResearchMissionRecordUpdateWithoutExecutionAttemptsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutExecutionAttemptsInput = {
@@ -1739,6 +1975,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutExecutionAttemptsInput = 
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1797,6 +2034,7 @@ export type ResearchMissionRecordCreateWithoutQuestionResultsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutQuestionResultsInput = {
@@ -1813,6 +2051,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutQuestionResultsInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1887,6 +2126,7 @@ export type ResearchMissionRecordUpdateWithoutQuestionResultsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutQuestionResultsInput = {
@@ -1903,6 +2143,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutQuestionResultsInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1961,6 +2202,7 @@ export type ResearchMissionRecordCreateWithoutSourceAssessmentsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutSourceAssessmentsInput = {
@@ -1977,6 +2219,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutSourceAssessmentsInput = 
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2051,6 +2294,7 @@ export type ResearchMissionRecordUpdateWithoutSourceAssessmentsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutSourceAssessmentsInput = {
@@ -2067,6 +2311,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutSourceAssessmentsInput = 
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2125,6 +2370,7 @@ export type ResearchMissionRecordCreateWithoutPrimaryAdverseRequirementsInput = 
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutPrimaryAdverseRequirementsInput = {
@@ -2141,6 +2387,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutPrimaryAdverseRequirement
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2204,6 +2451,7 @@ export type ResearchMissionRecordCreateWithoutAdverseMissionRequirementInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutAdverseMissionRequirementInput = {
@@ -2220,6 +2468,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAdverseMissionRequirement
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2294,6 +2543,7 @@ export type ResearchMissionRecordUpdateWithoutPrimaryAdverseRequirementsInput = 
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutPrimaryAdverseRequirementsInput = {
@@ -2310,6 +2560,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutPrimaryAdverseRequirement
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2379,6 +2630,7 @@ export type ResearchMissionRecordUpdateWithoutAdverseMissionRequirementInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutAdverseMissionRequirementInput = {
@@ -2395,6 +2647,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAdverseMissionRequirement
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2453,6 +2706,7 @@ export type ResearchMissionRecordCreateWithoutAssistedVerificationsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutAssistedVerificationsInput = {
@@ -2469,6 +2723,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAssistedVerificationsInpu
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2543,6 +2798,7 @@ export type ResearchMissionRecordUpdateWithoutAssistedVerificationsInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutAssistedVerificationsInput = {
@@ -2559,6 +2815,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAssistedVerificationsInpu
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2617,6 +2874,7 @@ export type ResearchMissionRecordCreateWithoutAutomaticReportLinksInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutAutomaticReportLinksInput = {
@@ -2633,6 +2891,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAutomaticReportLinksInput
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2707,6 +2966,7 @@ export type ResearchMissionRecordUpdateWithoutAutomaticReportLinksInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutAutomaticReportLinksInput = {
@@ -2723,6 +2983,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAutomaticReportLinksInput
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2781,6 +3042,7 @@ export type ResearchMissionRecordCreateWithoutKnowledgeRevisionInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutKnowledgeRevisionInput = {
@@ -2796,6 +3058,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutKnowledgeRevisionInput = 
   payloadFingerprint: string
   missionFingerprint?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2865,6 +3128,7 @@ export type ResearchMissionRecordCreateWithoutFirstKnowledgeRevisionInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionCreateNestedOneWithoutResearchMissionInput
 }
 
 export type ResearchMissionRecordUncheckedCreateWithoutFirstKnowledgeRevisionInput = {
@@ -2880,6 +3144,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutFirstKnowledgeRevisionInp
   payloadFingerprint: string
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -2959,6 +3224,7 @@ export type ResearchMissionRecordCreateManyTenantInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3010,6 +3276,7 @@ export type ResearchMissionRecordUpdateWithoutTenantInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutTenantInput = {
@@ -3025,6 +3292,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutTenantInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3062,6 +3330,7 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutTenantInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3091,6 +3360,7 @@ export type ResearchMissionRecordCreateManyAssignedActorInput = {
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3142,6 +3412,7 @@ export type ResearchMissionRecordUpdateWithoutAssignedActorInput = {
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput = {
@@ -3157,6 +3428,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput = {
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3194,6 +3466,7 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorInput = 
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3223,6 +3496,7 @@ export type ResearchMissionRecordCreateManyKnowledgeRevisionInput = {
   payloadFingerprint: string
   missionFingerprint?: string | null
   firstKnowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3252,6 +3526,7 @@ export type ResearchMissionRecordCreateManyFirstKnowledgeRevisionInput = {
   payloadFingerprint: string
   missionFingerprint?: string | null
   knowledgeRevisionId?: string | null
+  professionalQuestionVersionId?: string | null
   legalIssueSemanticKey?: string | null
   researchQuestionSemanticKey?: string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3303,6 +3578,7 @@ export type ResearchMissionRecordUpdateWithoutKnowledgeRevisionInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutKnowledgeRevisionInput = {
@@ -3318,6 +3594,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutKnowledgeRevisionInput = 
   payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3355,6 +3632,7 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionInpu
   payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3406,6 +3684,7 @@ export type ResearchMissionRecordUpdateWithoutFirstKnowledgeRevisionInput = {
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
+  professionalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionUpdateOneWithoutResearchMissionNestedInput
 }
 
 export type ResearchMissionRecordUncheckedUpdateWithoutFirstKnowledgeRevisionInput = {
@@ -3421,6 +3700,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutFirstKnowledgeRevisionInp
   payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3458,6 +3738,7 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisio
   payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  professionalQuestionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3573,6 +3854,7 @@ export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions
   missionFingerprint?: boolean
   knowledgeRevisionId?: boolean
   firstKnowledgeRevisionId?: boolean
+  professionalQuestionVersionId?: boolean
   legalIssueSemanticKey?: boolean
   researchQuestionSemanticKey?: boolean
   referenceDateBasis?: boolean
@@ -3599,6 +3881,7 @@ export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions
   adverseMissionRequirement?: boolean | Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
   _count?: boolean | Prisma.ResearchMissionRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["researchMissionRecord"]>
 
@@ -3616,6 +3899,7 @@ export type ResearchMissionRecordSelectCreateManyAndReturn<ExtArgs extends runti
   missionFingerprint?: boolean
   knowledgeRevisionId?: boolean
   firstKnowledgeRevisionId?: boolean
+  professionalQuestionVersionId?: boolean
   legalIssueSemanticKey?: boolean
   researchQuestionSemanticKey?: boolean
   referenceDateBasis?: boolean
@@ -3634,6 +3918,7 @@ export type ResearchMissionRecordSelectCreateManyAndReturn<ExtArgs extends runti
   assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
 }, ExtArgs["result"]["researchMissionRecord"]>
 
 export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3650,6 +3935,7 @@ export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runti
   missionFingerprint?: boolean
   knowledgeRevisionId?: boolean
   firstKnowledgeRevisionId?: boolean
+  professionalQuestionVersionId?: boolean
   legalIssueSemanticKey?: boolean
   researchQuestionSemanticKey?: boolean
   referenceDateBasis?: boolean
@@ -3668,6 +3954,7 @@ export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runti
   assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
 }, ExtArgs["result"]["researchMissionRecord"]>
 
 export type ResearchMissionRecordSelectScalar = {
@@ -3684,6 +3971,7 @@ export type ResearchMissionRecordSelectScalar = {
   missionFingerprint?: boolean
   knowledgeRevisionId?: boolean
   firstKnowledgeRevisionId?: boolean
+  professionalQuestionVersionId?: boolean
   legalIssueSemanticKey?: boolean
   researchQuestionSemanticKey?: boolean
   referenceDateBasis?: boolean
@@ -3700,7 +3988,7 @@ export type ResearchMissionRecordSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ResearchMissionRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "assignedActorId" | "contractVersion" | "caseId" | "fascicoloReference" | "referenceDate" | "mode" | "payload" | "payloadFingerprint" | "missionFingerprint" | "knowledgeRevisionId" | "firstKnowledgeRevisionId" | "legalIssueSemanticKey" | "researchQuestionSemanticKey" | "referenceDateBasis" | "lifecycleStatus" | "status" | "stateVersion" | "claimantId" | "claimToken" | "claimExpiresAt" | "activeExecutionId" | "completedAt" | "deferredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["researchMissionRecord"]>
+export type ResearchMissionRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "assignedActorId" | "contractVersion" | "caseId" | "fascicoloReference" | "referenceDate" | "mode" | "payload" | "payloadFingerprint" | "missionFingerprint" | "knowledgeRevisionId" | "firstKnowledgeRevisionId" | "professionalQuestionVersionId" | "legalIssueSemanticKey" | "researchQuestionSemanticKey" | "referenceDateBasis" | "lifecycleStatus" | "status" | "stateVersion" | "claimantId" | "claimToken" | "claimExpiresAt" | "activeExecutionId" | "completedAt" | "deferredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["researchMissionRecord"]>
 export type ResearchMissionRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
   assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
@@ -3714,6 +4002,7 @@ export type ResearchMissionRecordInclude<ExtArgs extends runtime.Types.Extension
   adverseMissionRequirement?: boolean | Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
   _count?: boolean | Prisma.ResearchMissionRecordCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResearchMissionRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3721,12 +4010,14 @@ export type ResearchMissionRecordIncludeCreateManyAndReturn<ExtArgs extends runt
   assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
 }
 export type ResearchMissionRecordIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
   assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
+  professionalQuestionVersion?: boolean | Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>
 }
 
 export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3744,6 +4035,7 @@ export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensio
     adverseMissionRequirement: Prisma.$ResearchAdverseRequirementPayload<ExtArgs> | null
     knowledgeRevision: Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs> | null
     firstKnowledgeRevision: Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs> | null
+    professionalQuestionVersion: Prisma.$ProfessionalLegalQuestionVersionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3759,6 +4051,7 @@ export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensio
     missionFingerprint: string | null
     knowledgeRevisionId: string | null
     firstKnowledgeRevisionId: string | null
+    professionalQuestionVersionId: string | null
     legalIssueSemanticKey: string | null
     researchQuestionSemanticKey: string | null
     referenceDateBasis: runtime.JsonValue | null
@@ -4179,6 +4472,7 @@ export interface Prisma__ResearchMissionRecordClient<T, Null = never, ExtArgs ex
   adverseMissionRequirement<T extends Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>>): Prisma.Prisma__ResearchAdverseRequirementClient<runtime.Types.Result.GetResult<Prisma.$ResearchAdverseRequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   knowledgeRevision<T extends Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>>): Prisma.Prisma__FascicoloKnowledgeRevisionClient<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   firstKnowledgeRevision<T extends Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>>): Prisma.Prisma__FascicoloKnowledgeRevisionClient<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  professionalQuestionVersion<T extends Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs>>): Prisma.Prisma__ProfessionalLegalQuestionVersionClient<runtime.Types.Result.GetResult<Prisma.$ProfessionalLegalQuestionVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4221,6 +4515,7 @@ export interface ResearchMissionRecordFieldRefs {
   readonly missionFingerprint: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly knowledgeRevisionId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly firstKnowledgeRevisionId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
+  readonly professionalQuestionVersionId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly legalIssueSemanticKey: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly researchQuestionSemanticKey: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly referenceDateBasis: Prisma.FieldRef<"ResearchMissionRecord", 'Json'>
@@ -4896,6 +5191,25 @@ export type ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs extends run
    */
   include?: Prisma.FascicoloKnowledgeRevisionInclude<ExtArgs> | null
   where?: Prisma.FascicoloKnowledgeRevisionWhereInput
+}
+
+/**
+ * ResearchMissionRecord.professionalQuestionVersion
+ */
+export type ResearchMissionRecord$professionalQuestionVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfessionalLegalQuestionVersion
+   */
+  select?: Prisma.ProfessionalLegalQuestionVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProfessionalLegalQuestionVersion
+   */
+  omit?: Prisma.ProfessionalLegalQuestionVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfessionalLegalQuestionVersionInclude<ExtArgs> | null
+  where?: Prisma.ProfessionalLegalQuestionVersionWhereInput
 }
 
 /**

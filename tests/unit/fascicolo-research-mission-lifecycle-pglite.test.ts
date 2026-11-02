@@ -95,6 +95,7 @@ async function database() {
   `);
   await db.exec(migration);
   await db.exec(versioningMigration);
+  await db.exec('ALTER TABLE "ResearchMissionRecord" ADD COLUMN "professionalQuestionVersionId" TEXT;');
   await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
   await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
   return db;
@@ -162,6 +163,50 @@ afterEach(async () => {
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("preserves current missions created from approved professional questions", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-professional");
+    const professionalMission = plan("p".repeat(64)).mission!;
+    await db.query(`
+      INSERT INTO "ResearchMissionRecord" (
+        "id", "tenantId", "assignedActorId", "contractVersion", "caseId",
+        "referenceDate", "mode", "payload", "payloadFingerprint",
+        "missionFingerprint", "legalIssueSemanticKey", "researchQuestionSemanticKey",
+        "referenceDateBasis", "lifecycleStatus", "status", "professionalQuestionVersionId"
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13::jsonb,'CURRENT','PENDING',$14)
+    `, [
+      professionalMission.missionId,
+      "tenant-1",
+      "admin-1",
+      professionalMission.version,
+      "procedure-1",
+      professionalMission.referenceDate,
+      professionalMission.mode,
+      JSON.stringify(professionalMission),
+      "z".repeat(64),
+      "p".repeat(64),
+      "i".repeat(64),
+      "q".repeat(64),
+      JSON.stringify({ kind: "PROFESSIONAL_SELECTION" }),
+      "professional-version-1",
+    ]);
+
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-professional",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+
+    const rows = await db.query<{ lifecycleStatus: string }>(
+      'SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [professionalMission.missionId],
+    );
+    expect(rows.rows[0]?.lifecycleStatus).toBe("CURRENT");
+  });
 
   it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {
     const db = await database();

@@ -454,6 +454,8 @@ export const ModelName = {
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  ProfessionalLegalQuestion: 'ProfessionalLegalQuestion',
+  ProfessionalLegalQuestionVersion: 'ProfessionalLegalQuestionVersion',
   TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -506,7 +508,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "v7ProviderOutputRecoveryArtifact" | "researchProviderOAuthCredential" | "runtimeWorkerHeartbeat" | "fascicoloAnalysisEvaluationPermit" | "fascicoloAnalysisEvaluationArtifact" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeIdentity" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeEvidenceSpan" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "v7ProviderOutputRecoveryArtifact" | "researchProviderOAuthCredential" | "runtimeWorkerHeartbeat" | "fascicoloAnalysisEvaluationPermit" | "fascicoloAnalysisEvaluationArtifact" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "professionalLegalQuestion" | "professionalLegalQuestionVersion" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeIdentity" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeEvidenceSpan" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4728,6 +4730,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProfessionalLegalQuestion: {
+      payload: Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>
+      fields: Prisma.ProfessionalLegalQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProfessionalLegalQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.ProfessionalLegalQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.ProfessionalLegalQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.ProfessionalLegalQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.ProfessionalLegalQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        delete: {
+          args: Prisma.ProfessionalLegalQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        update: {
+          args: Prisma.ProfessionalLegalQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProfessionalLegalQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProfessionalLegalQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProfessionalLegalQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.ProfessionalLegalQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProfessionalLegalQuestion>
+        }
+        groupBy: {
+          args: Prisma.ProfessionalLegalQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProfessionalLegalQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProfessionalLegalQuestionVersion: {
+      payload: Prisma.$ProfessionalLegalQuestionVersionPayload<ExtArgs>
+      fields: Prisma.ProfessionalLegalQuestionVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        findMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        create: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        createMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.ProfessionalLegalQuestionVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        update: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.ProfessionalLegalQuestionVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProfessionalLegalQuestionVersion>
+        }
+        groupBy: {
+          args: Prisma.ProfessionalLegalQuestionVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProfessionalLegalQuestionVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionVersionCountAggregateOutputType> | number
+        }
+      }
+    }
     TechnicalSourceResearchRecord: {
       payload: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>
       fields: Prisma.TechnicalSourceResearchRecordFieldRefs
@@ -8793,6 +8943,7 @@ export const ResearchMissionRecordScalarFieldEnum = {
   missionFingerprint: 'missionFingerprint',
   knowledgeRevisionId: 'knowledgeRevisionId',
   firstKnowledgeRevisionId: 'firstKnowledgeRevisionId',
+  professionalQuestionVersionId: 'professionalQuestionVersionId',
   legalIssueSemanticKey: 'legalIssueSemanticKey',
   researchQuestionSemanticKey: 'researchQuestionSemanticKey',
   referenceDateBasis: 'referenceDateBasis',
@@ -8810,6 +8961,40 @@ export const ResearchMissionRecordScalarFieldEnum = {
 } as const
 
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  createdByUserId: 'createdByUserId',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionScalarFieldEnum = (typeof ProfessionalLegalQuestionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionVersionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  version: 'version',
+  questionText: 'questionText',
+  theme: 'theme',
+  rationale: 'rationale',
+  referenceDate: 'referenceDate',
+  status: 'status',
+  semanticKey: 'semanticKey',
+  contentFingerprint: 'contentFingerprint',
+  createdByUserId: 'createdByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionVersionScalarFieldEnum = (typeof ProfessionalLegalQuestionVersionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionVersionScalarFieldEnum]
 
 
 export const TechnicalSourceResearchRecordScalarFieldEnum = {
@@ -10923,6 +11108,20 @@ export type ListEnumResearchMissionStatusFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'ProfessionalLegalQuestionVersionStatus'
+ */
+export type EnumProfessionalLegalQuestionVersionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfessionalLegalQuestionVersionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProfessionalLegalQuestionVersionStatus[]'
+ */
+export type ListEnumProfessionalLegalQuestionVersionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfessionalLegalQuestionVersionStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'ResearchExecutionState'
  */
 export type EnumResearchExecutionStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResearchExecutionState'>
@@ -11633,6 +11832,8 @@ export type GlobalOmitConfig = {
   fascicoloSignal?: Prisma.FascicoloSignalOmit
   concessioneExpiryChangeCommand?: Prisma.ConcessioneExpiryChangeCommandOmit
   researchMissionRecord?: Prisma.ResearchMissionRecordOmit
+  professionalLegalQuestion?: Prisma.ProfessionalLegalQuestionOmit
+  professionalLegalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionOmit
   technicalSourceResearchRecord?: Prisma.TechnicalSourceResearchRecordOmit
   researchExecutionAttempt?: Prisma.ResearchExecutionAttemptOmit
   researchEvidenceBundleRecord?: Prisma.ResearchEvidenceBundleRecordOmit

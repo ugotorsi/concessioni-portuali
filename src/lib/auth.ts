@@ -86,6 +86,20 @@ export async function requireAdminWithMfa(): Promise<CurrentUser> {
   return user;
 }
 
+export async function requireUserWithMfa(allowedRoles: readonly DemoRole[]): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("AUTHENTICATION_REQUIRED");
+  }
+  if (!allowedRoles.includes(user.role)) {
+    throw new Error("ROLE_NOT_AUTHORIZED");
+  }
+  if (!user.mfaVerified) {
+    throw new Error("MFA_VERIFICATION_REQUIRED");
+  }
+  return user;
+}
+
 export async function requireRole(allowedRoles?: DemoRole[]): Promise<DemoRole> {
   const session = await loadAuthSession();
   const user = session?.user;

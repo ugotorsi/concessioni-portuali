@@ -85,6 +85,7 @@ export interface StructuredReportMissionInput {
   missionFingerprint: string | null;
   knowledgeRevisionId: string | null;
   researchQuestionSemanticKey: string | null;
+  professionalQuestionVersionId?: string | null;
   legalIssueSemanticKey?: string | null;
   lifecycleStatus: "CURRENT" | "HISTORICAL";
   status: string;
@@ -819,7 +820,7 @@ function nonUsableRelevance(result: StructuredReportResearchResultInput): NonUsa
 }
 
 function projectQuestion(
-  item: StructuredKnowledgeReadItem,
+  item: Pick<StructuredKnowledgeReadItem, "id" | "semanticKey" | "normalizedText" | "status">,
   missionsByQuestion: ReadonlyMap<string, StructuredReportMissionInput>,
 ): StructuredReportQuestion {
   const mission = missionsByQuestion.get(item.semanticKey) ?? null;
@@ -1417,7 +1418,10 @@ export function buildStructuredFascicoloReport(input: {
 }): BuiltStructuredFascicoloReport {
   const legalCompleteness = assessLegalCompleteness(input.knowledge);
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
-    && mission.knowledgeRevisionId === input.knowledge.revision.id
+    && (
+      mission.knowledgeRevisionId === input.knowledge.revision.id
+      || mission.professionalQuestionVersionId
+    )
     && mission.researchQuestionSemanticKey !== null).sort(byId);
   const technicalSources = projectTechnicalSources(input.technicalSources ?? [], currentMissions);
   const groupedMissions = new Map<string, StructuredReportMissionInput[]>();
@@ -1440,7 +1444,18 @@ export function buildStructuredFascicoloReport(input: {
       )),
     }];
   }));
-  const questions = visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion));
+  const professionalQuestions = currentMissions
+    .filter((mission) => mission.professionalQuestionVersionId)
+    .map((mission) => projectQuestion({
+      id: mission.professionalQuestionVersionId!,
+      semanticKey: mission.researchQuestionSemanticKey!,
+      normalizedText: mission.question,
+      status: "HUMAN_CONFIRMED",
+    }, new Map([[mission.researchQuestionSemanticKey!, mission]])));
+  const questions = [
+    ...visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion)),
+    ...professionalQuestions,
+  ];
   const questionById = new Map(input.knowledge.researchQuestions.map((item) => [item.id, item]));
   const proceedingAnchors = new Map(
     [...input.knowledge.legalActs, ...input.knowledge.measures]

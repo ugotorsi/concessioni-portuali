@@ -995,6 +995,7 @@ model Ente {
   fascicoloSignals             FascicoloSignal[]
   concessioneExpiryChangeCommands ConcessioneExpiryChangeCommand[]
   researchMissions             ResearchMissionRecord[]
+  professionalLegalQuestions  ProfessionalLegalQuestion[]
   researchAssistedVerifications ResearchAssistedVerificationRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   automaticFascicoloReports         AutomaticFascicoloReport[]
@@ -1771,6 +1772,7 @@ model Procedimento {
   runtimeCostReservations           RuntimeCostReservation[]
   fascicoloAnalysisEvaluationPermits FascicoloAnalysisEvaluationPermit[]
   fascicoloAnalysisEvaluations      FascicoloAnalysisEvaluationArtifact[]
+  professionalLegalQuestions        ProfessionalLegalQuestion[]
 
   @@index([enteId])
   @@index([concessioneId])
@@ -2784,6 +2786,7 @@ model ResearchMissionRecord {
   missionFingerprint  String?               @db.Char(64)
   knowledgeRevisionId String?
   firstKnowledgeRevisionId String?
+  professionalQuestionVersionId String?       @unique(map: "research_mission_professional_question_version_uq")
   legalIssueSemanticKey String?             @db.Char(64)
   researchQuestionSemanticKey String?       @db.Char(64)
   referenceDateBasis  Json?
@@ -2811,6 +2814,7 @@ model ResearchMissionRecord {
   adverseMissionRequirement ResearchAdverseRequirement? @relation("AdverseMission")
   knowledgeRevision  FascicoloKnowledgeRevision? @relation("ResearchMissionCurrentKnowledgeRevision", fields: [knowledgeRevisionId], references: [id], onDelete: Restrict)
   firstKnowledgeRevision FascicoloKnowledgeRevision? @relation("ResearchMissionFirstKnowledgeRevision", fields: [firstKnowledgeRevisionId], references: [id], onDelete: Restrict)
+  professionalQuestionVersion ProfessionalLegalQuestionVersion? @relation(fields: [professionalQuestionVersionId], references: [id], onDelete: Restrict, map: "research_mission_professional_question_version_fk")
 
   @@unique([id, tenantId], map: "research_mission_tenant_uq")
   @@index([tenantId, assignedActorId, status, createdAt], map: "research_mission_actor_status_idx")
@@ -2822,6 +2826,58 @@ model ResearchMissionRecord {
   @@index([knowledgeRevisionId], map: "research_mission_knowledge_revision_idx")
   @@index([firstKnowledgeRevisionId], map: "research_mission_first_knowledge_revision_idx")
   @@index([tenantId, caseId, researchQuestionSemanticKey], map: "research_mission_question_idx")
+}
+
+enum ProfessionalLegalQuestionVersionStatus {
+  DRAFT
+  APPROVED
+  SUPERSEDED
+  ARCHIVED
+}
+
+model ProfessionalLegalQuestion {
+  id              String    @id @default(cuid())
+  tenantId        String
+  procedimentoId  String
+  createdByUserId String
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant        Ente                               @relation(fields: [tenantId], references: [id], onDelete: Restrict, map: "professional_legal_question_tenant_fk")
+  procedimento Procedimento                       @relation(fields: [procedimentoId, tenantId], references: [id, enteId], onDelete: Restrict, map: "professional_legal_question_procedure_fk")
+  versions      ProfessionalLegalQuestionVersion[]
+
+  @@unique([id, tenantId], map: "professional_legal_question_tenant_uq")
+  @@index([tenantId, procedimentoId, archivedAt], map: "professional_legal_question_procedure_idx")
+  @@index([createdByUserId], map: "professional_legal_question_creator_idx")
+}
+
+model ProfessionalLegalQuestionVersion {
+  id                 String                                 @id @default(cuid())
+  questionId         String
+  version            Int
+  questionText       String                                 @db.Text
+  theme              String?                                @db.VarChar(256)
+  rationale          String?                                @db.Text
+  referenceDate      DateTime
+  status             ProfessionalLegalQuestionVersionStatus @default(DRAFT)
+  semanticKey        String                                 @db.Char(64)
+  contentFingerprint String                                 @db.Char(64)
+  createdByUserId    String
+  approvedByUserId   String?
+  approvedAt         DateTime?
+  createdAt          DateTime                               @default(now())
+  updatedAt          DateTime                               @updatedAt
+
+  question        ProfessionalLegalQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict, map: "professional_legal_question_version_question_fk")
+  researchMission ResearchMissionRecord?
+
+  @@unique([questionId, version], map: "professional_legal_question_version_number_uq")
+  @@index([questionId, status, version], map: "professional_legal_question_version_status_idx")
+  @@index([semanticKey], map: "professional_legal_question_version_semantic_idx")
+  @@index([createdByUserId], map: "professional_legal_question_version_creator_idx")
+  @@index([approvedByUserId], map: "professional_legal_question_version_approver_idx")
 }
 
 model TechnicalSourceResearchRecord {

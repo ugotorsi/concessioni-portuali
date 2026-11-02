@@ -303,6 +303,16 @@ export type ConcessioneExpiryChangeCommand = Prisma.ConcessioneExpiryChangeComma
  */
 export type ResearchMissionRecord = Prisma.ResearchMissionRecordModel
 /**
+ * Model ProfessionalLegalQuestion
+ * 
+ */
+export type ProfessionalLegalQuestion = Prisma.ProfessionalLegalQuestionModel
+/**
+ * Model ProfessionalLegalQuestionVersion
+ * 
+ */
+export type ProfessionalLegalQuestionVersion = Prisma.ProfessionalLegalQuestionVersionModel
+/**
  * Model TechnicalSourceResearchRecord
  * 
  */

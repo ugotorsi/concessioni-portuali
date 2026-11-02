@@ -567,6 +567,7 @@ export type ProcedimentoWhereInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionListRelationFilter
 }
 
 export type ProcedimentoOrderByWithRelationInput = {
@@ -646,6 +647,7 @@ export type ProcedimentoOrderByWithRelationInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitOrderByRelationAggregateInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactOrderByRelationAggregateInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionOrderByRelationAggregateInput
 }
 
 export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
@@ -729,6 +731,7 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionListRelationFilter
 }, "id" | "id_enteId">
 
 export type ProcedimentoOrderByWithAggregationInput = {
@@ -909,6 +912,7 @@ export type ProcedimentoCreateInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateInput = {
@@ -985,6 +989,7 @@ export type ProcedimentoUncheckedCreateInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUpdateInput = {
@@ -1061,6 +1066,7 @@ export type ProcedimentoUpdateInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateInput = {
@@ -1137,6 +1143,7 @@ export type ProcedimentoUncheckedUpdateInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateManyInput = {
@@ -1771,6 +1778,20 @@ export type ProcedimentoUpdateOneRequiredWithoutFascicoloSignalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutFascicoloSignalsInput, Prisma.ProcedimentoUpdateWithoutFascicoloSignalsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput>
 }
 
+export type ProcedimentoCreateNestedOneWithoutProfessionalLegalQuestionsInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutProfessionalLegalQuestionsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneRequiredWithoutProfessionalLegalQuestionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutProfessionalLegalQuestionsInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutProfessionalLegalQuestionsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+}
+
 export type ProcedimentoCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
   create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
   connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
@@ -2084,6 +2105,7 @@ export type ProcedimentoCreateWithoutEnteInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutEnteInput = {
@@ -2159,6 +2181,7 @@ export type ProcedimentoUncheckedCreateWithoutEnteInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutEnteInput = {
@@ -2311,6 +2334,7 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
@@ -2386,6 +2410,7 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutConcessioneInput = {
@@ -2487,6 +2512,7 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
@@ -2562,6 +2588,7 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutCriticitaInput = {
@@ -2663,6 +2690,7 @@ export type ProcedimentoCreateWithoutFascicoloIntakeInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloIntakeInput = {
@@ -2738,6 +2766,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloIntakeInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloIntakeInput = {
@@ -2829,6 +2858,7 @@ export type ProcedimentoUpdateWithoutFascicoloIntakeInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloIntakeInput = {
@@ -2904,6 +2934,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloIntakeInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
@@ -2979,6 +3010,7 @@ export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
@@ -3054,6 +3086,7 @@ export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutResponsabileAssignmentsInput = {
@@ -3145,6 +3178,7 @@ export type ProcedimentoUpdateWithoutResponsabileAssignmentsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
@@ -3220,6 +3254,7 @@ export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDocumentiInput = {
@@ -3295,6 +3330,7 @@ export type ProcedimentoCreateWithoutDocumentiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
@@ -3370,6 +3406,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDocumentiInput = {
@@ -3461,6 +3498,7 @@ export type ProcedimentoUpdateWithoutDocumentiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
@@ -3536,6 +3574,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3611,6 +3650,7 @@ export type ProcedimentoCreateWithoutDocumentExtractionAttemptsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3686,6 +3726,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentExtractionAttemptsInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDocumentExtractionAttemptsInput = {
@@ -3777,6 +3818,7 @@ export type ProcedimentoUpdateWithoutDocumentExtractionAttemptsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
@@ -3852,6 +3894,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentExtractionAttemptsInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutNeutralIntakeDestinationsInput = {
@@ -3927,6 +3970,7 @@ export type ProcedimentoCreateWithoutNeutralIntakeDestinationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutNeutralIntakeDestinationsInput = {
@@ -4002,6 +4046,7 @@ export type ProcedimentoUncheckedCreateWithoutNeutralIntakeDestinationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutNeutralIntakeDestinationsInput = {
@@ -4093,6 +4138,7 @@ export type ProcedimentoUpdateWithoutNeutralIntakeDestinationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutNeutralIntakeDestinationsInput = {
@@ -4168,6 +4214,7 @@ export type ProcedimentoUncheckedUpdateWithoutNeutralIntakeDestinationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutAsyncJobsInput = {
@@ -4243,6 +4290,7 @@ export type ProcedimentoCreateWithoutAsyncJobsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutAsyncJobsInput = {
@@ -4318,6 +4366,7 @@ export type ProcedimentoUncheckedCreateWithoutAsyncJobsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutAsyncJobsInput = {
@@ -4409,6 +4458,7 @@ export type ProcedimentoUpdateWithoutAsyncJobsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutAsyncJobsInput = {
@@ -4484,6 +4534,7 @@ export type ProcedimentoUncheckedUpdateWithoutAsyncJobsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
@@ -4559,6 +4610,7 @@ export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
@@ -4634,6 +4686,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationPermits
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloAnalysisEvaluationPermitsInput = {
@@ -4725,6 +4778,7 @@ export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
@@ -4800,6 +4854,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermits
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationsInput = {
@@ -4875,6 +4930,7 @@ export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput = {
@@ -4950,6 +5006,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput 
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput = {
@@ -5041,6 +5098,7 @@ export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput = {
@@ -5116,6 +5174,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput 
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -5191,6 +5250,7 @@ export type ProcedimentoCreateWithoutRuntimeBudgetPoliciesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -5266,6 +5326,7 @@ export type ProcedimentoUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutRuntimeBudgetPoliciesInput = {
@@ -5357,6 +5418,7 @@ export type ProcedimentoUpdateWithoutRuntimeBudgetPoliciesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
@@ -5432,6 +5494,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutRuntimeCostReservationsInput = {
@@ -5507,6 +5570,7 @@ export type ProcedimentoCreateWithoutRuntimeCostReservationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutRuntimeCostReservationsInput = {
@@ -5582,6 +5646,7 @@ export type ProcedimentoUncheckedCreateWithoutRuntimeCostReservationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutRuntimeCostReservationsInput = {
@@ -5673,6 +5738,7 @@ export type ProcedimentoUpdateWithoutRuntimeCostReservationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
@@ -5748,6 +5814,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
@@ -5823,6 +5890,7 @@ export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloSignalsInput = {
@@ -5898,6 +5966,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloSignalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloSignalsInput = {
@@ -5989,6 +6058,7 @@ export type ProcedimentoUpdateWithoutFascicoloSignalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput = {
@@ -6050,6 +6120,327 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
   neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoCreateWithoutProfessionalLegalQuestionsInput = {
+  id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente: Prisma.EnteCreateNestedOneWithoutProcedimentiInput
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  fascicoloIntake?: Prisma.FascicoloIntakeCreateNestedOneWithoutProcedimentoInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationCreateNestedManyWithoutProcedimentoInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutProcedimentoInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutProcedimentoInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutProcedimentoInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput = {
+  id?: string
+  enteId: string
+  concessioneId?: string | null
+  criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fascicoloIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedOneWithoutProcedimentoInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutProcedimentoInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutProfessionalLegalQuestionsInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+}
+
+export type ProcedimentoUpsertWithoutProfessionalLegalQuestionsInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutProfessionalLegalQuestionsInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput, Prisma.ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+}
+
+export type ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneRequiredWithoutProcedimentiNestedInput
+  concessione?: Prisma.ConcessioneUpdateOneWithoutProcedimentiNestedInput
+  fascicoloIntake?: Prisma.FascicoloIntakeUpdateOneWithoutProcedimentoNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUpdateManyWithoutProcedimentoNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutProcedimentoNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutProcedimentoNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutProcedimentoNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fascicoloIntake?: Prisma.FascicoloIntakeUncheckedUpdateOneWithoutProcedimentoNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutProcedimentoNestedInput
@@ -6139,6 +6530,7 @@ export type ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
@@ -6214,6 +6606,7 @@ export type ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInpu
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutTechnicalSourceResearchRecordsInput = {
@@ -6305,6 +6698,7 @@ export type ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
@@ -6380,6 +6774,7 @@ export type ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInpu
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
@@ -6455,6 +6850,7 @@ export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
@@ -6530,6 +6926,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloObservationsInput = {
@@ -6621,6 +7018,7 @@ export type ProcedimentoUpdateWithoutFascicoloObservationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
@@ -6696,6 +7094,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
@@ -6771,6 +7170,7 @@ export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
@@ -6846,6 +7246,7 @@ export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutChecklistEvidenceInput = {
@@ -6937,6 +7338,7 @@ export type ProcedimentoUpdateWithoutChecklistEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
@@ -7012,6 +7414,7 @@ export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
@@ -7087,6 +7490,7 @@ export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput = {
@@ -7162,6 +7566,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDocumentRequirementProposalsInput = {
@@ -7253,6 +7658,7 @@ export type ProcedimentoUpdateWithoutDocumentRequirementProposalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
@@ -7328,6 +7734,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
@@ -7403,6 +7810,7 @@ export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
@@ -7478,6 +7886,7 @@ export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDecisioneProcedimentoInput = {
@@ -7569,6 +7978,7 @@ export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
@@ -7644,6 +8054,7 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
@@ -7719,6 +8130,7 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
@@ -7794,6 +8206,7 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutNormaImpattiInput = {
@@ -7885,6 +8298,7 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
@@ -7960,6 +8374,7 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -8035,6 +8450,7 @@ export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -8110,6 +8526,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsI
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -8201,6 +8618,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -8276,6 +8694,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsI
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutAutomaticFascicoloReportsInput = {
@@ -8351,6 +8770,7 @@ export type ProcedimentoCreateWithoutAutomaticFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
@@ -8426,6 +8846,7 @@ export type ProcedimentoUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutAutomaticFascicoloReportsInput = {
@@ -8517,6 +8938,7 @@ export type ProcedimentoUpdateWithoutAutomaticFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
@@ -8592,6 +9014,7 @@ export type ProcedimentoUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8667,6 +9090,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRevisionsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8742,6 +9166,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput =
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8833,6 +9258,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8908,6 +9334,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput =
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutStructuredFascicoloReportsInput = {
@@ -8983,6 +9410,7 @@ export type ProcedimentoCreateWithoutStructuredFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutStructuredFascicoloReportsInput = {
@@ -9058,6 +9486,7 @@ export type ProcedimentoUncheckedCreateWithoutStructuredFascicoloReportsInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutStructuredFascicoloReportsInput = {
@@ -9149,6 +9578,7 @@ export type ProcedimentoUpdateWithoutStructuredFascicoloReportsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
@@ -9224,6 +9654,7 @@ export type ProcedimentoUncheckedUpdateWithoutStructuredFascicoloReportsInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloOperationalProposalsInput = {
@@ -9299,6 +9730,7 @@ export type ProcedimentoCreateWithoutFascicoloOperationalProposalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
@@ -9374,6 +9806,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloOperationalProposalsInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloOperationalProposalsInput = {
@@ -9465,6 +9898,7 @@ export type ProcedimentoUpdateWithoutFascicoloOperationalProposalsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
@@ -9540,6 +9974,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloOperationalProposalsInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeIdentitiesInput = {
@@ -9615,6 +10050,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeIdentitiesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput = {
@@ -9690,6 +10126,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloKnowledgeIdentitiesInput = {
@@ -9781,6 +10218,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
@@ -9856,6 +10294,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -9931,6 +10370,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeItemsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -10006,6 +10446,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloKnowledgeItemsInput = {
@@ -10097,6 +10538,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeItemsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
@@ -10172,6 +10614,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -10247,6 +10690,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -10322,6 +10766,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
@@ -10413,6 +10858,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -10488,6 +10934,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -10563,6 +11010,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRelationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -10638,6 +11086,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRelationsInput =
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloKnowledgeRelationsInput = {
@@ -10729,6 +11178,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRelationsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
@@ -10804,6 +11254,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput =
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -10879,6 +11330,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -10954,6 +11406,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput = {
@@ -11045,6 +11498,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -11120,6 +11574,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -11195,6 +11650,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -11270,6 +11726,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutProcedimentoInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput = {
@@ -11361,6 +11818,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -11436,6 +11894,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput 
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateManyEnteInput = {
@@ -11558,6 +12017,7 @@ export type ProcedimentoUpdateWithoutEnteInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutEnteInput = {
@@ -11633,6 +12093,7 @@ export type ProcedimentoUncheckedUpdateWithoutEnteInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateManyWithoutEnteInput = {
@@ -11802,6 +12263,7 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
@@ -11877,6 +12339,7 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
@@ -12046,6 +12509,7 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
@@ -12121,6 +12585,7 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutProcedimentoNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
@@ -12202,6 +12667,7 @@ export type ProcedimentoCountOutputType = {
   runtimeCostReservations: number
   fascicoloAnalysisEvaluationPermits: number
   fascicoloAnalysisEvaluations: number
+  professionalLegalQuestions: number
 }
 
 export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -12231,6 +12697,7 @@ export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   runtimeCostReservations?: boolean | ProcedimentoCountOutputTypeCountRuntimeCostReservationsArgs
   fascicoloAnalysisEvaluationPermits?: boolean | ProcedimentoCountOutputTypeCountFascicoloAnalysisEvaluationPermitsArgs
   fascicoloAnalysisEvaluations?: boolean | ProcedimentoCountOutputTypeCountFascicoloAnalysisEvaluationsArgs
+  professionalLegalQuestions?: boolean | ProcedimentoCountOutputTypeCountProfessionalLegalQuestionsArgs
 }
 
 /**
@@ -12425,6 +12892,13 @@ export type ProcedimentoCountOutputTypeCountFascicoloAnalysisEvaluationsArgs<Ext
   where?: Prisma.FascicoloAnalysisEvaluationArtifactWhereInput
 }
 
+/**
+ * ProcedimentoCountOutputType without action
+ */
+export type ProcedimentoCountOutputTypeCountProfessionalLegalQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProfessionalLegalQuestionWhereInput
+}
+
 
 export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -12503,6 +12977,7 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   runtimeCostReservations?: boolean | Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>
   fascicoloAnalysisEvaluationPermits?: boolean | Prisma.Procedimento$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>
   fascicoloAnalysisEvaluations?: boolean | Prisma.Procedimento$fascicoloAnalysisEvaluationsArgs<ExtArgs>
+  professionalLegalQuestions?: boolean | Prisma.Procedimento$professionalLegalQuestionsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["procedimento"]>
 
@@ -12689,6 +13164,7 @@ export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.Interna
   runtimeCostReservations?: boolean | Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>
   fascicoloAnalysisEvaluationPermits?: boolean | Prisma.Procedimento$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>
   fascicoloAnalysisEvaluations?: boolean | Prisma.Procedimento$fascicoloAnalysisEvaluationsArgs<ExtArgs>
+  professionalLegalQuestions?: boolean | Prisma.Procedimento$professionalLegalQuestionsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProcedimentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -12736,6 +13212,7 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     runtimeCostReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
     fascicoloAnalysisEvaluationPermits: Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>[]
     fascicoloAnalysisEvaluations: Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>[]
+    professionalLegalQuestions: Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -13208,6 +13685,7 @@ export interface Prisma__ProcedimentoClient<T, Null = never, ExtArgs extends run
   runtimeCostReservations<T extends Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloAnalysisEvaluationPermits<T extends Prisma.Procedimento$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloAnalysisEvaluations<T extends Prisma.Procedimento$fascicoloAnalysisEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$fascicoloAnalysisEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  professionalLegalQuestions<T extends Prisma.Procedimento$professionalLegalQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$professionalLegalQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14380,6 +14858,30 @@ export type Procedimento$fascicoloAnalysisEvaluationsArgs<ExtArgs extends runtim
   take?: number
   skip?: number
   distinct?: Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum | Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum[]
+}
+
+/**
+ * Procedimento.professionalLegalQuestions
+ */
+export type Procedimento$professionalLegalQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfessionalLegalQuestion
+   */
+  select?: Prisma.ProfessionalLegalQuestionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProfessionalLegalQuestion
+   */
+  omit?: Prisma.ProfessionalLegalQuestionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfessionalLegalQuestionInclude<ExtArgs> | null
+  where?: Prisma.ProfessionalLegalQuestionWhereInput
+  orderBy?: Prisma.ProfessionalLegalQuestionOrderByWithRelationInput | Prisma.ProfessionalLegalQuestionOrderByWithRelationInput[]
+  cursor?: Prisma.ProfessionalLegalQuestionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProfessionalLegalQuestionScalarFieldEnum | Prisma.ProfessionalLegalQuestionScalarFieldEnum[]
 }
 
 /**

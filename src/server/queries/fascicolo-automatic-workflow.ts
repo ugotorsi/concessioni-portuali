@@ -99,6 +99,7 @@ const researchMissionReadSelect = {
   missionFingerprint: true,
   legalIssueSemanticKey: true,
   researchQuestionSemanticKey: true,
+  professionalQuestionVersionId: true,
   knowledgeRevisionId: true,
   firstKnowledgeRevisionId: true,
   mode: true,
@@ -358,6 +359,7 @@ export interface FascicoloResearchMissionReadModel {
   missionFingerprint: string | null;
   legalIssueSemanticKey: string | null;
   researchQuestionSemanticKey: string | null;
+  professionalQuestionVersionId: string | null;
   knowledgeRevisionId: string | null;
   lifecycleOutcome: "NEW" | "REUSED" | "LEGACY";
   lifecycleStatus: "CURRENT" | "HISTORICAL";
@@ -825,6 +827,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         missionFingerprint: mission.missionFingerprint,
         legalIssueSemanticKey: mission.legalIssueSemanticKey,
         researchQuestionSemanticKey: mission.researchQuestionSemanticKey,
+        professionalQuestionVersionId: mission.professionalQuestionVersionId,
         knowledgeRevisionId: mission.knowledgeRevisionId,
         lifecycleOutcome: mission.firstKnowledgeRevisionId === null || mission.knowledgeRevisionId === null
           ? "LEGACY" as const

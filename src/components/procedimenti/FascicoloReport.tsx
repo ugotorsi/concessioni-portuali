@@ -598,6 +598,10 @@ function PreviousVersions({ snapshots }: { snapshots: readonly FascicoloReportSn
                 <span className="ml-3 text-slate-600">{fascicoloReportStatusLabel(snapshot.status)}</span>
               </summary>
               {reasons.length > 0 ? <p className="mt-2 text-sm text-slate-600">{reasons.join(" ")}</p> : null}
+              <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                <a href={`/api/procedimenti/${snapshot.payload.procedimentoId}/reports/${snapshot.id}/export?format=pdf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta PDF</a>
+                <a href={`/api/procedimenti/${snapshot.payload.procedimentoId}/reports/${snapshot.id}/export?format=rtf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta RTF modificabile</a>
+              </div>
               <div className="mt-4 border-t border-slate-200 pt-4" aria-label={`Rapporto storico del ${formatDateIT(snapshot.generatedAt)}`}>
                 <ReportContent payload={snapshot.payload} />
               </div>
@@ -638,6 +642,10 @@ export function FascicoloReport({ snapshots }: { snapshots: readonly FascicoloRe
                 <p>Il fascicolo contiene modifiche successive alla generazione di questo rapporto.</p>
               </div>
             ) : null}
+            <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-200 pt-3 text-sm">
+              <a href={`/api/procedimenti/${report.payload.procedimentoId}/reports/${report.id}/export?format=pdf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta PDF strutturato</a>
+              <a href={`/api/procedimenti/${report.payload.procedimentoId}/reports/${report.id}/export?format=rtf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta RTF modificabile</a>
+            </div>
           </section>
           <ReportContent payload={report.payload} />
         </>

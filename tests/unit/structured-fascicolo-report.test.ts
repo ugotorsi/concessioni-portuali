@@ -489,6 +489,34 @@ describe("deterministic structured fascicolo report", () => {
     ]));
   });
 
+  it("projects an approved professional question into the V2 report without a Knowledge AI item", () => {
+    const professionalMission = mission({
+      missionId: "mission-professional",
+      missionFingerprint: sha("p"),
+      knowledgeRevisionId: null,
+      researchQuestionSemanticKey: sha("professional-question"),
+      professionalQuestionVersionId: "professional-version-2",
+      question: "Quali obblighi di trasparenza si applicano?",
+    });
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [professionalMission],
+      contractVersion: "STRUCTURED_FASCICOLO_REPORT_V2",
+    });
+
+    const projected = report.payload.unassignedQuestions.find(
+      (question) => question.knowledgeItemId === "professional-version-2",
+    );
+    expect(projected).toMatchObject({
+      text: "Quali obblighi di trasparenza si applicano?",
+      reviewStatus: "HUMAN_CONFIRMED",
+      missionId: "mission-professional",
+      missionStatus: "COMPLETED",
+    });
+  });
+
   describe("MCP technical sources", () => {
     const technical = (overrides: Partial<StructuredReportTechnicalSourceInput> = {}): StructuredReportTechnicalSourceInput => ({
       recordId: "tech-1",

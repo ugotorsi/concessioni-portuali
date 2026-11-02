@@ -108,6 +108,8 @@ export const ModelName = {
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  ProfessionalLegalQuestion: 'ProfessionalLegalQuestion',
+  ProfessionalLegalQuestionVersion: 'ProfessionalLegalQuestionVersion',
   TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -1451,6 +1453,7 @@ export const ResearchMissionRecordScalarFieldEnum = {
   missionFingerprint: 'missionFingerprint',
   knowledgeRevisionId: 'knowledgeRevisionId',
   firstKnowledgeRevisionId: 'firstKnowledgeRevisionId',
+  professionalQuestionVersionId: 'professionalQuestionVersionId',
   legalIssueSemanticKey: 'legalIssueSemanticKey',
   researchQuestionSemanticKey: 'researchQuestionSemanticKey',
   referenceDateBasis: 'referenceDateBasis',
@@ -1468,6 +1471,40 @@ export const ResearchMissionRecordScalarFieldEnum = {
 } as const
 
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  createdByUserId: 'createdByUserId',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionScalarFieldEnum = (typeof ProfessionalLegalQuestionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionVersionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  version: 'version',
+  questionText: 'questionText',
+  theme: 'theme',
+  rationale: 'rationale',
+  referenceDate: 'referenceDate',
+  status: 'status',
+  semanticKey: 'semanticKey',
+  contentFingerprint: 'contentFingerprint',
+  createdByUserId: 'createdByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionVersionScalarFieldEnum = (typeof ProfessionalLegalQuestionVersionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionVersionScalarFieldEnum]
 
 
 export const TechnicalSourceResearchRecordScalarFieldEnum = {

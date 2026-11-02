@@ -21,6 +21,7 @@ import { mergeFascicoloAnalysisQuestions } from "@/components/procedimenti/fasci
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
+import { ProfessionalLegalQuestionsPanel } from "@/components/procedimenti/ProfessionalLegalQuestionsPanel";
 import { FascicoloReport, OperationalPlans } from "@/components/procedimenti/FascicoloReport";
 import {
   FascicoloResearch,
@@ -81,6 +82,7 @@ import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
+import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
 import { listStructuredFascicoloReportSnapshots, persistStructuredFascicoloReport } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
@@ -215,6 +217,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     : null;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
+  const professionalLegalQuestions = detail.canonicalEnteId
+    ? await listProfessionalLegalQuestions({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : [];
   const existingCorpusAnalysis = role === "ADMIN"
     && documentCorpus?.availability === "READY"
     && documentCorpus.documentCount > 0
@@ -387,10 +395,20 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             />
           ) : null}
           {activeSection === "research" ? (
-            <FascicoloResearch
-              model={baseResearchModel}
-              technicalResearchProcedureId={detail.procedimento.id}
-            />
+            <div className="space-y-6">
+              <ProfessionalLegalQuestionsPanel
+                procedimentoId={detail.procedimento.id}
+                questions={professionalLegalQuestions}
+                canManage={role === "ADMIN" || role === "GIURIDICO"}
+                defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
+                documentCount={documentCorpus?.documentCount ?? 0}
+                reportCount={structuredReportSnapshots.length}
+              />
+              <FascicoloResearch
+                model={baseResearchModel}
+                technicalResearchProcedureId={detail.procedimento.id}
+              />
+            </div>
           ) : null}
           {activeSection === "proposals" ? (
             <section aria-label="Proposte preliminari">
@@ -778,10 +796,20 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         </section> : null}
 
         {activeSection === "research" ? (
-          <FascicoloResearch
-            model={researchModel}
-            technicalResearchProcedureId={detail.procedimento.id}
-          />
+          <div className="space-y-6">
+            <ProfessionalLegalQuestionsPanel
+              procedimentoId={detail.procedimento.id}
+              questions={professionalLegalQuestions}
+              canManage={role === "ADMIN" || role === "GIURIDICO"}
+              defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
+              documentCount={documentCorpus?.documentCount ?? 0}
+              reportCount={structuredReportSnapshots.length}
+            />
+            <FascicoloResearch
+              model={researchModel}
+              technicalResearchProcedureId={detail.procedimento.id}
+            />
+          </div>
         ) : null}
 
         {activeSection === "subjects" ? (
