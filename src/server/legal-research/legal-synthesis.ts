@@ -31,6 +31,26 @@ const strategySchema = z.object({
   risks: z.array(text).min(1).max(12),
 }).strict();
 
+// An empty adverse-authority set is admissible only with an auditable search record.
+// It must never be populated with a fabricated "contrary" citation.
+const adverseSearchRecordSchema = z.object({
+  providerId: z.enum(["MOONLIT", "SIMPLICITER", "LEGAL_DATA_HUNTER"]),
+  query: text,
+  sourceFamiliesSearched: z.array(z.string().trim().min(1).max(128)).min(1).max(16),
+  examinedResultIds: z.array(id).max(100),
+  outcome: z.enum([
+    "NO_RELEVANT_ADVERSE_AUTHORITY",
+    "ONLY_UNVERIFIABLE_RESULTS",
+    "ONLY_QUALIFYING_RESULTS",
+  ]),
+  notes: text,
+}).strict();
+
+const noContraryAuthorityFindingSchema = z.object({
+  searches: z.array(adverseSearchRecordSchema).min(1).max(20),
+  reasonedFinding: text,
+}).strict();
+
 export const legalAnalysisContributionSchema = z.object({
   version: z.literal(LEGAL_ANALYSIS_CONTRIBUTION_VERSION),
   contributionId: id,
@@ -39,7 +59,8 @@ export const legalAnalysisContributionSchema = z.object({
   issueStatement: text,
   ruleApplications: z.array(ruleApplicationSchema).min(1).max(20),
   supportingArguments: z.array(groundedArgumentSchema).min(1).max(20),
-  contraryArguments: z.array(groundedArgumentSchema).min(1).max(20),
+  contraryArguments: z.array(groundedArgumentSchema).max(20),
+  noContraryAuthorityFinding: noContraryAuthorityFindingSchema.optional(),
   evidenceAssessment: z.object({
     strengths: z.array(groundedArgumentSchema).min(1).max(20),
     weaknesses: z.array(groundedArgumentSchema).min(1).max(20),
@@ -54,7 +75,22 @@ export const legalAnalysisContributionSchema = z.object({
   }).strict(),
   strategies: z.array(strategySchema).min(1).max(12),
   uncertainties: z.array(text).max(20),
-}).strict();
+}).strict().superRefine((value, ctx) => {
+  if (value.contraryArguments.length === 0 && !value.noContraryAuthorityFinding) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["noContraryAuthorityFinding"],
+      message: "An empty contraryArguments array requires an auditable adverse-authority search record.",
+    });
+  }
+  if (value.contraryArguments.length > 0 && value.noContraryAuthorityFinding) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["noContraryAuthorityFinding"],
+      message: "A no-contrary-authority finding cannot coexist with contrary arguments.",
+    });
+  }
+});
 
 export type LegalAnalysisContribution = z.infer<typeof legalAnalysisContributionSchema>;
 
