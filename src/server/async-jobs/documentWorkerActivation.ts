@@ -158,6 +158,7 @@ function activationSpec(request: DocumentWorkerActivationRequest) {
       "ASYNC_WORKER_MAX_PROCESSED_JOBS=1",
       `ASYNC_WORKER_TARGET_JOB_ID=${applicationJobId}`,
       `ASYNC_WORKER_TARGET_TENANT_ID=${tenantId}`,
+      ...(request.withLegalResearch ? ["MANUAL_LEGAL_ANALYSIS_PIPELINE=true"] : []),
       `ASYNC_WORKER_OPERATION_ALLOWLIST=${DOCUMENT_WORKER_OPERATIONS.documentAnalysis}`,
       "ASYNC_PROVIDER_EXECUTION_ENABLED=true",
       "npm run worker:async",

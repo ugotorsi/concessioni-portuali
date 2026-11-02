@@ -243,6 +243,31 @@ historical status, makes no provider call, and deletes the artifact after succes
 ## Infrastructure service center
 
 `/admin/runtime` is the ADMIN + MFA control center for the services used by NOETRA.
+
+### Manual legal research with general automation off
+
+The explicit `Avvia analisi giuridica` action uses a separate fail-closed policy from
+the periodic automatic reconciler. Keep `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false`
+and configure the web process and the one-off application worker with the same values:
+
+- `MANUAL_RESEARCH_EXECUTION_ENABLED=true`;
+- `MANUAL_RESEARCH_TENANT_ALLOWLIST=<tenant IDs>`;
+- `MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST=<procedure IDs>`;
+- `MANUAL_RESEARCH_ALLOWED_CAPABILITIES=<comma-separated capabilities>`;
+- `MANUAL_RESEARCH_MAX_CALLS=<maximum calls per mission>`;
+- `MANUAL_RESEARCH_WORKER_ACTOR_ID=<authorized worker actor>`;
+- `MANUAL_RESEARCH_LEASE_MS=<bounded lease>`;
+- `MANUAL_RESEARCH_PROVIDER_TIMEOUT_MS=<bounded provider timeout>`;
+- `MANUAL_OFFICIAL_SOURCE_VERIFICATION_ENABLED=true`;
+- `MANUAL_OFFICIAL_SOURCE_MAX_ACQUISITIONS=<bounded acquisitions per mission>`.
+
+Admission requires ADMIN + MFA, tenant write access, an explicit form confirmation,
+the three active runtime budget scopes, a procedure allowlist match, and a
+`SERVER_AUTONOMOUS` mission within the configured capability and call limits. The job
+stores a `manual-research-policy-v1` decision fingerprint and the worker recomputes
+that exact policy before provider dispatch. Provider OAuth grants, the encrypted
+credential key, and the Legal Data Hunter API key must already be configured; missing
+credentials fail closed and never fall back to interactive login.
 It distinguishes informational notices, required interventions, and blocking problems
 for AI, Render, Vercel, Neon, S3-compatible document storage (including Cloudflare R2),
 and configured connectors.

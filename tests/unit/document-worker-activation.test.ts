@@ -274,6 +274,7 @@ describe("document worker activation", () => {
     expect(research).toContain("ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false");
     expect(research).toContain("ASYNC_PROVIDER_EXECUTION_ENABLED=true");
     if (chained) {
+      expect(segments[0]).toContain("MANUAL_LEGAL_ANALYSIS_PIPELINE=true");
       expect(segments[0]).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=FASCICOLO.AUTOMATIC_ANALYSIS_V1");
       expect(segments[0]).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
     }

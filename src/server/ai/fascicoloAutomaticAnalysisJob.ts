@@ -19,9 +19,11 @@ import {
   type ResearchMission,
 } from "@/server/legal-research/bridge";
 import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
+import { manualResearchPlanner } from "@/server/legal-research/manual-research-policy";
 import { createResearchMissionRecord } from "@/server/legal-research/persistence";
 import {
   ensureAutomaticResearchExecution,
+  ensureManualResearchExecution,
   type AutomaticResearchAdmissionResult,
 } from "@/server/legal-research/automatic-research-job";
 import { FASCICOLO_AUTOMATIC_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fascicoloAutomaticContracts";
@@ -1037,11 +1039,19 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
     mission,
     actor: { actorId, tenantId },
   }),
-  scheduleMission: ensureAutomaticResearchExecution,
+  scheduleMission: (input) => manualLegalAnalysisPipelineEnabled()
+    ? ensureManualResearchExecution(input)
+    : ensureAutomaticResearchExecution(input),
   async listPriorReportIds() {
     return [];
   },
 };
+
+export function manualLegalAnalysisPipelineEnabled(
+  environment: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return environment.MANUAL_LEGAL_ANALYSIS_PIPELINE?.trim().toLowerCase() === "true";
+}
 
 export function createDefaultFascicoloAutomaticAnalysisDependencies(): FascicoloAutomaticAnalysisDependencies {
   return { ...defaultHandlerDependencies };
@@ -1075,7 +1085,9 @@ async function reconcileStructuredKnowledgeMissions(input: {
         ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
       allowBuildingRevision: input.allowBuildingRevision,
       referenceDateConfirmations,
-      autonomousResearch: autonomousResearchPlanner(input.revision.tenantId),
+      autonomousResearch: manualLegalAnalysisPipelineEnabled()
+        ? manualResearchPlanner(input.revision.tenantId)
+        : autonomousResearchPlanner(input.revision.tenantId),
     });
   } catch {
     throw new AsyncJobExecutionError(
