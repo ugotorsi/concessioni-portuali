@@ -1,6 +1,11 @@
 const WORKOS_RESOURCE_ENDPOINT = "https://api.workos.com/user_management/authkit_oauth_resources";
 export const SELVARA_PREVIEW_MCP_RESOURCE =
   "https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp";
+export const NOETRA_PRODUCTION_MCP_RESOURCE = "https://app.noetra.it/api/mcp";
+const ALLOWED_MCP_RESOURCES = new Set([
+  SELVARA_PREVIEW_MCP_RESOURCE,
+  NOETRA_PRODUCTION_MCP_RESOURCE,
+]);
 
 type WorkosResource = Readonly<{
   id: string;
@@ -32,7 +37,7 @@ function validateEnvironment(): string {
 }
 
 function validateResource(value: string | null): string {
-  if (value !== SELVARA_PREVIEW_MCP_RESOURCE || value.includes("*")) {
+  if (!value || !ALLOWED_MCP_RESOURCES.has(value) || value.includes("*")) {
     throw new Error("WORKOS_RESOURCE_NOT_ALLOWED");
   }
   return value;
