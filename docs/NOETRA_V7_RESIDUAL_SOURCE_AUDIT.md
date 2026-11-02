@@ -96,3 +96,25 @@ Totali:
    conclusione giuridica.
 4. Le verifiche sono conservate separatamente dai bundle storici per non
    riscrivere output append-only né inventare metadati semantici mancanti.
+
+## Chiusura Legal Data Hunter
+
+Il ricollaudo autorizzato del 2 novembre 2026 ha usato esclusivamente Legal
+Data Hunter sulla Preview:
+
+- missione:
+  `research-mission:53b4df387f748621e126984feb7c59be3fa649ad2651c0516609acb2159fdd33`;
+- bundle:
+  `research-bundle:656b6a956035598ff243cc457eacaf4191b27a0abb675bf33dcb283c12e919f0`;
+- tre chiamate completate in circa 14 secondi, senza `TIMEOUT` o altro
+  `errorCode`;
+- costo autorizzato e consuntivato: EUR 0,06;
+- discovery, resolve e fallback hanno restituito zero risultati per
+  `Cons. Stato, sez. AP, n. 18/2021`;
+- il bundle registra correttamente
+  `OFFICIAL_IDENTITY_NOT_VERIFIED`, zero candidati e
+  `BUDGET_EXHAUSTED`, senza trasformare l'assenza di risultati in un successo
+  giuridico.
+
+Il precedente timeout era quindi applicativo e risulta corretto. Il limite
+residuo non è più tecnico: il provider non ha risolto la citazione testata.
