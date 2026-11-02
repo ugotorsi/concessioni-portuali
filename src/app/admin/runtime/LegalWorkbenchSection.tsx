@@ -55,6 +55,12 @@ const CHANNEL_LABELS: Record<string, string> = {
 };
 
 const REQUIREMENT_LABELS: Record<string, string> = {
+  MANUAL_RESEARCH_POLICY_DISABLED: "ricerca su richiesta non abilitata in questo ambiente",
+  MANUAL_RESEARCH_TENANT_NOT_ALLOWED: "ente non autorizzato alla ricerca su richiesta",
+  MANUAL_RESEARCH_PROCEDIMENTO_NOT_ALLOWED: "fascicolo non autorizzato alla ricerca su richiesta",
+  MANUAL_RESEARCH_CAPABILITY_NOT_ALLOWED: "capacità richiesta non autorizzata",
+  MANUAL_RESEARCH_BUDGET_NOT_ALLOWED: "budget della missione superiore al limite autorizzato",
+  MANUAL_RESEARCH_POLICY_INVALID: "configurazione della ricerca su richiesta incompleta",
   AUTOMATIC_RESEARCH_POLICY_DISABLED: "ricerca autonoma non abilitata in questo ambiente",
   AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED: "ente non autorizzato alla ricerca autonoma",
   AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED: "fascicolo non autorizzato alla ricerca autonoma",
@@ -120,7 +126,7 @@ export function LegalWorkbenchSection({
                   nuova versione del rapporto. Elaborazioni già eseguite non vengono ripetute; si applicano i limiti di spesa.
                 </p>
                 <p className="text-xs text-slate-700">
-                  Ricerca autonoma:{" "}
+                  Ricerca su richiesta:{" "}
                   {snapshot.research.autonomousChannel.authorized
                     ? <strong className="text-green-700">abilitata per questo fascicolo</strong>
                     : <strong className="text-amber-700">non disponibile ({REQUIREMENT_LABELS[snapshot.research.autonomousChannel.requirementCode ?? ""] ?? snapshot.research.autonomousChannel.requirementCode})</strong>}

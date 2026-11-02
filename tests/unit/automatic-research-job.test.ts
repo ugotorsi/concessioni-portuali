@@ -7,8 +7,10 @@ import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import {
   createAutomaticResearchExecutionHandler,
   ensureAutomaticResearchExecution,
+  ensureManualResearchExecution,
 } from "@/server/legal-research/automatic-research-job";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
+import { evaluateManualResearchPolicy } from "@/server/legal-research/manual-research-policy";
 import { createResearchMission, RESEARCH_BRIDGE_VERSION } from "@/server/legal-research/bridge";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 
@@ -57,6 +59,16 @@ const env = {
 };
 
 const decision = evaluateAutomaticResearchPolicy({ tenantId: "tenant-1", mission, env });
+const manualEnv = {
+  MANUAL_RESEARCH_EXECUTION_ENABLED: "true",
+  MANUAL_RESEARCH_TENANT_ALLOWLIST: "tenant-1",
+  MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST: "procedure-1",
+  MANUAL_RESEARCH_ALLOWED_CAPABILITIES: "SEMANTIC_DISCOVERY",
+  MANUAL_RESEARCH_MAX_CALLS: "2",
+  MANUAL_RESEARCH_WORKER_ACTOR_ID: "manual-worker",
+  MANUAL_RESEARCH_LEASE_MS: "60000",
+  MANUAL_RESEARCH_PROVIDER_TIMEOUT_MS: "5000",
+};
 const reference = {
   referenceType: "LEGAL_RESEARCH_MISSION",
   referenceId: mission.missionId,
@@ -88,6 +100,58 @@ describe("automatic research queue job", () => {
       requirementCode: "AUTOMATIC_RESEARCH_POLICY_DISABLED",
       jobId: null,
     });
+  });
+
+  it("admits an explicitly requested mission without enabling automatic research", async () => {
+    const admitJob = vi.fn(async () => ({ job: { id: "manual-job-1" } }));
+    await expect(ensureManualResearchExecution({
+      mission,
+      tenantId: "tenant-1",
+      actorId: "admin-1",
+      correlationId: "manual-1",
+      env: manualEnv,
+    }, {
+      findJobByIdempotencyKey: vi.fn(async () => null),
+      admitJob,
+    })).resolves.toEqual({
+      outcome: "ADMITTED",
+      requirementCode: null,
+      jobId: "manual-job-1",
+    });
+    expect(admitJob).toHaveBeenCalledWith(expect.objectContaining({
+      policyDecisionRef: expect.stringMatching(/^manual-research-policy-v1:/),
+      admission: expect.objectContaining({
+        initiatingUserId: "admin-1",
+        admissionType: "AUTHENTICATED_USER",
+        actor: expect.objectContaining({
+          actorId: "admin-1",
+          actorRole: "MANUAL_FASCICOLO_RESEARCH",
+        }),
+      }),
+    }));
+    expect(evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: { ...env, AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false" },
+    }).authorized).toBe(false);
+  });
+
+  it("keeps manual policy scope and budget independent from automatic policy", () => {
+    expect(evaluateManualResearchPolicy({
+      tenantId: "tenant-2",
+      mission,
+      env: manualEnv,
+    }).requirementCode).toBe("MANUAL_RESEARCH_TENANT_NOT_ALLOWED");
+    expect(evaluateManualResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: { ...manualEnv, MANUAL_RESEARCH_MAX_CALLS: "1" },
+    }).requirementCode).toBe("MANUAL_RESEARCH_BUDGET_NOT_ALLOWED");
+    expect(evaluateManualResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: manualEnv,
+    }).policyDecisionRef).toMatch(/^manual-research-policy-v1:/);
   });
 
   it("never admits a ChatGPT connector mission even when autonomous policy is enabled", async () => {

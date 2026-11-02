@@ -21,6 +21,11 @@ import {
   type AutomaticResearchPolicyDecision,
   type AutomaticResearchPolicyEnv,
 } from "./automatic-research-policy";
+import {
+  evaluateManualResearchPolicy,
+  type ManualResearchPolicyDecision,
+  type ManualResearchPolicyEnv,
+} from "./manual-research-policy";
 import { createAutomaticResearchProviderAdapters } from "./automatic-research-providers";
 import { createLocalTrustedResearchClient } from "./local-trusted-research-client";
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
@@ -67,11 +72,49 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
   findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
   admitJob?(admission: AsyncJobAdmissionInput): Promise<{ job: { id: string } }>;
 }> = {}): Promise<AutomaticResearchAdmissionResult> {
-  const decision = evaluateAutomaticResearchPolicy({
-    tenantId: input.tenantId,
-    mission: input.mission,
-    env: input.env,
-  });
+  return ensureResearchExecution(input, dependencies, "AUTOMATIC");
+}
+
+export async function ensureManualResearchExecution(input: Readonly<{
+  mission: ResearchMission;
+  tenantId: string;
+  actorId: string;
+  correlationId: string;
+  now?: Date;
+  env?: ManualResearchPolicyEnv;
+}>, dependencies: Readonly<{
+  findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
+  admitJob?(admission: AsyncJobAdmissionInput): Promise<{ job: { id: string } }>;
+}> = {}): Promise<AutomaticResearchAdmissionResult> {
+  return ensureResearchExecution(input, dependencies, "MANUAL");
+}
+
+async function ensureResearchExecution(
+  input: Readonly<{
+    mission: ResearchMission;
+    tenantId: string;
+    actorId: string;
+    correlationId: string;
+    now?: Date;
+    env?: AutomaticResearchPolicyEnv | ManualResearchPolicyEnv;
+  }>,
+  dependencies: Readonly<{
+    findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
+    admitJob?(admission: AsyncJobAdmissionInput): Promise<{ job: { id: string } }>;
+  }>,
+  mode: "AUTOMATIC" | "MANUAL",
+): Promise<AutomaticResearchAdmissionResult> {
+  const decision = mode === "AUTOMATIC"
+    ? evaluateAutomaticResearchPolicy({
+      tenantId: input.tenantId,
+      mission: input.mission,
+      env: input.env as AutomaticResearchPolicyEnv,
+    })
+    : evaluateManualResearchPolicy({
+      tenantId: input.tenantId,
+      mission: input.mission,
+      env: input.env as ManualResearchPolicyEnv,
+    });
   if (!decision.authorized || !decision.policyDecisionRef) {
     return { outcome: "NOT_AUTHORIZED", requirementCode: decision.requirementCode, jobId: null };
   }
@@ -83,9 +126,9 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
       actor: {
         actorId: input.actorId,
         actorEmail: null,
-        actorRole: "AUTOMATIC_FASCICOLO_RESEARCH",
-        initiatingUserId: null,
-        admissionType: "AUTHORIZED_SYSTEM",
+        actorRole: mode === "AUTOMATIC" ? "AUTOMATIC_FASCICOLO_RESEARCH" : "MANUAL_FASCICOLO_RESEARCH",
+        initiatingUserId: mode === "MANUAL" ? input.actorId : null,
+        admissionType: mode === "AUTOMATIC" ? "AUTHORIZED_SYSTEM" : "AUTHENTICATED_USER",
         tenantId: input.tenantId,
       },
       correlationId: input.correlationId,
@@ -160,6 +203,41 @@ export async function admitCurrentKnowledgeAutonomousResearch(input: Readonly<{
   return admissions;
 }
 
+export async function admitCurrentKnowledgeManualResearch(input: Readonly<{
+  tenantId: string;
+  procedimentoId: string;
+  actorId: string;
+  limit?: number;
+  correlationId?: string;
+}>): Promise<readonly CurrentKnowledgeResearchAdmission[]> {
+  const records = await prisma.researchMissionRecord.findMany({
+    where: {
+      tenantId: input.tenantId,
+      caseId: input.procedimentoId,
+      lifecycleStatus: "CURRENT",
+      status: "PENDING",
+      researchQuestionSemanticKey: { not: null },
+      assignedActorId: { not: null },
+    },
+    orderBy: { createdAt: "asc" },
+    take: input.limit ?? 25,
+    select: { id: true, tenantId: true, payload: true },
+  });
+  const admissions: CurrentKnowledgeResearchAdmission[] = [];
+  for (const record of records) {
+    const mission = record.payload as unknown as ResearchMission;
+    if (!record.tenantId || researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
+    const result = await ensureManualResearchExecution({
+      mission,
+      tenantId: record.tenantId,
+      actorId: input.actorId,
+      correlationId: input.correlationId ?? `manual-research:${mission.missionId}:${input.actorId}`,
+    });
+    admissions.push({ missionId: record.id, ...result });
+  }
+  return admissions;
+}
+
 export async function reconcilePendingAutomaticResearchExecutions(limit = 25): Promise<number> {
   const links = await prisma.automaticFascicoloReportMission.findMany({
     where: {
@@ -194,7 +272,7 @@ type ExecutionAuthority = Readonly<{
   mission: ResearchMission;
   tenantId: string;
   actorId: string;
-  decision: AutomaticResearchPolicyDecision;
+  decision: AutomaticResearchPolicyDecision | ManualResearchPolicyDecision;
 }>;
 
 export interface AutomaticResearchExecutionDependencies {
@@ -255,7 +333,9 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
     if (!activeLink && !currentKnowledgeMission) return null;
     const stored = await getResearchMission(input.missionId, { actorId: job.actorId, tenantId: job.tenantId });
     if (!stored) return null;
-    const decision = evaluateAutomaticResearchPolicy({ tenantId: job.tenantId, mission: stored.mission });
+    const decision = job.policyDecisionRef?.startsWith("manual-research-policy-v1:")
+      ? evaluateManualResearchPolicy({ tenantId: job.tenantId, mission: stored.mission })
+      : evaluateAutomaticResearchPolicy({ tenantId: job.tenantId, mission: stored.mission });
     if (!decision.authorized || decision.policyDecisionRef !== job.policyDecisionRef) return null;
     return {
       mission: stored.mission,
@@ -302,7 +382,7 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       });
       return;
     }
-    if (process.env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED === "true") {
+    if (input.authority.decision.officialSourceVerificationEnabled) {
       if (input.authority.decision.maxOfficialSourceAcquisitions === null) {
         throw new Error("AUTOMATIC_OFFICIAL_SOURCE_ACQUISITION_LIMIT_MISSING");
       }

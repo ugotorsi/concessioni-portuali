@@ -45,6 +45,7 @@ export type AutomaticResearchPolicyDecision = Readonly<{
   workerActorId: string | null;
   leaseDurationMs: number | null;
   providerTimeoutMs: number | null;
+  officialSourceVerificationEnabled: boolean;
   maxOfficialSourceAcquisitions: number | null;
   allowedCapabilities: readonly ResearchCapability[];
 }>;
@@ -74,6 +75,7 @@ function denied(
     workerActorId: null,
     leaseDurationMs: null,
     providerTimeoutMs: null,
+    officialSourceVerificationEnabled: false,
     maxOfficialSourceAcquisitions: null,
     allowedCapabilities,
   };
@@ -146,6 +148,7 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
     workerActorId,
     leaseDurationMs,
     providerTimeoutMs,
+    officialSourceVerificationEnabled,
     maxOfficialSourceAcquisitions,
     allowedCapabilities,
   };

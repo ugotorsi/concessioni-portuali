@@ -6,7 +6,7 @@ import {
   loadReferenceDateConfirmations,
   type ReferenceDateReviewQuestion,
 } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
-import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
+import { evaluateManualResearchPolicy } from "@/server/legal-research/manual-research-policy";
 import {
   readProviderOAuthCredentialStatuses,
   type ProviderOAuthCredentialStatus,
@@ -16,13 +16,13 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 const ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALYSIS_V1";
 
 function autonomousChannelStatus(tenantId: string, procedimentoId: string) {
-  const decision = evaluateAutomaticResearchPolicy({ tenantId });
+  const decision = evaluateManualResearchPolicy({ tenantId });
   if (!decision.authorized) return { authorized: false, requirementCode: decision.requirementCode };
-  const procedimenti = process.env.AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST
+  const procedimenti = process.env.MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST
     ?.split(",").map((value) => value.trim()) ?? [];
   return procedimenti.includes(procedimentoId)
     ? { authorized: true, requirementCode: null }
-    : { authorized: false, requirementCode: "AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED" };
+    : { authorized: false, requirementCode: "MANUAL_RESEARCH_PROCEDIMENTO_NOT_ALLOWED" };
 }
 
 export interface LegalWorkbenchSource {

@@ -7,7 +7,10 @@ vi.mock("@/server/fascicolo-knowledge/researchMissionRecovery", () => ({
   recoverCurrentKnowledgeResearchMissions: vi.fn(),
 }));
 vi.mock("@/server/legal-research/automatic-research-job", () => ({
-  admitCurrentKnowledgeAutonomousResearch: vi.fn(),
+  admitCurrentKnowledgeManualResearch: vi.fn(),
+}));
+vi.mock("@/server/legal-research/manual-research-policy", () => ({
+  manualResearchPlanner: vi.fn(() => vi.fn()),
 }));
 vi.mock("@/server/legal-research/persistence", () => ({
   RESEARCH_MISSION_EXECUTION_OPERATION: "LEGAL_RESEARCH.EXECUTE_V1",
@@ -67,6 +70,7 @@ describe("manual legal analysis pipeline", () => {
       workerActivationOutcome: "REQUESTED",
     });
     expect(recoverMissions).toHaveBeenCalledWith(expect.objectContaining({ candidateActorId: "admin-1" }));
+    expect(admitResearch).toHaveBeenCalledWith(expect.objectContaining({ actorId: "admin-1" }));
     expect(activateWorker).toHaveBeenCalledWith({ kind: "LEGAL_RESEARCH", procedimentoId: "procedure-1" });
   });
 

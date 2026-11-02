@@ -3,7 +3,8 @@ import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorp
 import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 
-import { admitCurrentKnowledgeAutonomousResearch } from "./automatic-research-job";
+import { admitCurrentKnowledgeManualResearch } from "./automatic-research-job";
+import { manualResearchPlanner } from "./manual-research-policy";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "./persistence";
 
 const TERMINAL_JOB_STATUSES = new Set(["SUCCEEDED", "TERMINAL_FAILED", "CANCELLED"]);
@@ -26,7 +27,7 @@ export type ManualLegalAnalysisResult = Readonly<{
 interface ManualLegalAnalysisDependencies {
   requestAnalysis: typeof requestExistingCorpusAnalysis;
   recoverMissions: typeof recoverCurrentKnowledgeResearchMissions;
-  admitResearch: typeof admitCurrentKnowledgeAutonomousResearch;
+  admitResearch: typeof admitCurrentKnowledgeManualResearch;
   countQueuedResearchJobs(input: Readonly<{ tenantId: string; procedimentoId: string }>): Promise<number>;
   activateWorker: typeof requestDocumentWorkerActivation;
 }
@@ -34,7 +35,7 @@ interface ManualLegalAnalysisDependencies {
 const defaultDependencies: ManualLegalAnalysisDependencies = {
   requestAnalysis: requestExistingCorpusAnalysis,
   recoverMissions: recoverCurrentKnowledgeResearchMissions,
-  admitResearch: admitCurrentKnowledgeAutonomousResearch,
+  admitResearch: admitCurrentKnowledgeManualResearch,
   countQueuedResearchJobs: ({ tenantId, procedimentoId }) => prisma.asyncJob.count({
     where: {
       tenantId,
@@ -78,10 +79,12 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     procedimentoId: input.procedimentoId,
     candidateActorId: input.actor.id,
     requireValidCandidate: true,
+    autonomousResearch: manualResearchPlanner(input.tenantId),
   });
   const admissions = await dependencies.admitResearch({
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
+    actorId: input.actor.id,
     correlationId: `manual-legal-analysis:${input.procedimentoId}:${input.actor.id}`,
   });
   const queuedResearchJobs = await dependencies.countQueuedResearchJobs(input);
