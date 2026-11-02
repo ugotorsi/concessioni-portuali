@@ -45,10 +45,10 @@ function providerArgument(value: string): AcceptanceProvider {
 
 function budget(provider: AcceptanceProvider) {
   return {
-    maxTotalResearchCalls: provider === "SIMPLICITER" || provider === "LEGAL_DATA_HUNTER" ? 2 : 1,
+    maxTotalResearchCalls: provider === "LEGAL_DATA_HUNTER" ? 3 : provider === "SIMPLICITER" ? 2 : 1,
     maxMoonlitCalls: provider === "MOONLIT" ? 1 : 0,
     maxSimpliciterCalls: provider === "SIMPLICITER" ? 2 : 0,
-    maxLegalDataHunterCalls: provider === "LEGAL_DATA_HUNTER" ? 2 : 0,
+    maxLegalDataHunterCalls: provider === "LEGAL_DATA_HUNTER" ? 3 : 0,
   };
 }
 
