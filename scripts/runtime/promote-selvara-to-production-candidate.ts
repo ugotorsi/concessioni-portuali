@@ -459,6 +459,38 @@ async function assertDemoScope(client: PoolClient): Promise<void> {
   }
 }
 
+async function remapExistingDemoTenant(
+  client: PoolClient,
+  rows: Map<string, SelectedRow>,
+): Promise<{ sourceTenantId: string; targetTenantId: string } | null> {
+  if (!SCOPE?.requiredEnteCodePrefix) return null;
+  const sourceTenants = [...rows.values()].filter(
+    (selected) => (
+      selected.table === "Ente"
+      && typeof selected.row.id === "string"
+      && typeof selected.row.codice === "string"
+      && selected.row.codice.startsWith(SCOPE.requiredEnteCodePrefix ?? "")
+    ),
+  );
+  if (sourceTenants.length !== 1) {
+    throw new Error("DEMO_PROMOTION_SOURCE_TENANT_INVALID");
+  }
+  const sourceTenantId = sourceTenants[0].row.id as string;
+  const code = sourceTenants[0].row.codice as string;
+  const existing = await client.query<{ id: string }>(
+    `SELECT "id" FROM "Ente" WHERE "codice" = $1`,
+    [code],
+  );
+  if (existing.rows.length === 0 || existing.rows[0].id === sourceTenantId) return null;
+  const targetTenantId = existing.rows[0].id;
+  for (const selected of rows.values()) {
+    for (const [column, value] of Object.entries(selected.row)) {
+      if (value === sourceTenantId) selected.row[column] = targetTenantId;
+    }
+  }
+  return { sourceTenantId, targetTenantId };
+}
+
 const DEMO_EMAIL_DOMAINS = /\.(demo|local|example|invalid|test)$/i;
 
 function promotionInventory(rows: Map<string, SelectedRow>) {
@@ -489,6 +521,7 @@ async function main(): Promise<void> {
     const client = await dryRunPool.connect();
     try {
       await client.query("BEGIN READ ONLY");
+      await client.query("SET LOCAL idle_in_transaction_session_timeout = 0");
       await assertDemoScope(client);
       const { rows } = await selectPromotionGraph(client);
       console.info(`NOETRA_PROMOTION_DRY_RUN=${JSON.stringify({
@@ -530,12 +563,14 @@ async function main(): Promise<void> {
   const target = await targetPool.connect();
   try {
     await source.query("BEGIN READ ONLY");
+    await source.query("SET LOCAL idle_in_transaction_session_timeout = 0");
     await target.query("BEGIN");
     await assertDemoScope(source);
     const { rows, metadata } = await selectPromotionGraph(source);
     if (SCOPE.requiredEnteCodePrefix && promotionInventory(rows).nonDemoEmailDomains.length > 0) {
       throw new Error("DEMO_PROMOTION_NON_DEMO_PERSONAL_DATA");
     }
+    const tenantRemapping = await remapExistingDemoTenant(target, rows);
     if (targetStorageBucket) {
       for (const selected of rows.values()) {
         if (selected.row.storageKey && selected.row.storageBucket) {
@@ -572,6 +607,7 @@ async function main(): Promise<void> {
       inserted: summary,
       currentRevisions: verification.rows[0].currentRevisions,
       currentReports: verification.rows[0].currentReports,
+      tenantRemapping,
       fingerprint: createHash("sha256").update(JSON.stringify(summary)).digest("hex"),
     })}`);
   } catch (error) {
