@@ -505,6 +505,7 @@ async function main(): Promise<void> {
     return;
   }
   const targetUrl = process.env.NOETRA_PRODUCTION_CANDIDATE_DATABASE_URL;
+  const targetStorageBucket = process.env.NOETRA_PRODUCTION_STORAGE_BUCKET?.trim();
   if (
     process.env.VERCEL_ENV !== "preview"
     || process.env.NOETRA_PRODUCTION_PROMOTION_APPROVAL !== APPROVAL
@@ -515,6 +516,12 @@ async function main(): Promise<void> {
   }
   if (new URL(process.env.DATABASE_URL).host === new URL(targetUrl).host) {
     throw new Error("SELVARA_PROMOTION_DATABASES_NOT_ISOLATED");
+  }
+  if (
+    SCOPE.requiredEnteCodePrefix
+    && (!targetStorageBucket || !/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(targetStorageBucket))
+  ) {
+    throw new Error("DEMO_PROMOTION_TARGET_STORAGE_BUCKET_REQUIRED");
   }
 
   const sourcePool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -528,6 +535,13 @@ async function main(): Promise<void> {
     const { rows, metadata } = await selectPromotionGraph(source);
     if (SCOPE.requiredEnteCodePrefix && promotionInventory(rows).nonDemoEmailDomains.length > 0) {
       throw new Error("DEMO_PROMOTION_NON_DEMO_PERSONAL_DATA");
+    }
+    if (targetStorageBucket) {
+      for (const selected of rows.values()) {
+        if (selected.row.storageKey && selected.row.storageBucket) {
+          selected.row.storageBucket = targetStorageBucket;
+        }
+      }
     }
     const inserted = await insertPromotionGraph(target, rows, metadata);
     const verification = await target.query<{
