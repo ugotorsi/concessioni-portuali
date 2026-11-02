@@ -609,15 +609,7 @@ export async function assignDefaultProcedimentoBudgetPolicy(
   revalidatePath(`/procedimenti/${procedimento.id}`);
 }
 
-export async function configureLegalDataHunterCredential(formData: FormData): Promise<void> {
-  const currentUser = await requireAdminWithMfa();
-  if (formData.get("confirmation") !== "STORE_LEGAL_DATA_HUNTER_CREDENTIAL") {
-    throw new Error("LEGAL_DATA_HUNTER_CONFIRMATION_REQUIRED");
-  }
-  const apiKey = formData.get("apiKey");
-  if (typeof apiKey !== "string" || apiKey.trim().length < 8 || apiKey.trim().length > 4_096) {
-    throw new Error("LEGAL_DATA_HUNTER_CREDENTIAL_INVALID");
-  }
+async function synchronizeProviderCredentialKey(): Promise<string> {
   const key = readProviderCredentialKey();
   if (!key) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_KEY_MISSING");
   const renderServiceId = process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim() ?? "";
@@ -647,6 +639,41 @@ export async function configureLegalDataHunterCredential(formData: FormData): Pr
     clearTimeout(timeout);
   }
   if (!response.ok) throw new Error(`RENDER_CREDENTIAL_CONFIGURATION_FAILED:${response.status}`);
+  return renderServiceId;
+}
+
+export async function synchronizeResearchProviderCredentialKey(): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const renderServiceId = await synchronizeProviderCredentialKey();
+  await auditSuccess({
+    azione: "RESEARCH_PROVIDER_CREDENTIAL_KEY_SYNC",
+    entita: "ResearchProviderCredential",
+    entitaId: "WORKER",
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      credentialValueLogged: false,
+      renderServiceId,
+    },
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function configureLegalDataHunterCredential(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  if (formData.get("confirmation") !== "STORE_LEGAL_DATA_HUNTER_CREDENTIAL") {
+    throw new Error("LEGAL_DATA_HUNTER_CONFIRMATION_REQUIRED");
+  }
+  const apiKey = formData.get("apiKey");
+  if (typeof apiKey !== "string" || apiKey.trim().length < 8 || apiKey.trim().length > 4_096) {
+    throw new Error("LEGAL_DATA_HUNTER_CREDENTIAL_INVALID");
+  }
+  const key = readProviderCredentialKey();
+  if (!key) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_KEY_MISSING");
+  const renderServiceId = await synchronizeProviderCredentialKey();
   await storeLegalDataHunterApiKey({ apiKey, key });
   await auditSuccess({
     azione: "RESEARCH_PROVIDER_CREDENTIAL_CONFIGURE",

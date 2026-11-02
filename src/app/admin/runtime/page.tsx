@@ -18,6 +18,7 @@ import { getLegalWorkbenchSnapshot } from "@/server/runtime/legalWorkbench";
 import {
   assignDefaultProcedimentoBudgetPolicy,
   configureLegalDataHunterCredential,
+  synchronizeResearchProviderCredentialKey,
   confirmResearchReferenceDate,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
@@ -358,6 +359,7 @@ export default async function RuntimeOperationsPage({
         recoverMissionsAction={recoverCurrentKnowledgeMissions}
         startLegalAnalysisAction={startLegalAnalysisPipeline}
         configureLegalDataHunterAction={configureLegalDataHunterCredential}
+        synchronizeProviderCredentialKeyAction={synchronizeResearchProviderCredentialKey}
       />
 
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">

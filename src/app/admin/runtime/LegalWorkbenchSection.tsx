@@ -48,6 +48,7 @@ interface Props {
   recoverMissionsAction: (formData: FormData) => Promise<void>;
   startLegalAnalysisAction: (formData: FormData) => Promise<void>;
   configureLegalDataHunterAction: (formData: FormData) => Promise<void>;
+  synchronizeProviderCredentialKeyAction: () => Promise<void>;
 }
 
 const CHANNEL_LABELS: Record<string, string> = {
@@ -79,6 +80,7 @@ export function LegalWorkbenchSection({
   recoverMissionsAction,
   startLegalAnalysisAction,
   configureLegalDataHunterAction,
+  synchronizeProviderCredentialKeyAction,
 }: Props) {
   const confirmedByQuestion = new Map(
     (snapshot?.referenceDateConfirmations ?? []).map((confirmation) => [confirmation.questionSemanticKey, confirmation]),
@@ -140,6 +142,15 @@ export function LegalWorkbenchSection({
                   <Button type="submit">Salva chiave Legal Data Hunter</Button>
                 </form>
               ) : null}
+              <form
+                action={synchronizeProviderCredentialKeyAction}
+                className="flex flex-wrap items-center gap-3 rounded border border-slate-200 bg-slate-50 p-3"
+              >
+                <p className="min-w-64 flex-1 text-xs text-slate-700">
+                  Sincronizza in modo sicuro la chiave di cifratura con il worker senza mostrare o modificare le credenziali provider.
+                </p>
+                <Button type="submit" variant="secondary">Sincronizza credenziali worker</Button>
+              </form>
               <form action={startLegalAnalysisAction} className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
                 <p className="text-sm font-semibold text-slate-900">Avvia analisi giuridica completa</p>
