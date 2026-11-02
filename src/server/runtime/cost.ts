@@ -120,9 +120,9 @@ export async function reserveRuntimeCost(input: {
     } else await tx.query(`
       INSERT INTO "RuntimeCostReservation" (
         "id","tenantId","procedimentoId","jobId","provider","operationType","currency",
-        "estimatedAmount","reservedAmount","status","idempotencyKey","expiresAt"
+        "estimatedAmount","reservedAmount","status","idempotencyKey","expiresAt","updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::numeric,$8::numeric,'RESERVED',$9,
-        CURRENT_TIMESTAMP+($10*INTERVAL '1 second'))
+        CURRENT_TIMESTAMP+($10*INTERVAL '1 second'),CURRENT_TIMESTAMP)
     `, [id, input.tenantId, input.procedimentoId, input.jobId, input.provider,
       input.operationType, currency, amount, key, ttl]);
     return { reservationId: id, outcome: "RESERVED" };

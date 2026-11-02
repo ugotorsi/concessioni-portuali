@@ -64,6 +64,7 @@ describe("Lotto 8 runtime cost gate", () => {
     await expect(reserveRuntimeCost(reservation, db)).resolves.toMatchObject({ outcome: "RESERVED" });
     expect(String(db.query.mock.calls[1][0])).toContain("FOR UPDATE");
     expect(String(db.query.mock.calls[5][0])).toContain("INSERT INTO \"RuntimeCostReservation\"");
+    expect(String(db.query.mock.calls[5][0])).toContain('"updatedAt"');
   });
 
   it("reuses an existing reservation idempotently", async () => {
