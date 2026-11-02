@@ -122,14 +122,16 @@ Aggiunte a `.env.example` per il percorso automatico:
   `tsx` esegue pdf.js in un processo Node separato (circa 90 MB invece di circa
   450 MB), evitando che le istanze da 512 MB vengano terminate senza log durante
   l'estrazione dei documenti caricati;
-- provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
-  `SIMPLICITER_OAUTH_STORAGE_PATH`.
+- provider: `LEGAL_DATA_HUNTER_API_KEY` e
+  `RESEARCH_PROVIDER_CREDENTIAL_KEY`. Le credenziali OAuth Moonlit e Simpliciter
+  sono cifrate nel database tramite lo script di grant dedicato; non usare file
+  token locali sul worker.
 
 Prima di abilitare la ricerca automatica, eseguire sul worker persistente
 `npm run runtime:verify-automatic-research-connectors`. Il controllo non effettua
-chiamate di rete e non stampa credenziali; richiede percorsi assoluti e token
-OAuth gia presenti per Moonlit e Simpliciter, oltre alla presenza della
-credenziale Legal Data Hunter.
+chiamate provider e non stampa credenziali; verifica nel database la presenza
+di credenziali OAuth rinnovabili per Moonlit e Simpliciter, oltre alla presenza
+della credenziale Legal Data Hunter.
 
 OCR e parsing PDF usano le dipendenze incluse nella release (`tesseract.js`,
 dati italiani e `pdfjs-dist`): non leggono credenziali o variabili OCR.
@@ -139,10 +141,11 @@ checkout legge `DATABASE_URL`; non e una dipendenza del runtime applicativo.
 La presenza remota delle variabili sensitive non ne prova il valore o lo scope.
 Sono da verificare live: database effettivamente staging, bucket isolato,
 permessi S3, chiave AI e progetto approvato, entitlement provider, log del
-worker e file OAuth montati. I file `.local-storage/moonlit/oauth.json` e
-`.local-storage/simpliciter/oauth.json` del computer non sono disponibili sul
-server. Il worker accetta ora percorsi server espliciti, ma il servizio di host
-deve fornire file protetti e persistenti. Non esegue login interattivi.
+worker e stato delle credenziali OAuth cifrate. Il login OAuth iniziale avviene
+interattivamente sulla workstation dell'operatore; il worker usa esclusivamente
+il grant persistito e puo rinnovarlo senza avviare login interattivi.
+Il grant dedicato si registra con
+`tsx scripts/legal-research/grant-provider-oauth-credential.ts --provider <MOONLIT|SIMPLICITER> --expected-db-host <prefisso-host-preview>`.
 
 ## Canary su un solo fascicolo
 

@@ -18,7 +18,8 @@ export class SimpliciterOAuthProvider extends MoonlitOAuthProvider {
   constructor(
     redirectUrl: string,
     onRedirect: (authorizationUrl: URL) => void | Promise<void>,
+    storagePath = configuredSimpliciterStoragePath(),
   ) {
-    super(redirectUrl, onRedirect, configuredSimpliciterStoragePath());
+    super(redirectUrl, onRedirect, storagePath);
   }
 }
