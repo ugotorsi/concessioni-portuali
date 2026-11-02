@@ -209,6 +209,54 @@ describe("Block 3B.13A chat legal research bridge", () => {
     })))).toContain("DUPLICATE_LEGAL_ANALYSIS_CONTRIBUTION");
   });
 
+  it("binds a no-contrary finding to successful provider executions and retained candidates", () => {
+    const researchMission = mission();
+    const noContrary = {
+      ...legalContribution(),
+      contraryArguments: [],
+      noContraryAuthorityFinding: {
+        searches: [{
+          executionRecordId: "execution-record-1",
+          examinedCandidateIds: [candidate().candidateId],
+          outcome: "NO_RELEVANT_ADVERSE_AUTHORITY" as const,
+          notes: "The retained result was examined but did not contain a pertinent adverse authority.",
+        }],
+        reasonedFinding: "No pertinent adverse authority was identified in the recorded provider search.",
+      },
+    };
+    expect(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [noContrary],
+    }))).toEqual([]);
+
+    const unknownExecution = {
+      ...noContrary,
+      noContraryAuthorityFinding: {
+        ...noContrary.noContraryAuthorityFinding,
+        searches: [{
+          ...noContrary.noContraryAuthorityFinding.searches[0],
+          executionRecordId: "unknown-execution",
+        }],
+      },
+    };
+    expect(codes(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [unknownExecution],
+    })))).toContain("LEGAL_ANALYSIS_ADVERSE_SEARCH_EXECUTION_INVALID");
+
+    const unknownCandidate = {
+      ...noContrary,
+      noContraryAuthorityFinding: {
+        ...noContrary.noContraryAuthorityFinding,
+        searches: [{
+          ...noContrary.noContraryAuthorityFinding.searches[0],
+          examinedCandidateIds: ["unknown-candidate"],
+        }],
+      },
+    };
+    expect(codes(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [unknownCandidate],
+    })))).toContain("LEGAL_ANALYSIS_ADVERSE_SEARCH_RESULT_INVALID");
+  });
+
   it("accepts a minimal provider-neutral discovery mission", () => {
     const value = mission();
     expect(validateResearchMission(value)).toEqual([]);

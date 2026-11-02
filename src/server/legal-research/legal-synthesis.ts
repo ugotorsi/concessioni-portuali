@@ -31,20 +31,25 @@ const strategySchema = z.object({
   risks: z.array(text).min(1).max(12),
 }).strict();
 
-// An empty adverse-authority set is admissible only with an auditable search record.
-// It must never be populated with a fabricated "contrary" citation.
 const adverseSearchRecordSchema = z.object({
-  providerId: z.enum(["MOONLIT", "SIMPLICITER", "LEGAL_DATA_HUNTER"]),
-  query: text,
-  sourceFamiliesSearched: z.array(z.string().trim().min(1).max(128)).min(1).max(16),
-  examinedResultIds: z.array(id).max(100),
+  executionRecordId: id,
+  examinedCandidateIds: z.array(id).max(100),
   outcome: z.enum([
     "NO_RELEVANT_ADVERSE_AUTHORITY",
     "ONLY_UNVERIFIABLE_RESULTS",
     "ONLY_QUALIFYING_RESULTS",
   ]),
   notes: text,
-}).strict();
+}).strict().superRefine((value, ctx) => {
+  if (value.outcome !== "NO_RELEVANT_ADVERSE_AUTHORITY"
+    && value.examinedCandidateIds.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["examinedCandidateIds"],
+      message: "This adverse-search outcome requires at least one examined authority candidate.",
+    });
+  }
+});
 
 const noContraryAuthorityFindingSchema = z.object({
   searches: z.array(adverseSearchRecordSchema).min(1).max(20),

@@ -324,6 +324,8 @@ export type ResearchBridgeValidationErrorCode =
   | "INVALID_ID"
   | "INVALID_MISSION_REFERENCE"
   | "LEGAL_ANALYSIS_CONTRIBUTION_INVALID"
+  | "LEGAL_ANALYSIS_ADVERSE_SEARCH_EXECUTION_INVALID"
+  | "LEGAL_ANALYSIS_ADVERSE_SEARCH_RESULT_INVALID"
   | "LEGAL_ANALYSIS_SOURCE_REFERENCE_INVALID"
   | "INVALID_RESEARCH_QUESTION"
   | "PROFILE_FIELD_FORBIDDEN"
@@ -709,6 +711,7 @@ export function validateResearchEvidenceBundle(
     errors.push(error("INVALID_DATE", "completedAt", bundle.executionId));
   }
   const executionIds = new Set<string>();
+  const executionById = new Map<string, ResearchToolExecution>();
   for (const execution of bundle.researchToolExecutions) {
     if (!validId(execution.executionRecordId) || !validId(execution.toolId)
       || !execution.researchQuery.trim() || !Number.isInteger(execution.resultCount)
@@ -720,6 +723,7 @@ export function validateResearchEvidenceBundle(
       errors.push(error("DUPLICATE_ENTITY_ID", "researchToolExecutions", execution.executionRecordId));
     }
     executionIds.add(execution.executionRecordId);
+    executionById.set(execution.executionRecordId, execution);
   }
   const candidateIds = new Set<string>();
   for (const candidate of bundle.authorityCandidates) {
@@ -767,6 +771,32 @@ export function validateResearchEvidenceBundle(
           parsed.data.contributionId,
           candidateId,
         ));
+      }
+    }
+    for (const search of parsed.data.noContraryAuthorityFinding?.searches ?? []) {
+      const execution = executionById.get(search.executionRecordId);
+      if (!execution
+        || execution.errorState
+        || execution.callsConsumed < 1
+        || !["MOONLIT", "SIMPLICITER", "LEGAL_DATA_HUNTER"].includes(
+          execution.toolId.trim().toUpperCase(),
+        )) {
+        errors.push(error(
+          "LEGAL_ANALYSIS_ADVERSE_SEARCH_EXECUTION_INVALID",
+          "legalAnalysisContributions.noContraryAuthorityFinding.searches.executionRecordId",
+          parsed.data.contributionId,
+          search.executionRecordId,
+        ));
+      }
+      for (const candidateId of search.examinedCandidateIds) {
+        if (!candidateIds.has(candidateId)) {
+          errors.push(error(
+            "LEGAL_ANALYSIS_ADVERSE_SEARCH_RESULT_INVALID",
+            "legalAnalysisContributions.noContraryAuthorityFinding.searches.examinedCandidateIds",
+            parsed.data.contributionId,
+            candidateId,
+          ));
+        }
       }
     }
   }

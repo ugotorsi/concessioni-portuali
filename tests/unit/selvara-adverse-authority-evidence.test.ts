@@ -57,10 +57,8 @@ describe("legal analysis adverse authority evidence", () => {
       ...sample(),
       noContraryAuthorityFinding: {
         searches: [{
-          providerId: "MOONLIT",
-          query: "Ricerca di precedenti contrari sul regime concessorio demaniale marittimo.",
-          sourceFamiliesSearched: ["GIUSTIZIA_AMMINISTRATIVA"],
-          examinedResultIds: [],
+          executionRecordId: "moonlit-adverse-search-1",
+          examinedCandidateIds: [],
           outcome: "NO_RELEVANT_ADVERSE_AUTHORITY",
           notes: "Nessun risultato pertinente dopo verifica delle fonti restituite.",
         }],
@@ -81,14 +79,27 @@ describe("legal analysis adverse authority evidence", () => {
       contraryArguments: [arg],
       noContraryAuthorityFinding: {
         searches: [{
-          providerId: "MOONLIT",
-          query: "Ricerca di orientamenti contrari sul regime concessorio demaniale marittimo.",
-          sourceFamiliesSearched: ["GIUSTIZIA_AMMINISTRATIVA"],
-          examinedResultIds: [],
+          executionRecordId: "moonlit-adverse-search-1",
+          examinedCandidateIds: [],
           outcome: "NO_RELEVANT_ADVERSE_AUTHORITY",
           notes: "La ricerca non ha trovato fonti pertinenti di segno opposto.",
         }],
         reasonedFinding: "Non esistono precedenti contrari pertinenti tra i risultati verificati.",
+      },
+    };
+    expect(legalAnalysisContributionSchema.safeParse(payload).success).toBe(false);
+  });
+  it("requires examined candidates for non-empty adverse-search outcomes", () => {
+    const payload = {
+      ...sample(),
+      noContraryAuthorityFinding: {
+        searches: [{
+          executionRecordId: "moonlit-adverse-search-1",
+          examinedCandidateIds: [],
+          outcome: "ONLY_UNVERIFIABLE_RESULTS" as const,
+          notes: "I risultati restituiti non consentono una verifica sulla fonte ufficiale.",
+        }],
+        reasonedFinding: "Non sono disponibili precedenti contrari utilizzabili.",
       },
     };
     expect(legalAnalysisContributionSchema.safeParse(payload).success).toBe(false);
