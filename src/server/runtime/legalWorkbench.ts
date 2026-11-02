@@ -163,7 +163,9 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
       },
     }),
     readProviderOAuthCredentialStatuses().catch(() => []),
-    isLegalDataHunterApiKeyConfigured().catch(() => false),
+    process.env.LEGAL_DATA_HUNTER_API_KEY?.trim()
+      ? Promise.resolve(true)
+      : isLegalDataHunterApiKeyConfigured().catch(() => false),
     prisma.asyncJob.findMany({
       where: { ...scope, operation: RESEARCH_MISSION_EXECUTION_OPERATION },
       orderBy: { createdAt: "desc" },
