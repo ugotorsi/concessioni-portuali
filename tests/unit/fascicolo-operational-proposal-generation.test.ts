@@ -90,6 +90,51 @@ describe("Lotto 7 operational proposal generation", () => {
     expect(generate(empty)).toEqual([]);
   });
 
+  it("aggregates page-level extraction gaps into one coverage review per document instead of document requests", () => {
+    const value = report();
+    const pageGap = (page: number, document = 1) => ({
+      ...item(`coverage-${document}-${page}`, "GAP", {
+        gapType: "DOCUMENT_INTERPRETATION_GAP",
+        description: `Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_${document}.PAGE_${page}.`,
+        impact: "Pagina non utilizzata",
+      }),
+      normalizedText: `Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_${document}.PAGE_${page}.`,
+    });
+    const notificationDate = item("missing-date", "GAP", {
+      gapType: "MISSING_EVIDENCE",
+      description: "Nessuna data di notifica è stata rilevata in DOCUMENT_1.PAGE_3",
+      impact: "Decorrenza non verificabile",
+    });
+    value.gaps = [
+      ...[1, 2, 3, 4, 5, 6, 9, 10, 25].map((page) => pageGap(page)),
+      pageGap(7, 2),
+      value.gaps[0],
+      notificationDate,
+    ] as never;
+
+    const candidates = generate(value);
+    const requests = candidates.filter((candidate) => candidate.proposalType === "DOCUMENT_REQUIREMENT");
+    expect(requests.map((candidate) => candidate.originatingKnowledgeItemIds)).toEqual(expect.arrayContaining([["gap-1"], ["missing-date"]]));
+    expect(requests).toHaveLength(2);
+
+    const coverage = candidates.filter((candidate) => candidate.warningCodes.includes("EXTRACTION_COVERAGE_REVIEW"));
+    expect(coverage).toHaveLength(2);
+    const first = coverage.find((candidate) => (candidate.proposedPayload as { documentRef: string }).documentRef === "DOCUMENT_1")!;
+    expect(first.proposalType).toBe("NOTE");
+    expect(first.title).toBe("Verificare la copertura della lettura: documento 1");
+    expect(first.description).toContain("9 pagine (pag. 1-6, 9-10, 25) del documento 1");
+    expect(first.description).toContain("Non è richiesta nuova documentazione.");
+    expect(first.originatingKnowledgeItemIds).toHaveLength(9);
+    expect(first.proposedPayload).toMatchObject({ reviewType: "EXTRACTION_COVERAGE", requestsNewDocumentation: false, pageNumbers: [1, 2, 3, 4, 5, 6, 9, 10, 25] });
+    expect(first.warningCodes).toContain("MANUAL_ACTION_REQUIRED");
+    expect(candidates.every((candidate) => operationalProposalCandidateSchema.safeParse(candidate).success)).toBe(true);
+
+    const reordered = report();
+    reordered.gaps = [...(value.gaps as never[])].reverse() as never;
+    expect(generate(reordered).map((candidate) => candidate.proposalFingerprint))
+      .toEqual(candidates.map((candidate) => candidate.proposalFingerprint));
+  });
+
   it("creates phase-aware activities and preview-only metadata reconciliations with rollback evidence", () => {
     const value = report();
     const concession = item("concession-act", "LEGAL_ACT", {

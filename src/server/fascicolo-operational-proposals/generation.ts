@@ -128,33 +128,145 @@ function deadlineCandidates(input: GenerationInput): OperationalProposalCandidat
   });
 }
 
-function documentRequirementCandidates(input: GenerationInput): OperationalProposalCandidate[] {
-  return input.report.gaps.flatMap((item) => {
-    const payload = record(item.payload);
-    const gapType = text(payload.gapType) ?? "UNSPECIFIED_GAP";
-    if (!gapType.includes("DOCUMENT") && !gapType.includes("EVIDENCE")) return [];
-    const issueKeys = issueKeysForItem(input.report, item.id);
-    return [buildCandidate({
+const EXTRACTION_COVERAGE_GAP_TYPE = /EXTRACT|COVERAGE|EMPTY_PAGE|UNREADABLE|NO_CONTENT|NO_INFORMATION/;
+const EXTRACTION_COVERAGE_TEXT = new RegExp([
+  String.raw`nessun[ao]?\s+(?:informazion[ei]|dat[oi]\b|contenut[oi])[^.]*?estratt`,
+  String.raw`non\s+(?:[èe]|sono)\s+stat[aoie]\s+estratt[aeio]\s+(?:alcun|informazion|dat[oi]\b|contenut)`,
+  String.raw`non\s+(?:[èe]\s+stato\s+)?possibile\s+estrarre`,
+  String.raw`no\s+(?:verified\s+)?(?:\w+\s+)?(?:information|content|data)[^.]*?extracted`,
+  String.raw`nothing\s+(?:was\s+)?extracted`,
+].join("|"), "i");
+const DOCUMENT_PAGE_REF = /\bDOCUMENT_(\d+)(?:\.PAGE_(\d+))?\b/g;
+
+interface DocumentGap {
+  item: StructuredFascicoloReportPayload["gaps"][number];
+  gapType: string;
+  description: string;
+}
+
+interface CoverageReference {
+  documentNumber: number | null;
+  pageNumbers: number[];
+}
+
+function coverageReference(gap: DocumentGap): CoverageReference {
+  const refs = [...`${gap.description} ${gap.item.normalizedText}`.matchAll(DOCUMENT_PAGE_REF)];
+  const evidenceRefs = gap.item.evidence.flatMap((entry) => [...(entry.basisRef ?? "").matchAll(DOCUMENT_PAGE_REF)]);
+  const source = refs.length > 0 ? refs : evidenceRefs;
+  const documentNumber = source.length > 0 ? Number(source[0][1]) : null;
+  const pageNumbers = source
+    .filter((match) => Number(match[1]) === documentNumber && match[2] !== undefined)
+    .map((match) => Number(match[2]));
+  return { documentNumber, pageNumbers };
+}
+
+// Page-level "nothing was extracted" gaps describe the reading of a document already in the
+// fascicolo, not a missing document: they must not become requests for new documentation.
+function isExtractionCoverageGap(gap: DocumentGap): boolean {
+  if (EXTRACTION_COVERAGE_GAP_TYPE.test(gap.gapType)) return true;
+  return EXTRACTION_COVERAGE_TEXT.test(`${gap.description} ${gap.item.normalizedText}`)
+    && /\bDOCUMENT_\d+/.test(`${gap.description} ${gap.item.normalizedText} ${gap.item.evidence.map((entry) => entry.basisRef ?? "").join(" ")}`);
+}
+
+function pageRanges(pages: readonly number[]): string {
+  const sorted = [...new Set(pages)].sort((left, right) => left - right);
+  const ranges: string[] = [];
+  for (let index = 0; index < sorted.length; index += 1) {
+    const start = sorted[index];
+    while (index + 1 < sorted.length && sorted[index + 1] === sorted[index] + 1) index += 1;
+    ranges.push(start === sorted[index] ? `${start}` : `${start}-${sorted[index]}`);
+  }
+  return ranges.join(", ");
+}
+
+function extractionCoverageCandidates(input: GenerationInput, gaps: readonly DocumentGap[]): OperationalProposalCandidate[] {
+  const groups = new Map<string, { documentNumber: number | null; pages: number[]; gaps: DocumentGap[] }>();
+  for (const gap of gaps) {
+    const reference = coverageReference(gap);
+    const key = reference.documentNumber === null ? "UNIDENTIFIED" : `DOCUMENT_${reference.documentNumber}`;
+    const group = groups.get(key) ?? { documentNumber: reference.documentNumber, pages: [], gaps: [] };
+    group.pages.push(...reference.pageNumbers);
+    group.gaps.push(gap);
+    groups.set(key, group);
+  }
+  return [...groups.entries()].map(([key, group]) => {
+    const documentLabel = group.documentNumber === null ? "documenti del fascicolo" : `documento ${group.documentNumber}`;
+    const pages = [...new Set(group.pages)].sort((left, right) => left - right);
+    const pageText = pages.length > 0
+      ? `${pages.length} ${pages.length === 1 ? "pagina" : "pagine"} (pag. ${pageRanges(pages)})`
+      : `${group.gaps.length} ${group.gaps.length === 1 ? "segmento" : "segmenti"}`;
+    const itemIds = unique(group.gaps.map((gap) => gap.item.id)).slice(0, 1_000);
+    const issueKeys = unique(group.gaps.flatMap((gap) => issueKeysForItem(input.report, gap.item.id))).slice(0, 1_000);
+    const confidences = group.gaps.map((gap) => gap.item.confidence).filter((value): value is number => typeof value === "number");
+    return buildCandidate({
       ...input,
       knowledgeRevisionId: input.report.knowledgeRevisionId,
-      proposalType: "DOCUMENT_REQUIREMENT",
-      title: `Acquisire documentazione: ${item.normalizedText}`,
-      description: text(payload.description) ?? item.normalizedText,
+      proposalType: "NOTE",
+      title: `Verificare la copertura della lettura: ${documentLabel}`,
+      description: `Per ${pageText} del ${documentLabel}, già acquisito al fascicolo, non sono state estratte informazioni utilizzabili. `
+        + "Verificare la leggibilità delle pagine (eventuale nuova acquisizione OCR) oppure confermare che non contengono elementi rilevanti. "
+        + "Non è richiesta nuova documentazione.",
       proposedPayload: {
-        requestedDocumentType: gapType,
-        description: text(payload.description) ?? item.normalizedText,
-        reason: text(payload.impact) ?? "Gap documentale corrente",
+        reviewType: "EXTRACTION_COVERAGE",
+        documentRef: key,
+        pageNumbers: pages,
+        gapTypes: unique(group.gaps.map((gap) => gap.gapType)),
+        relatedKnowledgeItemIds: itemIds,
         relatedIssueSemanticKeys: issueKeys,
-        relatedKnowledgeItemIds: [item.id],
-        urgency: "TO_REVIEW",
+        suggestedActions: [
+          "Verificare la leggibilità delle pagine indicate ed eventualmente ripetere l'OCR",
+          "Confermare che le pagine non contengono elementi rilevanti per l'istruttoria",
+        ],
+        requestsNewDocumentation: false,
       },
-      originatingKnowledgeItemIds: [item.id],
+      originatingKnowledgeItemIds: itemIds,
       originatingIssueSemanticKeys: issueKeys,
-      rationale: "Gap documentale CURRENT; la proposta non invia richieste esterne.",
-      confidence: item.confidence,
-      warningCodes: ["MANUAL_ACTION_REQUIRED", "NO_SAFE_DOCUMENT_REQUIREMENT_TARGET"],
-    })];
+      rationale: "Lacune di lettura su pagine di un documento già presente: aggregate in un'unica verifica, senza richieste di nuova documentazione.",
+      confidence: confidences.length > 0 ? Math.min(...confidences) : null,
+      warningCodes: ["MANUAL_ACTION_REQUIRED", "EXTRACTION_COVERAGE_REVIEW"],
+    });
   });
+}
+
+function documentRequirementCandidates(input: GenerationInput): OperationalProposalCandidate[] {
+  const documentGaps: DocumentGap[] = input.report.gaps.flatMap((item) => {
+    const payload = record(item.payload);
+    const gapType = text(payload.gapType) ?? "UNSPECIFIED_GAP";
+    const eligible = gapType.includes("DOCUMENT") || gapType.includes("EVIDENCE") || EXTRACTION_COVERAGE_GAP_TYPE.test(gapType);
+    return eligible ? [{ item, gapType, description: text(payload.description) ?? item.normalizedText }] : [];
+  });
+  const coverageGaps = documentGaps.filter(isExtractionCoverageGap);
+  const missingDocumentGaps = documentGaps.filter((gap) => !isExtractionCoverageGap(gap));
+  return [
+    ...extractionCoverageCandidates(input, coverageGaps),
+    ...missingDocumentGaps.flatMap((gap) => missingDocumentCandidate(input, gap)),
+  ];
+}
+
+function missingDocumentCandidate(input: GenerationInput, gap: DocumentGap): OperationalProposalCandidate[] {
+  const { item, gapType } = gap;
+  const payload = record(item.payload);
+  const issueKeys = issueKeysForItem(input.report, item.id);
+  return [buildCandidate({
+    ...input,
+    knowledgeRevisionId: input.report.knowledgeRevisionId,
+    proposalType: "DOCUMENT_REQUIREMENT",
+    title: `Acquisire documentazione: ${item.normalizedText}`,
+    description: text(payload.description) ?? item.normalizedText,
+    proposedPayload: {
+      requestedDocumentType: gapType,
+      description: text(payload.description) ?? item.normalizedText,
+      reason: text(payload.impact) ?? "Gap documentale corrente",
+      relatedIssueSemanticKeys: issueKeys,
+      relatedKnowledgeItemIds: [item.id],
+      urgency: "TO_REVIEW",
+    },
+    originatingKnowledgeItemIds: [item.id],
+    originatingIssueSemanticKeys: issueKeys,
+    rationale: "Gap documentale CURRENT; la proposta non invia richieste esterne.",
+    confidence: item.confidence,
+    warningCodes: ["MANUAL_ACTION_REQUIRED", "NO_SAFE_DOCUMENT_REQUIREMENT_TARGET"],
+  })];
 }
 
 function contradictionCandidates(input: GenerationInput): OperationalProposalCandidate[] {
