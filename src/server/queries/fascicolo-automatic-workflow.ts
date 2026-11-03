@@ -226,7 +226,39 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
   const { tenantId, procedimentoId } = input;
   const owner = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { enteId: true },
+    select: {
+      enteId: true,
+      stato: true,
+      tipologia: true,
+      origineProcedimento: true,
+      dataAvvio: true,
+      dataProvvedimentoFinale: true,
+      comunicazioneAvvioInviata: true,
+      contestazioneFormaleInviata: true,
+      memorieRicevute: true,
+      audizioneSvolta: true,
+      controdeduzioniValutate: true,
+      checklistContraddittorioCompleta: true,
+      decisioneProcedimento: {
+        select: {
+          numeroAtto: true,
+          dataAtto: true,
+          motivazioneSintetica: true,
+        },
+      },
+      concessione: {
+        select: {
+          numeroAtto: true,
+          stato: true,
+          dataRilascio: true,
+        },
+      },
+      documenti: {
+        where: { statoDocumento: { not: "ARCHIVIATO" } },
+        select: { nome: true },
+        orderBy: [{ dataDocumento: "asc" }, { createdAt: "asc" }],
+      },
+    },
   });
   if (owner?.enteId !== tenantId) return null;
 
@@ -631,6 +663,30 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     tenantId,
     procedimentoId,
     knowledge,
+    proceduralContext: {
+      stato: owner.stato,
+      tipologia: owner.tipologia,
+      origineProcedimento: owner.origineProcedimento,
+      dataAvvio: owner.dataAvvio?.toISOString() ?? null,
+      dataProvvedimentoFinale: owner.dataProvvedimentoFinale?.toISOString() ?? null,
+      comunicazioneAvvioInviata: owner.comunicazioneAvvioInviata,
+      contestazioneFormaleInviata: owner.contestazioneFormaleInviata,
+      memorieRicevute: owner.memorieRicevute,
+      audizioneSvolta: owner.audizioneSvolta,
+      controdeduzioniValutate: owner.controdeduzioniValutate,
+      checklistContraddittorioCompleta: owner.checklistContraddittorioCompleta,
+      finalAct: owner.decisioneProcedimento ? {
+        numeroAtto: owner.decisioneProcedimento.numeroAtto,
+        dataAtto: owner.decisioneProcedimento.dataAtto.toISOString(),
+        motivazioneSintetica: owner.decisioneProcedimento.motivazioneSintetica,
+      } : null,
+      concessione: owner.concessione ? {
+        numeroAtto: owner.concessione.numeroAtto,
+        stato: owner.concessione.stato,
+        dataRilascio: owner.concessione.dataRilascio.toISOString(),
+      } : null,
+      documentTitles: owner.documenti.map((document) => document.nome),
+    },
     missions: [
       ...readModel.missions,
       ...missions.filter((mission) => mission.mode === "ADVERSE_SEARCH").map((mission) => {

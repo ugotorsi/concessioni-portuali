@@ -87,18 +87,23 @@ function AuthorityGroup({ title, authorities }: { title: string; authorities: re
       <h4 className="text-sm font-semibold text-slate-950">{title}</h4>
       <div className="mt-2 space-y-2">
         {authorities.map((authority) => (
-          <article key={`${authority.direction}-${authority.resultId}`} className="rounded-md border border-slate-200 bg-white p-3">
-            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+          <details key={`${authority.direction}-${authority.resultId}`} className="rounded-md border border-slate-200 bg-white">
+            <summary className="cursor-pointer p-3">
+              <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
               <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{authority.title}</p>
               <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">{authority.direction}</span>
+              </div>
+            </summary>
+            <div className="border-t border-slate-200 p-3">
+              <p className="text-xs font-medium text-emerald-800">Fonte verificata e utilizzabile</p>
+              {authority.rationale ? <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">{authority.rationale}</p> : null}
+              {authority.sourceUrl ? (
+                <a href={authority.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#075985] underline underline-offset-4">
+                  Apri la fonte ufficiale <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+              ) : null}
             </div>
-            {authority.rationale ? <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">{authority.rationale}</p> : null}
-            {authority.sourceUrl ? (
-              <a href={authority.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#075985] underline underline-offset-4">
-                Apri la fonte <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            ) : null}
-          </article>
+          </details>
         ))}
       </div>
     </section>
@@ -109,8 +114,9 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
   const candidates = question.nonUsableResults.filter((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"));
   if (candidates.length === 0) return null;
   return (
-    <section className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3" aria-label="Fonti candidate da verificare">
-      <h5 className="text-sm font-semibold text-amber-950">Fonti individuate — da verificare</h5>
+    <details className="mt-3 rounded-md border border-amber-200 bg-amber-50" aria-label="Fonti candidate da verificare">
+      <summary className="cursor-pointer p-3 text-sm font-semibold text-amber-950">Fonti individuate — da verificare ({candidates.length})</summary>
+      <div className="border-t border-amber-200 p-3">
       <p className="mt-1 text-xs text-amber-900">
         Risultati preliminari dei connettori: non sono ancora fonti utilizzabili per conclusioni professionali.
         Devono essere controllati identità, testo, citazioni e applicabilità temporale.
@@ -132,7 +138,8 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
           </li>
         ))}
       </ul>
-    </section>
+      </div>
+    </details>
   );
 }
 
@@ -175,6 +182,16 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
                       {step.requiredDocuments.map((document) => <li key={document}>{document}</li>)}
                     </ul>
                     <p className="mt-2 text-xs text-slate-600">Condizione per proseguire: {step.completionGate}</p>
+                    {step.draftTemplate ? (
+                      <details className="mt-3 rounded-md border border-slate-200 bg-white">
+                        <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-slate-800">
+                          Apri facsimile: {step.draftTitle ?? "atto operativo"}
+                        </summary>
+                        <pre className="whitespace-pre-wrap border-t border-slate-200 p-3 font-sans text-xs leading-5 text-slate-700">
+                          {step.draftTemplate}
+                        </pre>
+                      </details>
+                    ) : null}
                   </li>
                 ))}
               </ol>
@@ -199,6 +216,38 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
           </article>
         ))}
       </div>
+    </ContentSection>
+  );
+}
+
+function RegulatoryApplicability({
+  rows,
+}: {
+  rows: NonNullable<StructuredFascicoloReportPayload["regulatoryApplicability"]>;
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <ContentSection title="Applicabilità della delibera ART n. 242/2025">
+      <details className="rounded-md border border-slate-200 bg-slate-50">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-950">
+          Matrice temporale e adempimenti ({rows.length} misure)
+        </summary>
+        <div className="space-y-3 border-t border-slate-200 p-4">
+          {rows.map((row) => (
+            <article key={row.measure} className="rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-700">
+              <h4 className="font-semibold text-slate-950">Misura {row.measure}</h4>
+              <p><strong>Efficacia:</strong> {row.effectiveFrom}</p>
+              <p><strong>Fattispecie:</strong> {row.trigger}</p>
+              <p><strong>Applicabilità:</strong> {row.applicability}</p>
+              <p><strong>Adempimento AdSP:</strong> {row.authorityAction}</p>
+              <p><strong>Scadenza:</strong> {row.deadline}</p>
+              <a href={row.officialSourceUrl} target="_blank" rel="noreferrer" className="font-medium text-[#075985] underline underline-offset-4">
+                Allegato A ufficiale ART
+              </a>
+            </article>
+          ))}
+        </div>
+      </details>
     </ContentSection>
   );
 }
@@ -272,6 +321,8 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
           </div>
         </ContentSection>
       ) : null}
+
+      {payload.regulatoryApplicability?.length ? <RegulatoryApplicability rows={payload.regulatoryApplicability} /> : null}
 
       {payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
 

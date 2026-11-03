@@ -82,6 +82,8 @@ export interface StructuredReportOperationalStep {
   office: string;
   requiredDocuments: readonly string[];
   completionGate: string;
+  draftTitle?: string;
+  draftTemplate?: string;
 }
 
 export interface StructuredReportOperationalAlternative {
@@ -102,6 +104,41 @@ export interface StructuredReportOperationalPlan {
   steps: readonly StructuredReportOperationalStep[];
   alternatives: readonly StructuredReportOperationalAlternative[];
   deadlineReview: string;
+}
+
+export interface StructuredReportProceduralContext {
+  stato: string;
+  tipologia: string;
+  origineProcedimento: string;
+  dataAvvio: string | null;
+  dataProvvedimentoFinale: string | null;
+  comunicazioneAvvioInviata: boolean;
+  contestazioneFormaleInviata: boolean;
+  memorieRicevute: boolean;
+  audizioneSvolta: boolean;
+  controdeduzioniValutate: boolean;
+  checklistContraddittorioCompleta: boolean;
+  finalAct: {
+    numeroAtto: string;
+    dataAtto: string;
+    motivazioneSintetica: string;
+  } | null;
+  concessione: {
+    numeroAtto: string;
+    stato: string;
+    dataRilascio: string;
+  } | null;
+  documentTitles: readonly string[];
+}
+
+export interface StructuredReportRegulatoryApplicability {
+  measure: string;
+  effectiveFrom: string;
+  trigger: string;
+  applicability: string;
+  authorityAction: string;
+  deadline: string;
+  officialSourceUrl: string;
 }
 
 export interface StructuredFascicoloReportPayload {
@@ -135,6 +172,8 @@ export interface StructuredFascicoloReportPayload {
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
   /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
   operationalPlans?: readonly StructuredReportOperationalPlan[];
+  /** Additive applicability matrix. Older archived V1 reports may omit this field. */
+  regulatoryApplicability?: readonly StructuredReportRegulatoryApplicability[];
   limitations: readonly string[];
 }
 
@@ -233,6 +272,7 @@ function projectQuestion(
 function buildOperationalPlans(
   issues: StructuredFascicoloReportPayload["legalIssues"],
   knowledge: StructuredKnowledgeReadModel,
+  proceduralContext?: StructuredReportProceduralContext,
 ): readonly StructuredReportOperationalPlan[] {
   const evidenceItems = [
     ...knowledge.facts, ...knowledge.legalActs, ...knowledge.measures,
@@ -254,7 +294,45 @@ function buildOperationalPlans(
     const caseText = [issue.text, ...related.map((item) => item.normalizedText)].join(" ");
     const concernsInstallation = /container|manufatt|prefabbricat|installazion/i.test(caseText)
       && /concession|demanial|portual/i.test(caseText);
-    const steps: StructuredReportOperationalStep[] = [
+    const proceedingConcluded = proceduralContext
+      ? ["CONCLUSO", "ARCHIVIATO"].includes(proceduralContext.stato)
+        || proceduralContext.dataProvvedimentoFinale !== null
+        || proceduralContext.finalAct !== null
+      : false;
+    const reviewPending = proceduralContext?.documentTitles.some((title) => /riesame|autotutela/i.test(title)) ?? false;
+    const finalActLabel = proceduralContext?.finalAct
+      ? `${proceduralContext.finalAct.numeroAtto} del ${proceduralContext.finalAct.dataAtto}`
+      : "provvedimento finale";
+    const postDecisionSteps: StructuredReportOperationalStep[] = [
+      ...(reviewPending ? [{
+        title: "1. Istruire l'istanza di riesame come procedimento distinto",
+        action: `Confrontare i motivi dell'istanza con ${finalActLabel}, distinguendo fatti nuovi, errori prospettati, documenti già valutati e interesse pubblico attuale. Non riavviare né duplicare il procedimento concluso.`,
+        office: "Responsabile del riesame o dell'autotutela, con supporto dell'ufficio legale e dell'ufficio concessioni",
+        requiredDocuments: ["Istanza di riesame con allegati e protocollo", "Provvedimento finale e prova della comunicazione", "Indice degli atti istruttori, memorie e audizioni", "Matrice motivi del riesame - motivazione dell'atto - prova disponibile"],
+        completionGate: "Ogni motivo ha ricevuto una valutazione espressa; competenza, termine, interesse pubblico e affidamento sono stati verificati",
+        draftTitle: "Riscontro motivato all'istanza di riesame",
+        draftTemplate: "Oggetto: istanza di riesame relativa a [TITOLO/ATTO]. Esaminata l'istanza prot. [PROTOCOLLO], l'Autorità ricostruisce separatamente ciascun motivo, i fatti nuovi e gli atti già valutati; verifica competenza, disciplina applicabile nel tempo, interesse pubblico attuale e affidamento; determina [ESITO MOTIVATO]. Campi da completare: [ORGANO COMPETENTE], [TERMINE], [MOTIVI], [DOCUMENTI], [ESITO]. Bozza soggetta ad approvazione umana; nessun invio automatico.",
+      }] : []),
+      {
+        title: reviewPending ? "2. Verificare la tenuta del provvedimento finale" : "1. Verificare la tenuta del provvedimento finale",
+        action: `Riesaminare ${finalActLabel} rispetto a competenza, successione temporale delle fonti, prova dei singoli addebiti, trattamento delle regolarizzazioni, contraddittorio, proporzionalità e motivazione. Separare penali, decadenza e obblighi regolatori.`,
+        office: "Ufficio concessioni con supporto legale e tecnico-contabile",
+        requiredDocuments: ["Provvedimento finale e fascicolo istruttorio completo", "Titolo concessorio con PI, PEF e allegati", "Memorie, verbali di audizione e valutazione delle controdeduzioni", "Riconciliazione canoni e rettifiche contabili", "Fonti vigenti alle date dei fatti e del provvedimento"],
+        completionGate: "Nota di tenuta con esito separato per ciascun addebito e valutazione delle ragioni favorevoli e contrarie all'Autorità",
+        draftTitle: "Nota interna sulla tenuta del provvedimento",
+        draftTemplate: "La nota verifica: (1) competenza; (2) disciplina ratione temporis; (3) fatti provati, allegazioni e lacune; (4) difese e controdeduzioni; (5) regolarizzazioni; (6) proporzionalità; (7) distinzione tra penali e decadenza; (8) motivazione. Per ogni punto indicare [ELEMENTI FAVOREVOLI], [ELEMENTI CONTRARI], [RISCHIO], [CONCLUSIONE]. Bozza soggetta ad approvazione umana.",
+      },
+      {
+        title: reviewPending ? "3. Governare esecuzione, contenzioso e obblighi residui" : "2. Governare esecuzione, contenzioso e obblighi residui",
+        action: "Programmare soltanto gli adempimenti conseguenti all'atto efficace: riconsegna e inventario, controlli tecnici, tutela patrimoniale, riconciliazione canoni, conservazione della prova e comunicazioni regolatorie effettivamente dovute.",
+        office: "Ufficio demanio, area tecnica, ragioneria e ufficio legale secondo competenza",
+        requiredDocuments: ["Planimetria e inventario aggiornati", "Verbali e documentazione fotografica", "Situazione contabile riconciliata", "Calendario di riconsegna e adempimenti", "Eventuali atti giudiziari o precontenziosi"],
+        completionGate: "Ogni adempimento ha responsabile, data, dipendenze, documento di esito e verifica di chiusura",
+        draftTitle: "Convocazione e verbale di riconsegna",
+        draftTemplate: "Oggetto: riconsegna del compendio [IDENTIFICAZIONE]. Convocazione per il [DATA] alle [ORA] presso [LUOGO]. Il verbale rileva perimetro, opere, beni, stato manutentivo, utenze, chiavi, obblighi patrimoniali e riserve. Allegati: [PLANIMETRIA], [INVENTARIO], [FOTOGRAFIE], [LETTURE]. Bozza soggetta ad approvazione umana; nessuna firma, protocollazione o notifica automatica.",
+      },
+    ];
+    const preDecisionSteps: StructuredReportOperationalStep[] = [
       {
         title: "1. Accertare i fatti e gli obblighi concessori",
         action: "L'ente concedente deve confrontare titolo e prescrizioni con lo stato dei luoghi e l'uso effettivo, distinguendo elementi provati, indizi, atti mancanti ed eventuali autorizzazioni successive. Verificare chi sia l'autorità competente per ciascun potere.",
@@ -288,6 +366,7 @@ function buildOperationalPlans(
         completionGate: "Motivazione, competenza, garanzie e verifiche professionali completate; autorizzazione umana all'adozione",
       },
     ];
+    const steps = proceedingConcluded ? postDecisionSteps : preDecisionSteps;
     const alternatives: StructuredReportOperationalAlternative[] = concernsInstallation ? [
       {
         title: "Valutare il procedimento di decadenza (art. 47 cod. nav.)",
@@ -327,7 +406,7 @@ function buildOperationalPlans(
         riskOrLimit: "La decadenza non è conseguenza automatica di qualsiasi irregolarità; distinguere tipicità, prova, partecipazione e proporzionalità.",
       },
       {
-        title: "Valutare misure ripristinatorie o altri interventi",
+        title: "Valutare il ripristino o altri interventi",
         whenApplicable: "Se i fatti integrano presupposti di occupazione o innovazione abusiva o altra violazione con poteri amministrativi specifici",
         practicalRoute: "Verificare l'autorità competente e le norme applicabili, istruire separatamente il ripristino o le altre misure consentite.",
         riskOrLimit: "Non estendere i poteri dell'ente oltre le competenze stabilite dalla legge.",
@@ -352,7 +431,9 @@ function buildOperationalPlans(
       outstandingEvidence,
       legalSourceStatus: sourceReady ? "VERIFIED_SOURCES_ATTACHED" : "LEGAL_RESEARCH_REQUIRED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
-      recommendedNextStep: "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.",
+      recommendedNextStep: proceedingConcluded
+        ? `Il procedimento risulta concluso${proceduralContext?.finalAct ? ` con l'atto ${proceduralContext.finalAct.numeroAtto}` : ""}: priorità a tenuta dell'atto, riesame, contenzioso, esecuzione e obblighi residui. Non proporre un nuovo avvio per i medesimi fatti.`
+        : "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.",
       steps,
       alternatives,
       deadlineReview: "Verificare espressamente scadenze, notifiche e termini applicabili: nessuna data processuale è determinata da questo piano.",
@@ -360,11 +441,48 @@ function buildOperationalPlans(
   });
 }
 
+const ART_242_SOURCE_URL = "https://www.autorita-trasporti.it/wp-content/uploads/2025/12/All.-A-delibera-n.-242_2025_signed.pdf";
+
+function buildRegulatoryApplicability(
+  context?: StructuredReportProceduralContext,
+): readonly StructuredReportRegulatoryApplicability[] {
+  if (!context?.concessione) return [];
+  const preExisting = context.concessione.dataRilascio < "2026-03-01";
+  const applicability = preExisting
+    ? "Concessione preesistente: applicazione dal 1 marzo 2026 nei limiti della misura 1.2, punto iii; nessuna qualificazione retroattiva delle condotte anteriori."
+    : "Concessione rilasciata dopo l'entrata in vigore: verificare l'intero atto di regolazione e la disciplina della procedura di rilascio.";
+  const row = (
+    measure: string,
+    trigger: string,
+    authorityAction: string,
+    deadline: string,
+  ): StructuredReportRegulatoryApplicability => ({
+    measure,
+    effectiveFrom: "1 marzo 2026",
+    trigger,
+    applicability,
+    authorityAction,
+    deadline,
+    officialSourceUrl: ART_242_SOURCE_URL,
+  });
+  return [
+    row("3.7", "Istanza rilevante di revisione o aggiornamento di concessione, PI o PEF.", "Vigilare sul titolo e notificare l'istanza ad ART; distinguere revisione, differimento investimenti, modifica del titolo ed estensione della durata.", "Alla ricezione o emersione dell'istanza rilevante."),
+    row("3.13", "Rilascio o cambio di controllo del concessionario e condizioni concorrenziali.", "Valutare capacità e relazioni societarie; informare annualmente ART sull'applicazione della misura.", "Cadenza annuale; verificare le istruzioni operative ART."),
+    row("3.18", "Monitoraggio di investimenti, obiettivi di traffico e livelli occupazionali.", "Svolgere il monitoraggio annuale e comunicarne gli esiti ad ART; applicare penali soltanto se predeterminate nel bando o nel titolo.", "Cadenza annuale."),
+    row("3.19", "Nuove infrastrutture pubbliche che incidono sull'equilibrio concorrenziale originario.", "Valutare revisione di concessione e PEF oppure, nei casi rilevanti, revoca e nuova gara con comunicazione ad ART.", "Prima della decisione sulla revisione o sulla diversa misura."),
+    row("3.20", "Istanza di estensione della durata ai sensi del D.M. 202/2022 e del D.M. 110/2023.", "Notificare l'istanza documentata ad ART e acquisire il parere vincolante sulla coerenza con il PEF.", "Parere ART entro 30 giorni dalla ricezione di tutte le informazioni necessarie."),
+    row("4", "Concessione vigente di area o banchina portuale.", "Acquisire e verificare la contabilità separata secondo gli schemi regolatori.", "Coordinare con la trasmissione annuale della misura 15."),
+    row("5", "Analisi annuale della struttura dei mercati portuali.", "Predisporre l'ASM, distinguendo anche i terminal industriali, e trasmetterla ad ART.", "1 marzo dell'anno successivo a quello di riferimento."),
+    row("15", "Concessione vigente e obblighi informativi ART.", "Trasmettere dati generali, determinazione canoni, PEF, contabilità regolatoria e dati di performance nei formati ART.", "Prima applicazione 15.2(a): 31 marzo 2026; dati annuali: 30 giugno."),
+  ];
+}
+
 export function buildStructuredFascicoloReport(input: {
   tenantId: string;
   procedimentoId: string;
   knowledge: StructuredKnowledgeReadModel;
   missions: readonly StructuredReportMissionInput[];
+  proceduralContext?: StructuredReportProceduralContext;
 }): BuiltStructuredFascicoloReport {
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
     && mission.knowledgeRevisionId === input.knowledge.revision.id
@@ -447,7 +565,8 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
-    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge),
+    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext),
+    regulatoryApplicability: buildRegulatoryApplicability(input.proceduralContext),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),

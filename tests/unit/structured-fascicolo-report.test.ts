@@ -179,6 +179,61 @@ describe("deterministic structured fascicolo report", () => {
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
   });
 
+  it("recognizes a concluded Selvara review and never proposes restarting the proceeding", () => {
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-selvara",
+      knowledge: knowledge(),
+      missions: [mission()],
+      proceduralContext: {
+        stato: "CONCLUSO",
+        tipologia: "AVVIO_DECADENZA",
+        origineProcedimento: "UFFICIO",
+        dataAvvio: "2026-01-10T00:00:00.000Z",
+        dataProvvedimentoFinale: "2026-09-15T00:00:00.000Z",
+        comunicazioneAvvioInviata: true,
+        contestazioneFormaleInviata: true,
+        memorieRicevute: true,
+        audizioneSvolta: true,
+        controdeduzioniValutate: true,
+        checklistContraddittorioCompleta: true,
+        finalAct: {
+          numeroAtto: "149/2026",
+          dataAtto: "2026-09-15T00:00:00.000Z",
+          motivazioneSintetica: "Decadenza",
+        },
+        concessione: {
+          numeroAtto: "SELVARA-2023",
+          stato: "DECADUTA",
+          dataRilascio: "2023-05-10T00:00:00.000Z",
+        },
+        documentTitles: [
+          "Determinazione 149-2026.pdf",
+          "Istanza di riesame Selvara.pdf",
+        ],
+      },
+    });
+
+    const plan = report.payload.operationalPlans?.[0];
+    expect(plan?.recommendedNextStep).toContain("procedimento risulta concluso");
+    expect(plan?.recommendedNextStep).toContain("Non proporre un nuovo avvio");
+    expect(plan?.steps.map((step) => step.title)).toEqual([
+      "1. Istruire l'istanza di riesame come procedimento distinto",
+      "2. Verificare la tenuta del provvedimento finale",
+      "3. Governare esecuzione, contenzioso e obblighi residui",
+    ]);
+    expect(plan?.steps.every((step) => step.draftTemplate?.includes("approvazione umana"))).toBe(true);
+    expect(plan?.steps.map((step) => step.action).join(" ")).not.toContain("predisporre gli atti di avvio");
+
+    expect(report.payload.regulatoryApplicability?.map((row) => row.measure)).toEqual([
+      "3.7", "3.13", "3.18", "3.19", "3.20", "4", "5", "15",
+    ]);
+    expect(report.payload.regulatoryApplicability?.every((row) =>
+      row.applicability.includes("nessuna qualificazione retroattiva"))).toBe(true);
+    expect(report.payload.regulatoryApplicability?.find((row) => row.measure === "3.18")?.authorityAction)
+      .toContain("soltanto se predeterminate");
+  });
+
   it("is stable across input order and changes when CURRENT source state changes", () => {
     const firstMission = mission();
     const first = buildStructuredFascicoloReport({
