@@ -74,6 +74,7 @@ const mission = {
 const missionRecord = {
   id: missionId,
   tenantId,
+  assignedActorId: actorId,
   caseId: mission.caseReference.caseId,
   fascicoloReference: mission.caseReference.fascicoloReference,
   payload: mission,
@@ -153,5 +154,24 @@ describe("trusted mission route integration", () => {
     expect(payload.result?.structuredContent?.assistedVerification).toBeNull();
     expect(JSON.stringify(payload)).not.toContain(bearer);
     expect(JSON.stringify(payload)).not.toContain("fg1.");
+  });
+
+  it("keeps a mission assigned to another actor invisible through the same transport", async () => {
+    missionFindUniqueMock.mockResolvedValue({ ...missionRecord, assignedActorId: "actor-b" });
+    const response = await trustedMissionPost(new Request(
+      "https://staging.example.test/api/legal-research/trusted/mission",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ missionId }),
+      },
+    ));
+    const payload = await response.json() as {
+      result?: { structuredContent?: Record<string, unknown> };
+    };
+
+    expect(JSON.stringify(payload)).not.toContain(mission.researchQuestion);
+    expect(payload.result?.structuredContent).toEqual({ error: "MISSION_NOT_VISIBLE" });
+    expect(assistedFindFirstMock).not.toHaveBeenCalled();
   });
 });
