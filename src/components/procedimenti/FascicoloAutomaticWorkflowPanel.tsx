@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { sourceLimitLabel } from "@/lib/professional-text";
 import {
   generateOperationalProposalsAction,
   materializeOperationalProposalAction,
@@ -293,7 +294,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <p className="text-xs text-amber-800">Aspetti scoperti: {mission.coverageGaps.map((gap) => gap.key).join(", ")}</p>
                                   ) : null}
                                   {mission.sourceGaps.length > 0 ? (
-                                    <p className="text-xs text-amber-800">Gap fonti: {mission.sourceGaps.join(", ")}</p>
+                                    <p className="text-xs text-amber-800">Limiti delle fonti: {mission.sourceGaps.map(sourceLimitLabel).join("; ")}</p>
                                   ) : null}
                                   <p className="text-xs text-slate-500">La direzione del risultato non certifica la fonte e non costituisce una conclusione giuridica.</p>
                                 </div>

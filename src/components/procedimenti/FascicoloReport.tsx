@@ -1,6 +1,7 @@
 import { AlertTriangle, BookOpen, Download, ExternalLink } from "lucide-react";
 
 import { formatDateIT } from "@/lib/utils";
+import { documentReferenceLabel } from "@/lib/professional-text";
 import type {
   StructuredFascicoloReportPayload,
   StructuredReportAuthority,
@@ -212,7 +213,7 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
             </div>
             <p className="mt-4 text-sm text-slate-700">{plan.deadlineReview}</p>
             {plan.sourceDocumentRefs.length > 0 ? (
-              <p className="mt-2 text-xs text-slate-500">Riferimenti documentali: {plan.sourceDocumentRefs.join(", ")}</p>
+              <p className="mt-2 text-xs text-slate-500">Riferimenti documentali: {plan.sourceDocumentRefs.map(documentReferenceLabel).join("; ")}</p>
             ) : null}
           </article>
         ))}

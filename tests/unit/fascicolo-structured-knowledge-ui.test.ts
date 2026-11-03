@@ -73,7 +73,7 @@ describe("Lotto 2 structured knowledge UI", () => {
       "Temporalmente applicabile",
       "Contenuto verificato",
       "Motivi di blocco:",
-      "Gap fonti:",
+      "Limiti delle fonti:",
       "Ricerca contraria:",
       "Autorità utilizzabili in conflitto",
     ]) expect(source).toContain(label);

@@ -2,6 +2,7 @@ import { CheckCircle2, CircleDot, Lightbulb, ShieldCheck, XCircle } from "lucide
 
 import { Button } from "@/components/ui/Button";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { humanizeProfessionalText } from "@/lib/professional-text";
 import {
   materializeOperationalProposalAction,
   reviewOperationalProposalAction,
@@ -154,7 +155,7 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-500">{fascicoloProposalTypeLabel(proposal.proposalType)}</p>
-          <h4 className="mt-1 font-semibold text-slate-950 [overflow-wrap:anywhere]">{proposal.title}</h4>
+          <h4 className="mt-1 font-semibold text-slate-950 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.title)}</h4>
           <p className="mt-1 text-xs text-slate-500">Proposta del {formatDateIT(proposal.createdAt)}</p>
         </div>
         <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${statusTone[proposal.status]}`}>
@@ -162,7 +163,7 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
         </span>
       </div>
 
-      <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{proposal.description}</p>
+      <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.description)}</p>
 
       {reconciliation ? (
         <details className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
@@ -184,7 +185,7 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <dt className="text-xs font-medium text-slate-500">Motivazione</dt>
-            <dd className="mt-1 leading-6 text-slate-700 [overflow-wrap:anywhere]">{proposal.rationale}</dd>
+            <dd className="mt-1 leading-6 text-slate-700 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.rationale)}</dd>
           </div>
           {proposal.reviewedAt ? (
             <div><dt className="text-xs font-medium text-slate-500">Revisionata il</dt><dd className="mt-1 text-slate-700">{formatDateIT(proposal.reviewedAt)}</dd></div>
