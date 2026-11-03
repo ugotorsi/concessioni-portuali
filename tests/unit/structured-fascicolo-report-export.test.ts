@@ -47,7 +47,7 @@ function snapshot(): StructuredReportSnapshotRecord {
       sourceStateFingerprint: "d".repeat(64),
       documentedFramework: {
         partyRoles: [item("role", "Autorità portuale quale ente concedente")],
-        facts: [item("fact", "Fatto documentato con {riserva}")],
+        facts: [item("fact", "Fatto documentato con {riserva} DOCUMENT_1.PAGE_9")],
         timeline: [item("event", "Provvedimento adottato il 10 ottobre")],
         legalActs: [item("act", "Concessione n. 17/2023")],
         measures: [],
@@ -93,7 +93,7 @@ function snapshot(): StructuredReportSnapshotRecord {
       deadlineCandidates: [],
       operationalPlans: [],
       regulatoryApplicability: [],
-      limitations: ["INTERNAL_CODE"],
+      limitations: ["INTERNAL_CODE", "COMPILATION warning REBUILT"],
     },
   };
 }
@@ -107,6 +107,8 @@ describe("structured fascicolo professional export", () => {
     expect(text).not.toContain("Foreign draft law");
     expect(text).not.toContain("MOONLIT");
     expect(text).not.toContain("INTERNAL_CODE");
+    expect(text).not.toContain("DOCUMENT_1");
+    expect(text).not.toContain("COMPILATION");
     expect(text).not.toContain("reportFingerprint");
   });
 

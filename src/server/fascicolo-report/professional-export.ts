@@ -14,12 +14,22 @@ export interface ProfessionalReportDocument {
   sections: readonly ProfessionalReportSection[];
 }
 
+function cleanProfessionalText(value: string): string {
+  return value
+    .replace(/\bDOCUMENT_\d+(?:\.PAGE_\d+)?\b/g, "")
+    .replace(/\bPAGE_\d+\b/g, "")
+    .replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g, "")
+    .replace(/\s+([,.;:])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function unique(values: readonly string[]): string[] {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  return [...new Set(values.map(cleanProfessionalText).filter(Boolean))];
 }
 
 function professionalNotes(values: readonly string[]): string[] {
-  return unique(values).filter((value) => !/^[A-Z][A-Z0-9_]+$/.test(value));
+  return unique(values).filter((value) => !/\b[A-Z][A-Z0-9]{4,}\b/.test(value));
 }
 
 export function buildProfessionalReportDocument(
