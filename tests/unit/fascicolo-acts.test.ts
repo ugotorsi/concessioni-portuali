@@ -74,8 +74,48 @@ describe("fascicolo act templates", () => {
     const concluded = detectActPhase({
       proceduralContext: context({ stato: "CONCLUSO", documentTitles: ["Istanza di riesame"] }),
     });
-    expect(concluded).toEqual({ phase: "POST_DECISION", reviewPending: true });
+    expect(concluded).toMatchObject({ phase: "POST_DECISION", reviewPending: true, documentaryAhead: false });
     expect(detectActPhase(null).phase).toBe("INITIAL");
+  });
+
+  it("infers a later phase from evidenced documents when authoritative metadata is stale", () => {
+    const knowledge = (text: string, evidence = true) => ({
+      id: text, kind: "LEGAL_ACT" as const, semanticKey: text, contentFingerprint: text, normalizedText: text,
+      payload: {}, confidence: 0.9, status: "AI_PROPOSED" as const, reviewVersion: 1,
+      evidence: evidence
+        ? [{ basisRef: "DOCUMENT_1.PAGE_2", documentoId: "d", documentFileVersionId: null, pageNumber: 2, textSha256: "x" }]
+        : [],
+    });
+    const framework = (legalActs: ReturnType<typeof knowledge>[]) => ({
+      partyRoles: [], facts: [], timeline: [], legalActs, measures: [], contradictions: [],
+    });
+
+    const stale = detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([
+        knowledge("Decreto n. 5/2025 di decadenza dalla concessione n. 17/2023"),
+        knowledge("Istanza di riesame presentata dal concessionario"),
+      ]),
+    });
+    expect(stale).toMatchObject({ phase: "POST_DECISION", authoritativePhase: "INITIAL", documentaryAhead: true, reviewPending: true });
+    expect(stale.documentarySignals).toContain("Decreto n. 5/2025 di decadenza dalla concessione n. 17/2023");
+
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Proposta di provvedimento di decadenza da sottoporre al dirigente")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Decreto di decadenza n. 5/2025", false)]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Contestazione degli addebiti con termine per deduzioni di 30 giorni")]),
+    })).toMatchObject({ phase: "INSTRUCTION", documentaryAhead: true });
+    expect(detectActPhase({
+      proceduralContext: context({ stato: "CONCLUSO" }),
+      documentedFramework: framework([knowledge("Contestazione degli addebiti")]),
+    })).toMatchObject({ phase: "POST_DECISION", documentaryAhead: false });
   });
 
   it("recommends phase-specific facsimiles and fills only verified placeholders", () => {

@@ -217,6 +217,20 @@ export function FascicoloActsWorkspace({
           {catalog.reviewPending ? " – risulta un'istanza di riesame o autotutela da istruire separatamente" : ""}.
           Ogni salvataggio crea una nuova versione immutabile registrata nel registro di audit. Le bozze non vengono firmate, protocollate né inviate automaticamente.
         </p>
+        {catalog.documentaryAhead ? (
+          <div role="note" className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p>
+              Fase desunta dai documenti del fascicolo: i dati anagrafici del procedimento indicano ancora
+              {" "}<strong>{ACT_PHASE_LABELS[catalog.authoritativePhase]}</strong>. Verificare e, se confermato,
+              approvare la correzione nella sezione Proposte prima di adottare atti.
+            </p>
+            {catalog.documentarySignals.length > 0 ? (
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {catalog.documentarySignals.map((signal) => <li key={signal}>{signal}</li>)}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-3">

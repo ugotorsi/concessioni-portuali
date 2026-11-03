@@ -28,9 +28,18 @@ export interface ActTemplateContext {
   unitaOrganizzativa: string | null;
 }
 
-export interface ActTemplateCatalog {
+export interface ActPhaseDetection {
   phase: ActPhase;
   reviewPending: boolean;
+  /** Phase resulting from authoritative procedimento metadata only. */
+  authoritativePhase: ActPhase;
+  /** True when document evidence shows a later phase than the authoritative metadata. */
+  documentaryAhead: boolean;
+  /** Knowledge texts (with evidence) supporting the documentary phase or the review signal. */
+  documentarySignals: readonly string[];
+}
+
+export interface ActTemplateCatalog extends ActPhaseDetection {
   recommended: readonly ActTemplate[];
   others: readonly ActTemplate[];
 }
@@ -179,23 +188,58 @@ function concludedFromContext(context: StructuredReportProceduralContext | undef
     || context.finalAct !== null;
 }
 
-export function detectActPhase(payload: Pick<StructuredFascicoloReportPayload, "proceduralContext" | "operationalPlans"> | null): {
-  phase: ActPhase;
-  reviewPending: boolean;
-} {
+const PHASE_ORDER: readonly ActPhase[] = ["INITIAL", "INSTRUCTION", "DECISION", "POST_DECISION"];
+
+const DOCUMENTARY_PHASE_SIGNALS: ReadonlyArray<[ActPhase, RegExp]> = [
+  ["POST_DECISION", /(?:decret\w*|provvediment\w*|determin\w*|ordinanz\w*)\s+(?:\S+\s+){0,4}?(?:di|della|dichiarativ\w* (?:della|di))\s+decadenz|(?:dichiarat\w*|pronunciat\w*|disposto|dispone|dichiara)\s+(?:\S+\s+){0,3}?(?:la\s+)?decadenz|provvedimento (?:finale|conclusivo)\s+(?:\S+\s+){0,3}?(?:adottat|emess|notificat|comunicat)|revoca(?:t\w*)? (?:della|la) concessione (?:è stata )?(?:disposta|adottata)/i],
+  ["DECISION", /preavviso di rigetto|art\.?\s*10-?bis|controdeduzioni\s+(?:\S+\s+){0,3}?valutat|chiusura dell'istruttoria/i],
+  ["INSTRUCTION", /comunicazione di avvio|avvio del procedimento|contestazion\w* (?:degli )?addebit|termine per (?:le )?deduzioni|memorie difensive|controdeduzion|audizion/i],
+];
+
+const REVIEW_SIGNAL = /riesame|autotutela/i;
+const TENTATIVE_SIGNAL = /\b(?:propost\w*|schema|bozza|ipotes\w*|eventual\w*|possibil\w*|preannunci\w*|intendimento|ai fini (?:della|di una)|potrebbe|potrà)\b/i;
+
+type PhasePayload = Pick<StructuredFascicoloReportPayload, "proceduralContext" | "operationalPlans">
+  & Partial<Pick<StructuredFascicoloReportPayload, "documentedFramework">>;
+
+function documentaryEvidence(payload: PhasePayload | null): readonly string[] {
+  const framework = payload?.documentedFramework;
+  if (!framework) return [];
+  return [...framework.legalActs, ...framework.timeline, ...framework.measures, ...framework.facts]
+    .filter((item) => item.status !== "REJECTED" && item.evidence.length > 0)
+    .map((item) => item.normalizedText);
+}
+
+export function detectActPhase(payload: PhasePayload | null): ActPhaseDetection {
   const context = payload?.proceduralContext;
-  const reviewPending = context?.documentTitles.some((title) => /riesame|autotutela/i.test(title)) ?? false;
+  const evidenceTexts = documentaryEvidence(payload);
+  const reviewSignals = evidenceTexts.filter((text) => REVIEW_SIGNAL.test(text));
+  const reviewPending = (context?.documentTitles.some((title) => REVIEW_SIGNAL.test(title)) ?? false)
+    || reviewSignals.length > 0;
   const postDecisionPlan = (payload?.operationalPlans ?? []).some((plan) =>
     plan.steps.some((step) => /tenuta del provvedimento finale/i.test(step.title)));
-  if (concludedFromContext(context) || postDecisionPlan) return { phase: "POST_DECISION", reviewPending };
-  if (context && (context.controdeduzioniValutate || context.checklistContraddittorioCompleta)) {
-    return { phase: "DECISION", reviewPending };
+
+  let authoritativePhase: ActPhase = "INITIAL";
+  if (concludedFromContext(context) || postDecisionPlan) authoritativePhase = "POST_DECISION";
+  else if (context && (context.controdeduzioniValutate || context.checklistContraddittorioCompleta)) authoritativePhase = "DECISION";
+  else if (context && (context.comunicazioneAvvioInviata || context.contestazioneFormaleInviata
+    || context.memorieRicevute || context.audizioneSvolta)) authoritativePhase = "INSTRUCTION";
+
+  let documentaryPhase: ActPhase = "INITIAL";
+  const phaseSignals: string[] = [];
+  for (const [phase, pattern] of DOCUMENTARY_PHASE_SIGNALS) {
+    const matches = evidenceTexts.filter((text) =>
+      pattern.test(text) && (phase !== "POST_DECISION" || !TENTATIVE_SIGNAL.test(text)));
+    if (matches.length > 0) {
+      documentaryPhase = phase;
+      phaseSignals.push(...matches);
+      break;
+    }
   }
-  if (context && (context.comunicazioneAvvioInviata || context.contestazioneFormaleInviata
-    || context.memorieRicevute || context.audizioneSvolta)) {
-    return { phase: "INSTRUCTION", reviewPending };
-  }
-  return { phase: "INITIAL", reviewPending };
+  const documentaryAhead = PHASE_ORDER.indexOf(documentaryPhase) > PHASE_ORDER.indexOf(authoritativePhase);
+  const phase = documentaryAhead ? documentaryPhase : authoritativePhase;
+  const documentarySignals = [...new Set([...(documentaryAhead ? phaseSignals : []), ...reviewSignals])].slice(0, 5);
+  return { phase, reviewPending, authoritativePhase, documentaryAhead, documentarySignals };
 }
 
 export function fillTemplatePlaceholders(
@@ -242,10 +286,11 @@ function planTemplates(payload: Pick<StructuredFascicoloReportPayload, "operatio
 }
 
 export function buildActTemplateCatalog(input: {
-  payload: Pick<StructuredFascicoloReportPayload, "proceduralContext" | "operationalPlans"> | null;
+  payload: PhasePayload | null;
   context: ActTemplateContext;
 }): ActTemplateCatalog {
-  const { phase, reviewPending } = detectActPhase(input.payload);
+  const detection = detectActPhase(input.payload);
+  const { phase } = detection;
   const fill = (template: ActTemplate): ActTemplate => ({
     ...template,
     body: fillTemplatePlaceholders(template.body, input.payload, input.context),
@@ -253,8 +298,7 @@ export function buildActTemplateCatalog(input: {
   const fromPlans = planTemplates(input.payload).map(fill);
   const catalog = CATALOG.map(fill);
   return {
-    phase,
-    reviewPending,
+    ...detection,
     recommended: [...fromPlans, ...catalog.filter((template) => template.phases.includes(phase))],
     others: catalog.filter((template) => !template.phases.includes(phase)),
   };
