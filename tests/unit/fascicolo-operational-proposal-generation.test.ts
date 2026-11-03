@@ -89,4 +89,92 @@ describe("Lotto 7 operational proposal generation", () => {
     empty.legalIssues = [];
     expect(generate(empty)).toEqual([]);
   });
+
+  it("creates phase-aware activities and preview-only metadata reconciliations with rollback evidence", () => {
+    const value = report();
+    const concession = item("concession-act", "LEGAL_ACT", {
+      documentBasisRef: "DOCUMENT_1.PAGE_1",
+      actType: "Atto di concessione demaniale",
+      proceduralRole: null,
+      authoritySubjectIds: [],
+      number: "17/2023",
+      date: { precision: "EXACT", from: "2023-04-03", to: null, originalText: null, confidence: 95 },
+      title: "Atto di concessione demaniale n. 17/2023",
+      declaredEffects: [],
+    });
+    const decision = item("final-act", "LEGAL_ACT", {
+      documentBasisRef: "DOCUMENT_1.PAGE_2",
+      actType: "Determinazione di decadenza",
+      proceduralRole: "CHALLENGED_ACT",
+      authoritySubjectIds: [],
+      number: "149/2026",
+      date: { precision: "EXACT", from: "2026-10-08", to: null, originalText: null, confidence: 95 },
+      title: "Determinazione di decadenza n. 149/2026",
+      declaredEffects: ["Decadenza"],
+    });
+    value.documentedFramework.legalActs = [concession, decision] as never;
+    value.legalIssues[0].originatingItemIds = [
+      ...value.legalIssues[0].originatingItemIds,
+      concession.id,
+      decision.id,
+    ];
+    value.proceduralContext = {
+      stato: "DA_AVVIARE",
+      tipologia: "ALTRO",
+      origineProcedimento: "ALTRO",
+      dataAvvio: null,
+      dataProvvedimentoFinale: null,
+      comunicazioneAvvioInviata: false,
+      contestazioneFormaleInviata: false,
+      memorieRicevute: false,
+      audizioneSvolta: false,
+      controdeduzioniValutate: false,
+      checklistContraddittorioCompleta: false,
+      finalAct: null,
+      concessione: null,
+      documentTitles: ["Istanza di riesame"],
+    };
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Tenuta della decisione",
+      sourceDocumentRefs: ["DOCUMENT_1.PAGE_2"],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Istruire il riesame",
+      steps: [{
+        title: "Istruire il riesame",
+        action: "Confrontare motivi, decisione e prove.",
+        office: "Ufficio legale",
+        requiredDocuments: ["Istanza", "Provvedimento"],
+        completionGate: "Ogni motivo è valutato",
+        draftTitle: "Riscontro al riesame",
+        draftTemplate: "Bozza soggetta ad approvazione umana.",
+      }],
+      alternatives: [],
+      deadlineReview: "Non creare termini senza fonte.",
+    }];
+
+    const candidates = generate(value);
+    expect(candidates.filter((candidate) => candidate.proposalType === "ACTIVITY")).toHaveLength(1);
+    const reconciliations = candidates.filter((candidate) =>
+      candidate.warningCodes.includes("AUTHORITATIVE_DATA_CHANGE_PREVIEW"));
+    expect(reconciliations).toHaveLength(2);
+    expect(reconciliations.map((candidate) => candidate.proposedPayload)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        before: null,
+        after: expect.objectContaining({ numeroAtto: "17/2023" }),
+        previewOnly: true,
+      }),
+      expect.objectContaining({
+        reconciliationType: "PROCEDIMENTO_FINAL_ACT",
+        before: expect.objectContaining({ stato: "DA_AVVIARE" }),
+        after: expect.objectContaining({ stato: "CONCLUSO" }),
+        previewOnly: true,
+      }),
+    ]));
+    expect(reconciliations.every((candidate) =>
+      candidate.warningCodes.includes("MANUAL_ACTION_REQUIRED"))).toBe(true);
+  });
 });

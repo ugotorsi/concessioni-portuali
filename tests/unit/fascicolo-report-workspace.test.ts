@@ -51,8 +51,12 @@ function snapshot(status: FascicoloReportSnapshot["status"], id: string = status
   return { id, status, payload: payload(), staleReasons: status === "SUPERSEDED" ? ["SUPERSEDED_BY_MATERIAL_CHANGE"] : [], generatedAt: new Date("2026-10-01T10:00:00.000Z") };
 }
 
-function render(snapshots: readonly FascicoloReportSnapshot[]): string {
-  return renderToStaticMarkup(createElement(FascicoloReport, { snapshots }));
+function render(snapshots: readonly FascicoloReportSnapshot[], showDiagnostics = false): string {
+  return renderToStaticMarkup(createElement(FascicoloReport, {
+    procedimentoId: "procedure-1",
+    showDiagnostics,
+    snapshots,
+  }));
 }
 
 describe("Fascicolo report workspace", () => {
@@ -77,20 +81,31 @@ describe("Fascicolo report workspace", () => {
     expect(stale).toContain("Il fascicolo contiene modifiche successive alla generazione di questo rapporto.");
   });
 
-  it("shows usable authorities separately from unverified linked candidate sources", () => {
+  it("keeps unverified candidates out of the professional report and exposes separate admin diagnostics", () => {
     const html = render([snapshot("CURRENT")]);
     expect(html).toContain("Fonti utilizzabili");
     expect(html).toContain("Elementi favorevoli");
     expect(html).toContain("Elementi contrari");
     expect(html).toContain("Consiglio di Stato, sentenza favorevole");
     expect(html).toContain("TAR, sentenza contraria");
-    expect(html).toContain("Fonti individuate");
-    expect(html).toContain("Fonte non verificata");
-    expect(html).toContain("Principio provvisorio da verificare");
-    expect(html).toContain("https://example.test/candidate");
-    expect(html).toContain("non sono ancora fonti utilizzabili");
+    expect(html).not.toContain("Fonte non verificata");
+    expect(html).not.toContain("https://example.test/candidate");
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noreferrer"');
+    const adminHtml = render([snapshot("CURRENT")], true);
+    expect(adminHtml).toContain("Diagnostica amministratore");
+    expect(adminHtml).toContain("Fonte non verificata");
+    expect(adminHtml).toContain("Principio provvisorio da verificare");
+  });
+
+  it("exports only the current structured report directly from its fascicolo", () => {
+    const current = render([snapshot("CURRENT")]);
+    expect(current).toContain("/procedimenti/procedure-1/report/export?format=pdf");
+    expect(current).toContain("/procedimenti/procedure-1/report/export?format=rtf");
+    expect(current).toContain("Scarica PDF");
+    expect(current).toContain("Scarica RTF");
+    const stale = render([snapshot("STALE")]);
+    expect(stale).not.toContain("/report/export");
   });
 
   it("renders professional limitations and previous versions without internal data", () => {

@@ -19,7 +19,7 @@ export interface OperationalProposalAuditInput {
   azione: string;
   entitaId: string | null;
   enteId: string;
-  concessioneId: string;
+  concessioneId: string | null;
   metadata: JsonValue;
   actor: { actorId: string; actorEmail: string | null; actorRole: string };
 }
@@ -102,11 +102,12 @@ function deterministicId(prefix: string, identity: string): string {
   return `${prefix}_${createHash("sha256").update(identity).digest("hex")}`.slice(0, 96);
 }
 
-async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string }> {
-  const result = await tx.query<{ concessioneId: string }>(`
+async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string | null }> {
+  const result = await tx.query<{ concessioneId: string | null }>(`
     SELECT p."concessioneId" FROM "Procedimento" p
-    JOIN "Concessione" c ON c."id" = p."concessioneId"
-    WHERE p."id" = $1 AND c."enteId" = $2
+    LEFT JOIN "Concessione" c ON c."id" = p."concessioneId"
+    WHERE p."id" = $1 AND p."enteId" = $2
+      AND (p."concessioneId" IS NULL OR c."enteId" = $2)
   `, [procedimentoId, tenantId]);
   if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
   return result.rows[0];
@@ -376,6 +377,7 @@ export async function materializeOperationalProposal(input: {
   const ctx = context(overrides);
   return ctx.transaction(async (tx) => {
     const { concessioneId } = await assertAuthority(tx, input.tenantId, input.procedimentoId);
+    if (!concessioneId) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
     const current = await tx.query<OperationalProposalRecord>(`
       SELECT * FROM "FascicoloOperationalProposal"
       WHERE "id"=$1 AND "tenantId"=$2 AND "procedimentoId"=$3 FOR UPDATE

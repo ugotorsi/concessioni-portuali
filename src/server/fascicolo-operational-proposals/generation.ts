@@ -227,6 +227,131 @@ function sourceGapCandidates(input: GenerationInput): OperationalProposalCandida
   ];
 }
 
+function activityCandidates(input: GenerationInput): OperationalProposalCandidate[] {
+  return (input.report.operationalPlans ?? []).flatMap((plan) => plan.steps.map((step, index) => buildCandidate({
+    ...input,
+    knowledgeRevisionId: input.report.knowledgeRevisionId,
+    proposalType: "ACTIVITY",
+    title: step.title,
+    description: step.action,
+    proposedPayload: {
+      state: "PROPOSED",
+      classification: "PROFESSIONAL_RECOMMENDATION",
+      priority: index === 0 ? "HIGH" : "MEDIUM",
+      responsibleOffice: step.office,
+      dueDate: null,
+      dependencies: index === 0 ? [] : [plan.steps[index - 1].title],
+      requiredDocuments: [...step.requiredDocuments],
+      completionCriterion: step.completionGate,
+      expectedResult: step.completionGate,
+      draft: step.draftTemplate ? {
+        title: step.draftTitle ?? "Atto operativo",
+        template: step.draftTemplate,
+        approvalRequired: true,
+      } : null,
+    },
+    originatingKnowledgeItemIds: input.report.legalIssues
+      .find((issue) => issue.semanticKey === plan.issueSemanticKey)?.originatingItemIds ?? [],
+    originatingIssueSemanticKeys: [plan.issueSemanticKey],
+    rationale: "Attività derivata dal percorso operativo phase-aware del rapporto strutturato corrente.",
+    warningCodes: ["MANUAL_ACTION_REQUIRED", "PROFESSIONAL_REVIEW_REQUIRED"],
+  })));
+}
+
+function exactDate(value: JsonValue | undefined): string | null {
+  if (value === undefined) return null;
+  const candidate = record(value);
+  return text(candidate.precision) === "EXACT" ? text(candidate.from) : null;
+}
+
+function metadataReconciliationCandidates(input: GenerationInput): OperationalProposalCandidate[] {
+  const context = input.report.proceduralContext;
+  if (!context) return [];
+  return input.report.documentedFramework.legalActs.flatMap((item) => {
+    const payload = record(item.payload);
+    const number = text(payload.number);
+    const actType = text(payload.actType) ?? "";
+    const title = text(payload.title) ?? item.normalizedText;
+    const date = exactDate(payload.date);
+    const proceduralRole = text(payload.proceduralRole);
+    const evidence = item.evidence.map((entry) => ({ ...entry }));
+    const candidates: OperationalProposalCandidate[] = [];
+    const isConcession = /concession|titolo demanial|atto demanial/i.test(`${actType} ${title}`);
+    if (isConcession && number && context.concessione?.numeroAtto !== number) {
+      const before = context.concessione;
+      candidates.push(buildCandidate({
+        ...input,
+        knowledgeRevisionId: input.report.knowledgeRevisionId,
+        proposalType: "NOTE",
+        title: `Riconciliare il titolo amministrativo ${number}`,
+        description: "Il titolo documentato non coincide con la relazione Concessione attualmente rappresentata nel fascicolo.",
+        proposedPayload: {
+          reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+          targetEntity: "CONCESSIONE",
+          before,
+          after: { numeroAtto: number, dataRilascio: date, title },
+          evidence,
+          integrityChecks: [
+            "TENANT_MATCH",
+            "UNIQUE_CONCESSION_NUMBER_AND_RELEASE_DATE",
+            "INTAKE_AND_PROCEDURE_CONCESSION_LINK_MATCH",
+          ],
+          rollback: { strategy: "RESTORE_AUTHORITATIVE_SNAPSHOT", value: before },
+          previewOnly: true,
+        },
+        originatingKnowledgeItemIds: [item.id],
+        originatingIssueSemanticKeys: issueKeysForItem(input.report, item.id),
+        rationale: "Proposta documentale in sola anteprima; richiede verifica del titolo e conferma umana prima di ogni scrittura autoritativa.",
+        confidence: item.confidence,
+        warningCodes: ["MANUAL_ACTION_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
+      }));
+    }
+    const isFinalAct = proceduralRole === "CHALLENGED_ACT"
+      || /determinazione|decreto|provvedimento|decisione/i.test(`${actType} ${title}`)
+        && /decaden|revoca|archivia|conclus/i.test(`${actType} ${title} ${item.normalizedText}`);
+    if (isFinalAct && (context.finalAct?.numeroAtto !== number || context.stato !== "CONCLUSO")) {
+      const before = {
+        stato: context.stato,
+        dataProvvedimentoFinale: context.dataProvvedimentoFinale,
+        finalAct: context.finalAct,
+      };
+      candidates.push(buildCandidate({
+        ...input,
+        knowledgeRevisionId: input.report.knowledgeRevisionId,
+        proposalType: "NOTE",
+        title: `Riconciliare la fase conclusiva${number ? ` — atto ${number}` : ""}`,
+        description: "La documentazione indica un possibile provvedimento conclusivo non allineato ai metadati autoritativi del procedimento.",
+        proposedPayload: {
+          reconciliationType: "PROCEDIMENTO_FINAL_ACT",
+          targetEntity: "PROCEDIMENTO",
+          targetId: input.procedimentoId,
+          before,
+          after: {
+            stato: "CONCLUSO",
+            dataProvvedimentoFinale: date,
+            finalAct: { numeroAtto: number, dataAtto: date, title },
+          },
+          evidence,
+          integrityChecks: [
+            "TENANT_MATCH",
+            "FINAL_ACT_DOCUMENT_AVAILABLE",
+            "FINAL_DATE_NOT_BEFORE_PROCEDURE_START",
+            "NO_CONFLICTING_CURRENT_FINAL_ACT",
+          ],
+          rollback: { strategy: "RESTORE_AUTHORITATIVE_SNAPSHOT", value: before },
+          previewOnly: true,
+        },
+        originatingKnowledgeItemIds: [item.id],
+        originatingIssueSemanticKeys: issueKeysForItem(input.report, item.id),
+        rationale: "Proposta documentale in sola anteprima; stato e provvedimento finale restano invariati fino all'approvazione esplicita.",
+        confidence: item.confidence,
+        warningCodes: ["MANUAL_ACTION_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
+      }));
+    }
+    return candidates;
+  });
+}
+
 export interface GenerationInput {
   tenantId: string;
   procedimentoId: string;
@@ -244,5 +369,7 @@ export function generateOperationalProposalCandidates(input: GenerationInput): r
     ...documentRequirementCandidates(input),
     ...contradictionCandidates(input),
     ...sourceGapCandidates(input),
+    ...activityCandidates(input),
+    ...metadataReconciliationCandidates(input),
   ].sort((left, right) => left.proposalFingerprint.localeCompare(right.proposalFingerprint));
 }

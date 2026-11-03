@@ -74,7 +74,10 @@ export interface FascicoloAutomaticWorkflowReadModel {
     staleReasons: readonly string[];
     generatedAt: Date;
   }[];
-  operationalProposals: readonly (OperationalProposalRecord & { reviewEvents: readonly Record<string, unknown>[] })[];
+  operationalProposals: readonly (OperationalProposalRecord & {
+    reconciliationPreview: unknown | null;
+    reviewEvents: readonly Record<string, unknown>[];
+  })[];
   automaticResearch: {
     authorized: boolean;
     requirementCode: string | null;
@@ -460,7 +463,12 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       currentRevisionFingerprint: knowledge?.revision.corpusFingerprint ?? null,
     },
     knowledge,
-    operationalProposals: operationalProposals as FascicoloAutomaticWorkflowReadModel["operationalProposals"],
+    operationalProposals: operationalProposals.map((proposal) => ({
+      ...proposal,
+      reconciliationPreview: record(proposal.proposedPayload)?.previewOnly === true
+        ? proposal.proposedPayload
+        : null,
+    })) as FascicoloAutomaticWorkflowReadModel["operationalProposals"],
     historicalMissionCount,
     automaticResearch: {
       authorized: researchPolicy.authorized,

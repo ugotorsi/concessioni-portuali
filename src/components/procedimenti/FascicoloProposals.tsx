@@ -33,6 +33,7 @@ export interface FascicoloProposal {
   title: string;
   description: string;
   rationale: string;
+  reconciliationPreview?: unknown;
   reviewVersion: number;
   reviewNote?: string | null;
   warningCodes: readonly string[];
@@ -80,6 +81,39 @@ function present(value: string | null | undefined): value is string {
   return Boolean(value?.trim());
 }
 
+function reconciliationPayload(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const payload = value as Record<string, unknown>;
+  return payload.previewOnly === true ? payload : null;
+}
+
+function PreviewValue({ value }: { value: unknown }) {
+  if (value === null || value === undefined) return <span className="text-slate-500">Non presente</span>;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return <span>{String(value)}</span>;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0 ? <span className="text-slate-500">Nessun elemento</span> : (
+      <ul className="list-disc space-y-1 pl-5">
+        {value.map((item, index) => <li key={index}><PreviewValue value={item} /></li>)}
+      </ul>
+    );
+  }
+  if (typeof value === "object") {
+    return (
+      <dl className="grid gap-2 rounded-md bg-white p-3">
+        {Object.entries(value).map(([key, item]) => (
+          <div key={key}>
+            <dt className="text-xs font-medium text-slate-500">{formatEnumLabel(key)}</dt>
+            <dd className="mt-0.5 text-xs leading-5 text-slate-700"><PreviewValue value={item} /></dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  return <span>{String(value)}</span>;
+}
+
 function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
   if (!canManage) return null;
   if (proposal.status === "PROPOSED") {
@@ -114,6 +148,7 @@ function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal;
 }
 
 function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
+  const reconciliation = reconciliationPayload(proposal.reconciliationPreview);
   return (
     <article className="min-w-0 rounded-md border border-slate-200 bg-white p-4">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -128,6 +163,21 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
       </div>
 
       <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{proposal.description}</p>
+
+      {reconciliation ? (
+        <details className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
+          <summary className="cursor-pointer font-semibold text-amber-950">
+            Simulazione di riconciliazione — nessun dato autoritativo modificato
+          </summary>
+          <div className="mt-3 grid gap-3">
+            <div><p className="font-medium text-slate-800">Valori precedenti</p><PreviewValue value={reconciliation.before} /></div>
+            <div><p className="font-medium text-slate-800">Valori proposti</p><PreviewValue value={reconciliation.after} /></div>
+            <div><p className="font-medium text-slate-800">Prove documentali</p><PreviewValue value={reconciliation.evidence} /></div>
+            <div><p className="font-medium text-slate-800">Verifiche di integrità</p><PreviewValue value={reconciliation.integrityChecks} /></div>
+            <div><p className="font-medium text-slate-800">Piano di rollback</p><PreviewValue value={reconciliation.rollback} /></div>
+          </div>
+        </details>
+      ) : null}
 
       <details className="mt-3 border-t border-slate-200 pt-3 text-sm">
         <summary className="cursor-pointer font-medium text-slate-700">Dettagli</summary>

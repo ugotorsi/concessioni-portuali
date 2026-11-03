@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, ExternalLink } from "lucide-react";
+import { AlertTriangle, BookOpen, Download, ExternalLink } from "lucide-react";
 
 import { formatDateIT } from "@/lib/utils";
 import type {
@@ -110,7 +110,7 @@ function AuthorityGroup({ title, authorities }: { title: string; authorities: re
   );
 }
 
-function UnverifiedCandidateSources({ question }: { question: StructuredReportQuestion }) {
+export function UnverifiedCandidateSources({ question }: { question: StructuredReportQuestion }) {
   const candidates = question.nonUsableResults.filter((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"));
   if (candidates.length === 0) return null;
   return (
@@ -296,7 +296,6 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
                     {issue.questions.map((question) => (
                       <li key={question.knowledgeItemId}>
                         <p>{question.text}</p>
-                        <UnverifiedCandidateSources question={question} />
                       </li>
                     ))}
                   </ul>
@@ -306,7 +305,6 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
             {payload.unassignedQuestions.map((question) => (
               <article key={question.knowledgeItemId} className="border-l-2 border-slate-300 pl-4 text-sm leading-6 text-slate-700">
                 <p>{question.text}</p>
-                <UnverifiedCandidateSources question={question} />
               </article>
             ))}
           </div>
@@ -363,7 +361,35 @@ function PreviousVersions({ snapshots }: { snapshots: readonly FascicoloReportSn
   );
 }
 
-export function FascicoloReport({ snapshots }: { snapshots: readonly FascicoloReportSnapshot[] }) {
+function ReportDiagnostics({ payload }: { payload: StructuredFascicoloReportPayload }) {
+  const questions = allQuestions(payload).filter((question) => question.nonUsableResults.length > 0);
+  if (questions.length === 0) return null;
+  return (
+    <details className="rounded-md border border-slate-300 bg-slate-50 p-4">
+      <summary className="cursor-pointer text-sm font-semibold text-slate-800">
+        Diagnostica amministratore — fonti escluse dal rapporto professionale
+      </summary>
+      <div className="mt-3 space-y-4 border-t border-slate-200 pt-3">
+        {questions.map((question) => (
+          <article key={question.semanticKey}>
+            <p className="text-sm font-medium text-slate-900">{question.text}</p>
+            <UnverifiedCandidateSources question={question} />
+          </article>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+export function FascicoloReport({
+  procedimentoId,
+  showDiagnostics = false,
+  snapshots,
+}: {
+  procedimentoId: string;
+  showDiagnostics?: boolean;
+  snapshots: readonly FascicoloReportSnapshot[];
+}) {
   const report = snapshots.find((snapshot) => snapshot.status === "CURRENT")
     ?? snapshots.find((snapshot) => snapshot.status === "STALE")
     ?? null;
@@ -382,10 +408,26 @@ export function FascicoloReport({ snapshots }: { snapshots: readonly FascicoloRe
       {report ? (
         <>
           <section aria-label="Rapporto disponibile" className="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">
-            <dl className="flex flex-wrap gap-x-7 gap-y-3 text-sm">
-              <div><dt className="text-xs font-medium text-slate-500">Stato</dt><dd className="mt-1 font-semibold text-slate-950">{fascicoloReportStatusLabel(report.status)}</dd></div>
-              <div><dt className="text-xs font-medium text-slate-500">Generato il</dt><dd className="mt-1 font-semibold text-slate-950">{formatDateIT(report.generatedAt)}</dd></div>
-            </dl>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <dl className="flex flex-wrap gap-x-7 gap-y-3 text-sm">
+                <div><dt className="text-xs font-medium text-slate-500">Stato</dt><dd className="mt-1 font-semibold text-slate-950">{fascicoloReportStatusLabel(report.status)}</dd></div>
+                <div><dt className="text-xs font-medium text-slate-500">Generato il</dt><dd className="mt-1 font-semibold text-slate-950">{formatDateIT(report.generatedAt)}</dd></div>
+              </dl>
+              {report.status === "CURRENT" ? (
+                <div className="flex flex-wrap gap-2">
+                  {(["pdf", "rtf"] as const).map((format) => (
+                    <a
+                      key={format}
+                      href={`/procedimenti/${procedimentoId}/report/export?format=${format}`}
+                      className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+                    >
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                      Scarica {format.toUpperCase()}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             {report.status === "STALE" ? (
               <div className="mt-4 flex items-start gap-2 border-t border-amber-200 pt-3 text-sm text-amber-900">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -394,6 +436,7 @@ export function FascicoloReport({ snapshots }: { snapshots: readonly FascicoloRe
             ) : null}
           </section>
           <ReportContent payload={report.payload} />
+          {showDiagnostics ? <ReportDiagnostics payload={report.payload} /> : null}
         </>
       ) : (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">

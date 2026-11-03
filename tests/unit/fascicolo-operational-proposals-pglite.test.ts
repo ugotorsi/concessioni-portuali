@@ -92,10 +92,13 @@ async function database() {
       ('procedure-neutral','tenant-a',NULL),
       ('procedure-inconsistent','tenant-a','concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
-      ('revision-a','tenant-a','procedure-a','CURRENT'),('revision-b','tenant-b','procedure-b','CURRENT');
+      ('revision-a','tenant-a','procedure-a','CURRENT'),
+      ('revision-b','tenant-b','procedure-b','CURRENT'),
+      ('revision-neutral','tenant-a','procedure-neutral','CURRENT');
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES
       ('report-a','tenant-a','procedure-a','revision-a','${reportFingerprint}','CURRENT'),
-      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT');
+      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT'),
+      ('report-neutral','tenant-a','procedure-neutral','revision-neutral','${reportFingerprint}','CURRENT');
   `);
   await db.exec(migration);
   return db;
@@ -172,16 +175,45 @@ describe("Lotto 7 operational proposal persistence", () => {
     }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
   });
 
-  it("keeps write authority restricted to procedimenti with a tenant-consistent concession", async () => {
+  it("allows preview and review without a concession but blocks authoritative materialization", async () => {
     const db = await database();
-    const neutralCandidate = candidate("DEADLINE", { procedimentoId: "procedure-neutral" });
-    await expect(reconcileOperationalProposals({
+    const neutralCandidate = candidate("NOTE", {
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      proposalFingerprint: "9".repeat(64),
+      proposedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        before: null,
+        after: { numeroAtto: "17/2023" },
+        previewOnly: true,
+      },
+      warningCodes: ["MANUAL_ACTION_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
+    });
+    const reconciled = await reconcileOperationalProposals({
       tenantId: "tenant-a",
       procedimentoId: "procedure-neutral",
-      knowledgeRevisionId: "revision-a",
-      structuredReportId: "report-a",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
       structuredReportFingerprint: reportFingerprint,
       candidates: [neutralCandidate],
+    }, repositoryContext(db));
+    expect(reconciled).toMatchObject({ created: 1, reused: 0 });
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: reconciled.proposals[0].id,
+      action: "APPROVE",
+      expectedReviewVersion: 0,
+      reviewNote: "Anteprima verificata",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "RESPONSABILE_UFFICIO" },
+    }, repositoryContext(db));
+    expect(approved.status).toBe("APPROVED");
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
     }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
   });
 

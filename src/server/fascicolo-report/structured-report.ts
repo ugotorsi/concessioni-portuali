@@ -151,6 +151,8 @@ export interface StructuredFascicoloReportPayload {
   knowledgeStateFingerprint: string;
   researchStateFingerprint: string;
   sourceStateFingerprint: string;
+  /** Authoritative metadata used when the immutable report version was generated. */
+  proceduralContext?: StructuredReportProceduralContext;
   documentedFramework: {
     partyRoles: readonly StructuredKnowledgeReadItem[];
     facts: readonly StructuredKnowledgeReadItem[];
@@ -553,6 +555,7 @@ export function buildStructuredFascicoloReport(input: {
     knowledgeStateFingerprint: fingerprint(knowledgeState),
     researchStateFingerprint: fingerprint(researchState),
     sourceStateFingerprint: fingerprint(sourceState),
+    proceduralContext: input.proceduralContext,
     documentedFramework: {
       partyRoles: visibleItems(input.knowledge.partyRoles),
       facts: visibleItems(input.knowledge.facts),

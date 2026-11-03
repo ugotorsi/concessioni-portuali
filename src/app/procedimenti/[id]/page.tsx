@@ -330,7 +330,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <p className="mt-4 text-sm text-slate-600">Nessun titolo concessorio viene presunto o creato automaticamente. Le proposte richiedono valutazione professionale.</p>
             </section>
           ) : null}
-          {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
+          {activeSection === "reports" ? (
+            <FascicoloReport
+              procedimentoId={detail.procedimento.id}
+              showDiagnostics={role === "ADMIN"}
+              snapshots={structuredReportSnapshots}
+            />
+          ) : null}
           {activeSection === "concession" ? (
             <Card>
               <CardHeader><CardTitle>Titolo concessorio non accertato</CardTitle></CardHeader>
@@ -1434,7 +1440,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
         ) : null}
 
-        {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
+        {activeSection === "reports" ? (
+          <FascicoloReport
+            procedimentoId={detail.procedimento.id}
+            showDiagnostics={role === "ADMIN"}
+            snapshots={structuredReportSnapshots}
+          />
+        ) : null}
       </div>
     </FascicoloShell>
   );
