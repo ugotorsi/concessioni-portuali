@@ -199,6 +199,8 @@ describe("Lotto 7 operational proposal persistence", () => {
       candidates: [neutralCandidate],
     }, repositoryContext(db));
     expect(reconciled).toMatchObject({ created: 1, reused: 0 });
+    expect(reconciled.proposals[0].createdAt).toBeInstanceOf(Date);
+    expect(reconciled.proposals[0].updatedAt).toBeInstanceOf(Date);
     const approved = await reviewOperationalProposal({
       tenantId: "tenant-a",
       procedimentoId: "procedure-neutral",

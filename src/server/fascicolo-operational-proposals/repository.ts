@@ -184,9 +184,10 @@ export async function reconcileOperationalProposals(input: {
           "structuredReportFingerprint","policyVersion","proposalType","status","title","description",
           "proposedPayload","originatingKnowledgeItemIds","originatingIssueSemanticKeys",
           "originatingQuestionSemanticKeys","relevantResultIds","rationale","confidence",
-          "proposalFingerprint","warningCodes"
+          "proposalFingerprint","warningCodes","createdAt","updatedAt"
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::"FascicoloOperationalProposalType",'PROPOSED',$9,$10,
-          $11::jsonb,$12::text[],$13::text[],$14::text[],$15::text[],$16,$17,$18,$19::text[])
+          $11::jsonb,$12::text[],$13::text[],$14::text[],$15::text[],$16,$17,$18,$19::text[],
+          CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
         ON CONFLICT ("tenantId","procedimentoId","proposalFingerprint") DO NOTHING RETURNING "id"
       `, [deterministicId("operational_proposal", candidate.proposalFingerprint), candidate.tenantId,
         candidate.procedimentoId, candidate.knowledgeRevisionId, candidate.structuredReportId,
