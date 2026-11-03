@@ -46,6 +46,13 @@ const assistedMigration = readFileSync(path.join(
   "20260926_assisted_verification_persistence",
   "migration.sql",
 ), "utf8");
+const actorBindingMigration = readFileSync(path.join(
+  root,
+  "prisma",
+  "migrations",
+  "20261008_research_mission_actor_binding",
+  "migration.sql",
+), "utf8");
 const now = new Date("2026-09-26T12:00:00.000Z");
 const actor = { actorId: "legal-user-a", tenantId: "tenant-a" } as const;
 
@@ -76,14 +83,15 @@ function pglitePersistenceClient(executor: SqlExecutor): ResearchPersistenceClie
     },
     create: async ({ data }: { data: Record<string, unknown> }) => one(executor, `
       INSERT INTO "ResearchMissionRecord" (
-        "id", "tenantId", "contractVersion", "caseId", "fascicoloReference",
+        "id", "tenantId", "assignedActorId", "contractVersion", "caseId", "fascicoloReference",
         "referenceDate", "mode", "payload", "payloadFingerprint", "status",
         "stateVersion", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, 'PENDING', 0, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, 'PENDING', 0, $11)
       RETURNING *
     `, [
       data.id,
       data.tenantId,
+      data.assignedActorId,
       data.contractVersion,
       data.caseId,
       data.fascicoloReference ?? null,
@@ -296,6 +304,9 @@ describe("assisted verification route with disposable PGlite persistence", () =>
       await database.exec("INSERT INTO \"Ente\" (\"id\") VALUES ('tenant-a'), ('tenant-b')");
       await database.exec(researchMigration);
       await database.exec(assistedMigration);
+      await database.exec('CREATE TABLE "User" ("id" TEXT PRIMARY KEY)');
+      await database.exec("INSERT INTO \"User\" (\"id\") VALUES ('legal-user-a'), ('legal-user-b'), ('legal-user-c'), ('legal-user-d')");
+      await database.exec(actorBindingMigration);
       await database.exec('CREATE TABLE "SyntheticDocument" ("documentId" TEXT, "fileVersionId" TEXT PRIMARY KEY, "tenantId" TEXT, "caseId" TEXT, "legalSourceId" TEXT, "expressionId" TEXT, "officialIdentifier" TEXT, "sha256" TEXT, "body" TEXT, "available" BOOLEAN DEFAULT true)');
       for (const suffix of ["a", "b"]) {
         const body = `Synthetic authority ${suffix.toUpperCase()}`;
@@ -434,13 +445,18 @@ describe("assisted verification route with disposable PGlite persistence", () =>
         }),
       ]);
 
+      // Missions are bound to their assigned actor: same-tenant reviewers without the assignment are denied.
       session = { ...tenantContext("GIURIDICO", "tenant-a"), userId: "legal-user-b" };
+      expect((await handlers.GET(new Request(url(primaryMission.missionId)))).status).toBe(403);
+      expect((await handlers.POST(request("POST", { ...reviewCommand(primaryMission.missionId), recordId: suggested!.recordId }))).status)
+        .toBe(403);
+      session = tenantContext("GIURIDICO", "tenant-a");
       const reviewResponse = await handlers.POST(request("POST", { ...reviewCommand(primaryMission.missionId), recordId: suggested!.recordId }));
       expect(reviewResponse.status).toBe(201);
       const latestResponse = await handlers.GET(new Request(url(primaryMission.missionId)));
       const latestPayload = await latestResponse.json() as { verification: ReviewerVerification };
       expect(latestPayload.verification.snapshot.adverseReview).toMatchObject({
-        reviewedByActorId: "legal-user-b",
+        reviewedByActorId: actor.actorId,
         reviewedAt: now.toISOString(),
         rationale: reviewCommand(primaryMission.missionId).rationale,
       });
@@ -504,15 +520,18 @@ describe("assisted verification route with disposable PGlite persistence", () =>
         documentId: "document-b", fileVersionId: "file-b",
         contentSha256: createHash("sha256").update("Synthetic authority B").digest("hex"),
       };
-      session = { ...tenantContext("GIURIDICO", "tenant-a"), userId: "legal-user-c" };
-      const appended = await handlers.PUT(request("PUT", {
+      const appendCommand = {
         missionId: sourceOnlyMission.missionId, recordId: sourceOnly!.recordId, sources: [additionalSource],
         citationRelation: { sourceAuthorityId: "authority-a", targetAuthorityId: "authority-b", evidenceSourceId: "source-a", locator: { paragraph: "42" } },
-      }));
+      };
+      session = { ...tenantContext("GIURIDICO", "tenant-a"), userId: "legal-user-c" };
+      expect((await handlers.PUT(request("PUT", appendCommand))).status).toBe(403);
+      session = tenantContext("GIURIDICO", "tenant-a");
+      const appended = await handlers.PUT(request("PUT", appendCommand));
       expect(appended.status).toBe(201);
       const appendedRecord = await getLatestAssistedVerification(sourceOnlyMission.missionId, actor, persistence);
-      expect(appendedRecord?.snapshot.sources[0].reviewerAttestation.reviewedByActorId).toBe("legal-user-b");
-      expect(appendedRecord?.snapshot.sources[1].reviewerAttestation.reviewedByActorId).toBe("legal-user-c");
+      expect(appendedRecord?.snapshot.sources[0].reviewerAttestation).toEqual(sourceOnly?.snapshot.sources[0].reviewerAttestation);
+      expect(appendedRecord?.snapshot.sources[1].reviewerAttestation.reviewedByActorId).toBe(actor.actorId);
       expect((await handlers.PUT(request("PUT", {
         missionId: sourceOnlyMission.missionId, recordId: sourceOnly!.recordId, sources: [additionalSource],
       }))).status).toBe(409);
@@ -521,14 +540,17 @@ describe("assisted verification route with disposable PGlite persistence", () =>
       await database.query('INSERT INTO "SyntheticDocument" VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true)', [
         "document-b", "file-b-v2", "tenant-a", "case-a", "legal-source-b", "expression-b-v2", "ECLI:EU:C:2020:2", correctedHash, correctedBody,
       ]);
-      session = { ...tenantContext("GIURIDICO", "tenant-a"), userId: "legal-user-d" };
-      expect((await handlers.PUT(request("PUT", {
+      const correctionCommand = {
         missionId: sourceOnlyMission.missionId, recordId: appendedRecord!.recordId,
         sources: [{ ...additionalSource, fileVersionId: "file-b-v2", legalExpressionVersionId: "expression-b-v2", contentSha256: correctedHash }],
-      }))).status).toBe(201);
+      };
+      session = { ...tenantContext("GIURIDICO", "tenant-a"), userId: "legal-user-d" };
+      expect((await handlers.PUT(request("PUT", correctionCommand))).status).toBe(403);
+      session = tenantContext("GIURIDICO", "tenant-a");
+      expect((await handlers.PUT(request("PUT", correctionCommand))).status).toBe(201);
       const corrected = await getLatestAssistedVerification(sourceOnlyMission.missionId, actor, persistence);
-      expect(corrected?.snapshot.sources[0].reviewerAttestation.reviewedByActorId).toBe("legal-user-b");
-      expect(corrected?.snapshot.sources[1].reviewerAttestation.reviewedByActorId).toBe("legal-user-d");
+      expect(corrected?.snapshot.sources[0].reviewerAttestation).toEqual(sourceOnly?.snapshot.sources[0].reviewerAttestation);
+      expect(corrected?.snapshot.sources[1].reviewerAttestation.reviewedByActorId).toBe(actor.actorId);
       expect(corrected?.snapshot.citationRelation).toBeUndefined();
       expect(appendedRecord?.snapshot.sources[1].fullText.fileVersionId).toBe("file-b");
       expect((await handlers.PUT(request("PUT", sourceOnlyCommand(gapMission.missionId)))).status).toBe(201);
