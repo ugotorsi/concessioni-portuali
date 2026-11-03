@@ -3,6 +3,10 @@ import { createHash } from "node:crypto";
 import { stableStringify } from "@/server/audit/hash";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
 
+import { buildLegalApplication, type StructuredReportLegalApplication } from "./legal-application";
+
+export type { StructuredReportLegalApplication } from "./legal-application";
+
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
 
 type JsonRecord = Readonly<Record<string, unknown>>;
@@ -176,6 +180,8 @@ export interface StructuredFascicoloReportPayload {
   operationalPlans?: readonly StructuredReportOperationalPlan[];
   /** Additive applicability matrix. Older archived V1 reports may omit this field. */
   regulatoryApplicability?: readonly StructuredReportRegulatoryApplicability[];
+  /** Additive fact-to-law application with temporal reasoning. Older archived V1 reports may omit this field. */
+  legalApplication?: readonly StructuredReportLegalApplication[];
   limitations: readonly string[];
 }
 
@@ -570,6 +576,28 @@ export function buildStructuredFascicoloReport(input: {
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
     operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext),
     regulatoryApplicability: buildRegulatoryApplicability(input.proceduralContext),
+    legalApplication: buildLegalApplication({
+      issues: legalIssues.map((issue) => {
+        const toAuthority = (authority: StructuredReportAuthority) => ({
+          title: authority.title, sourceUrl: authority.sourceUrl, rationale: authority.rationale,
+        });
+        const dedupe = (values: ReturnType<typeof toAuthority>[]) =>
+          [...new Map(values.map((value) => [`${value.title}|${value.sourceUrl ?? ""}`, value])).values()];
+        return {
+          semanticKey: issue.semanticKey,
+          text: issue.text,
+          originatingItemIds: issue.originatingItemIds,
+          favorableAuthorities: dedupe(issue.questions.flatMap((question) => question.favorableAuthorities.map(toAuthority))),
+          contraryAuthorities: dedupe(issue.questions.flatMap((question) => question.contraryAuthorities.map(toAuthority))),
+        };
+      }),
+      knowledgeItems: [...new Map([
+        ...input.knowledge.facts, ...input.knowledge.events, ...input.knowledge.legalActs,
+        ...input.knowledge.measures, ...input.knowledge.timeline,
+      ].map((item) => [item.id, normalizedItem(item)])).values()].sort(byId),
+      analysisDate: new Date(input.knowledge.revision.createdAt).toISOString().slice(0, 10),
+      context: input.proceduralContext,
+    }),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),

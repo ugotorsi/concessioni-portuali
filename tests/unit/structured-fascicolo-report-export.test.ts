@@ -93,6 +93,22 @@ function snapshot(): StructuredReportSnapshotRecord {
       deadlineCandidates: [],
       operationalPlans: [],
       regulatoryApplicability: [],
+      legalApplication: [{
+        issueSemanticKey: "issue-1",
+        issueText: "Tenuta della decadenza",
+        relevantDates: [{ label: "Provvedimento finale", date: "2025-04-02", basis: "Data dell'atto conclusivo" }],
+        facts: [{ text: "Container non autorizzato", humanConfirmed: false, pages: [3] }],
+        rules: [{
+          ruleId: "COD_NAV_47", citation: "Art. 47 cod. nav.", subject: "Decadenza", temporalAnchor: "CONDUCT",
+          referenceDate: "2024-09-10", temporalStatus: "APPLICABLE", temporalReasoning: "Vigente alla data della condotta.",
+          applicationToFacts: "Fattispecie tipiche e contraddittorio.", officialUrl: "https://www.normattiva.it/x!vig=2024-09-10",
+        }],
+        favorableAuthorities: [], contraryAuthorities: [],
+        favorableArguments: ["Inadempimento documentato"], contraryArguments: ["Proporzionalità"],
+        conclusionStatus: "NORMATIVE_ONLY_PRELIMINARY",
+        conclusion: "Conclusione preliminare motivata.",
+        consequences: ["Ricorso al TAR entro 60 giorni"],
+      }],
       limitations: ["INTERNAL_CODE", "COMPILATION warning REBUILT"],
     },
   };
@@ -104,6 +120,10 @@ describe("structured fascicolo professional export", () => {
     const text = JSON.stringify(document);
     expect(text).toContain("Concessione n. 17/2023");
     expect(text).toContain("Consiglio di Stato, decisione verificata");
+    expect(text).toContain("Analisi giuridica: applicazione delle norme ai fatti");
+    expect(text).toContain("Art. 47 cod. nav. — Decadenza. Vigenza: Vigente alla data della condotta.");
+    expect(text).toContain("Conclusione: Conclusione preliminare motivata.");
+    expect(text).toContain("(pag. 3)");
     expect(text).not.toContain("Foreign draft law");
     expect(text).not.toContain("MOONLIT");
     expect(text).not.toContain("INTERNAL_CODE");

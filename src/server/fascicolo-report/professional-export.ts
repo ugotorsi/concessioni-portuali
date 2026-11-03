@@ -88,6 +88,20 @@ export function buildProfessionalReportDocument(
       paragraphs: authorities,
     },
     {
+      title: "Analisi giuridica: applicazione delle norme ai fatti",
+      paragraphs: unique((payload.legalApplication ?? []).flatMap((item) => [
+        `Questione: ${item.issueText}`,
+        `Date rilevanti: ${item.relevantDates.map((date) => `${date.label} ${date.date.split("-").reverse().join("/")}`).join("; ")}.`,
+        ...item.facts.map((fact) => `Fatto${fact.humanConfirmed ? "" : " (da confermare)"}: ${fact.text}${fact.pages.length ? ` (pag. ${fact.pages.join(", ")})` : ""}`),
+        ...item.rules.map((rule) =>
+          `${rule.citation} — ${rule.subject}. Vigenza: ${rule.temporalReasoning} Applicazione: ${rule.applicationToFacts} Testo ufficiale: ${rule.officialUrl}`),
+        ...item.favorableArguments.map((argument) => `Argomento a sostegno — ${argument}`),
+        ...item.contraryArguments.map((argument) => `Argomento contrario — ${argument}`),
+        `Conclusione: ${item.conclusion}`,
+        ...item.consequences.map((consequence) => `Conseguenza: ${consequence}`),
+      ])),
+    },
+    {
       title: "Applicabilità temporale e adempimenti",
       paragraphs: unique((payload.regulatoryApplicability ?? []).map((row) =>
         `Misura ${row.measure}. ${row.applicability} Adempimento: ${row.authorityAction} Scadenza: ${row.deadline}`)),

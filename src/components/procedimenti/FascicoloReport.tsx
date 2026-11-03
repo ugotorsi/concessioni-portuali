@@ -4,6 +4,7 @@ import { formatDateIT } from "@/lib/utils";
 import type {
   StructuredFascicoloReportPayload,
   StructuredReportAuthority,
+  StructuredReportLegalApplication,
   StructuredReportQuestion,
 } from "@/server/fascicolo-report/structured-report";
 import type {
@@ -220,6 +221,100 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
   );
 }
 
+const TEMPORAL_STATUS_LABELS: Readonly<Record<StructuredReportLegalApplication["rules"][number]["temporalStatus"], string>> = {
+  APPLICABLE: "Applicabile",
+  APPLICABLE_PREVIOUS_VERSION: "Applicabile nel testo previgente",
+  NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",
+  PROSPECTIVE_ONLY: "Solo per adempimenti successivi",
+  DATE_TO_VERIFY: "Data da accertare",
+};
+
+export function LegalApplicationSection({ items }: { items: readonly StructuredReportLegalApplication[] }) {
+  if (items.length === 0) return null;
+  return (
+    <ContentSection title="Analisi giuridica: applicazione delle norme ai fatti">
+      <div className="space-y-3">
+        {items.map((item) => (
+          <details key={item.issueSemanticKey} className="rounded-md border border-slate-200 bg-white" aria-label={`Analisi: ${item.issueText}`}>
+            <summary className="cursor-pointer p-3">
+              <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+                <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{item.issueText}</p>
+                <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">
+                  {item.conclusionStatus === "GROUNDED_ON_VERIFIED_AUTHORITIES" ? "Con giurisprudenza verificata" : "Preliminare: solo dato normativo"}
+                </span>
+              </div>
+            </summary>
+            <div className="space-y-4 border-t border-slate-200 p-4 text-sm leading-6 text-slate-700">
+              <section>
+                <h5 className="font-semibold text-slate-950">Date rilevanti</h5>
+                <ul className="mt-1 space-y-1">
+                  {item.relevantDates.map((date) => (
+                    <li key={`${date.label}-${date.date}`}><strong>{date.label}:</strong> {formatDateIT(new Date(`${date.date}T00:00:00Z`))} — {date.basis}</li>
+                  ))}
+                </ul>
+              </section>
+              {item.facts.length > 0 ? (
+                <section>
+                  <h5 className="font-semibold text-slate-950">Fatti e prova documentale</h5>
+                  <ul className="mt-1 space-y-1">
+                    {item.facts.map((fact) => (
+                      <li key={fact.text} className="[overflow-wrap:anywhere]">
+                        {fact.text}
+                        <span className="text-xs text-slate-500"> ({fact.humanConfirmed ? "confermato" : "da confermare"}{fact.pages.length ? `; pag. ${fact.pages.join(", ")}` : ""})</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {item.rules.length > 0 ? (
+                <section>
+                  <h5 className="font-semibold text-slate-950">Normativa applicabile nel tempo</h5>
+                  <div className="mt-2 space-y-2">
+                    {item.rules.map((rule) => (
+                      <details key={rule.ruleId} className="rounded-md border border-slate-200 bg-slate-50">
+                        <summary className="cursor-pointer px-3 py-2">
+                          <span className="font-medium text-slate-950">{rule.citation}</span>
+                          <span className="ml-2 text-xs font-semibold text-slate-600">{TEMPORAL_STATUS_LABELS[rule.temporalStatus]}</span>
+                        </summary>
+                        <div className="space-y-1 border-t border-slate-200 px-3 py-2">
+                          <p><strong>Oggetto:</strong> {rule.subject}</p>
+                          <p><strong>Vigenza:</strong> {rule.temporalReasoning}</p>
+                          <p><strong>Applicazione ai fatti:</strong> {rule.applicationToFacts}</p>
+                          <a href={rule.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
+                            Testo ufficiale{rule.referenceDate ? " nella versione alla data rilevante" : ""} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                          </a>
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <section>
+                  <h5 className="font-semibold text-slate-950">Argomenti a sostegno</h5>
+                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.favorableArguments.map((argument) => <li key={argument}>{argument}</li>)}</ul>
+                </section>
+                <section>
+                  <h5 className="font-semibold text-slate-950">Argomenti contrari e rischi</h5>
+                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.contraryArguments.map((argument) => <li key={argument}>{argument}</li>)}</ul>
+                </section>
+              </div>
+              <section>
+                <h5 className="font-semibold text-slate-950">Conclusione motivata</h5>
+                <p className="mt-1">{item.conclusion}</p>
+              </section>
+              <section>
+                <h5 className="font-semibold text-slate-950">Conseguenze operative e processuali</h5>
+                <ul className="mt-1 list-disc space-y-1 pl-5">{item.consequences.map((consequence) => <li key={consequence}>{consequence}</li>)}</ul>
+              </section>
+            </div>
+          </details>
+        ))}
+      </div>
+    </ContentSection>
+  );
+}
+
 function RegulatoryApplicability({
   rows,
 }: {
@@ -319,6 +414,8 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
           </div>
         </ContentSection>
       ) : null}
+
+      {payload.legalApplication?.length ? <LegalApplicationSection items={payload.legalApplication} /> : null}
 
       {payload.regulatoryApplicability?.length ? <RegulatoryApplicability rows={payload.regulatoryApplicability} /> : null}
 
