@@ -27,8 +27,8 @@ function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ 
   return {
     query: (query, params = []) => sql.query(query, [...params]),
     audit: (input) => sql.query(`
-      INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata") VALUES ($1,$2,$3::jsonb)
-    `, [input.azione, input.entitaId, JSON.stringify(input.metadata)]),
+      INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata","actorId") VALUES ($1,$2,$3::jsonb,$4)
+    `, [input.azione, input.entitaId, JSON.stringify(input.metadata), input.actor.actorId]),
   };
 }
 
@@ -83,7 +83,7 @@ async function database() {
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "subjectId" TEXT NOT NULL,
       "identifierType" TEXT NOT NULL, "normalizedValue" TEXT NOT NULL
     );
-    CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL);
+    CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL, "actorId" TEXT);
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
     INSERT INTO "Procedimento" VALUES
@@ -201,6 +201,10 @@ describe("Lotto 7 operational proposal persistence", () => {
     expect(reconciled).toMatchObject({ created: 1, reused: 0 });
     expect(reconciled.proposals[0].createdAt).toBeInstanceOf(Date);
     expect(reconciled.proposals[0].updatedAt).toBeInstanceOf(Date);
+    const reconciliationAudit = await db.query<{ actorId: string | null }>(
+      `SELECT "actorId" FROM "TestAuditEvent" WHERE "azione"='OPERATIONAL_PROPOSALS_RECONCILED'`,
+    );
+    expect(reconciliationAudit.rows[0].actorId).toBeNull();
     const approved = await reviewOperationalProposal({
       tenantId: "tenant-a",
       procedimentoId: "procedure-neutral",

@@ -21,7 +21,7 @@ export interface OperationalProposalAuditInput {
   enteId: string;
   concessioneId: string | null;
   metadata: JsonValue;
-  actor: { actorId: string; actorEmail: string | null; actorRole: string };
+  actor: { actorId: string | null; actorEmail: string | null; actorRole: string };
 }
 
 export interface OperationalProposalRepositoryContext {
@@ -209,7 +209,7 @@ export async function reconcileOperationalProposals(input: {
       enteId: input.tenantId,
       concessioneId,
       metadata: { procedimentoId: input.procedimentoId, knowledgeRevisionId: input.knowledgeRevisionId, created, reused: candidates.length - created, stale: stale.rows.length },
-      actor: { actorId: "fascicolo-operational-proposal-policy", actorEmail: null, actorRole: "SYSTEM" },
+      actor: { actorId: null, actorEmail: null, actorRole: "SYSTEM" },
     });
     return { created, reused: candidates.length - created, stale: stale.rows.length, proposals: proposals.rows };
   });
