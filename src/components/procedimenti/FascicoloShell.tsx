@@ -17,6 +17,7 @@ export const FASCICOLO_SECTIONS = [
   ["issues", "Criticità"],
   ["reports", "Rapporto"],
   ["proposals", "Proposte"],
+  ["acts", "Atti"],
 ] as const;
 
 export type FascicoloSection = (typeof FASCICOLO_SECTIONS)[number][0] | "istruttoria" | "decisione";

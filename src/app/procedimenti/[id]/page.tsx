@@ -13,6 +13,9 @@ import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEv
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
+import { FascicoloActsWorkspace } from "@/components/procedimenti/FascicoloActsWorkspace";
+import { listActAttachmentOptions, listActDrafts } from "@/server/fascicolo-acts/repository";
+import { buildActTemplateCatalog } from "@/server/fascicolo-acts/templates";
 import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
@@ -235,6 +238,35 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     materialId,
     statementPath,
   });
+  const actsWorkspace = activeSection === "acts" && detail.canonicalEnteId
+    ? {
+        catalog: buildActTemplateCatalog({
+          payload: automaticWorkflow?.structuredReport?.payload ?? null,
+          context: {
+            procedimentoLabel: `Procedimento ${detail.procedimento.id}`,
+            responsabile: detail.procedimento.responsabileProcedimentoNome,
+            unitaOrganizzativa: detail.procedimento.unitaOrganizzativaResponsabile,
+          },
+        }),
+        drafts: await listActDrafts({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id }),
+        attachmentOptions: await listActAttachmentOptions(detail.procedimento.id),
+      }
+    : null;
+  const actsSection = activeSection === "acts" ? (
+    actsWorkspace ? (
+      <FascicoloActsWorkspace
+        procedimentoId={detail.procedimento.id}
+        catalog={actsWorkspace.catalog}
+        drafts={actsWorkspace.drafts}
+        attachmentOptions={actsWorkspace.attachmentOptions}
+        canManage={canReview}
+      />
+    ) : (
+      <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
+        Gli atti sono disponibili dopo il collegamento del fascicolo all&apos;ente competente.
+      </p>
+    )
+  ) : null;
 
   if (!detail.concessione || !detail.concessionario) {
     const overview: FascicoloOverviewModel = {
@@ -359,6 +391,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               responsibilityHistory={[]}
             />
           ) : null}
+          {actsSection}
           {["timeline", "deadlines", "issues", "proposals", "decisione"].includes(activeSection) ? (
             <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
               Nessun dato disponibile per questa sezione.
@@ -879,6 +912,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             canManage={canReview && hasCanonicalTenant}
           />
         ) : null}
+
+        {actsSection}
 
         {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>
