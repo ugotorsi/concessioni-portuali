@@ -1,0 +1,157 @@
+export const PRODUCTION_RELEASE = Object.freeze({
+  projectId: "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu",
+  organizationId: "team_jT8QBufySulc3clxzIl6RqnL",
+  scope: "ugotorsis-projects",
+  productionDomain: "app.noetra.it",
+} as const);
+
+export const REQUIRED_PRODUCTION_ENV = Object.freeze([
+  "DATABASE_URL",
+  "NEXTAUTH_SECRET",
+  "NEXTAUTH_URL",
+  "MFA_ENCRYPTION_KEY",
+  "RUNTIME_EXPECTED_DATABASE_NAME",
+  "RUNTIME_EXPECTED_NEON_PROJECT_ID",
+  "RUNTIME_EXPECTED_NEON_BRANCH_ID",
+  "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
+  "SERVER_AUTONOMOUS_RESEARCH_ENABLED",
+] as const);
+
+export type ProductionReleaseErrorCode =
+  | "EXPECTED_COMMIT_REQUIRED"
+  | "EXPECTED_COMMIT_INVALID"
+  | "UNSUPPORTED_ARGUMENT"
+  | "WORKTREE_DIRTY"
+  | "GIT_HEAD_MISMATCH"
+  | "COMMIT_NOT_ON_REMOTE"
+  | "VERCEL_IDENTITY_MISMATCH"
+  | "DOMAIN_BOUND_TO_GIT_BRANCH"
+  | "DOMAIN_BOUND_TO_CUSTOM_ENVIRONMENT"
+  | "DOMAIN_REDIRECT_FORBIDDEN"
+  | "PRODUCTION_ENV_MISSING"
+  | "DEPLOYMENT_NOT_PRODUCTION_TARGET"
+  | "DEPLOYMENT_NOT_READY"
+  | "DEPLOYMENT_PROJECT_MISMATCH"
+  | "DEPLOYMENT_COMMIT_MISMATCH"
+  | "DEPLOYMENT_DIRTY_SOURCE"
+  | "ALIAS_MISMATCH"
+  | "HEALTHCHECK_FAILED"
+  | "VERCEL_COMMAND_FAILED";
+
+export class ProductionReleaseError extends Error {
+  constructor(readonly code: ProductionReleaseErrorCode, readonly detail?: string) {
+    super(detail ? `${code}: ${detail}` : code);
+    this.name = "ProductionReleaseError";
+  }
+}
+
+export interface ProductionReleaseArgs {
+  readonly expectedCommit: string;
+  readonly verifyOnly: boolean;
+}
+
+export function parseProductionReleaseArgs(argv: readonly string[]): ProductionReleaseArgs {
+  let expectedCommit: string | undefined;
+  let verifyOnly = false;
+  for (let index = 0; index < argv.length; index += 1) {
+    const argument = argv[index];
+    if (argument === "--expected-commit") {
+      const value = argv[index + 1];
+      if (!value || value.startsWith("--") || expectedCommit !== undefined) {
+        throw new ProductionReleaseError("EXPECTED_COMMIT_REQUIRED");
+      }
+      expectedCommit = value;
+      index += 1;
+      continue;
+    }
+    if (argument === "--verify-only") {
+      verifyOnly = true;
+      continue;
+    }
+    throw new ProductionReleaseError("UNSUPPORTED_ARGUMENT", argument);
+  }
+  if (!expectedCommit) throw new ProductionReleaseError("EXPECTED_COMMIT_REQUIRED");
+  if (!/^[a-f0-9]{40}$/.test(expectedCommit)) throw new ProductionReleaseError("EXPECTED_COMMIT_INVALID");
+  return { expectedCommit, verifyOnly };
+}
+
+export interface VercelDomainConfig {
+  readonly name: string;
+  readonly gitBranch?: string | null;
+  readonly customEnvironmentId?: string | null;
+  readonly redirect?: string | null;
+}
+
+/**
+ * A domain bound to a Git branch is a Preview branch domain: every push to that
+ * branch would publish a Preview build on it. The production domain must be
+ * unbound so that only production-target deployments can receive it.
+ */
+export function assertProductionDomainConfig(domain: VercelDomainConfig): void {
+  if (domain.gitBranch) throw new ProductionReleaseError("DOMAIN_BOUND_TO_GIT_BRANCH", domain.gitBranch);
+  if (domain.customEnvironmentId) {
+    throw new ProductionReleaseError("DOMAIN_BOUND_TO_CUSTOM_ENVIRONMENT", domain.customEnvironmentId);
+  }
+  if (domain.redirect) throw new ProductionReleaseError("DOMAIN_REDIRECT_FORBIDDEN", domain.redirect);
+}
+
+export interface VercelEnvEntry {
+  readonly key: string;
+  readonly target?: readonly string[] | string | null;
+  readonly gitBranch?: string | null;
+}
+
+export function missingProductionEnv(
+  envs: readonly VercelEnvEntry[],
+  required: readonly string[] = REQUIRED_PRODUCTION_ENV,
+): string[] {
+  const present = new Set(
+    envs
+      .filter((entry) => {
+        const targets = Array.isArray(entry.target) ? entry.target : entry.target ? [entry.target] : [];
+        return targets.includes("production") && !entry.gitBranch;
+      })
+      .map((entry) => entry.key),
+  );
+  return required.filter((key) => !present.has(key));
+}
+
+export interface VercelDeploymentSnapshot {
+  readonly id: string;
+  readonly url?: string;
+  readonly projectId?: string;
+  readonly target?: string | null;
+  readonly readyState?: string;
+  readonly meta?: Record<string, string | undefined>;
+}
+
+export function assertDeploymentEligibleForProductionDomain(
+  deployment: VercelDeploymentSnapshot,
+  expectedCommit: string,
+): void {
+  if (deployment.projectId && deployment.projectId !== PRODUCTION_RELEASE.projectId) {
+    throw new ProductionReleaseError("DEPLOYMENT_PROJECT_MISMATCH", deployment.projectId);
+  }
+  if (deployment.target !== "production") {
+    throw new ProductionReleaseError("DEPLOYMENT_NOT_PRODUCTION_TARGET", String(deployment.target ?? "preview"));
+  }
+  if (deployment.readyState !== "READY") {
+    throw new ProductionReleaseError("DEPLOYMENT_NOT_READY", String(deployment.readyState));
+  }
+  const sha = deployment.meta?.gitCommitSha ?? deployment.meta?.githubCommitSha;
+  if (sha !== expectedCommit) {
+    throw new ProductionReleaseError("DEPLOYMENT_COMMIT_MISMATCH", String(sha));
+  }
+  if (deployment.meta?.gitDirty === "1") throw new ProductionReleaseError("DEPLOYMENT_DIRTY_SOURCE");
+}
+
+export function assertAliasResolvesTo(
+  aliasDeployment: VercelDeploymentSnapshot,
+  expectedDeploymentId: string,
+  expectedCommit: string,
+): void {
+  if (aliasDeployment.id !== expectedDeploymentId) {
+    throw new ProductionReleaseError("ALIAS_MISMATCH", `${aliasDeployment.id} != ${expectedDeploymentId}`);
+  }
+  assertDeploymentEligibleForProductionDomain(aliasDeployment, expectedCommit);
+}

@@ -41,6 +41,20 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
 6. Controllare i build logs e risolvere eventuali env mancanti.
 7. Aprire il dominio assegnato e testare login + percorsi demo principali.
 
+### 5.1 Rilascio Production su app.noetra.it (obbligatorio)
+- Rilasciare esclusivamente con `npm run deploy:production -- --expected-commit <SHA completo>`
+  (`scripts/deploy/release-production.ts`). Lo script blocca il rilascio se: l'albero di lavoro non e pulito,
+  HEAD non coincide con il commit atteso o non e presente su `origin`, il dominio `app.noetra.it` e legato a un
+  branch Git, a un ambiente personalizzato o a un redirect, mancano variabili Production obbligatorie, il deployment
+  non ha target `production`, non e `READY`, ha commit diverso o sorgente sporca. Dopo il rilascio verifica che
+  l'alias risolva allo stesso deployment e che `/login` risponda 200.
+- Verifica in sola lettura dello stato corrente: `npm run deploy:production -- --expected-commit <SHA> --verify-only`.
+- Vietato `vercel alias set` manuale verso URL Preview. In ogni caso il middleware risponde 421 a qualsiasi
+  richiesta su `app.noetra.it` servita da un deployment con `VERCEL_ENV` diverso da `production`.
+- Causa dell'incidente del 03/11/2026: `app.noetra.it` era configurato come dominio di branch Git
+  (`staging-operativo`), quindi assegnabile a deployment Preview. Il legame e stato rimosso; lo script ne impedisce
+  la reintroduzione silenziosa.
+
 ## 6. Procedura database
 1. Creare un database PostgreSQL gestito (Prisma Postgres/Vercel o Supabase).
 2. Copiare la connection string cloud.

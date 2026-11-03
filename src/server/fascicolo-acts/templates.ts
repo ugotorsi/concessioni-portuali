@@ -20,6 +20,11 @@ export interface ActTemplate {
   body: string;
   source: "CATALOG" | "REPORT_PLAN";
   issueSemanticKey: string | null;
+  /**
+   * Issue profile and fact elements that make the template pertinent: it is recommended only when the
+   * report assesses that profile with every listed element documented (proven or indicated).
+   */
+  requires?: { readonly profile: string; readonly elements: readonly string[] };
 }
 
 export interface ActTemplateContext {
@@ -179,7 +184,70 @@ const CATALOG: readonly ActTemplate[] = [
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
   },
+  {
+    templateKey: "CATALOG:MESSA_IN_MORA_CANONE",
+    title: "Messa in mora per canone demaniale non versato o versato in parte",
+    legalBasis: "Titolo concessorio; art. 1219 c.c.; art. 47, lett. d), cod. nav. (solo se raggiunta la soglia di rate del titolo)",
+    phases: ["INITIAL", "INSTRUCTION"],
+    source: "CATALOG",
+    issueSemanticKey: null,
+    requires: { profile: "FEE_PAYMENT", elements: ["non-payment"] },
+    body: [
+      "Oggetto: canone demaniale – concessione n. [CONCESSIONE] – messa in mora.",
+      "Destinatario: [CONCESSIONARIO], [DOMICILIO DIGITALE].",
+      "Dalla documentazione contabile risulta quanto segue:\n- rata: [RATA E SCADENZA DA TITOLO]; importo dovuto: [IMPORTO DOVUTO];\n- versamenti ricevuti: [DATA, IMPORTO E CAUSALE DI CIASCUN VERSAMENTO];\n- residuo: [IMPORTO RESIDUO], oltre interessi nella misura di legge.",
+      "Imputazione dei versamenti: [IMPUTAZIONE AI SENSI DELL'ART. 1193 C.C. O DICHIARATA DAL DEBITORE].",
+      "Si invita al versamento del residuo entro [TERMINE] giorni dal ricevimento, con l'avvertenza che in mancanza si procederà al recupero coattivo [ED ESCUSSIONE DELLA GARANZIA, SE PREVISTA DAL TITOLO].",
+      "[SOLO SE VERIFICATO NEL TITOLO: si rappresenta che l'omesso pagamento di [NUMERO] rate costituisce causa di decadenza ai sensi dell'art. 47, lett. d), cod. nav. e della clausola [CLAUSOLA] del titolo.]",
+      "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
+      HUMAN_APPROVAL_NOTICE,
+    ].join("\n\n"),
+  },
+  {
+    templateKey: "CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI",
+    title: "Diffida ad adempiere agli obblighi di investimento del programma di attività",
+    legalBasis: "Art. 18, commi 10 e 11, L. 84/1994; art. 9 D.I. 202/2022; titolo concessorio",
+    phases: ["INITIAL", "INSTRUCTION"],
+    source: "CATALOG",
+    issueSemanticKey: null,
+    requires: { profile: "INVESTMENT_DEFAULT", elements: ["obligation", "non-performance"] },
+    body: [
+      "Oggetto: concessione n. [CONCESSIONE] – stato di attuazione del programma di attività e degli investimenti – diffida ad adempiere.",
+      "Obblighi del titolo e del programma: [INTERVENTO, CLAUSOLA, TERMINE PREVISTO].",
+      "Esito della verifica del [DATA VERIFICA] (art. 18, comma 10, L. 84/1994; art. 9 D.I. 202/2022): [STATO DI AVANZAMENTO CON RIFERIMENTO AL VERBALE].",
+      "Prima di valutare ulteriori misure, si invita il concessionario a:\n1. completare gli interventi indicati entro [TERMINE];\n2. comunicare eventuali cause non imputabili, ritardi autorizzativi o istanze di revisione del programma, con la relativa documentazione.",
+      "Si rappresenta che la decadenza ai sensi dell'art. 18, comma 11, presuppone l'inosservanza degli obblighi «senza giustificato motivo» e che penali possono essere applicate solo se predeterminate nel titolo o nel bando.",
+      "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
+      HUMAN_APPROVAL_NOTICE,
+    ].join("\n\n"),
+  },
+  {
+    templateKey: "CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI",
+    title: "Richiesta di chiarimenti e invito a regolarizzare l'uso del bene da parte di terzi",
+    legalBasis: "Art. 18, comma 9, L. 84/1994; artt. 45-bis e 46 cod. nav.; art. 6 L. 241/1990",
+    phases: ["INITIAL", "INSTRUCTION"],
+    source: "CATALOG",
+    issueSemanticKey: null,
+    requires: { profile: "THIRD_PARTY_USE", elements: ["third-party-use"] },
+    body: [
+      "Oggetto: concessione n. [CONCESSIONE] – utilizzo di [AREA O MANUFATTO] da parte di [SOGGETTO TERZO].",
+      "Dai documenti acquisiti risulta che [SOGGETTO TERZO] utilizza [AREA O MANUFATTO] in forza di [CONTRATTO O TITOLO DICHIARATO] ([DOCUMENTO E PAGINA]).",
+      "Non risulta agli atti un'autorizzazione dell'autorità concedente all'affidamento ad altri delle attività oggetto della concessione (art. 45-bis cod. nav.; art. 18, comma 9, ultimo periodo, L. 84/1994) né al subingresso (art. 46 cod. nav.).",
+      "Si chiede di trasmettere entro [TERMINE] giorni: il contratto con il terzo, la descrizione delle attività svolte, la loro durata e il rapporto con l'oggetto del titolo, nonché ogni assenso eventualmente ottenuto.",
+      "Si avverte che, all'esito, l'Amministrazione valuterà l'eventuale regolarizzazione o, in mancanza dei presupposti, la contestazione degli addebiti ai sensi dell'art. 47 cod. nav. e dell'art. 18, comma 11, L. 84/1994.",
+      "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
+      HUMAN_APPROVAL_NOTICE,
+    ].join("\n\n"),
+  },
 ];
+
+/** Templates whose act has already been performed according to the authoritative metadata. */
+function alreadyPerformed(template: ActTemplate, context: StructuredReportProceduralContext | undefined): boolean {
+  if (!context) return false;
+  if (template.templateKey === "CATALOG:COMUNICAZIONE_AVVIO") return context.comunicazioneAvvioInviata;
+  if (template.templateKey === "CATALOG:CONTESTAZIONE_DECADENZA") return context.contestazioneFormaleInviata;
+  return false;
+}
 
 function concludedFromContext(context: StructuredReportProceduralContext | undefined): boolean {
   if (!context) return false;
@@ -200,7 +268,7 @@ const REVIEW_SIGNAL = /riesame|autotutela/i;
 const TENTATIVE_SIGNAL = /\b(?:propost\w*|schema|bozza|ipotes\w*|eventual\w*|possibil\w*|preannunci\w*|intendimento|ai fini (?:della|di una)|potrebbe|potrà)\b/i;
 
 type PhasePayload = Pick<StructuredFascicoloReportPayload, "proceduralContext" | "operationalPlans">
-  & Partial<Pick<StructuredFascicoloReportPayload, "documentedFramework">>;
+  & Partial<Pick<StructuredFascicoloReportPayload, "documentedFramework" | "legalApplication" | "portRegime">>;
 
 function documentaryEvidence(payload: PhasePayload | null): readonly string[] {
   const framework = payload?.documentedFramework;
@@ -263,7 +331,7 @@ export function fillTemplatePlaceholders(
   );
 }
 
-function planTemplates(payload: Pick<StructuredFascicoloReportPayload, "operationalPlans"> | null): ActTemplate[] {
+function planTemplates(payload: Pick<StructuredFascicoloReportPayload, "operationalPlans"> | null, phase: ActPhase): ActTemplate[] {
   const templates = new Map<string, ActTemplate>();
   for (const plan of payload?.operationalPlans ?? []) {
     for (const step of plan.steps) {
@@ -274,8 +342,8 @@ function planTemplates(payload: Pick<StructuredFascicoloReportPayload, "operatio
       templates.set(templateKey, {
         templateKey,
         title,
-        legalBasis: "Percorso operativo del rapporto professionale",
-        phases: ["POST_DECISION"],
+        legalBasis: `Percorso operativo del rapporto professionale – ${plan.issueText}`,
+        phases: [phase],
         body: step.draftTemplate,
         source: "REPORT_PLAN",
         issueSemanticKey: plan.issueSemanticKey,
@@ -295,12 +363,37 @@ export function buildActTemplateCatalog(input: {
     ...template,
     body: fillTemplatePlaceholders(template.body, input.payload, input.context),
   });
-  const fromPlans = planTemplates(input.payload).map(fill);
+  const applications = input.payload?.legalApplication ?? [];
+  const documented = (status: string) => status === "PROVEN" || status === "INDICATED";
+  const requirementMet = (requires: NonNullable<ActTemplate["requires"]>) => applications.some((entry) => {
+    const analysis = entry.elementAnalysis;
+    return analysis?.profileId === requires.profile && requires.elements.every((elementId) =>
+      documented((analysis.elements ?? []).find((element) => element.elementId === elementId)?.status ?? "NOT_PROVEN"));
+  });
+  // Decadence is contestable only where a profile has all substantive core elements documented,
+  // or where an unprofiled issue explicitly concerns a breach; legacy payloads keep the generic behaviour.
+  const decadenceContestable = applications.length === 0 || applications.some((entry) => {
+    const analysis = entry.elementAnalysis;
+    if (!analysis) return /decadenz|inadempi|violazion|abusiv|omess|mancat\w* (?:pagament|esecuzion)/i.test(entry.issueText);
+    return (analysis.elements ?? []).filter((element) => element.core).every((element) => documented(element.status));
+  });
+  const concessionMatter = applications.length === 0
+    || Boolean(input.payload?.proceduralContext?.concessione)
+    || Boolean(input.payload?.portRegime)
+    || applications.some((entry) => /concession|demani|banchin|portual|canone/i.test(entry.issueText))
+    || documentaryEvidence(input.payload).some((text) => /concession\w* demanial|demanio marittim|area demanial/i.test(text));
+  const pertinent = (template: ActTemplate) =>
+    template.phases.includes(phase)
+    && concessionMatter
+    && !alreadyPerformed(template, input.payload?.proceduralContext)
+    && (template.templateKey !== "CATALOG:CONTESTAZIONE_DECADENZA" || decadenceContestable)
+    && (!template.requires || requirementMet(template.requires));
+  const fromPlans = planTemplates(input.payload, phase).map(fill);
   const catalog = CATALOG.map(fill);
   return {
     ...detection,
-    recommended: [...fromPlans, ...catalog.filter((template) => template.phases.includes(phase))],
-    others: catalog.filter((template) => !template.phases.includes(phase)),
+    recommended: [...fromPlans, ...catalog.filter(pertinent)],
+    others: catalog.filter((template) => !pertinent(template)),
   };
 }
 

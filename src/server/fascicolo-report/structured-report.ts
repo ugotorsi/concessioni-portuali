@@ -3,9 +3,12 @@ import { createHash } from "node:crypto";
 import { stableStringify } from "@/server/audit/hash";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
 
-import { buildLegalApplication, type StructuredReportLegalApplication } from "./legal-application";
+import { buildLegalApplication, extractIsoDates, type StructuredReportLegalApplication } from "./legal-application";
+import { assessIssueProfile, LEGAL_ELEMENT_STATUS_LABELS, type LegalIssueProfileAssessment } from "./legal-issue-profiles";
+import { buildPortRegimeCoordination, isPortConcessionMatter, type PortRegimeCoordination } from "./port-regime";
 
 export type { StructuredReportLegalApplication } from "./legal-application";
+export type { PortRegimeCoordination } from "./port-regime";
 
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
 
@@ -182,6 +185,8 @@ export interface StructuredFascicoloReportPayload {
   regulatoryApplicability?: readonly StructuredReportRegulatoryApplicability[];
   /** Additive fact-to-law application with temporal reasoning. Older archived V1 reports may omit this field. */
   legalApplication?: readonly StructuredReportLegalApplication[];
+  /** Additive date-driven coordination of the port-concession regime. Older reports may omit it. */
+  portRegime?: PortRegimeCoordination | null;
   limitations: readonly string[];
 }
 
@@ -275,6 +280,89 @@ function projectQuestion(
     gaps,
     limitations,
   };
+}
+
+const DEFAULT_DECISION_OPTIONS = "Scegliere fra archiviazione, regolarizzazione con prescrizioni, penali se predeterminate nel titolo, ripristino o decadenza.";
+
+const PROFILE_DECISION_OPTIONS: Record<string, string> = {
+  THIRD_PARTY_USE: "Scegliere fra archiviazione, regolarizzazione mediante autorizzazione (art. 45-bis cod. nav.; art. 18, comma 9, ultimo periodo, L. 84/1994) se l'attività è affidabile, diffida a cessare l'uso non autorizzato entro un termine, e decadenza (art. 47, lett. e, cod. nav.; art. 18, comma 11, L. 84/1994) solo come misura proporzionata alla gravità e alla durata.",
+  INVESTMENT_DEFAULT: "Scegliere fra archiviazione per giustificato motivo, diffida ad adempiere con nuovo cronoprogramma, revisione del programma o del PEF (con notifica ad ART se successiva al 01/03/2026), penali solo se predeterminate nel bando o nel titolo, e decadenza come extrema ratio.",
+  UNAUTHORIZED_OCCUPATION: "Scegliere fra archiviazione, variazione assentita del titolo se compatibile (art. 24 reg. nav. mar.), ingiunzione di sgombero e rimessa in pristino (art. 54 cod. nav., potere autonomo dalla decadenza), decadenza solo per inosservanza grave degli obblighi del titolo, e segnalazione all'autorità giudiziaria se ne ricorrono i presupposti.",
+  FEE_PAYMENT: "Scegliere fra messa in mora e recupero del credito con interessi, imputazione dei versamenti, rateizzazione se ammessa dall'ente, escussione della garanzia se prevista dal titolo, e decadenza (art. 47, lett. d, cod. nav.) solo se è raggiunto il numero di rate omesse fissato dall'atto di concessione.",
+};
+
+function profileOperationalSteps(
+  issueText: string,
+  profile: LegalIssueProfileAssessment,
+): StructuredReportOperationalStep[] {
+  const subject = issueText.length > 90 ? `${issueText.slice(0, 87).trimEnd()}…` : issueText;
+  const substantive = profile.elements.filter((element) => element.elementId !== "contraddittorio");
+  const contraddittorio = profile.elements.find((element) => element.elementId === "contraddittorio");
+  const open = substantive.filter((element) => element.status !== "PROVEN");
+  const coreMet = substantive.filter((element) => element.core)
+    .every((element) => element.status === "PROVEN" || element.status === "INDICATED");
+  const contrary = substantive.filter((element) => element.status === "CONTRARY_EVIDENCE");
+  const bases = [...new Set(substantive.flatMap((element) => element.legalBasis.split(/;\s*/)).map((basis) => basis.trim()).filter(Boolean))];
+  const contested = contraddittorio?.status === "PROVEN";
+  const decisionOptions = PROFILE_DECISION_OPTIONS[profile.profileId] ?? DEFAULT_DECISION_OPTIONS;
+  return [
+    {
+      title: `1. ${subject}: completare la prova dei requisiti`,
+      action: open.length
+        ? `Requisiti ancora da provare o confermare: ${open.map((element) =>
+          `${element.requirement} (${element.legalBasis}) — ${LEGAL_ELEMENT_STATUS_LABELS[element.status].toLowerCase()}: ${element.reasoning}`).join(" ")}`
+        : "Tutti i requisiti della fattispecie risultano provati e confermati dal professionista: verificare soltanto che le prove siano aggiornate alla data della decisione.",
+      office: "Responsabile del procedimento e ufficio demanio dell'ente concedente, con ufficio tecnico per sopralluoghi e verifiche",
+      requiredDocuments: open.length
+        ? open.map((element) => `${element.requirement}: ${element.status === "NOT_PROVEN" ? element.reasoning.replace(/^Nessun riscontro documentale\.\s*/, "") : "conferma professionale delle evidenze indicate"}`)
+        : ["Evidenze già confermate, aggiornate alla data della decisione"],
+      completionGate: `Ogni requisito essenziale (${substantive.filter((element) => element.core).map((element) => element.requirement.toLowerCase()).join("; ")}) è provato oppure motivatamente escluso`,
+    },
+    {
+      title: `2. ${subject}: qualificazione giuridica`,
+      action: profile.qualification,
+      office: "Ufficio legale o concessioni dell'ente concedente; il professionista valida la qualificazione",
+      requiredDocuments: [...bases.map((basis) => `Testo vigente alla data dei fatti: ${basis}`), "Titolo concessorio e programma di attività con prescrizioni pertinenti"],
+      completionGate: contrary.length
+        ? `Gli elementi contrari o giustificativi (${contrary.map((element) => element.requirement.toLowerCase()).join("; ")}) sono stati valutati espressamente`
+        : "Qualificazione motivata e validata dal professionista",
+    },
+    {
+      title: `3. ${subject}: ${contested ? "valutare le deduzioni del concessionario" : "contestazione degli addebiti"}`,
+      action: contested
+        ? `Contestazione già registrata. ${contraddittorio?.reasoning ?? ""} Valutare ogni deduzione rispetto ai singoli requisiti prima di qualsiasi misura.`
+        : coreMet
+          ? `Predisporre la contestazione degli addebiti indicando per ciascuno fatti e pagine di riscontro, norme violate (${bases.join("; ")}) e termine per le deduzioni ai sensi dell'art. 47, ultimo comma, cod. nav. e degli artt. 7 e 10 L. 241/1990.`
+          : "Non avviare la contestazione finché i requisiti essenziali indicati al punto 1 non sono documentati: una contestazione priva di prova espone l'atto ad annullamento per difetto di istruttoria.",
+      office: "Responsabile del procedimento dell'autorità concedente competente",
+      requiredDocuments: ["Relazione istruttoria con le prove del punto 1", "Bozza di contestazione dalla sezione Atti", "Prova della notificazione e del termine assegnato"],
+      completionGate: contested
+        ? "Ogni deduzione ha ricevuto una valutazione espressa"
+        : "Contestazione notificata con termine per le deduzioni, oppure motivata decisione di non procedere",
+      ...(contested || !coreMet ? {} : {
+        draftTitle: "Contestazione degli addebiti",
+        draftTemplate: [
+          `Oggetto: contestazione degli addebiti — ${subject}.`,
+          `Elementi risultanti dal fascicolo (da confermare prima della notifica):\n${substantive
+            .filter((element) => element.status === "PROVEN" || element.status === "INDICATED")
+            .map((element) => `- ${element.requirement} (${element.legalBasis}): ${element.reasoning}`)
+            .join("\n")}`,
+          `Qualificazione proposta: ${profile.qualification}`,
+          `Norme: ${bases.join("; ")}, nel testo vigente alla data delle condotte.`,
+          "Termine per le deduzioni e per chiedere l'audizione: [TERMINE DA VERIFICARE] giorni (art. 47, ultimo comma, cod. nav.; artt. 7 e 10 L. 241/1990).",
+          "Organo competente: [ORGANO DA VERIFICARE]. Responsabile del procedimento: [RESPONSABILE].",
+          "Bozza soggetta ad approvazione umana; nessuna notifica automatica.",
+        ].join("\n\n"),
+      }),
+    },
+    {
+      title: `4. ${subject}: decisione motivata e proporzionata`,
+      action: `${decisionOptions} Motivare su ciascun requisito, sulle deduzioni e sulla proporzionalità rispetto a gravità e durata della condotta.`,
+      office: "Organo dell'ente concedente competente per il provvedimento",
+      requiredDocuments: ["Esito motivato per ciascun requisito", "Valutazione delle deduzioni", "Schema di provvedimento e piano di verifica degli adempimenti"],
+      completionGate: "Autorizzazione umana all'adozione dopo verifica di competenza, motivazione e garanzie",
+    },
+  ];
 }
 
 function buildOperationalPlans(
@@ -374,7 +462,19 @@ function buildOperationalPlans(
         completionGate: "Motivazione, competenza, garanzie e verifiche professionali completate; autorizzazione umana all'adozione",
       },
     ];
-    const steps = proceedingConcluded ? postDecisionSteps : preDecisionSteps;
+    const profile = proceedingConcluded ? null : assessIssueProfile({
+      issueText: issue.text,
+      relatedItems: related,
+      analysisDate: new Date(knowledge.revision.createdAt).toISOString().slice(0, 10),
+      procedural: proceduralContext ? {
+        contestazioneFormaleInviata: proceduralContext.contestazioneFormaleInviata ?? false,
+        memorieRicevute: proceduralContext.memorieRicevute ?? false,
+        controdeduzioniValutate: proceduralContext.controdeduzioniValutate ?? false,
+      } : null,
+    });
+    const steps = proceedingConcluded
+      ? postDecisionSteps
+      : profile ? profileOperationalSteps(issue.text, profile) : preDecisionSteps;
     const alternatives: StructuredReportOperationalAlternative[] = concernsInstallation ? [
       {
         title: "Valutare il procedimento di decadenza (art. 47 cod. nav.)",
@@ -453,12 +553,15 @@ const ART_242_SOURCE_URL = "https://www.autorita-trasporti.it/wp-content/uploads
 
 function buildRegulatoryApplicability(
   context?: StructuredReportProceduralContext,
+  documentedGrantDate?: string | null,
 ): readonly StructuredReportRegulatoryApplicability[] {
-  if (!context?.concessione) return [];
-  const preExisting = context.concessione.dataRilascio < "2026-03-01";
-  const applicability = preExisting
-    ? "Concessione preesistente: applicazione dal 1 marzo 2026 nei limiti della misura 1.2, punto iii; nessuna qualificazione retroattiva delle condotte anteriori."
-    : "Concessione rilasciata dopo l'entrata in vigore: verificare l'intero atto di regolazione e la disciplina della procedura di rilascio.";
+  const grantDate = context?.concessione?.dataRilascio.slice(0, 10) ?? documentedGrantDate ?? null;
+  if (!grantDate) return [];
+  const preExisting = grantDate < "2026-03-01";
+  const basis = context?.concessione ? "" : " Data del titolo ricavata dai documenti: confermarla collegando la concessione nel registro.";
+  const applicability = (preExisting
+    ? "Concessione preesistente: applicazione dal 1 marzo 2026 nei limiti della misura 1.2, punto iii; nessuna qualificazione retroattiva delle condotte anteriori; l'intero atto si applica a modifiche del contenuto e vicende soggettive successive (punto ii)."
+    : "Concessione rilasciata dopo l'entrata in vigore: verificare l'intero atto di regolazione e la disciplina della procedura di rilascio.") + basis;
   const row = (
     measure: string,
     trigger: string,
@@ -551,6 +654,21 @@ export function buildStructuredFascicoloReport(input: {
     resultId: result.resultId,
     assessment: result.sourceAssessment,
   }))).sort(byId);
+  const applicationItems = [...new Map([
+    ...input.knowledge.facts, ...input.knowledge.events, ...input.knowledge.legalActs,
+    ...input.knowledge.measures, ...input.knowledge.timeline,
+  ].map((item) => [item.id, normalizedItem(item)])).values()].sort(byId);
+  const analysisDate = new Date(input.knowledge.revision.createdAt).toISOString().slice(0, 10);
+  const portRegime = isPortConcessionMatter({
+    tipologia: input.proceduralContext?.tipologia,
+    knowledgeItems: [...applicationItems, ...visibleItems(input.knowledge.gaps)],
+    issueTexts: [...legalIssues.map((issue) => issue.text), ...questions.map((question) => question.text)],
+  }) ? buildPortRegimeCoordination({
+      knowledgeItems: applicationItems,
+      analysisDate,
+      registryGrant: input.proceduralContext?.concessione ?? null,
+      extractIsoDates,
+    }) : null;
   const payload: StructuredFascicoloReportPayload = {
     contractVersion: STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION,
     tenantId: input.tenantId,
@@ -575,7 +693,8 @@ export function buildStructuredFascicoloReport(input: {
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
     operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext),
-    regulatoryApplicability: buildRegulatoryApplicability(input.proceduralContext),
+    regulatoryApplicability: buildRegulatoryApplicability(input.proceduralContext, portRegime?.grantDate.date),
+    portRegime,
     legalApplication: buildLegalApplication({
       issues: legalIssues.map((issue) => {
         const toAuthority = (authority: StructuredReportAuthority) => ({
@@ -591,12 +710,10 @@ export function buildStructuredFascicoloReport(input: {
           contraryAuthorities: dedupe(issue.questions.flatMap((question) => question.contraryAuthorities.map(toAuthority))),
         };
       }),
-      knowledgeItems: [...new Map([
-        ...input.knowledge.facts, ...input.knowledge.events, ...input.knowledge.legalActs,
-        ...input.knowledge.measures, ...input.knowledge.timeline,
-      ].map((item) => [item.id, normalizedItem(item)])).values()].sort(byId),
-      analysisDate: new Date(input.knowledge.revision.createdAt).toISOString().slice(0, 10),
+      knowledgeItems: applicationItems,
+      analysisDate,
       context: input.proceduralContext,
+      documentedGrantDate: portRegime?.grantDate.date ?? null,
     }),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,

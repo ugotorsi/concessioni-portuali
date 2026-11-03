@@ -1,4 +1,5 @@
 import type { StructuredKnowledgeReadItem } from "@/server/queries/fascicolo-knowledge";
+import { assessIssueProfile, type LegalIssueProfileAssessment } from "./legal-issue-profiles";
 
 /**
  * Deterministic fact-to-law application. Rules are a curated catalogue of official
@@ -46,6 +47,8 @@ export interface StructuredReportLegalApplication {
   conclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES" | "NORMATIVE_ONLY_PRELIMINARY";
   conclusion: string;
   consequences: readonly string[];
+  /** Additive element-by-element assessment of the fattispecie. Older reports may omit it. */
+  elementAnalysis?: LegalIssueProfileAssessment | null;
 }
 
 export interface LegalApplicationContext {
@@ -55,6 +58,9 @@ export interface LegalApplicationContext {
   finalAct: { numeroAtto: string; dataAtto: string } | null;
   concessione: { numeroAtto: string; dataRilascio: string } | null;
   documentTitles: readonly string[];
+  contestazioneFormaleInviata?: boolean;
+  memorieRicevute?: boolean;
+  controdeduzioniValutate?: boolean;
 }
 
 export interface LegalApplicationIssueInput {
@@ -99,7 +105,7 @@ const CATALOG: readonly CatalogRule[] = [
     effectiveFrom: "1942-04-21",
     effectiveFromYear: 1942,
     normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art47",
-    application: "La decadenza richiede la prova di una delle fattispecie tipiche (in particolare lett. f per inadempimento degli obblighi del titolo; lett. c per mutamento sostanziale non autorizzato dello scopo), la previa fissazione di un termine per le deduzioni e una decisione motivata dell'autorità concedente (art. 48 cod. nav.).",
+    application: "La decadenza richiede la prova di una delle fattispecie tipiche: a) mancata esecuzione delle opere prescritte o mancato inizio della gestione nei termini; b) non uso continuato o cattivo uso; c) mutamento sostanziale non autorizzato dello scopo; d) omesso pagamento del canone per il numero di rate fissato dall'atto; e) abusiva sostituzione di altri nel godimento della concessione; f) inadempienza degli obblighi del titolo o di legge. Occorrono la previa fissazione di un termine per le deduzioni e una decisione motivata; per le lett. a) e b) è ammessa la proroga.",
     favorable: "Se l'inadempimento di obblighi espressi del titolo è documentato e persistente, la fattispecie tipica dell'art. 47 offre base legale alla decadenza.",
     contrary: "La decadenza non è automatica: difetti di tipicità, di prova, di contraddittorio o di proporzionalità, ovvero la regolarizzazione o la tolleranza dell'amministrazione, possono renderla illegittima.",
   },
@@ -126,9 +132,35 @@ const CATALOG: readonly CatalogRule[] = [
     effectiveFromYear: 1994,
     versions: [{ from: "2022-08-27", label: "testo modificato dall'art. 5 della L. 5 agosto 2022, n. 118" }],
     normattivaUrn: "urn:nir:stato:legge:1994-01-28;84~art18",
-    application: "Il rapporto concessorio portuale va letto alla luce dei requisiti e degli impegni del titolo (programma di attività e investimenti, PEF, traffici e occupazione) e dei poteri di vigilanza dell'Autorità di sistema portuale.",
-    favorable: "Il mancato rispetto degli impegni del programma di attività e degli obblighi del titolo è rilevante ai fini della vigilanza e delle misure previste dal titolo e dalla legge.",
-    contrary: "Gli scostamenti dal programma devono essere valutati alla luce di cause non imputabili, revisioni autorizzate del PEF e clausole del titolo; la versione dell'art. 18 applicabile dipende dalla data dell'atto.",
+    application: "Il rapporto concessorio portuale va letto alla luce dei requisiti e degli impegni del titolo (comma 8: programma di attività assistito da garanzie, attrezzature, organico), dell'obbligo di esercizio diretto e del divieto di operare in spazi diversi da quelli assegnati (comma 9, che consente l'affidamento autorizzato ad imprese ex art. 16 di attività del ciclo operativo), delle verifiche annuali (comma 10) e della decadenza per inosservanza degli obblighi o mancato raggiungimento degli obiettivi del programma senza giustificato motivo (comma 11).",
+    favorable: "Il mancato rispetto degli impegni del programma di attività e degli obblighi del titolo, senza giustificato motivo, fonda la decadenza speciale dell'art. 18, comma 11, nel rispetto della L. 241/1990.",
+    contrary: "Il comma 11 esclude la decadenza in presenza di giustificato motivo: cause non imputabili, revisioni autorizzate del programma o del PEF e clausole del titolo vanno valutate; la versione dell'art. 18 applicabile al rilascio dipende dalla data della procedura.",
+  },
+  {
+    id: "COD_NAV_45BIS",
+    citation: "Art. 45-bis cod. nav.",
+    subject: "Affidamento ad altri soggetti delle attività oggetto della concessione",
+    anchor: "CONDUCT",
+    trigger: /affid\w*[^.]{0,40}(?:a terz|ad altr)|terz\w* operator|gestion\w* (?:affidat|da parte di terz)|sub-?affid|sub-?concession/i,
+    effectiveFrom: null,
+    effectiveFromYear: 1993,
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art45bis",
+    application: "Il concessionario può affidare ad altri soggetti la gestione delle attività oggetto della concessione solo previa autorizzazione, in casi eccezionali e per periodi determinati; la gestione di attività secondarie può essere affidata previa autorizzazione. In ambito portuale la norma si coordina con l'obbligo di esercizio diretto dell'art. 18, comma 9, L. 84/1994.",
+    favorable: "L'affidamento senza autorizzazione dell'autorità concedente è contrario all'art. 45-bis e rileva ai fini dell'art. 47, lett. e) e f).",
+    contrary: "Se l'attività affidata è secondaria o temporanea, l'ordinamento ammette l'autorizzazione: la regolarizzazione può essere il rimedio proporzionato.",
+  },
+  {
+    id: "COD_NAV_46",
+    citation: "Art. 46 cod. nav.",
+    subject: "Subingresso nella concessione",
+    anchor: "CONDUCT",
+    trigger: /subingress|sostituzion\w* (?:di altri|nel godimento)|cession\w* (?:della concessione|del titolo)|trasferiment\w* della concessione/i,
+    effectiveFrom: "1942-04-21",
+    effectiveFromYear: 1942,
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art46",
+    application: "La sostituzione di altri nel godimento della concessione richiede l'autorizzazione dell'autorità concedente; in mancanza, la sostituzione è inopponibile all'amministrazione e integra la causa di decadenza dell'art. 47, lett. e).",
+    favorable: "La sostituzione non autorizzata nel godimento integra una fattispecie tipica di decadenza.",
+    contrary: "Un rapporto contrattuale che non trasferisce il godimento del bene (es. servizi resi al concessionario) non è subingresso.",
   },
   {
     id: "L84_ART16",
@@ -172,16 +204,16 @@ const CATALOG: readonly CatalogRule[] = [
   },
   {
     id: "DM_202_2022",
-    citation: "D.M. 28 dicembre 2022, n. 202",
+    citation: "D.I. 28 dicembre 2022, n. 202",
     subject: "Regolamento per il rilascio delle concessioni di aree e banchine portuali",
     anchor: "GRANT",
-    trigger: /rilascio|istanz\w* di concession|procedur\w* (?:comparativ|selettiv|ad evidenza)|durata|rinnovo|estension\w* della durata/i,
+    trigger: /rilascio|istanz\w* di concession|procedur\w* (?:comparativ|selettiv|ad evidenza)|durata|rinnovo|estension\w* della durata|vicend\w* soggettiv|trasferiment\w* di quote|verific\w* annual/i,
     effectiveFrom: "2023-01-15",
     effectiveFromYear: 2023,
     normattivaUrn: "urn:nir:ministero.infrastrutture.e.trasporti:decreto:2022-12-28;202",
-    application: "Il regolamento disciplina le procedure di rilascio, durata ed estensione delle concessioni ex art. 18; si applica alle procedure e alle istanze successive alla sua entrata in vigore.",
-    favorable: "Per istanze presentate dal 15 gennaio 2023 il regolamento fissa criteri di trasparenza, valutazione del PEF e durata vincolanti per l'Autorità.",
-    contrary: "Non disciplina retroattivamente titoli rilasciati prima della sua entrata in vigore, salvo che per istanze successive di modifica o estensione.",
+    application: "Il regolamento disciplina rilascio, durata, canoni ed estensione delle concessioni ex art. 18. Per i titoli rilasciati dal 15/01/2023 si applica integralmente; per quelli anteriori l'art. 10, comma 1, rende applicabili soltanto gli artt. 6 (modifica del contenuto ed estensione della durata fino a cinque anni), 7 (vicende soggettive), 8 (avvicendamento) e 9 (verifiche annuali), con rivalutazione ISTAT dei canoni (art. 10, comma 2).",
+    favorable: "Per titoli successivi al 15/01/2023 il regolamento fissa criteri di trasparenza, valutazione del PEF e durata vincolanti; gli artt. 6-9 si applicano comunque a modifiche, vicende soggettive e verifiche successive.",
+    contrary: "Per i titoli anteriori al 15/01/2023 le regole di rilascio, durata e canone del regolamento non si applicano (art. 10, comma 1).",
   },
   {
     id: "DM_110_2023",
@@ -218,7 +250,7 @@ const CATALOG: readonly CatalogRule[] = [
     effectiveFrom: "2026-03-01",
     effectiveFromYear: 2026,
     officialUrl: "https://www.autorita-trasporti.it/wp-content/uploads/2025/12/All.-A-delibera-n.-242_2025_signed.pdf",
-    application: "Per le concessioni preesistenti le misure si applicano dal 1° marzo 2026 nei limiti della misura 1.2, punto iii: obblighi informativi, contabilità separata, monitoraggio e notifiche ad ART per istanze di revisione o estensione successive.",
+    application: "Le misure entrano in vigore il 1° marzo 2026 (misura 16.1). Si applicano integralmente alle concessioni non ancora rilasciate a tale data (misura 1.2, punto i) e, per le concessioni anteriori, agli aggiornamenti o revisioni che modificano il contenuto del titolo e alle vicende soggettive successive (punto ii); per le concessioni in essere valgono soltanto le misure 3.7, 3.13, 3.18, 3.19, 3.20, 4, 5 e 15 (punto iii): vigilanza e notifica ad ART delle istanze di revisione, monitoraggio annuale, parere ART sulle estensioni di durata, contabilità regolatoria e obblighi informativi.",
     favorable: "Dal 1° marzo 2026 l'Autorità di sistema portuale deve esercitare vigilanza e comunicazioni ad ART secondo le misure applicabili.",
     contrary: "La delibera non qualifica retroattivamente condotte anteriori al 1° marzo 2026 né altera atti già adottati prima di tale data.",
   },
@@ -327,6 +359,8 @@ export function buildLegalApplication(input: {
   knowledgeItems: readonly StructuredKnowledgeReadItem[];
   analysisDate: string;
   context?: LegalApplicationContext;
+  /** Grant date reconstructed by the port-regime coordination when the registry is not linked. */
+  documentedGrantDate?: string | null;
 }): readonly StructuredReportLegalApplication[] {
   const items = input.knowledgeItems.filter((item) => item.status !== "REJECTED");
   const allTexts = items.map((item) => item.normalizedText);
@@ -337,6 +371,7 @@ export function buildLegalApplication(input: {
     : false;
   const reviewPending = input.context?.documentTitles.some((title) => /riesame|autotutela/i.test(title)) ?? false;
   const grantDate = isoDay(input.context?.concessione?.dataRilascio)
+    ?? input.documentedGrantDate
     ?? firstDate(allTexts, /concession\w*[^.]{0,40}(?:n\.|numero|rilasciat|del)/i);
   const decisionDate = isoDay(input.context?.finalAct?.dataAtto) ?? isoDay(input.context?.dataProvvedimentoFinale)
     ?? (concluded ? firstDate(allTexts, /provvediment\w* (?:finale|di decadenza)|decret\w*|determinazion\w*/i) : null);
@@ -354,7 +389,18 @@ export function buildLegalApplication(input: {
       ...(decisionDate ? [{ label: "Provvedimento finale", date: decisionDate, basis: "Data dell'atto conclusivo" }] : []),
       { label: "Analisi", date: input.analysisDate, basis: "Revisione del quadro documentale utilizzata" },
     ];
-    const rules = CATALOG.filter((rule) => rule.trigger.test(caseText)).map((rule) => {
+    const elementAnalysis = assessIssueProfile({
+      issueText: issue.text,
+      relatedItems: related,
+      analysisDate: input.analysisDate,
+      procedural: input.context ? {
+        contestazioneFormaleInviata: input.context.contestazioneFormaleInviata ?? false,
+        memorieRicevute: input.context.memorieRicevute ?? false,
+        controdeduzioniValutate: input.context.controdeduzioniValutate ?? false,
+      } : null,
+    });
+    const profileRuleIds = new Set(elementAnalysis?.ruleIds ?? []);
+    const rules = CATALOG.filter((rule) => profileRuleIds.has(rule.id) || rule.trigger.test(caseText)).map((rule) => {
       const referenceDate = rule.anchor === "CONDUCT" ? conductDate
         : rule.anchor === "GRANT" ? grantDate
           : rule.anchor === "ACT" ? actDate
@@ -385,7 +431,10 @@ export function buildLegalApplication(input: {
     const grounded = issue.favorableAuthorities.length + issue.contraryAuthorities.length > 0;
     const excluded = rules.filter((rule) => ["NOT_APPLICABLE_RATIONE_TEMPORIS", "PROSPECTIVE_ONLY"].includes(rule.temporalStatus));
     const undetermined = rules.filter((rule) => rule.temporalStatus === "DATE_TO_VERIFY");
+    const missingCore = elementAnalysis?.elements.filter((element) => element.core && element.status === "NOT_PROVEN") ?? [];
     const conclusion = [
+      elementAnalysis ? `Qualificazione: ${elementAnalysis.qualification}` : "",
+      missingCore.length ? `Requisiti ancora privi di prova: ${missingCore.map((element) => element.requirement.charAt(0).toLowerCase() + element.requirement.slice(1)).join("; ")}.` : "",
       operative.length
         ? `La questione va decisa alla luce di ${operative.map((rule) => rule.citation).join("; ")}, nella versione vigente alla data rilevante per ciascuna disposizione.`
         : "Dai documenti non emerge una disposizione del catalogo verificato sicuramente applicabile: la qualificazione richiede l'individuazione professionale della norma.",
@@ -420,6 +469,7 @@ export function buildLegalApplication(input: {
       conclusionStatus: grounded ? "GROUNDED_ON_VERIFIED_AUTHORITIES" : "NORMATIVE_ONLY_PRELIMINARY",
       conclusion,
       consequences,
+      elementAnalysis,
     };
   });
 }

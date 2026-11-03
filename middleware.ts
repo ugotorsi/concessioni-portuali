@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { isMisroutedProductionHost } from "@/lib/deployment-host-guard";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
@@ -105,6 +106,13 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  if (isMisroutedProductionHost(request.headers.get("host") ?? request.nextUrl.host, process.env.VERCEL_ENV)) {
+    const response = new NextResponse("Deployment non autorizzato per il dominio di produzione.", {
+      status: 421,
+      headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" },
+    });
+    return withSecurityHeaders(response);
+  }
   const rateLimitPolicy = getRateLimitPolicy(pathname);
 
   if (rateLimitPolicy) {

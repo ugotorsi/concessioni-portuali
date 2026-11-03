@@ -32,6 +32,13 @@ function professionalNotes(values: readonly string[]): string[] {
   return unique(values).filter((value) => !/\b[A-Z][A-Z0-9]{4,}\b/.test(value));
 }
 
+const ELEMENT_STATUS_TEXT = {
+  PROVEN: "provato",
+  INDICATED: "risulta dai documenti, da confermare",
+  NOT_PROVEN: "non provato",
+  CONTRARY_EVIDENCE: "elementi contrari o giustificativi",
+} as const;
+
 export function buildProfessionalReportDocument(
   snapshot: StructuredReportSnapshotRecord,
 ): ProfessionalReportDocument {
@@ -88,11 +95,24 @@ export function buildProfessionalReportDocument(
       paragraphs: authorities,
     },
     {
+      title: "Coordinamento del regime concessorio portuale",
+      paragraphs: payload.portRegime ? unique([
+        ...[payload.portRegime.procedureStartDate, payload.portRegime.grantDate].map((entry) =>
+          `${entry.label}: ${entry.date ? entry.date.split("-").reverse().join("/") : "da accertare"} — ${entry.basis}.`),
+        ...payload.portRegime.sources.map((source) =>
+          `${source.citation}. ${source.reasoning}${source.operativeConsequences.length ? ` Conseguenze: ${source.operativeConsequences.join(" ")}` : ""} Testo ufficiale: ${source.officialUrl}`),
+        `Conclusione: ${payload.portRegime.conclusion}`,
+        ...payload.portRegime.limits.map((limit) => `Limite: ${limit}`),
+      ]) : [],
+    },
+    {
       title: "Analisi giuridica: applicazione delle norme ai fatti",
       paragraphs: unique((payload.legalApplication ?? []).flatMap((item) => [
         `Questione: ${item.issueText}`,
         `Date rilevanti: ${item.relevantDates.map((date) => `${date.label} ${date.date.split("-").reverse().join("/")}`).join("; ")}.`,
         ...item.facts.map((fact) => `Fatto${fact.humanConfirmed ? "" : " (da confermare)"}: ${fact.text}${fact.pages.length ? ` (pag. ${fact.pages.join(", ")})` : ""}`),
+        ...(item.elementAnalysis?.elements ?? []).map((element) =>
+          `Elemento — ${element.requirement} (${element.legalBasis}): ${ELEMENT_STATUS_TEXT[element.status]}. ${element.reasoning}`),
         ...item.rules.map((rule) =>
           `${rule.citation} — ${rule.subject}. Vigenza: ${rule.temporalReasoning} Applicazione: ${rule.applicationToFacts} Testo ufficiale: ${rule.officialUrl}`),
         ...item.favorableArguments.map((argument) => `Argomento a sostegno — ${argument}`),

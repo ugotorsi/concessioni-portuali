@@ -166,6 +166,74 @@ describe("fascicolo act templates", () => {
     expect(plan.source).toBe("REPORT_PLAN");
     expect(plan.issueSemanticKey).toBe("issue-1");
     expect(plan.body).toBe("Oggetto: istanza di riesame relativa a provvedimento n. 12 del 2025-04-02.");
+    expect(plan.phases).toEqual(["POST_DECISION"]);
+    expect(catalog.recommended.map((template) => template.templateKey)).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+  });
+
+  it("recommends issue-specific facsimiles only for the issues present in the report", () => {
+    const required: Record<string, string[]> = {
+      FEE_PAYMENT: ["non-payment"],
+      INVESTMENT_DEFAULT: ["obligation", "non-performance"],
+      THIRD_PARTY_USE: ["third-party-use"],
+    };
+    const legalApplication = (profileIds: string[]) => profileIds.map((profileId) => ({
+      issueText: "Questione relativa alla concessione demaniale portuale",
+      elementAnalysis: {
+        profileId,
+        elements: (required[profileId] ?? []).map((elementId) => ({ elementId, status: "INDICATED", core: true })),
+      },
+    })) as never;
+    const fee = buildActTemplateCatalog({
+      payload: { proceduralContext: context(), legalApplication: legalApplication(["FEE_PAYMENT"]) },
+      context: templateContext,
+    });
+    const feeKeys = fee.recommended.map((template) => template.templateKey);
+    expect(feeKeys).toContain("CATALOG:MESSA_IN_MORA_CANONE");
+    expect(feeKeys).not.toContain("CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI");
+    expect(feeKeys).not.toContain("CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI");
+    expect(fee.others.map((template) => template.templateKey)).toContain("CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI");
+    const moraBody = findActTemplate(fee, "CATALOG:MESSA_IN_MORA_CANONE")?.body ?? "";
+    expect(moraBody).toContain("[TERMINE]");
+    expect(moraBody).toContain("[SOLO SE VERIFICATO NEL TITOLO");
+    expect(moraBody).not.toMatch(/\b\d{1,2}\/\d{2}\/\d{4}\b/);
+
+    const thirdParty = buildActTemplateCatalog({
+      payload: { proceduralContext: context(), legalApplication: legalApplication(["THIRD_PARTY_USE", "INVESTMENT_DEFAULT"]) },
+      context: templateContext,
+    });
+    expect(thirdParty.recommended.map((template) => template.templateKey)).toEqual(expect.arrayContaining([
+      "CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI",
+      "CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI",
+    ]));
+
+    const undocumented = buildActTemplateCatalog({
+      payload: {
+        proceduralContext: context(),
+        legalApplication: [{
+          issueText: "Inadempimento investimenti concessione portuale",
+          elementAnalysis: { profileId: "INVESTMENT_DEFAULT", elements: [
+            { elementId: "obligation", status: "INDICATED", core: true },
+            { elementId: "non-performance", status: "NOT_PROVEN", core: true },
+          ] },
+        }] as never,
+      },
+      context: templateContext,
+    });
+    const undocumentedKeys = undocumented.recommended.map((template) => template.templateKey);
+    expect(undocumentedKeys).not.toContain("CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI");
+    expect(undocumentedKeys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+  });
+
+  it("does not recommend acts already performed according to the procedural metadata", () => {
+    const catalog = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ comunicazioneAvvioInviata: true, contestazioneFormaleInviata: true }) },
+      context: templateContext,
+    });
+    expect(catalog.phase).toBe("INSTRUCTION");
+    const keys = catalog.recommended.map((template) => template.templateKey);
+    expect(keys).not.toContain("CATALOG:COMUNICAZIONE_AVVIO");
+    expect(keys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+    expect(keys).toContain("CATALOG:VALUTAZIONE_CONTRODEDUZIONI");
   });
 });
 

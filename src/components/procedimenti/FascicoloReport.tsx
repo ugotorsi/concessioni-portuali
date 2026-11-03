@@ -3,6 +3,7 @@ import { AlertTriangle, BookOpen, Download, ExternalLink } from "lucide-react";
 import { formatDateIT } from "@/lib/utils";
 import { documentReferenceLabel } from "@/lib/professional-text";
 import type {
+  PortRegimeCoordination,
   StructuredFascicoloReportPayload,
   StructuredReportAuthority,
   StructuredReportLegalApplication,
@@ -230,6 +231,58 @@ const TEMPORAL_STATUS_LABELS: Readonly<Record<StructuredReportLegalApplication["
   DATE_TO_VERIFY: "Data da accertare",
 };
 
+const ELEMENT_STATUS_LABELS: Readonly<Record<NonNullable<StructuredReportLegalApplication["elementAnalysis"]>["elements"][number]["status"], string>> = {
+  PROVEN: "Provato",
+  INDICATED: "Dai documenti, da confermare",
+  NOT_PROVEN: "Non provato",
+  CONTRARY_EVIDENCE: "Elementi contrari",
+};
+
+const PORT_REGIME_STATUS_LABELS: Readonly<Record<PortRegimeCoordination["sources"][number]["status"], string>> = {
+  FULLY_APPLICABLE: "Applicabile integralmente",
+  PARTIALLY_APPLICABLE: "Applicabile in parte",
+  PREVIOUS_TEXT_APPLICABLE: "Testo previgente",
+  NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",
+  SUPERSEDED: "Sostituita",
+  DATE_TO_VERIFY: "Data da accertare",
+};
+
+export function PortRegimeSection({ regime }: { regime: PortRegimeCoordination }) {
+  const dateLine = (entry: PortRegimeCoordination["grantDate"]) =>
+    `${entry.label}: ${entry.date ? formatDateIT(new Date(`${entry.date}T00:00:00Z`)) : "da accertare"} — ${entry.basis}${entry.pages.length ? ` (pag. ${entry.pages.join(", ")})` : ""}`;
+  return (
+    <ContentSection title="Coordinamento del regime concessorio portuale nel tempo">
+      <div className="space-y-3 text-sm leading-6 text-slate-700">
+        <ul className="space-y-1">
+          <li>{dateLine(regime.procedureStartDate)}</li>
+          <li>{dateLine(regime.grantDate)}</li>
+        </ul>
+        <div className="space-y-2">
+          {regime.sources.map((source) => (
+            <details key={source.sourceId} className="rounded-md border border-slate-200 bg-slate-50">
+              <summary className="cursor-pointer px-3 py-2">
+                <span className="font-medium text-slate-950">{source.citation}</span>
+                <span className="ml-2 text-xs font-semibold text-slate-600">{PORT_REGIME_STATUS_LABELS[source.status]}</span>
+              </summary>
+              <div className="space-y-1 border-t border-slate-200 px-3 py-2">
+                <p>{source.reasoning}</p>
+                {source.operativeConsequences.length ? (
+                  <ul className="list-disc space-y-1 pl-5">{source.operativeConsequences.map((consequence) => <li key={consequence}>{consequence}</li>)}</ul>
+                ) : null}
+                <a href={source.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
+                  Testo ufficiale <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+              </div>
+            </details>
+          ))}
+        </div>
+        <p><strong>Conclusione:</strong> {regime.conclusion}</p>
+        <ul className="list-disc space-y-1 pl-5 text-xs text-slate-500">{regime.limits.map((limit) => <li key={limit}>{limit}</li>)}</ul>
+      </div>
+    </ContentSection>
+  );
+}
+
 export function LegalApplicationSection({ items }: { items: readonly StructuredReportLegalApplication[] }) {
   if (items.length === 0) return null;
   return (
@@ -300,6 +353,23 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                   <ul className="mt-1 list-disc space-y-1 pl-5">{item.contraryArguments.map((argument) => <li key={argument}>{argument}</li>)}</ul>
                 </section>
               </div>
+              {item.elementAnalysis ? (
+                <section aria-label="Analisi degli elementi della fattispecie">
+                  <h5 className="font-semibold text-slate-950">Elementi della fattispecie: {item.elementAnalysis.label}</h5>
+                  <ul className="mt-2 space-y-2">
+                    {item.elementAnalysis.elements.map((element) => (
+                      <li key={element.elementId} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+                          <span className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{element.requirement}</span>
+                          <span className="shrink-0 rounded border border-slate-300 bg-white px-2 py-0.5 text-xs font-semibold text-slate-700">{ELEMENT_STATUS_LABELS[element.status]}</span>
+                        </div>
+                        <p className="text-xs text-slate-500">{element.legalBasis}</p>
+                        <p className="mt-1">{element.reasoning}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
               <section>
                 <h5 className="font-semibold text-slate-950">Conclusione motivata</h5>
                 <p className="mt-1">{item.conclusion}</p>
@@ -416,6 +486,7 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
         </ContentSection>
       ) : null}
 
+      {payload.portRegime ? <PortRegimeSection regime={payload.portRegime} /> : null}
       {payload.legalApplication?.length ? <LegalApplicationSection items={payload.legalApplication} /> : null}
 
       {payload.regulatoryApplicability?.length ? <RegulatoryApplicability rows={payload.regulatoryApplicability} /> : null}

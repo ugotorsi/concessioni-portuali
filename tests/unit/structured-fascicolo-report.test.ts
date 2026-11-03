@@ -295,3 +295,31 @@ describe("deterministic structured fascicolo report", () => {
     ]));
   });
 });
+
+describe("profile-specific operational plans", () => {
+  it("derives distinct, evidence-driven steps per issue instead of generic art. 47 steps", () => {
+    const base = knowledge();
+    const use = { ...item("fact-use", "FACT", "AI_PROPOSED"), normalizedText: "Il contratto con Magazzini Levante attribuisce stabilmente a tale società 180 m² di M4, con proprio personale; non è allegato un assenso espresso dell'ente concedente." };
+    const invest = { ...item("fact-inv", "FACT", "AI_PROPOSED"), normalizedText: "Il programma di attività prevede l'intervento I4 entro il 30/06/2026." };
+    const thirdParty = { ...item("issue-third", "LEGAL_ISSUE"), normalizedText: "Uso di M4 da parte di terzo operatore", originatingItemIds: [use.id] };
+    const investment = { ...item("issue-inv", "LEGAL_ISSUE"), normalizedText: "Inadempimento o rimedio concessorio per investimenti", originatingItemIds: [invest.id] };
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-profile",
+      knowledge: { ...base, facts: [use, invest], gaps: [], legalIssues: [thirdParty, investment], researchQuestions: [] },
+      missions: [],
+    });
+    const plans = report.payload.operationalPlans ?? [];
+    const third = plans.find((plan) => plan.issueText.startsWith("Uso di M4"))!;
+    const inv = plans.find((plan) => plan.issueText.startsWith("Inadempimento"))!;
+    expect(third.steps[0].title).toBe("1. Uso di M4 da parte di terzo operatore: completare la prova dei requisiti");
+    expect(third.steps[1].action).toMatch(/art\. 18, comma 9/);
+    expect(third.steps[1].action).toMatch(/art\. 47, lett\. e/);
+    expect(third.steps[2].draftTitle).toBe("Contestazione degli addebiti");
+    expect(third.steps[2].draftTemplate).toContain("[TERMINE DA VERIFICARE]");
+    expect(inv.steps[0].action).toMatch(/Mancata, ritardata o incompleta esecuzione/);
+    expect(inv.steps[2].action).toMatch(/Non avviare la contestazione/);
+    expect(inv.steps[2].draftTemplate).toBeUndefined();
+    expect(new Set(plans.flatMap((plan) => plan.steps.map((step) => step.title))).size).toBe(8);
+  });
+});
