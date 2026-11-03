@@ -106,6 +106,7 @@ describe("Fascicolo proposals workspace", () => {
     expect(legacy).toContain('activeSection === "proposals"');
     expect(intake).toContain('activeSection === "proposals"');
     expect(legacy).toContain("<FascicoloProposals");
+    expect(legacy.match(/<FascicoloProposals\b/g)).toHaveLength(2);
     expect(intake).toContain("<FascicoloProposals");
     expect(legacy).not.toContain("<FascicoloDocumentRequirementProposalsPanel");
     expect(component).not.toContain("generateOperationalProposalsAction");

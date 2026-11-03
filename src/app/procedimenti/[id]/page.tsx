@@ -359,6 +359,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               {automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
                 <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
               ) : <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
+              <div className="mt-4">
+                <FascicoloProposals
+                  proposals={automaticWorkflow?.operationalProposals ?? []}
+                  canManage={canReview && hasCanonicalTenant}
+                />
+              </div>
               <p className="mt-4 text-sm text-slate-600">Nessun titolo concessorio viene presunto o creato automaticamente. Le proposte richiedono valutazione professionale.</p>
             </section>
           ) : null}
@@ -392,7 +398,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             />
           ) : null}
           {actsSection}
-          {["timeline", "deadlines", "issues", "proposals", "decisione"].includes(activeSection) ? (
+          {["timeline", "deadlines", "issues", "decisione"].includes(activeSection) ? (
             <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
               Nessun dato disponibile per questa sezione.
             </p>
