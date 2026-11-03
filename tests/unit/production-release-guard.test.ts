@@ -15,6 +15,7 @@ import {
   assertAliasResolvesTo,
   assertDeploymentEligibleForProductionDomain,
   assertProductionDomainConfig,
+  extractDeploymentUrl,
   missingProductionEnv,
   parseProductionReleaseArgs,
   REQUIRED_PRODUCTION_ENV,
@@ -71,6 +72,18 @@ describe("runtime host guard", () => {
 });
 
 describe("production release policy", () => {
+  it("extracts the deployment URL from CLI output on stdout or the stderr progress log", () => {
+    expect(extractDeploymentUrl("https://concessioni-portuali-demo-abc-ugotorsis-projects.vercel.app\n"))
+      .toBe("https://concessioni-portuali-demo-abc-ugotorsis-projects.vercel.app");
+    const stderrLog = [
+      "Vercel CLI 63.1.2",
+      "🔍  Inspect: https://vercel.com/ugotorsis-projects/concessioni-portuali-demo/H24r [3s]",
+      "✅  Production: https://concessioni-portuali-demo-epdw8cjl9-ugotorsis-projects.vercel.app [3m]",
+    ].join("\n");
+    expect(extractDeploymentUrl(stderrLog)).toBe("https://concessioni-portuali-demo-epdw8cjl9-ugotorsis-projects.vercel.app");
+    expect(extractDeploymentUrl("Inspect: https://vercel.com/x/y")).toBeNull();
+  });
+
   it("requires an exact full expected commit and rejects unknown arguments", () => {
     expect(parseProductionReleaseArgs(["--expected-commit", SHA])).toEqual({ expectedCommit: SHA, verifyOnly: false });
     expect(code(() => parseProductionReleaseArgs([]))).toBe("EXPECTED_COMMIT_REQUIRED");

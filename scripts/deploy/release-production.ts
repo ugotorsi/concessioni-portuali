@@ -8,6 +8,7 @@ import {
   assertAliasResolvesTo,
   assertDeploymentEligibleForProductionDomain,
   assertProductionDomainConfig,
+  extractDeploymentUrl,
   missingProductionEnv,
   parseProductionReleaseArgs,
   type VercelDeploymentSnapshot,
@@ -16,6 +17,10 @@ import {
 } from "./production-release-policy";
 
 function run(command: string, args: readonly string[], input?: string): string {
+  return runCapturing(command, args, input).stdout.trim();
+}
+
+function runCapturing(command: string, args: readonly string[], input?: string): { stdout: string; stderr: string } {
   // Arguments are internal constants or validated identifiers; Windows needs a shell to resolve vercel.cmd.
   const useShell = process.platform === "win32";
   const result = useShell
@@ -24,7 +29,7 @@ function run(command: string, args: readonly string[], input?: string): string {
   if (result.status !== 0) {
     throw new ProductionReleaseError("VERCEL_COMMAND_FAILED", `${command} ${args[0] ?? ""}: ${result.stderr.slice(-400)}`);
   }
-  return result.stdout.trim();
+  return { stdout: result.stdout, stderr: result.stderr };
 }
 
 function vercelApi<T>(apiPath: string): T {
@@ -86,11 +91,9 @@ export async function releaseProduction(argv: readonly string[]): Promise<void> 
   }
 
   verifyLocalSource(args.expectedCommit);
-  const deploymentUrl = run("vercel", ["deploy", "--prod", "--yes", `--scope=${PRODUCTION_RELEASE.scope}`])
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("https://"))
-    .pop();
+  const deployOutput = runCapturing("vercel", ["deploy", "--prod", "--yes", `--scope=${PRODUCTION_RELEASE.scope}`]);
+  // The CLI prints the deployment URL on stdout or, when not attached to a TTY, only in its progress log on stderr.
+  const deploymentUrl = extractDeploymentUrl(`${deployOutput.stdout}\n${deployOutput.stderr}`);
   if (!deploymentUrl) throw new ProductionReleaseError("VERCEL_COMMAND_FAILED", "deployment URL missing");
   const deployment = deploymentSnapshot(new URL(deploymentUrl).host);
   assertDeploymentEligibleForProductionDomain(deployment, args.expectedCommit);

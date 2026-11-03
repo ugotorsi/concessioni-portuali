@@ -155,3 +155,11 @@ export function assertAliasResolvesTo(
   }
   assertDeploymentEligibleForProductionDomain(aliasDeployment, expectedCommit);
 }
+
+/** Picks the deployment URL from `vercel deploy` output, ignoring the dashboard "Inspect" link. */
+export function extractDeploymentUrl(output: string): string | null {
+  const labelled = /^\s*(?:\S+\s+)?(?:Production|Preview):\s*(https:\/\/[a-z0-9.-]+\.vercel\.app)\b/im.exec(output);
+  if (labelled) return labelled[1];
+  const urls = [...output.matchAll(/https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app\b/gi)].map((match) => match[0]);
+  return urls.at(-1) ?? null;
+}

@@ -49,6 +49,7 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
   non ha target `production`, non e `READY`, ha commit diverso o sorgente sporca. Dopo il rilascio verifica che
   l'alias risolva allo stesso deployment e che `/login` risponda 200.
 - Verifica in sola lettura dello stato corrente: `npm run deploy:production -- --expected-commit <SHA> --verify-only`.
+- Se il deploy è stato creato ma lo script si è interrotto prima della verifica finale, non ripetere il deploy: controllare con `--verify-only` e lo SHA rilasciato che alias, target e commit coincidano.
 - Vietato `vercel alias set` manuale verso URL Preview. In ogni caso il middleware risponde 421 a qualsiasi
   richiesta su `app.noetra.it` servita da un deployment con `VERCEL_ENV` diverso da `production`.
 - Causa dell'incidente del 03/11/2026: `app.noetra.it` era configurato come dominio di branch Git
