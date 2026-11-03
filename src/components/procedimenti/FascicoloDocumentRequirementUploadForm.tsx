@@ -19,6 +19,8 @@ export function FascicoloDocumentRequirementUploadForm({
         className="grid gap-2 md:grid-cols-2"
         submitLabel="Carica e associa documento"
         purpose="REQUIREMENT_EVIDENCE"
+        successMessage="Documento caricato e associato."
+        failureMessage="Caricamento non completato. Verificare i dati e riprovare."
       >
         <input type="hidden" name="proposalId" value={proposalId} />
         <label className="text-xs text-slate-700 md:col-span-2">
