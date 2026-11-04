@@ -8,27 +8,38 @@ import {
   FASCICOLO_OPERATIONAL_PROPOSAL_POLICY_VERSION,
   OperationalProposalRepositoryError,
   listOperationalProposals,
+  listProposalReconciliations,
   materializeOperationalProposal,
   reconcileOperationalProposals,
+  reverseOperationalProposalReconciliation,
   reviewOperationalProposal,
   type OperationalProposalCandidate,
   type OperationalProposalRepositoryContext,
   type OperationalProposalSqlExecutor,
   type OperationalProposalType,
 } from "@/server/fascicolo-operational-proposals";
+import { proposalReconciliationFingerprint, proposalReconciliationStates } from "@/server/fascicolo-operational-proposals/reconciliation-state";
 
 const migration = readFileSync(path.join(
   process.cwd(), "prisma", "migrations", "20260930_fascicolo_operational_proposals", "migration.sql",
 ), "utf8");
 const databases: PGlite[] = [];
 const reportFingerprint = "a".repeat(64);
+const corpusFingerprint = "c".repeat(64);
 
 function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ rows: T[] }> }): OperationalProposalSqlExecutor {
   return {
     query: (query, params = []) => sql.query(query, [...params]),
-    audit: (input) => sql.query(`
-      INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata","actorId") VALUES ($1,$2,$3::jsonb,$4)
-    `, [input.azione, input.entitaId, JSON.stringify(input.metadata), input.actor.actorId]),
+    readCorpusFingerprint: async () => corpusFingerprint,
+    audit: async (input) => {
+      await sql.query(`
+        INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata","actorId") VALUES ($1,$2,$3::jsonb,$4)
+      `, [input.azione, input.entitaId, JSON.stringify(input.metadata), input.actor.actorId]);
+      return sql.query(`
+        INSERT INTO "ActivityLog" ("enteId","entita","entitaId","azione","esito","metadata")
+        VALUES ($1,'FascicoloOperationalProposal',$2,$3,'SUCCESS',$4::jsonb)
+      `, [input.enteId, input.entitaId, input.azione, JSON.stringify(input.metadata)]);
+    },
   };
 }
 
@@ -51,11 +62,13 @@ async function database() {
     CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
+      "corpusFingerprint" TEXT NOT NULL,
       UNIQUE ("id","tenantId","procedimentoId")
     );
     CREATE TABLE "StructuredFascicoloReportSnapshot" (
       "id" VARCHAR(96) PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL,
-      "knowledgeRevisionId" TEXT NOT NULL, "reportFingerprint" CHAR(64) NOT NULL, "status" TEXT NOT NULL
+      "knowledgeRevisionId" TEXT NOT NULL, "reportFingerprint" CHAR(64) NOT NULL, "status" TEXT NOT NULL,
+      "corpusFingerprint" TEXT NOT NULL
     );
     CREATE TYPE "TipologiaScadenza" AS ENUM ('TERMINE_PROCEDIMENTALE');
     CREATE TYPE "StatoScadenza" AS ENUM ('APERTA');
@@ -84,6 +97,10 @@ async function database() {
       "identifierType" TEXT NOT NULL, "normalizedValue" TEXT NOT NULL
     );
     CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL, "actorId" TEXT);
+    CREATE TABLE "ActivityLog" (
+      "id" BIGSERIAL PRIMARY KEY, "enteId" TEXT, "entita" TEXT NOT NULL, "entitaId" TEXT,
+      "azione" TEXT NOT NULL, "esito" TEXT NOT NULL, "metadata" JSONB, "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
     INSERT INTO "Procedimento" VALUES
@@ -92,13 +109,13 @@ async function database() {
       ('procedure-neutral','tenant-a',NULL),
       ('procedure-inconsistent','tenant-a','concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
-      ('revision-a','tenant-a','procedure-a','CURRENT'),
-      ('revision-b','tenant-b','procedure-b','CURRENT'),
-      ('revision-neutral','tenant-a','procedure-neutral','CURRENT');
+      ('revision-a','tenant-a','procedure-a','CURRENT','${corpusFingerprint}'),
+      ('revision-b','tenant-b','procedure-b','CURRENT','${corpusFingerprint}'),
+      ('revision-neutral','tenant-a','procedure-neutral','CURRENT','${corpusFingerprint}');
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES
-      ('report-a','tenant-a','procedure-a','revision-a','${reportFingerprint}','CURRENT'),
-      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT'),
-      ('report-neutral','tenant-a','procedure-neutral','revision-neutral','${reportFingerprint}','CURRENT');
+      ('report-a','tenant-a','procedure-a','revision-a','${reportFingerprint}','CURRENT','${corpusFingerprint}'),
+      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT','${corpusFingerprint}'),
+      ('report-neutral','tenant-a','procedure-neutral','revision-neutral','${reportFingerprint}','CURRENT','${corpusFingerprint}');
   `);
   await db.exec(migration);
   return db;
@@ -133,10 +150,20 @@ function customCandidate(type: OperationalProposalType, fingerprintCharacter: st
   });
 }
 
-function reconcile(db: PGlite, candidates: readonly OperationalProposalCandidate[]) {
+async function previewFingerprint(db: PGlite, candidates: readonly OperationalProposalCandidate[], procedure = "procedure-a") {
+  const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: procedure }, repositoryContext(db));
+  return proposalReconciliationFingerprint({
+    tenantId: "tenant-a", procedimentoId: procedure, reportFingerprint,
+    candidateFingerprints: candidates.map((item) => item.proposalFingerprint),
+    states: proposalReconciliationStates(proposals),
+  });
+}
+
+async function reconcile(db: PGlite, candidates: readonly OperationalProposalCandidate[]) {
   return reconcileOperationalProposals({
     tenantId: "tenant-a", procedimentoId: "procedure-a", knowledgeRevisionId: "revision-a",
     structuredReportId: "report-a", structuredReportFingerprint: reportFingerprint, candidates,
+    expectedCorpusFingerprint: corpusFingerprint, expectedPreviewFingerprint: await previewFingerprint(db, candidates),
   }, repositoryContext(db));
 }
 
@@ -197,6 +224,8 @@ describe("Lotto 7 operational proposal persistence", () => {
       structuredReportId: "report-neutral",
       structuredReportFingerprint: reportFingerprint,
       candidates: [neutralCandidate],
+      expectedCorpusFingerprint: corpusFingerprint,
+      expectedPreviewFingerprint: await previewFingerprint(db, [neutralCandidate], "procedure-neutral"),
     }, repositoryContext(db));
     expect(reconciled).toMatchObject({ created: 1, reused: 0 });
     expect(reconciled.proposals[0].createdAt).toBeInstanceOf(Date);
@@ -223,7 +252,7 @@ describe("Lotto 7 operational proposal persistence", () => {
     }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
   });
 
-  it("reuses an unchanged proposal with its review and supersedes an approved changed proposal", async () => {
+  it("preserves approved history but prevents materializing an outdated proposal", async () => {
     const db = await database();
     const first = await reconcile(db, [candidate()]);
     expect(first).toMatchObject({ created: 1, reused: 0, stale: 0 });
@@ -241,8 +270,16 @@ describe("Lotto 7 operational proposal persistence", () => {
     const next = await reconcile(db, [changed]);
     expect(next).toMatchObject({ created: 1, reused: 0, stale: 1 });
     expect(next.proposals[0]).toMatchObject({ status: "PROPOSED", reviewVersion: 0 });
-    const old = await db.query<{ status: string }>(`SELECT "status" FROM "FascicoloOperationalProposal" WHERE "id"=$1`, [approved.id]);
-    expect(old.rows[0].status).toBe("SUPERSEDED");
+    const old = await db.query<{ status: string; supersededAt: Date | null; reviewVersion: number }>(
+      `SELECT "status","supersededAt","reviewVersion" FROM "FascicoloOperationalProposal" WHERE "id"=$1`, [approved.id],
+    );
+    expect(old.rows[0]).toMatchObject({ status: "APPROVED", reviewVersion: 1 });
+    expect(old.rows[0].supersededAt).toBeInstanceOf(Date);
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", proposalId: approved.id, actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "CURRENT_INPUT_REQUIRED" });
+    const events = await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`, [approved.id]);
+    expect(events.rows).toHaveLength(1);
   });
 
   it("records immutable review history and allows only one concurrent decision for a review version", async () => {
@@ -263,6 +300,81 @@ describe("Lotto 7 operational proposal persistence", () => {
     `);
     expect(events.rows).toHaveLength(1);
     expect(events.rows[0].proposedPayload).toEqual(candidate().proposedPayload);
+  });
+
+  it("reactivates an identical unreviewed stale proposal without changing its identity or review history", async () => {
+    const db = await database();
+    const original = (await reconcile(db, [candidate()])).proposals[0];
+    await reconcile(db, [candidate("CRITICALITY")]);
+    const stale = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(stale.find((item) => item.id === original.id)).toMatchObject({ status: "STALE", reviewVersion: 0 });
+
+    const restored = await reconcile(db, [candidate()]);
+    expect(restored).toMatchObject({ created: 0, reused: 1 });
+    expect(restored.proposals[0]).toMatchObject({ id: original.id, status: "PROPOSED", supersededAt: null, reviewVersion: 0 });
+    const approved = await approve(db, original.id);
+    expect(approved).toMatchObject({ id: original.id, status: "APPROVED", reviewVersion: 1 });
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposal" WHERE "proposalFingerprint"=$1`,
+      [original.proposalFingerprint])).rows).toHaveLength(1);
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`,
+      [original.id])).rows).toHaveLength(1);
+  });
+
+  it("reverses an unchanged reconciliation while retaining new proposals as history and preserving approval", async () => {
+    const db = await database();
+    const original = (await reconcile(db, [candidate()])).proposals[0];
+    await approve(db, original.id);
+    const next = await reconcile(db, [candidate("CRITICALITY")]);
+    const summary = (await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === next.reconciliationId);
+    expect(summary).toMatchObject({ state: "AVAILABLE" });
+    const input = {
+      tenantId: "tenant-a", procedimentoId: "procedure-a", reconciliationId: next.reconciliationId,
+      expectedAfterFingerprint: summary!.afterFingerprint, note: "Ripristino verificato del collaudo.",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "ADMIN" },
+    };
+    await expect(reverseOperationalProposalReconciliation(input, repositoryContext(db)))
+      .resolves.toEqual({ restored: 1, retainedAsHistory: 1 });
+    const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(proposals.find((item) => item.id === original.id)).toMatchObject({
+      status: "APPROVED", reviewVersion: 1, supersededAt: null,
+    });
+    expect(proposals.find((item) => item.id === next.proposals[0].id)).toMatchObject({
+      status: "STALE", reviewVersion: 0,
+    });
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`,
+      [original.id])).rows).toHaveLength(1);
+    expect((await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === next.reconciliationId)?.state).toBe("REVERSED");
+    await expect(reverseOperationalProposalReconciliation(input, repositoryContext(db)))
+      .rejects.toMatchObject({ code: "RECONCILIATION_ALREADY_REVERSED" });
+  });
+
+  it("rejects a stale preview and refuses reversal after a later human review", async () => {
+    const db = await database();
+    const first = await reconcile(db, [candidate()]);
+    const nextCandidates = [candidate("CRITICALITY")];
+    const staleFingerprint = await previewFingerprint(db, nextCandidates);
+    const summary = (await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === first.reconciliationId)!;
+    await approve(db, first.proposals[0].id);
+    await expect(reconcileOperationalProposals({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", knowledgeRevisionId: "revision-a",
+      structuredReportId: "report-a", structuredReportFingerprint: reportFingerprint, candidates: nextCandidates,
+      expectedCorpusFingerprint: corpusFingerprint, expectedPreviewFingerprint: staleFingerprint,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "STALE_PREVIEW" });
+    await expect(reverseOperationalProposalReconciliation({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", reconciliationId: first.reconciliationId,
+      expectedAfterFingerprint: summary.afterFingerprint, note: "Tentativo dopo approvazione.",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "ADMIN" },
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "RECONCILIATION_CHANGED" });
+    const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(proposals).toHaveLength(1);
+    expect(proposals[0]).toMatchObject({ id: first.proposals[0].id, status: "APPROVED", reviewVersion: 1 });
+    expect((await db.query(`SELECT "id" FROM "ActivityLog" WHERE "azione"='OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'`)).rows).toHaveLength(0);
   });
 
   it("never materializes before approval and materializes one Scadenza exactly once", async () => {

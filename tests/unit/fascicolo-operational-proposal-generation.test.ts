@@ -222,4 +222,55 @@ describe("Lotto 7 operational proposal generation", () => {
     expect(reconciliations.every((candidate) =>
       candidate.warningCodes.includes("MANUAL_ACTION_REQUIRED"))).toBe(true);
   });
+
+  it("keeps multiple documents and does not invent dependencies from the order of activities", () => {
+    const value = report();
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Valutare le iniziative",
+      sourceDocumentRefs: [],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Esaminare",
+      steps: [
+        {
+          activityCode: "ASSESS",
+          title: "Esaminare gli atti",
+          action: "Esaminare.",
+          office: "Ufficio",
+          requiredDocuments: [],
+          completionGate: "Esame effettuato",
+          draftTitle: "Relazione",
+          documentCode: "REPORT",
+          draftTemplate: "Relazione da completare",
+          additionalDrafts: [{ documentCode: "NOTICE", title: "Comunicazione", template: "Comunicazione da completare" }],
+        },
+        {
+          activityCode: "OPTIONAL",
+          necessity: "CONDITIONAL",
+          title: "Valutare una soluzione alternativa",
+          action: "Verificare i presupposti.",
+          office: "Ufficio",
+          requiredDocuments: [],
+          completionGate: "Valutazione motivata",
+        },
+      ],
+      alternatives: [{
+        title: "Alternativa", whenApplicable: "Se pertinente", practicalRoute: "Valutare",
+        riskOrLimit: "Non cumulativa",
+      }],
+      deadlineReview: "Non presumere scadenze.",
+    }];
+    const activities = generate(value).filter((candidate) => candidate.proposalType === "ACTIVITY");
+    expect(activities).toHaveLength(2);
+    expect(activities.find((candidate) => candidate.title === "Esaminare gli atti")?.proposedPayload)
+      .toMatchObject({
+        dependencies: [],
+        draft: { documentCode: "REPORT", title: "Relazione" },
+        additionalDrafts: [{ documentCode: "NOTICE", title: "Comunicazione", template: "Comunicazione da completare" }],
+      });
+    expect(activities.find((candidate) => candidate.title === "Valutare una soluzione alternativa")?.proposedPayload)
+      .toMatchObject({ dependencies: [], necessity: "CONDITIONAL" });
+  });
 });

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
@@ -7,12 +7,21 @@ import { prisma } from "@/lib/prisma";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import type { JsonValue } from "@/server/fascicolo-knowledge";
+import { ACTIVITY_LOCK_NAMESPACE } from "@/server/fascicolo-operational-activities/model";
+import { readFascicoloDocumentCorpusInTransaction } from "@/server/queries/fascicolo-document-corpus";
 
 import { operationalProposalCandidateSchema, type OperationalProposalCandidate } from "./contracts";
+import {
+  proposalReconciliationFingerprint,
+  proposalReconciliationStates,
+  reconciliationProposalStateSchema,
+  type ReconciliationProposalState,
+} from "./reconciliation-state";
 
 export interface OperationalProposalSqlExecutor {
   query<T>(sql: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
   audit(input: OperationalProposalAuditInput): Promise<unknown>;
+  readCorpusFingerprint(scope: { tenantId: string; procedimentoId: string; concessioneId: string | null }): Promise<string | null>;
 }
 
 export interface OperationalProposalAuditInput {
@@ -30,12 +39,13 @@ export interface OperationalProposalRepositoryContext {
   now?: () => Date;
 }
 
-function executor(client: Pick<Prisma.TransactionClient, "$queryRawUnsafe">): OperationalProposalSqlExecutor {
+function executor(client: Prisma.TransactionClient): OperationalProposalSqlExecutor {
   return {
     async query<T>(sql: string, params: readonly unknown[] = []) {
       return { rows: await client.$queryRawUnsafe<T[]>(sql, ...params) };
     },
-    audit: (input) => createAuditLogInTransaction(client as Prisma.TransactionClient, {
+    readCorpusFingerprint: async (scope) => (await readFascicoloDocumentCorpusInTransaction(scope, client))?.corpusFingerprint ?? null,
+    audit: (input) => createAuditLogInTransaction(client, {
       azione: input.azione,
       entita: "FascicoloOperationalProposal",
       entitaId: input.entitaId,
@@ -78,6 +88,11 @@ export class OperationalProposalRepositoryError extends Error {
   constructor(readonly code:
     | "AUTHORITY_MISMATCH"
     | "CURRENT_INPUT_REQUIRED"
+    | "STALE_PREVIEW"
+    | "RECONCILIATION_NOT_FOUND"
+    | "RECONCILIATION_ALREADY_REVERSED"
+    | "RECONCILIATION_CHANGED"
+    | "RECONCILIATION_INVALID"
     | "PROPOSAL_NOT_FOUND"
     | "PROPOSAL_NOT_REVIEWABLE"
     | "STALE_REVIEW_VERSION"
@@ -128,20 +143,62 @@ async function assertReadAuthority(
   if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
 }
 
+async function assertProposalCurrent(tx: OperationalProposalSqlExecutor, proposal: OperationalProposalRecord): Promise<void> {
+  if (proposal.supersededAt || !proposal.structuredReportId) {
+    throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+  }
+  const result = await tx.query<{ id: string }>(`
+    SELECT r."id"
+    FROM "FascicoloKnowledgeRevision" r
+    JOIN "StructuredFascicoloReportSnapshot" s
+      ON s."tenantId" = r."tenantId" AND s."procedimentoId" = r."procedimentoId"
+      AND s."knowledgeRevisionId" = r."id"
+    WHERE r."id" = $1 AND r."tenantId" = $2 AND r."procedimentoId" = $3 AND r."status" = 'CURRENT'
+      AND s."id" = $4 AND s."reportFingerprint" = $5 AND s."status" = 'CURRENT'
+    FOR SHARE OF r, s
+  `, [proposal.knowledgeRevisionId, proposal.tenantId, proposal.procedimentoId,
+    proposal.structuredReportId, proposal.structuredReportFingerprint]);
+  if (!result.rows[0]) throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+}
+
+async function reconciliationStates(
+  tx: OperationalProposalSqlExecutor,
+  tenantId: string,
+  procedimentoId: string,
+  lock: boolean,
+): Promise<ReconciliationProposalState[]> {
+  const rows = await tx.query<Pick<OperationalProposalRecord,
+    "id" | "proposalFingerprint" | "status" | "reviewVersion" | "supersededAt" | "updatedAt">>(`
+    SELECT "id","proposalFingerprint","status","reviewVersion","supersededAt","updatedAt"
+    FROM "FascicoloOperationalProposal"
+    WHERE "tenantId" = $1 AND "procedimentoId" = $2
+    ORDER BY "id"
+    ${lock ? "FOR UPDATE" : ""}
+  `, [tenantId, procedimentoId]);
+  return proposalReconciliationStates(rows.rows);
+}
+
 export async function reconcileOperationalProposals(input: {
   tenantId: string;
   procedimentoId: string;
   knowledgeRevisionId: string;
   structuredReportId: string;
   structuredReportFingerprint: string;
+  expectedCorpusFingerprint: string;
+  expectedPreviewFingerprint: string;
   candidates: readonly OperationalProposalCandidate[];
+  actor?: OperationalProposalAuditInput["actor"];
 }, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<{
+  reconciliationId: string;
   created: number;
   reused: number;
   stale: number;
   proposals: readonly OperationalProposalRecord[];
 }> {
-  const candidates = input.candidates.map((candidate) => operationalProposalCandidateSchema.parse(candidate));
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedCorpusFingerprint);
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedPreviewFingerprint);
+  const parsed = input.candidates.map((candidate) => operationalProposalCandidateSchema.parse(candidate));
+  const candidates = [...new Map(parsed.map((candidate) => [candidate.proposalFingerprint, candidate])).values()];
   if (candidates.some((candidate) => candidate.tenantId !== input.tenantId
     || candidate.procedimentoId !== input.procedimentoId
     || candidate.knowledgeRevisionId !== input.knowledgeRevisionId
@@ -150,30 +207,71 @@ export async function reconcileOperationalProposals(input: {
     throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
   }
   const ctx = context(overrides);
+  const reconciliationId = `reconciliation_${randomUUID()}`;
   return ctx.transaction(async (tx) => {
+    await tx.query(`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(hashtext($1), hashtext($2))
+    `, [ACTIVITY_LOCK_NAMESPACE, `${input.tenantId}::${input.procedimentoId}`]);
     const { concessioneId } = await assertAuthority(tx, input.tenantId, input.procedimentoId);
-    const current = await tx.query<{ revisionId: string; reportFingerprint: string }>(`
-      SELECT r."id" AS "revisionId", s."reportFingerprint"
+    const current = await tx.query<{ revisionId: string; reportFingerprint: string; revisionCorpus: string; reportCorpus: string }>(`
+      SELECT r."id" AS "revisionId", s."reportFingerprint",
+        r."corpusFingerprint" AS "revisionCorpus", s."corpusFingerprint" AS "reportCorpus"
       FROM "FascicoloKnowledgeRevision" r
       JOIN "StructuredFascicoloReportSnapshot" s
         ON s."tenantId" = r."tenantId" AND s."procedimentoId" = r."procedimentoId"
       WHERE r."id" = $1 AND r."tenantId" = $2 AND r."procedimentoId" = $3 AND r."status" = 'CURRENT'
         AND s."id" = $4 AND s."knowledgeRevisionId" = r."id"
         AND s."reportFingerprint" = $5 AND s."status" = 'CURRENT'
+      FOR SHARE OF r, s
     `, [input.knowledgeRevisionId, input.tenantId, input.procedimentoId, input.structuredReportId, input.structuredReportFingerprint]);
     if (!current.rows[0]) throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
 
     const fingerprints = candidates.map((candidate) => candidate.proposalFingerprint);
+    const corpusFingerprint = await tx.readCorpusFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId, concessioneId,
+    });
+    if (corpusFingerprint !== input.expectedCorpusFingerprint
+      || current.rows[0].revisionCorpus !== corpusFingerprint || current.rows[0].reportCorpus !== corpusFingerprint) {
+      throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+    }
+    const before = await reconciliationStates(tx, input.tenantId, input.procedimentoId, true);
+    const beforeFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: input.structuredReportFingerprint, candidateFingerprints: fingerprints, states: before,
+    });
+    if (beforeFingerprint !== input.expectedPreviewFingerprint) {
+      throw new OperationalProposalRepositoryError("STALE_PREVIEW");
+    }
     const stale = await tx.query<{ id: string }>(`
       UPDATE "FascicoloOperationalProposal"
-      SET "status" = CASE
-          WHEN "status" = 'PROPOSED' THEN 'STALE'::"FascicoloOperationalProposalStatus"
-          ELSE 'SUPERSEDED'::"FascicoloOperationalProposalStatus"
-        END,
-        "supersededAt" = $4, "updatedAt" = $4
+      SET "status" = 'STALE'::"FascicoloOperationalProposalStatus", "supersededAt" = $4, "updatedAt" = $4
       WHERE "tenantId" = $1 AND "procedimentoId" = $2
-        AND "status" IN ('PROPOSED','APPROVED','AMENDED_AND_APPROVED')
+        AND "status" = 'PROPOSED'
         AND NOT ("proposalFingerprint" = ANY($3::text[]))
+      RETURNING "id"
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    const approvalsNeedingReview = await tx.query<{ id: string }>(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "supersededAt" = $4, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" IN ('APPROVED','AMENDED_AND_APPROVED') AND "supersededAt" IS NULL
+        AND NOT ("proposalFingerprint" = ANY($3::text[]))
+      RETURNING "id"
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    await tx.query(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "supersededAt" = NULL, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" IN ('APPROVED','AMENDED_AND_APPROVED') AND "supersededAt" IS NOT NULL
+        AND "proposalFingerprint" = ANY($3::text[])
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    const reactivated = await tx.query<{ id: string }>(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "status" = 'PROPOSED'::"FascicoloOperationalProposalStatus", "supersededAt" = NULL, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" = 'STALE' AND "reviewVersion" = 0
+        AND "proposalFingerprint" = ANY($3::text[])
       RETURNING "id"
     `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
     let created = 0;
@@ -203,15 +301,212 @@ export async function reconcileOperationalProposals(input: {
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "proposalFingerprint" = ANY($3::text[])
       ORDER BY "proposalFingerprint"
     `, [input.tenantId, input.procedimentoId, fingerprints]);
+    const after = await reconciliationStates(tx, input.tenantId, input.procedimentoId, false);
+    const afterFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: input.structuredReportFingerprint, candidateFingerprints: fingerprints, states: after,
+    });
     await tx.audit({
       azione: "OPERATIONAL_PROPOSALS_RECONCILED",
-      entitaId: null,
+      entitaId: reconciliationId,
       enteId: input.tenantId,
       concessioneId,
-      metadata: { procedimentoId: input.procedimentoId, knowledgeRevisionId: input.knowledgeRevisionId, created, reused: candidates.length - created, stale: stale.rows.length },
-      actor: { actorId: null, actorEmail: null, actorRole: "SYSTEM" },
+      metadata: {
+        schema: "OPERATIONAL_PROPOSALS_RECONCILIATION_V1",
+        procedimentoId: input.procedimentoId,
+        knowledgeRevisionId: input.knowledgeRevisionId,
+        reportFingerprint: input.structuredReportFingerprint,
+        candidateFingerprints: fingerprints,
+        before, after, beforeFingerprint, afterFingerprint,
+        created, reused: candidates.length - created, stale: stale.rows.length,
+        reactivated: reactivated.rows.length, approvalsNeedingReview: approvalsNeedingReview.rows.length,
+      },
+      actor: input.actor ?? { actorId: null, actorEmail: null, actorRole: "SYSTEM" },
     });
-    return { created, reused: candidates.length - created, stale: stale.rows.length, proposals: proposals.rows };
+    return { reconciliationId, created, reused: candidates.length - created, stale: stale.rows.length + approvalsNeedingReview.rows.length, proposals: proposals.rows };
+  });
+}
+
+const reconciliationAuditSchema = z.object({
+  schema: z.literal("OPERATIONAL_PROPOSALS_RECONCILIATION_V1"),
+  procedimentoId: z.string().min(1),
+  reportFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  candidateFingerprints: z.array(z.string().regex(/^[a-f0-9]{64}$/)),
+  before: z.array(reconciliationProposalStateSchema),
+  after: z.array(reconciliationProposalStateSchema),
+  beforeFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  afterFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+}).passthrough();
+
+function validatedReconciliationAudit(metadata: unknown, tenantId: string, procedimentoId: string) {
+  const parsed = reconciliationAuditSchema.safeParse(metadata);
+  if (!parsed.success || parsed.data.procedimentoId !== procedimentoId) {
+    throw new OperationalProposalRepositoryError("RECONCILIATION_INVALID");
+  }
+  const snapshot = parsed.data;
+  const fingerprint = (states: readonly ReconciliationProposalState[]) => proposalReconciliationFingerprint({
+    tenantId, procedimentoId, reportFingerprint: snapshot.reportFingerprint,
+    candidateFingerprints: snapshot.candidateFingerprints, states,
+  });
+  const before = new Map(snapshot.before.map((item) => [item.id, item]));
+  const after = new Map(snapshot.after.map((item) => [item.id, item]));
+  if (before.size !== snapshot.before.length || after.size !== snapshot.after.length
+    || snapshot.beforeFingerprint !== fingerprint(snapshot.before) || snapshot.afterFingerprint !== fingerprint(snapshot.after)
+    || [...before.values()].some((item) => {
+      const current = after.get(item.id);
+      if (!current || current.proposalFingerprint !== item.proposalFingerprint || current.reviewVersion !== item.reviewVersion) return true;
+      if (item.status === "PROPOSED" && current.status === "STALE") return current.supersededAt === null;
+      if (item.status === "STALE" && current.status === "PROPOSED") {
+        return item.reviewVersion !== 0 || current.supersededAt !== null;
+      }
+      if (item.status !== current.status) return true;
+      return !["APPROVED", "AMENDED_AND_APPROVED"].includes(item.status)
+        && item.supersededAt !== current.supersededAt;
+    })
+    || [...after.values()].some((item) => !before.has(item.id)
+      && (item.status !== "PROPOSED" || item.reviewVersion !== 0 || item.supersededAt !== null))) {
+    throw new OperationalProposalRepositoryError("RECONCILIATION_INVALID");
+  }
+  return snapshot;
+}
+
+export async function reverseOperationalProposalReconciliation(input: {
+  tenantId: string;
+  procedimentoId: string;
+  reconciliationId: string;
+  expectedAfterFingerprint: string;
+  note: string;
+  actor: { actorId: string; actorEmail: string | null; actorRole: string };
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<{
+  restored: number;
+  retainedAsHistory: number;
+}> {
+  z.string().regex(/^reconciliation_[0-9a-f-]{36}$/).parse(input.reconciliationId);
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedAfterFingerprint);
+  z.string().trim().min(3).max(4_000).parse(input.note);
+  const ctx = context(overrides);
+  return ctx.transaction(async (tx) => {
+    await tx.query(`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(hashtext($1), hashtext($2))
+    `, [ACTIVITY_LOCK_NAMESPACE, `${input.tenantId}::${input.procedimentoId}`]);
+    const { concessioneId } = await assertAuthority(tx, input.tenantId, input.procedimentoId);
+    const event = await tx.query<{ metadata: unknown }>(`
+      SELECT "metadata" FROM "ActivityLog"
+      WHERE "enteId" = $1 AND "entita" = 'FascicoloOperationalProposal'
+        AND "entitaId" = $2 AND "azione" = 'OPERATIONAL_PROPOSALS_RECONCILED'
+        AND "esito" = 'SUCCESS' AND "metadata" ->> 'procedimentoId' = $3
+    `, [input.tenantId, input.reconciliationId, input.procedimentoId]);
+    if (event.rows.length !== 1) throw new OperationalProposalRepositoryError("RECONCILIATION_NOT_FOUND");
+    const previousReversal = await tx.query<{ exists: boolean }>(`
+      SELECT EXISTS (
+        SELECT 1 FROM "ActivityLog"
+        WHERE "enteId" = $1 AND "entita" = 'FascicoloOperationalProposal'
+          AND "entitaId" = $2 AND "azione" = 'OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'
+          AND "esito" = 'SUCCESS' AND "metadata" ->> 'procedimentoId' = $3
+      ) AS "exists"
+    `, [input.tenantId, input.reconciliationId, input.procedimentoId]);
+    if (previousReversal.rows[0]?.exists) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_ALREADY_REVERSED");
+    }
+    const snapshot = validatedReconciliationAudit(event.rows[0].metadata, input.tenantId, input.procedimentoId);
+    if (snapshot.afterFingerprint !== input.expectedAfterFingerprint) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_CHANGED");
+    }
+    const current = await reconciliationStates(tx, input.tenantId, input.procedimentoId, true);
+    const currentFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: current,
+    });
+    if (currentFingerprint !== snapshot.afterFingerprint) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_CHANGED");
+    }
+
+    const before = new Map(snapshot.before.map((item) => [item.id, item]));
+    const now = (ctx.now ?? (() => new Date()))();
+    let restored = 0;
+    let retainedAsHistory = 0;
+    for (const after of snapshot.after) {
+      const original = before.get(after.id);
+      if (!original) {
+        await tx.query(`
+          UPDATE "FascicoloOperationalProposal"
+          SET "status" = 'STALE'::"FascicoloOperationalProposalStatus", "supersededAt" = $4, "updatedAt" = $4
+          WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "id" = $3
+        `, [input.tenantId, input.procedimentoId, after.id, now]);
+        retainedAsHistory += 1;
+      } else if (original.status !== after.status || original.supersededAt !== after.supersededAt) {
+        await tx.query(`
+          UPDATE "FascicoloOperationalProposal"
+          SET "status" = $4::"FascicoloOperationalProposalStatus", "supersededAt" = $5::timestamptz, "updatedAt" = $6
+          WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "id" = $3
+        `, [input.tenantId, input.procedimentoId, after.id, original.status, original.supersededAt, now]);
+        restored += 1;
+      }
+    }
+    const compensated = await reconciliationStates(tx, input.tenantId, input.procedimentoId, false);
+    const compensatedFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: compensated,
+    });
+    await tx.audit({
+      azione: "OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED",
+      entitaId: input.reconciliationId,
+      enteId: input.tenantId,
+      concessioneId,
+      metadata: {
+        procedimentoId: input.procedimentoId, note: input.note.trim(), originalBeforeFingerprint: snapshot.beforeFingerprint,
+        originalAfterFingerprint: snapshot.afterFingerprint, compensatedFingerprint, compensated, restored, retainedAsHistory,
+      },
+      actor: input.actor,
+    });
+    return { restored, retainedAsHistory };
+  });
+}
+
+export interface ProposalReconciliationSummary {
+  reconciliationId: string;
+  createdAt: Date;
+  afterFingerprint: string;
+  state: "AVAILABLE" | "CHANGED" | "REVERSED";
+}
+
+export async function listProposalReconciliations(input: {
+  tenantId: string;
+  procedimentoId: string;
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<readonly ProposalReconciliationSummary[]> {
+  const ctx = context(overrides);
+  await assertReadAuthority(ctx.read, input.tenantId, input.procedimentoId);
+  const [events, current] = await Promise.all([
+    ctx.read.query<{ reconciliationId: string; metadata: unknown; createdAt: Date; reversed: boolean }>(`
+      SELECT a."entitaId" AS "reconciliationId", a."metadata", a."createdAt",
+        EXISTS (
+          SELECT 1 FROM "ActivityLog" r WHERE r."enteId" = a."enteId" AND r."entita" = a."entita"
+            AND r."entitaId" = a."entitaId" AND r."azione" = 'OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'
+            AND r."esito" = 'SUCCESS' AND r."metadata" ->> 'procedimentoId' = $2
+        ) AS "reversed"
+      FROM "ActivityLog" a
+      WHERE a."enteId" = $1 AND a."entita" = 'FascicoloOperationalProposal'
+        AND a."azione" = 'OPERATIONAL_PROPOSALS_RECONCILED' AND a."esito" = 'SUCCESS'
+        AND a."metadata" ->> 'procedimentoId' = $2
+        AND a."metadata" ->> 'schema' = 'OPERATIONAL_PROPOSALS_RECONCILIATION_V1'
+      ORDER BY a."createdAt" DESC, a."id" DESC LIMIT 5
+    `, [input.tenantId, input.procedimentoId]),
+    reconciliationStates(ctx.read, input.tenantId, input.procedimentoId, false),
+  ]);
+  return events.rows.map((event) => {
+    const snapshot = validatedReconciliationAudit(event.metadata, input.tenantId, input.procedimentoId);
+    const currentFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: current,
+    });
+    return {
+      reconciliationId: event.reconciliationId,
+      createdAt: event.createdAt,
+      afterFingerprint: snapshot.afterFingerprint,
+      state: event.reversed ? "REVERSED" as const
+        : currentFingerprint === snapshot.afterFingerprint ? "AVAILABLE" as const : "CHANGED" as const,
+    };
   });
 }
 
@@ -249,6 +544,7 @@ export async function reviewOperationalProposal(
     if (proposal.reviewVersion !== input.expectedReviewVersion) {
       throw new OperationalProposalRepositoryError("STALE_REVIEW_VERSION");
     }
+    if (input.action !== "REJECT") await assertProposalCurrent(tx, proposal);
     const nextStatus: OperationalProposalStatus = input.action === "REJECT" ? "REJECTED"
       : input.action === "AMEND_AND_APPROVE" ? "AMENDED_AND_APPROVED" : "APPROVED";
     const approvedPayload = input.action === "REJECT" ? null
@@ -403,6 +699,7 @@ export async function materializeOperationalProposal(input: {
     if (!(["APPROVED", "AMENDED_AND_APPROVED"] as OperationalProposalStatus[]).includes(proposal.status)) {
       throw new OperationalProposalRepositoryError("PROPOSAL_NOT_APPROVED");
     }
+    await assertProposalCurrent(tx, proposal);
     if (proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED")
       || (["DOCUMENT_REQUIREMENT", "CHECKLIST_ITEM", "ACTIVITY", "NOTE"] as const).includes(proposal.proposalType as never)) {
       throw new OperationalProposalRepositoryError("MANUAL_ACTION_REQUIRED");

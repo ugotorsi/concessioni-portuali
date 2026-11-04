@@ -349,18 +349,29 @@ function activityCandidates(input: GenerationInput): OperationalProposalCandidat
     proposedPayload: {
       state: "PROPOSED",
       classification: "PROFESSIONAL_RECOMMENDATION",
+      activityCode: step.activityCode ?? null,
+      necessity: step.necessity ?? "CONDITIONAL",
       priority: index === 0 ? "HIGH" : "MEDIUM",
       responsibleOffice: step.office,
       dueDate: null,
-      dependencies: index === 0 ? [] : [plan.steps[index - 1].title],
+      dependencies: [],
       requiredDocuments: [...step.requiredDocuments],
       completionCriterion: step.completionGate,
       expectedResult: step.completionGate,
       draft: step.draftTemplate ? {
+        documentCode: step.documentCode ?? null,
         title: step.draftTitle ?? "Atto operativo",
         template: step.draftTemplate,
         approvalRequired: true,
       } : null,
+      ...(step.additionalDrafts?.length ? {
+        additionalDrafts: step.additionalDrafts.map((document) => ({
+          documentCode: document.documentCode,
+          title: document.title,
+          template: document.template,
+          approvalRequired: true,
+        })),
+      } : {}),
     },
     originatingKnowledgeItemIds: input.report.legalIssues
       .find((issue) => issue.semanticKey === plan.issueSemanticKey)?.originatingItemIds ?? [],

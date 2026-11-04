@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { canManageCriticita, canManageProcedimenti, getCurrentUser, requireRole, type DemoRole } from "@/lib/auth";
@@ -11,14 +12,28 @@ import {
   generateOperationalProposalCandidates,
   listOperationalProposals,
   materializeOperationalProposal,
+  OperationalProposalRepositoryError,
   reconcileOperationalProposals,
+  reverseOperationalProposalReconciliation,
   reviewOperationalProposal,
   type OperationalProposalRecord,
 } from "@/server/fascicolo-operational-proposals";
-import { persistStructuredFascicoloReport } from "@/server/fascicolo-report";
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
 
 const scopeSchema = z.object({ procedimentoId: z.string().trim().min(1).max(256) }).strict();
+const hashSchema = z.string().regex(/^[a-f0-9]{64}$/);
+const generationSchema = scopeSchema.extend({
+  expectedReportFingerprint: hashSchema,
+  expectedCorpusFingerprint: hashSchema,
+  expectedPreviewFingerprint: hashSchema,
+  confirmed: z.literal("true"),
+}).strict();
+const reversalSchema = scopeSchema.extend({
+  reconciliationId: z.string().regex(/^reconciliation_[0-9a-f-]{36}$/),
+  expectedAfterFingerprint: hashSchema,
+  note: z.string().trim().min(3).max(4_000),
+  confirmed: z.literal("true"),
+}).strict();
 const proposalSchema = scopeSchema.extend({ proposalId: z.string().trim().min(1).max(96) }).strict();
 const reviewSchema = proposalSchema.extend({
   action: z.enum(["APPROVE", "REJECT", "AMEND_AND_APPROVE"]),
@@ -84,37 +99,85 @@ async function auditBlocked(scope: AuthorizedScope, proposalId: string | null, a
 }
 
 export async function generateOperationalProposalsAction(formData: FormData): Promise<void> {
-  const input = scopeSchema.parse({ procedimentoId: formData.get("procedimentoId") });
+  const input = generationSchema.parse({
+    procedimentoId: formData.get("procedimentoId"),
+    expectedReportFingerprint: formData.get("expectedReportFingerprint"),
+    expectedCorpusFingerprint: formData.get("expectedCorpusFingerprint"),
+    expectedPreviewFingerprint: formData.get("expectedPreviewFingerprint"),
+    confirmed: formData.get("confirmed"),
+  });
   const scope = await authorizedScope(input.procedimentoId);
   if (!canManageProcedimenti(scope.role)) {
     const error = new Error("Profilo non autorizzato alla generazione delle proposte operative.");
     await auditBlocked(scope, null, "OPERATIONAL_PROPOSALS_GENERATION_BLOCKED", error);
     throw error;
   }
+  let errorCode: string | null = null;
   try {
     const model = await getFascicoloAutomaticWorkflowReadModel(input.procedimentoId);
-    if (!model?.structuredReport) throw new Error("Rapporto strutturato CURRENT non disponibile.");
-    const persisted = await persistStructuredFascicoloReport(model.structuredReport);
+    const report = model?.structuredReport;
+    if (!model || !report || model.analysisUpdate.status !== "CURRENT"
+      || model.analysisUpdate.corpusFingerprint !== input.expectedCorpusFingerprint
+      || report.reportFingerprint !== input.expectedReportFingerprint
+      || report.payload.tenantId !== scope.tenantId || report.payload.procedimentoId !== scope.procedimentoId) {
+      throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+    }
+    const snapshot = model.structuredReportSnapshots.find((item) =>
+      item.reportFingerprint === report.reportFingerprint && item.effectiveStatus === "CURRENT");
+    if (!snapshot) throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
     const candidates = generateOperationalProposalCandidates({
       tenantId: scope.tenantId,
       procedimentoId: scope.procedimentoId,
-      structuredReportId: persisted.snapshot.id,
-      structuredReportFingerprint: persisted.snapshot.reportFingerprint,
-      report: persisted.snapshot.payload,
+      structuredReportId: snapshot.snapshotId,
+      structuredReportFingerprint: report.reportFingerprint,
+      report: report.payload,
     });
     await reconcileOperationalProposals({
       tenantId: scope.tenantId,
       procedimentoId: scope.procedimentoId,
-      knowledgeRevisionId: persisted.snapshot.knowledgeRevisionId,
-      structuredReportId: persisted.snapshot.id,
-      structuredReportFingerprint: persisted.snapshot.reportFingerprint,
+      knowledgeRevisionId: report.payload.knowledgeRevisionId,
+      structuredReportId: snapshot.snapshotId,
+      structuredReportFingerprint: report.reportFingerprint,
+      expectedCorpusFingerprint: input.expectedCorpusFingerprint,
+      expectedPreviewFingerprint: input.expectedPreviewFingerprint,
       candidates,
+      actor: scope.actor,
     });
   } catch (error) {
     await auditBlocked(scope, null, "OPERATIONAL_PROPOSALS_GENERATION_BLOCKED", error);
-    throw error;
+    errorCode = error instanceof OperationalProposalRepositoryError ? error.code : "UNEXPECTED_ERROR";
+    if (errorCode === "UNEXPECTED_ERROR") console.error("operational_proposals_generation_failed", { procedimentoId: input.procedimentoId, error });
   }
   revalidatePath(`/procedimenti/${input.procedimentoId}`);
+  const query = errorCode ? `reconciliationError=${encodeURIComponent(errorCode)}` : "reconciliationDone=generated";
+  redirect(`/procedimenti/${input.procedimentoId}?section=proposals&${query}#proposal-reconciliation`);
+}
+
+export async function reverseOperationalProposalReconciliationAction(formData: FormData): Promise<void> {
+  const input = reversalSchema.parse({
+    procedimentoId: formData.get("procedimentoId"),
+    reconciliationId: formData.get("reconciliationId"),
+    expectedAfterFingerprint: formData.get("expectedAfterFingerprint"),
+    note: formData.get("note"),
+    confirmed: formData.get("confirmed"),
+  });
+  const scope = await authorizedScope(input.procedimentoId);
+  if (!canManageProcedimenti(scope.role)) {
+    const error = new Error("Profilo non autorizzato al ripristino delle proposte operative.");
+    await auditBlocked(scope, input.reconciliationId, "OPERATIONAL_PROPOSALS_REVERSAL_BLOCKED", error);
+    throw error;
+  }
+  let errorCode: string | null = null;
+  try {
+    await reverseOperationalProposalReconciliation({ ...input, tenantId: scope.tenantId, actor: scope.actor });
+  } catch (error) {
+    await auditBlocked(scope, input.reconciliationId, "OPERATIONAL_PROPOSALS_REVERSAL_BLOCKED", error);
+    errorCode = error instanceof OperationalProposalRepositoryError ? error.code : "UNEXPECTED_ERROR";
+    if (errorCode === "UNEXPECTED_ERROR") console.error("operational_proposals_reversal_failed", { procedimentoId: input.procedimentoId, error });
+  }
+  revalidatePath(`/procedimenti/${input.procedimentoId}`);
+  const query = errorCode ? `reconciliationError=${encodeURIComponent(errorCode)}` : "reconciliationDone=reversed";
+  redirect(`/procedimenti/${input.procedimentoId}?section=proposals&${query}#proposal-reconciliation`);
 }
 
 export async function reviewOperationalProposalAction(formData: FormData): Promise<void> {

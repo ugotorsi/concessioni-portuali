@@ -1,4 +1,5 @@
 import { CheckCircle2, CircleDot, Lightbulb, ShieldCheck, XCircle } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/Button";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
@@ -7,6 +8,9 @@ import {
   materializeOperationalProposalAction,
   reviewOperationalProposalAction,
 } from "@/server/actions/fascicolo-operational-proposals";
+import { actDraftMatchesTemplate, ACT_DRAFT_STATUS_LABELS, type ActDraft } from "@/server/fascicolo-acts/model";
+import { reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
+import type { ActivitySpec } from "@/server/fascicolo-operational-activities/model";
 
 export type FascicoloProposalType =
   | "DEADLINE"
@@ -42,6 +46,11 @@ export interface FascicoloProposal {
   reviewedAt?: Date | null;
   materializedAt?: Date | null;
   materializedEntityType?: string | null;
+  originatingIssueSemanticKeys?: readonly string[];
+  proposedPayload?: unknown;
+  approvedPayload?: unknown;
+  structuredReportFingerprint?: string;
+  supersededAt?: Date | null;
 }
 
 export function fascicoloProposalTypeLabel(type: FascicoloProposalType): string {
@@ -88,7 +97,7 @@ function reconciliationPayload(value: unknown): Record<string, unknown> | null {
   return payload.previewOnly === true ? payload : null;
 }
 
-function PreviewValue({ value }: { value: unknown }) {
+export function PreviewValue({ value }: { value: unknown }) {
   if (value === null || value === undefined) return <span className="text-slate-500">Non presente</span>;
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return <span>{String(value)}</span>;
@@ -115,8 +124,8 @@ function PreviewValue({ value }: { value: unknown }) {
   return <span>{String(value)}</span>;
 }
 
-function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
-  if (!canManage) return null;
+function ProposalActions({ proposal, canManage, isCurrent }: { proposal: FascicoloProposal; canManage: boolean; isCurrent: boolean }) {
+  if (!canManage || !isCurrent) return null;
   if (proposal.status === "PROPOSED") {
     return (
       <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3">
@@ -148,8 +157,62 @@ function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal;
   ) : null;
 }
 
-function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
+function activityDraftDetails(payload: unknown): { title: string; activityCode?: string; documentCode?: string } | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const record = payload as Record<string, unknown>;
+  const draft = record.draft;
+  if (!draft || typeof draft !== "object" || Array.isArray(draft)) return null;
+  const draftRecord = draft as Record<string, unknown>;
+  const title = draftRecord.title;
+  if (typeof title !== "string" || !title.trim()) return null;
+  return {
+    title,
+    activityCode: typeof record.activityCode === "string" ? record.activityCode : undefined,
+    documentCode: typeof draftRecord.documentCode === "string" ? draftRecord.documentCode : undefined,
+  };
+}
+
+function ProposalCard({
+  proposal, canManage, drafts, activitySpecs, currentReportFingerprint,
+}: {
+  proposal: FascicoloProposal;
+  canManage: boolean;
+  drafts: readonly ActDraft[];
+  activitySpecs: readonly ActivitySpec[];
+  currentReportFingerprint?: string;
+}) {
   const reconciliation = reconciliationPayload(proposal.reconciliationPreview);
+  const draftDetails = proposal.proposalType === "ACTIVITY" ? activityDraftDetails(proposal.proposedPayload) : null;
+  const draftTitle = draftDetails?.title ?? null;
+  const issueSemanticKey = proposal.originatingIssueSemanticKeys?.length === 1
+    ? proposal.originatingIssueSemanticKeys[0]
+    : null;
+  const calculatedTemplateKey = draftTitle && issueSemanticKey
+    ? reportPlanTemplateKey(issueSemanticKey, proposal.title, draftTitle, draftDetails?.activityCode, draftDetails?.documentCode)
+    : null;
+  const matchingSpecs = activitySpecs.filter((spec) =>
+    spec.issueSemanticKey === issueSemanticKey
+    && (draftDetails?.activityCode ? spec.activityCode === draftDetails.activityCode : spec.title === proposal.title));
+  const activitySpec = matchingSpecs.length === 1 ? matchingSpecs[0] : undefined;
+  const sameTitleDocuments = activitySpec?.documents.filter((document) => document.title === draftTitle) ?? [];
+  const activityDocument = activitySpec?.documents.find((document) => document.templateKey === calculatedTemplateKey)
+    ?? (sameTitleDocuments.length === 1 ? sameTitleDocuments[0] : undefined);
+  const activityTemplateKey = activityDocument?.templateKey ?? calculatedTemplateKey;
+  const linkedDrafts = activityTemplateKey && issueSemanticKey
+    ? drafts.filter((draft) => actDraftMatchesTemplate(draft, {
+        templateKey: activityTemplateKey,
+        issueSemanticKey,
+        legacyTemplateKeys: activityDocument?.legacyTemplateKeys,
+      }))
+    : [];
+  const possibleLegacyDrafts = draftTitle && issueSemanticKey && !linkedDrafts.length
+    ? drafts.filter((draft) => actDraftMatchesTemplate(draft, {
+        templateKey: `PLAN:${draftTitle}`, issueSemanticKey,
+      }))
+    : [];
+  const isCurrent = !proposal.supersededAt
+    && (!currentReportFingerprint || !proposal.structuredReportFingerprint
+      || proposal.structuredReportFingerprint === currentReportFingerprint);
   return (
     <article className="min-w-0 rounded-md border border-slate-200 bg-white p-4">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -164,6 +227,50 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
       </div>
 
       <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.description)}</p>
+
+      {draftTitle ? (
+        <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm">
+          <p className="font-medium text-slate-800">Facsimile collegato: {draftTitle}</p>
+          {linkedDrafts.length ? (
+            <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              {linkedDrafts.map((draft) => (
+                <li key={draft.draftKey}>
+                  <Link className="text-sky-700 underline" href={`/procedimenti/${proposal.procedimentoId}?section=acts#draft-${draft.draftKey}`}>
+                    {draft.current.title} · v{draft.current.version} · {ACT_DRAFT_STATUS_LABELS[draft.current.status]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : possibleLegacyDrafts.length ? (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-amber-900">Bozze precedenti da confrontare e associare all&apos;attività soltanto dopo verifica.</p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                {possibleLegacyDrafts.map((draft) => (
+                  <li key={draft.draftKey}>
+                    <Link className="text-sky-700 underline" href={`/procedimenti/${proposal.procedimentoId}?section=acts#draft-${draft.draftKey}`}>
+                      {draft.current.title} · v{draft.current.version} · {ACT_DRAFT_STATUS_LABELS[draft.current.status]}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-slate-600">
+                Nessuna bozza collegata; crearne una non segna l&apos;attività come eseguita.
+              </p>
+              {activitySpec && !["REJECTED", "SUPERSEDED", "STALE"].includes(proposal.status) ? (
+                <Link
+                  className="text-xs font-medium text-sky-700 underline"
+                  href={`/procedimenti/${proposal.procedimentoId}?section=proposals#activity-${activitySpec.activityKey}`}
+                >
+                  Apri l&apos;attività nel percorso operativo
+                </Link>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {reconciliation ? (
         <details className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
@@ -202,11 +309,14 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
         </dl>
       </details>
 
+      {!isCurrent && (proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED") ? (
+        <p className="mt-3 text-sm text-amber-900">Approvazione conservata, ma il quadro è cambiato: non è attuabile senza una nuova valutazione.</p>
+      ) : null}
       {(proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED")
         && proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED") ? (
           <p className="mt-3 text-sm text-slate-600">Approvata; l’attuazione richiede un intervento manuale separato.</p>
         ) : null}
-      <ProposalActions proposal={proposal} canManage={canManage} />
+      <ProposalActions proposal={proposal} canManage={canManage} isCurrent={isCurrent} />
     </article>
   );
 }
@@ -225,7 +335,15 @@ const groups: readonly {
   { key: "past", title: "Non più attuali", statuses: ["STALE", "SUPERSEDED"], icon: Lightbulb, iconClassName: "text-amber-700" },
 ];
 
-export function FascicoloProposals({ proposals, canManage }: { proposals: readonly FascicoloProposal[]; canManage: boolean }) {
+export function FascicoloProposals({
+  proposals, canManage, drafts = [], activitySpecs = [], currentReportFingerprint,
+}: {
+  proposals: readonly FascicoloProposal[];
+  canManage: boolean;
+  drafts?: readonly ActDraft[];
+  activitySpecs?: readonly ActivitySpec[];
+  currentReportFingerprint?: string;
+}) {
   const reviewCount = proposals.filter((proposal) => proposal.status === "PROPOSED").length;
   const approvedCount = proposals.filter((proposal) => proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED").length;
   const materializedCount = proposals.filter((proposal) => proposal.status === "MATERIALIZED").length;
@@ -267,7 +385,8 @@ export function FascicoloProposals({ proposals, canManage }: { proposals: readon
               <h3 id={`proposal-group-${group.key}`} className="text-base font-semibold text-slate-950">{group.title}</h3>
             </div>
             <div className="mt-3 grid min-w-0 gap-3 xl:grid-cols-2">
-              {groupProposals.map((proposal) => <ProposalCard key={proposal.id} proposal={proposal} canManage={canManage} />)}
+              {groupProposals.map((proposal) => <ProposalCard key={proposal.id} proposal={proposal} canManage={canManage} drafts={drafts}
+                activitySpecs={activitySpecs} currentReportFingerprint={currentReportFingerprint} />)}
             </div>
           </section>
         );
