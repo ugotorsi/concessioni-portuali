@@ -102,9 +102,17 @@ function boundedTimeout(value: string | undefined): number {
   return parsed;
 }
 
-function activationSpec(request: DocumentWorkerActivationRequest) {
+export function activationCallerEnvironment(
+  environment: Readonly<Record<string, string | undefined>>,
+): string {
+  const value = environment.VERCEL_ENV?.trim().toLowerCase();
+  return value && /^[a-z]{1,32}$/.test(value) ? value : "unspecified";
+}
+
+function activationSpec(request: DocumentWorkerActivationRequest, callerEnvironment: string) {
   const scopedProcedimentoId = procedimentoIdSchema.parse(request.procedimentoId);
   const common = [
+    `ASYNC_WORKER_CALLER_ENVIRONMENT=${callerEnvironment}`,
     "ASYNC_WORKER_CONCURRENCY=1",
     "ASYNC_WORKER_DEDICATED_MODE=true",
     "ASYNC_WORKER_EXIT_ON_IDLE=true",
@@ -176,7 +184,7 @@ export async function activateDocumentWorker(
   if (mode !== "RENDER_ONE_OFF") {
     throw new DocumentWorkerActivationError("INVALID_CONFIGURATION");
   }
-  const spec = activationSpec(request);
+  const spec = activationSpec(request, activationCallerEnvironment(environment));
   const serviceId = serviceIdSchema.safeParse(environment[spec.serviceVariable]?.trim());
   const apiKey = environment.RENDER_WORKER_API_KEY?.trim();
   if (!serviceId.success || !apiKey) {

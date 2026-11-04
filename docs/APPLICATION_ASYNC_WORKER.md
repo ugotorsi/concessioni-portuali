@@ -27,6 +27,8 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_OPERATION_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
+| `ASYNC_WORKER_REQUIRED_CALLER_ENVIRONMENT` | empty | set on the worker service (e.g. `production`); every start must declare the same caller environment or exits with `CALLER_ENVIRONMENT_MISMATCH` before touching database or storage |
+| `ASYNC_WORKER_CALLER_ENVIRONMENT` | empty | stamped inline by one-off activation from the caller's `VERCEL_ENV` (`unspecified` when absent); never set it on the worker service, otherwise starts that omit it would inherit a passing value |
 | `ASYNC_PROVIDER_EXECUTION_ENABLED` | `false` | blocks provider-backed claims when false |
 | `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required for generic workers or an allowlist containing `FASCICOLO.AUTOMATIC_ANALYSIS_V1` | positive decimal, max 6 decimals |
 | `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required for generic workers or an allowlist containing `LEGAL_RESEARCH.EXECUTE_V1` | positive decimal, max 6 decimals |

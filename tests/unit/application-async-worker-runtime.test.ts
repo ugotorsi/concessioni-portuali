@@ -616,6 +616,29 @@ describe("Block 3B.7 application async worker runtime", () => {
     });
   });
 
+  it("refuses starts whose caller environment differs from the bound environment", () => {
+    const base = {
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_WORKER_REQUIRED_CALLER_ENVIRONMENT: "production",
+    };
+    for (const caller of [undefined, "preview", "unspecified", "Production"]) {
+      expect(() => parseApplicationAsyncWorkerConfig({
+        ...base,
+        ...(caller === undefined ? {} : { ASYNC_WORKER_CALLER_ENVIRONMENT: caller }),
+      })).toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
+        code: "CALLER_ENVIRONMENT_MISMATCH",
+      }));
+    }
+    expect(parseApplicationAsyncWorkerConfig({
+      ...base,
+      ASYNC_WORKER_CALLER_ENVIRONMENT: "production",
+    }).providerExecutionEnabled).toBe(false);
+    expect(parseApplicationAsyncWorkerConfig({
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_WORKER_CALLER_ENVIRONMENT: "preview",
+    }).providerExecutionEnabled).toBe(false);
+  });
+
   it("requires monetary estimates before provider execution can be enabled", () => {
     expect(() => parseApplicationAsyncWorkerConfig({
       DATABASE_URL: "postgresql://server/database",

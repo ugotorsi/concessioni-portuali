@@ -45,6 +45,7 @@ vi.mock("@/server/async-jobs/documentWorkerActivation", async (importOriginal) =
 
 import {
   activateDocumentWorker,
+  activationCallerEnvironment,
   documentWorkerKindForOperation,
   type DocumentWorkerActivationRequest,
 } from "@/server/async-jobs/documentWorkerActivation";
@@ -267,6 +268,9 @@ describe("document worker activation", () => {
     const body = JSON.parse(String(fetch.mock.calls[0][1]?.body)) as { startCommand: string };
     const segments = body.startCommand.split(" && ");
     expect(segments).toHaveLength(chained ? 2 : 1);
+    for (const segment of segments) {
+      expect(segment.startsWith("ASYNC_WORKER_CALLER_ENVIRONMENT=unspecified ")).toBe(true);
+    }
     const research = segments.at(-1)!;
     expect(research).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=LEGAL_RESEARCH.EXECUTE_V1");
     expect(research).toContain("ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST=procedure-1");
@@ -279,6 +283,26 @@ describe("document worker activation", () => {
       expect(segments[0]).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
     }
   });
+  it("stamps a sanitized caller environment on one-off worker starts", async () => {
+    expect(activationCallerEnvironment({ VERCEL_ENV: "production" })).toBe("production");
+    expect(activationCallerEnvironment({ VERCEL_ENV: "preview" })).toBe("preview");
+    expect(activationCallerEnvironment({})).toBe("unspecified");
+    expect(activationCallerEnvironment({ VERCEL_ENV: "production; rm -rf /" })).toBe("unspecified");
+    const fetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => new Response(
+        JSON.stringify({ id: "job-render123" }),
+        { status: 201, headers: { "Content-Type": "application/json" } },
+      ));
+    await activateDocumentWorker(
+      { kind: "DOCUMENT_EXTRACTION", procedimentoId: "procedure-1" },
+      { environment: { ...environment, VERCEL_ENV: "preview" }, fetch },
+    );
+    const body = JSON.parse(String(fetch.mock.calls[0][1]?.body)) as { startCommand: string };
+    expect(body.startCommand.startsWith("ASYNC_WORKER_CALLER_ENVIRONMENT=preview ")).toBe(true);
+  });
+
   it("defers a rejected request without exposing credentials", async () => {
     const { requestDocumentWorkerActivation } = await vi.importActual<
       typeof import("@/server/async-jobs/documentWorkerActivation")

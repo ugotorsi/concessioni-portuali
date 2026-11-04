@@ -53,7 +53,9 @@ export type ApplicationAsyncWorkerEvent =
     };
 
 export class ApplicationAsyncWorkerConfigurationError extends Error {
-  constructor(readonly code: "DATABASE_URL_REQUIRED" | "INVALID_CONFIGURATION") {
+  constructor(
+    readonly code: "DATABASE_URL_REQUIRED" | "INVALID_CONFIGURATION" | "CALLER_ENVIRONMENT_MISMATCH",
+  ) {
     super(code);
     this.name = "ApplicationAsyncWorkerConfigurationError";
   }
@@ -206,6 +208,16 @@ export function parseApplicationAsyncWorkerConfig(
 ): ApplicationAsyncWorkerConfig {
   if (!environment.DATABASE_URL?.trim()) {
     throw new ApplicationAsyncWorkerConfigurationError("DATABASE_URL_REQUIRED");
+  }
+  // A worker bound to one environment (e.g. Production database and storage) refuses any start
+  // that does not declare the same caller environment, so Preview deployments sharing the Render
+  // service id cannot make it claim jobs. Starts without the declaration are refused as well.
+  const requiredCallerEnvironment = environment.ASYNC_WORKER_REQUIRED_CALLER_ENVIRONMENT?.trim();
+  if (
+    requiredCallerEnvironment
+    && environment.ASYNC_WORKER_CALLER_ENVIRONMENT?.trim() !== requiredCallerEnvironment
+  ) {
+    throw new ApplicationAsyncWorkerConfigurationError("CALLER_ENVIRONMENT_MISMATCH");
   }
   const workerId = environment.ASYNC_WORKER_ID?.trim() || defaultWorkerId();
   if (workerId.length > 256) {
