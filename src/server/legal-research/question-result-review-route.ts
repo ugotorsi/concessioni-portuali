@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { canValidateReport } from "@/lib/auth";
+import { canValidateReport, type DemoRole } from "@/lib/auth";
 import {
   canReadTenantResource,
   canWriteTenantResource,
@@ -43,7 +43,7 @@ function jsonError(error: string, status: number): Response {
 async function authorizedTenant(
   mode: "read" | "write",
   dependencies: QuestionResultReviewRouteDependencies,
-): Promise<{ tenantId: string } | { response: Response }> {
+): Promise<{ tenantId: string; actor: { userId: string; role: DemoRole } } | { response: Response }> {
   const context = await dependencies.getCurrentTenantContext();
   if (!context) return { response: jsonError("AUTH_REQUIRED", 401) };
   if (!canValidateReport(context.role) || !context.defaultTenantId) {
@@ -53,7 +53,7 @@ async function authorizedTenant(
     ? canWriteTenantResource(context, context.defaultTenantId, { allowWhenEnteMissing: false })
     : canReadTenantResource(context, context.defaultTenantId, { allowWhenEnteMissing: false });
   return allowed
-    ? { tenantId: context.defaultTenantId }
+    ? { tenantId: context.defaultTenantId, actor: { userId: context.userId, role: context.role } }
     : { response: jsonError("FORBIDDEN", 403) };
 }
 
@@ -71,7 +71,11 @@ async function getHandler(
       tenantId: authorization.tenantId,
     });
     return NextResponse.json({ results }, { headers: { "Cache-Control": "no-store" } });
-  } catch {
+  } catch (error) {
+    console.error("research_question_result_review_list_failed", {
+      missionId: missionId.data,
+      error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+    });
     return jsonError("QUESTION_RESULT_REVIEW_UNAVAILABLE", 500);
   }
 }
@@ -99,6 +103,7 @@ async function postHandler(
       reviewStatus: "HUMAN_CONFIRMED",
       confidence: null,
       rationale: input.data.rationale,
+      actor: authorization.actor,
     });
     const [result] = await dependencies.listResearchQuestionResultsForReview({
       missionId: input.data.missionId,
@@ -113,6 +118,14 @@ async function postHandler(
     if (error instanceof Error && error.message === "INVALID_CLASSIFICATION_RATIONALE") {
       return jsonError("INVALID_REQUEST", 400);
     }
+    if (error instanceof Error && error.message === "RESEARCH_REVIEW_FORBIDDEN") {
+      return jsonError("FORBIDDEN", 403);
+    }
+    console.error("research_question_result_review_write_failed", {
+      missionId: input.data.missionId,
+      resultId: input.data.resultId,
+      error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+    });
     return jsonError("QUESTION_RESULT_REVIEW_UNAVAILABLE", 500);
   }
 }

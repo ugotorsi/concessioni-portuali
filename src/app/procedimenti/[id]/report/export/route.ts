@@ -2,6 +2,7 @@ import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { listActAttachmentOptions } from "@/server/fascicolo-acts/repository";
 import {
   buildProfessionalReportDocument,
   buildProfessionalReportFileName,
@@ -60,7 +61,7 @@ export async function GET(
     : snapshots.find((candidate) => candidate.status === "CURRENT");
   if (!snapshot) return new Response("Current report not found", { status: 404 });
 
-  const document = buildProfessionalReportDocument(snapshot);
+  const document = buildProfessionalReportDocument(snapshot, await listActAttachmentOptions(procedimentoId));
   const body = format === "pdf"
     ? await renderProfessionalReportPdf(document)
     : renderProfessionalReportRtf(document);

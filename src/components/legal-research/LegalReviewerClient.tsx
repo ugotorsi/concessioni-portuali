@@ -155,6 +155,8 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
   }
 
   useEffect(() => {
+    // The existing mission route resets pending and error state when loading its initial request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialMissionId) void loadVerification(initialMissionId);
     // The initial route identifier is intentionally loaded once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -477,7 +479,8 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
               <CardTitle>Classificazione della fonte</CardTitle>
               <CardDescription>
                 La revisione qualifica il contributo della fonte al quesito. Non modifica i gate documentali,
-                temporali o di usabilità della SourceChain.
+                temporali o di usabilità della SourceChain. Motivare il rapporto tra fatti, passaggio
+                rilevante e questione, indicando differenze e limiti temporali.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">

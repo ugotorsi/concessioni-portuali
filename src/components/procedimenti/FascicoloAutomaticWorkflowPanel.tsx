@@ -5,7 +5,6 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { sourceLimitLabel } from "@/lib/professional-text";
 import {
-  generateOperationalProposalsAction,
   materializeOperationalProposalAction,
   reviewOperationalProposalAction,
 } from "@/server/actions/fascicolo-operational-proposals";
@@ -89,12 +88,12 @@ function sourceStateLabel(state: FascicoloAutomaticWorkflowReadModel["missions"]
   if (state === "IDENTITY_VERIFIED") return "Identità verificata";
   if (state === "CONTENT_VERIFIED") return "Contenuto verificato";
   if (state === "TEMPORAL_ASSESSED") return "Valutazione temporale disponibile";
-  if (state === "USABLE") return "Utilizzabilità già verificata";
+  if (state === "USABLE") return "Utilizzabilità tecnica già verificata";
   return "Fonte solo individuata";
 }
 
 function pipelineStateLabel(result: FascicoloAutomaticWorkflowReadModel["missions"][number]["results"][number]): string {
-  if (result.usable) return "Fonte utilizzabile";
+  if (result.usable) return "Fonte utilizzabile tecnicamente";
   if (result.manualReviewRequired) return "Review richiesta";
   if (result.retrievalState === "BLOCKED" || result.identityVerification === "MISMATCH" || result.contentVerification === "MISMATCH") return "Fonte bloccata";
   if (result.temporalStatus === "APPLICABLE") return "Temporalmente applicabile";
@@ -261,7 +260,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <span>Stato ricerca: {mission.researchState}</span>
                                     <span>Copertura: {mission.coverageStatus}</span>
                                     <span>Discovery: {mission.discoveryCoverageStatus}</span>
-                                    <span>Fonti utilizzabili: {mission.usableCoverageStatus}</span>
+                                    <span>Fonti utilizzabili: {mission.usableCoverageStatus} (verifica tecnica)</span>
                                     {mission.conflicting ? <Badge variant="danger">Orientamenti in conflitto</Badge> : null}
                                     {mission.conflictingUsableAuthorities ? <Badge variant="danger">Autorità utilizzabili in conflitto</Badge> : null}
                                     {mission.historicalResultCount > 0 ? <span>Risultati storici: {mission.historicalResultCount}</span> : null}
@@ -296,7 +295,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                   {mission.sourceGaps.length > 0 ? (
                                     <p className="text-xs text-amber-800">Limiti delle fonti: {mission.sourceGaps.map(sourceLimitLabel).join("; ")}</p>
                                   ) : null}
-                                  <p className="text-xs text-slate-500">La direzione del risultato non certifica la fonte e non costituisce una conclusione giuridica.</p>
+                                  <p className="text-xs text-slate-500">La direzione del risultato non certifica la fonte e non costituisce una conclusione giuridica. La verifica tecnica non conferma la pertinenza al caso: la classificazione richiede una valutazione motivata del professionista.</p>
                                 </div>
                               ) : null}
                             </div>
@@ -375,10 +374,12 @@ export function FascicoloAutomaticWorkflowPanel({
                 <Badge variant={currentStructuredSnapshot?.effectiveStatus === "STALE" ? "warning" : "success"}>
                   {currentStructuredSnapshot?.effectiveStatus === "STALE" ? "Da aggiornare" : "Aggiornato"}
                 </Badge>
-                <form action={generateOperationalProposalsAction}>
-                  <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
-                  <Button type="submit" size="sm">Genera proposte operative</Button>
-                </form>
+                <Link
+                  href={`/procedimenti/${structuredReport.payload.procedimentoId}?section=proposals#proposal-reconciliation`}
+                  className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+                >
+                  Genera proposte operative: esamina prima la simulazione
+                </Link>
                 <details>
                   <summary className="cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Altro</summary>
                   <form action={archiveStructuredFascicoloReportAction} className="mt-2">
@@ -710,3 +711,4 @@ export function FascicoloAutomaticWorkflowPanel({
     </Card>
   );
 }
+import Link from "next/link";

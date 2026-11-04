@@ -1,5 +1,11 @@
 import type { StructuredKnowledgeReadItem } from "@/server/queries/fascicolo-knowledge";
 import { assessIssueProfile, type LegalIssueProfileAssessment } from "./legal-issue-profiles";
+import {
+  buildPortRegimeCoordination,
+  isPortConcessionMatter,
+  type PortRegimeCoordination,
+  type PortRegimeSourceStatus,
+} from "./port-regime";
 
 /**
  * Deterministic fact-to-law application. Rules are a curated catalogue of official
@@ -14,6 +20,8 @@ export type LegalRuleTemporalStatus =
   | "APPLICABLE_PREVIOUS_VERSION"
   | "NOT_APPLICABLE_RATIONE_TEMPORIS"
   | "PROSPECTIVE_ONLY"
+  | "SUPERSEDED"
+  | "APPLICABILITY_TO_VERIFY"
   | "DATE_TO_VERIFY";
 
 export interface StructuredReportLegalRuleApplication {
@@ -44,7 +52,7 @@ export interface StructuredReportLegalApplication {
   contraryAuthorities: readonly StructuredReportLegalApplicationAuthority[];
   favorableArguments: readonly string[];
   contraryArguments: readonly string[];
-  conclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES" | "NORMATIVE_ONLY_PRELIMINARY";
+  conclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES" | "NORMATIVE_ONLY_PRELIMINARY" | "SOURCES_TO_VERIFY";
   conclusion: string;
   consequences: readonly string[];
   /** Additive element-by-element assessment of the fattispecie. Older reports may omit it. */
@@ -74,18 +82,21 @@ export interface LegalApplicationIssueInput {
 interface RuleVersion {
   from: string;
   label: string;
+  applicationBefore?: string;
 }
 
 interface CatalogRule {
   id: string;
   citation: string;
   subject: string;
+  scope: "GENERAL" | "MARITIME" | "PORT";
   anchor: TemporalAnchor;
   trigger: RegExp;
   /** Precise ISO start of effect when known; otherwise only the adoption year is catalogued. */
   effectiveFrom: string | null;
   effectiveFromYear: number;
   versions?: readonly RuleVersion[];
+  preExistingGrantReason?: string;
   normattivaUrn?: string;
   officialUrl?: string;
   application: string;
@@ -100,11 +111,12 @@ const CATALOG: readonly CatalogRule[] = [
     id: "COD_NAV_47",
     citation: "Art. 47 cod. nav. (R.D. 30 marzo 1942, n. 327)",
     subject: "Decadenza dalla concessione demaniale",
+    scope: "MARITIME",
     anchor: "CONDUCT",
     trigger: /decadenz|inadempi|obblig\w* (?:del )?(?:titolo|concession)|mutamento\w* (?:sostanzial\w* )?(?:dello )?scopo|mancato (?:uso|pagamento)|canon/i,
     effectiveFrom: "1942-04-21",
     effectiveFromYear: 1942,
-    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art47",
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327:1~art47",
     application: "La decadenza richiede la prova di una delle fattispecie tipiche: a) mancata esecuzione delle opere prescritte o mancato inizio della gestione nei termini; b) non uso continuato o cattivo uso; c) mutamento sostanziale non autorizzato dello scopo; d) omesso pagamento del canone per il numero di rate fissato dall'atto; e) abusiva sostituzione di altri nel godimento della concessione; f) inadempienza degli obblighi del titolo o di legge. Occorrono la previa fissazione di un termine per le deduzioni e una decisione motivata; per le lett. a) e b) è ammessa la proroga.",
     favorable: "Se l'inadempimento di obblighi espressi del titolo è documentato e persistente, la fattispecie tipica dell'art. 47 offre base legale alla decadenza.",
     contrary: "La decadenza non è automatica: difetti di tipicità, di prova, di contraddittorio o di proporzionalità, ovvero la regolarizzazione o la tolleranza dell'amministrazione, possono renderla illegittima.",
@@ -113,24 +125,30 @@ const CATALOG: readonly CatalogRule[] = [
     id: "COD_NAV_54",
     citation: "Art. 54 cod. nav. (R.D. 30 marzo 1942, n. 327)",
     subject: "Occupazioni e innovazioni abusive su demanio marittimo",
+    scope: "MARITIME",
     anchor: "CONDUCT",
     trigger: /abusiv|innovazion|manufatt|container|prefabbricat|opere? non autorizzat|occupazion\w* (?:senza titolo|eccedent)/i,
     effectiveFrom: "1942-04-21",
     effectiveFromYear: 1942,
-    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art54",
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327:1~art54",
     application: "Il potere di ingiunzione al ripristino è distinto dalla decadenza e spetta all'autorità individuata dalla norma; occorre accertare l'opera, l'assenza di assenso e l'eccedenza rispetto al titolo.",
     favorable: "La prova di un'opera non assentita sul demanio fonda il potere ripristinatorio indipendentemente dalla sorte della concessione.",
-    contrary: "Assensi pregressi, conoscenza e tolleranza documentata dell'amministrazione o la natura amovibile e assentita del manufatto escludono o limitano il potere ripristinatorio.",
+    contrary: "Un titolo valido o assensi pregressi che ricomprendano l'opera possono escludere l'abusività. La sola amovibilità, conoscenza o tolleranza dell'amministrazione non prova di per sé un titolo o un assenso valido: verificare gli atti e le circostanze concrete.",
   },
   {
     id: "L84_ART18",
     citation: "Art. 18 L. 28 gennaio 1994, n. 84",
     subject: "Concessione di aree e banchine portuali",
+    scope: "PORT",
     anchor: "GRANT",
     trigger: /concession\w*[^.]{0,60}(?:area|aree|banchin|portual|terminal)|art\.?\s*18\b|programma di (?:attivit|investiment)|\bPEF\b|piano economico/i,
     effectiveFrom: null,
     effectiveFromYear: 1994,
-    versions: [{ from: "2022-08-27", label: "testo modificato dall'art. 5 della L. 5 agosto 2022, n. 118" }],
+    versions: [{
+      from: "2022-08-27",
+      label: "testo modificato dall'art. 5 della L. 5 agosto 2022, n. 118",
+      applicationBefore: "Per il rilascio del titolo anteriore al 27/08/2022 consultare il testo dell'art. 18 allora vigente e le pattuizioni applicabili. Per verifiche e fatti successivi occorre valutare separatamente la disciplina vigente alla loro data e la salvaguardia delle concessioni preesistenti, senza retroapplicare le regole del nuovo rilascio.",
+    }],
     normattivaUrn: "urn:nir:stato:legge:1994-01-28;84~art18",
     application: "Il rapporto concessorio portuale va letto alla luce dei requisiti e degli impegni del titolo (comma 8: programma di attività assistito da garanzie, attrezzature, organico), dell'obbligo di esercizio diretto e del divieto di operare in spazi diversi da quelli assegnati (comma 9, che consente l'affidamento autorizzato ad imprese ex art. 16 di attività del ciclo operativo), delle verifiche annuali (comma 10) e della decadenza per inosservanza degli obblighi o mancato raggiungimento degli obiettivi del programma senza giustificato motivo (comma 11).",
     favorable: "Il mancato rispetto degli impegni del programma di attività e degli obblighi del titolo, senza giustificato motivo, fonda la decadenza speciale dell'art. 18, comma 11, nel rispetto della L. 241/1990.",
@@ -140,32 +158,40 @@ const CATALOG: readonly CatalogRule[] = [
     id: "COD_NAV_45BIS",
     citation: "Art. 45-bis cod. nav.",
     subject: "Affidamento ad altri soggetti delle attività oggetto della concessione",
+    scope: "MARITIME",
     anchor: "CONDUCT",
     trigger: /affid\w*[^.]{0,40}(?:a terz|ad altr)|terz\w* operator|gestion\w* (?:affidat|da parte di terz)|sub-?affid|sub-?concession/i,
-    effectiveFrom: null,
+    effectiveFrom: "1993-12-05",
     effectiveFromYear: 1993,
-    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art45bis",
-    application: "Il concessionario può affidare ad altri soggetti la gestione delle attività oggetto della concessione solo previa autorizzazione, in casi eccezionali e per periodi determinati; la gestione di attività secondarie può essere affidata previa autorizzazione. In ambito portuale la norma si coordina con l'obbligo di esercizio diretto dell'art. 18, comma 9, L. 84/1994.",
-    favorable: "L'affidamento senza autorizzazione dell'autorità concedente è contrario all'art. 45-bis e rileva ai fini dell'art. 47, lett. e) e f).",
-    contrary: "Se l'attività affidata è secondaria o temporanea, l'ordinamento ammette l'autorizzazione: la regolarizzazione può essere il rimedio proporzionato.",
+    versions: [{
+      from: "2001-04-18",
+      label: "soppressione dei limiti di eccezionalità e durata determinata dall'art. 10, comma 2, L. 88/2001",
+      applicationBefore: "Per l'affidamento dell'attività principale tra il 05/12/1993 e il 17/04/2001 il testo richiedeva casi eccezionali, periodi determinati e previa autorizzazione; anche la gestione di attività secondarie richiedeva autorizzazione. Distinguere l'affidamento dal subingresso e verificare la disciplina speciale portuale alla data dei fatti.",
+    }],
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327:1~art45bis",
+    application: "Dal 18/04/2001 l'art. 45-bis consente l'affidamento della gestione delle attività oggetto della concessione e delle attività secondarie previa autorizzazione; non richiede più, di per sé, casi eccezionali o periodi determinati. Per le concessioni portuali verificare anche la disciplina speciale dell'art. 18, comma 9, L. 84/1994 nella versione temporalmente applicabile. L'affidamento di attività è distinto dalla sostituzione nel godimento disciplinata dall'art. 46.",
+    favorable: "Un affidamento effettivamente soggetto ad autorizzazione, se accertato senza il necessario assenso, può costituire una violazione da valutare secondo la disciplina e il titolo applicabili.",
+    contrary: "Un'autorizzazione applicabile, un rapporto di mero servizio o l'assenza di effettiva gestione affidata al terzo possono escludere la violazione; il mancato reperimento del documento non prova da solo che l'autorizzazione non esista.",
   },
   {
     id: "COD_NAV_46",
     citation: "Art. 46 cod. nav.",
     subject: "Subingresso nella concessione",
+    scope: "MARITIME",
     anchor: "CONDUCT",
     trigger: /subingress|sostituzion\w* (?:di altri|nel godimento)|cession\w* (?:della concessione|del titolo)|trasferiment\w* della concessione/i,
     effectiveFrom: "1942-04-21",
     effectiveFromYear: 1942,
-    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327~art46",
-    application: "La sostituzione di altri nel godimento della concessione richiede l'autorizzazione dell'autorità concedente; in mancanza, la sostituzione è inopponibile all'amministrazione e integra la causa di decadenza dell'art. 47, lett. e).",
-    favorable: "La sostituzione non autorizzata nel godimento integra una fattispecie tipica di decadenza.",
+    normattivaUrn: "urn:nir:stato:regio.decreto:1942-03-30;327:1~art46",
+    application: "La sostituzione di altri nel godimento della concessione richiede l'autorizzazione dell'autorità concedente. La fattispecie è distinta dall'affidamento di attività: solo una sostituzione abusiva accertata può rilevare ai fini dell'art. 47, lett. e), nel rispetto del contraddittorio.",
+    favorable: "La sostituzione abusiva accertata nel godimento può integrare una fattispecie tipica di decadenza.",
     contrary: "Un rapporto contrattuale che non trasferisce il godimento del bene (es. servizi resi al concessionario) non è subingresso.",
   },
   {
     id: "L84_ART16",
     citation: "Art. 16 L. 28 gennaio 1994, n. 84",
     subject: "Operazioni e servizi portuali",
+    scope: "PORT",
     anchor: "CONDUCT",
     trigger: /operazion\w* portual|serviz\w* portual|art\.?\s*16\b|autorizzazion\w* (?:all'esercizio|alle operazioni)/i,
     effectiveFrom: null,
@@ -179,6 +205,7 @@ const CATALOG: readonly CatalogRule[] = [
     id: "L241_PARTECIPAZIONE",
     citation: "Artt. 7, 10 e 10-bis L. 7 agosto 1990, n. 241",
     subject: "Comunicazione di avvio, partecipazione e preavviso di rigetto",
+    scope: "GENERAL",
     anchor: "ACT",
     trigger: /contestazion|avvio del procedimento|contraddittorio|deduzion|memori|audizion|controdeduzion/i,
     effectiveFrom: null,
@@ -192,6 +219,7 @@ const CATALOG: readonly CatalogRule[] = [
     id: "L241_ART21_NONIES",
     citation: "Artt. 21-quinquies e 21-nonies L. 7 agosto 1990, n. 241",
     subject: "Revoca e annullamento d'ufficio (autotutela)",
+    scope: "GENERAL",
     anchor: "ACT",
     trigger: /riesame|autotutela|annullament\w* d'ufficio|revoca/i,
     effectiveFrom: null,
@@ -206,10 +234,12 @@ const CATALOG: readonly CatalogRule[] = [
     id: "DM_202_2022",
     citation: "D.I. 28 dicembre 2022, n. 202",
     subject: "Regolamento per il rilascio delle concessioni di aree e banchine portuali",
+    scope: "PORT",
     anchor: "GRANT",
     trigger: /rilascio|istanz\w* di concession|procedur\w* (?:comparativ|selettiv|ad evidenza)|durata|rinnovo|estension\w* della durata|vicend\w* soggettiv|trasferiment\w* di quote|verific\w* annual/i,
     effectiveFrom: "2023-01-15",
     effectiveFromYear: 2023,
+    preExistingGrantReason: "Per il titolo anteriore l'art. 10, comma 1, esclude le disposizioni sul rilascio ma mantiene applicabili gli artt. 6, 7, 8 e 9; il comma 2 disciplina la rivalutazione del canone. Verificare la data e i presupposti del singolo adempimento successivo.",
     normattivaUrn: "urn:nir:ministero.infrastrutture.e.trasporti:decreto:2022-12-28;202",
     application: "Il regolamento disciplina rilascio, durata, canoni ed estensione delle concessioni ex art. 18. Per i titoli rilasciati dal 15/01/2023 si applica integralmente; per quelli anteriori l'art. 10, comma 1, rende applicabili soltanto gli artt. 6 (modifica del contenuto ed estensione della durata fino a cinque anni), 7 (vicende soggettive), 8 (avvicendamento) e 9 (verifiche annuali), con rivalutazione ISTAT dei canoni (art. 10, comma 2).",
     favorable: "Per titoli successivi al 15/01/2023 il regolamento fissa criteri di trasparenza, valutazione del PEF e durata vincolanti; gli artt. 6-9 si applicano comunque a modifiche, vicende soggettive e verifiche successive.",
@@ -219,12 +249,13 @@ const CATALOG: readonly CatalogRule[] = [
     id: "DM_110_2023",
     citation: "D.M. 21 aprile 2023, n. 110 (Linee guida)",
     subject: "Linee guida applicative del regolamento sulle concessioni portuali",
+    scope: "PORT",
     anchor: "GRANT",
     trigger: /rilascio|istanz\w* di concession|durata|rinnovo|estension\w* della durata|\bPEF\b|piano economico/i,
-    effectiveFrom: "2023-05-12",
+    effectiveFrom: null,
     effectiveFromYear: 2023,
-    officialUrl: "https://www.gazzettaufficiale.it/atto/vediMenuHTML?atto.dataPubblicazioneGazzetta=2023-05-12&atto.codiceRedazionale=23A02826&tipoSerie=serie_generale&tipoVigenza=originario",
-    application: "Le linee guida orientano l'applicazione del D.M. 202/2022 (durata, estensione, valutazione del PEF e degli investimenti); rilevano per atti adottati dopo la pubblicazione.",
+    officialUrl: "https://www.mit.gov.it/normativa/decreto-ministeriale-n-110-del-21-04-2023",
+    application: "Le linee guida orientano l'applicazione del D.I. 202/2022; l'art. 2 del decreto richiede alle AdSP di conformare le valutazioni per selezione e rilascio. La rilevanza di durata, estensione, PEF e investimenti va verificata per ciascun atto, senza attribuire effetti retroattivi.",
     favorable: "Offrono parametri motivazionali per valutare durata ed estensione in relazione agli investimenti.",
     contrary: "Sono atti di indirizzo: non integrano fattispecie sanzionatorie né si applicano a rilasci anteriori.",
   },
@@ -232,6 +263,7 @@ const CATALOG: readonly CatalogRule[] = [
     id: "ART_57_2018",
     citation: "Delibera ART n. 57/2018, Allegato A (come modificato dalla delibera n. 89/2024)",
     subject: "Accesso equo e non discriminatorio alle infrastrutture portuali",
+    scope: "PORT",
     anchor: "GRANT",
     trigger: /rilascio|procedur\w* (?:comparativ|selettiv|di gara)|\bPEF\b|piano economico|accesso (?:equo|alle infrastrutture)|\bART\b|Autorit[aà] di regolazione/i,
     effectiveFrom: null,
@@ -245,13 +277,14 @@ const CATALOG: readonly CatalogRule[] = [
     id: "ART_242_2025",
     citation: "Delibera ART n. 242/2025, Allegato A",
     subject: "Revisione delle misure di regolazione in ambito portuale",
+    scope: "PORT",
     anchor: "ONGOING_OBLIGATION",
     trigger: /concession\w*[^.]{0,60}(?:area|aree|banchin|portual|terminal)|\bPEF\b|piano economico|estension\w* della durata|revisione|contabilit\w* (?:separata|regolatoria)|\bART\b/i,
     effectiveFrom: "2026-03-01",
     effectiveFromYear: 2026,
     officialUrl: "https://www.autorita-trasporti.it/wp-content/uploads/2025/12/All.-A-delibera-n.-242_2025_signed.pdf",
-    application: "Le misure entrano in vigore il 1° marzo 2026 (misura 16.1). Si applicano integralmente alle concessioni non ancora rilasciate a tale data (misura 1.2, punto i) e, per le concessioni anteriori, agli aggiornamenti o revisioni che modificano il contenuto del titolo e alle vicende soggettive successive (punto ii); per le concessioni in essere valgono soltanto le misure 3.7, 3.13, 3.18, 3.19, 3.20, 4, 5 e 15 (punto iii): vigilanza e notifica ad ART delle istanze di revisione, monitoraggio annuale, parere ART sulle estensioni di durata, contabilità regolatoria e obblighi informativi.",
-    favorable: "Dal 1° marzo 2026 l'Autorità di sistema portuale deve esercitare vigilanza e comunicazioni ad ART secondo le misure applicabili.",
+    application: "Le misure entrano in vigore il 1° marzo 2026 (misura 16.1). La misura 1.2 distingue i titoli non ancora rilasciati (punto i), gli aggiornamenti o le revisioni di titoli anteriori che riguardino modifiche del contenuto o vicende soggettive (punto ii) e i titoli in essere a tale data, per i quali elenca le sole misure 3.7, 3.13, 3.18, 3.19, 3.20, 4, 5 e 15 (punto iii). L'anteriorità del rilascio non prova la vigenza del titolo né il perfezionamento di una modifica.",
+    favorable: "Dal 1° marzo 2026 valutare vigilanza e comunicazioni ad ART soltanto se risultano verificati i presupposti delle misure pertinenti.",
     contrary: "La delibera non qualifica retroattivamente condotte anteriori al 1° marzo 2026 né altera atti già adottati prima di tale data.",
   },
 ];
@@ -325,6 +358,12 @@ function assessTemporal(rule: CatalogRule, referenceDate: string | null, analysi
   }
   if (startsAfter) {
     const start = rule.effectiveFrom ? italianDate(rule.effectiveFrom) : String(rule.effectiveFromYear);
+    if (rule.preExistingGrantReason && rule.effectiveFrom && analysisDate >= rule.effectiveFrom) {
+      return {
+        status: "PROSPECTIVE_ONLY",
+        reasoning: `Il titolo (${refLabel}) precede l'efficacia della disciplina (${start}). ${rule.preExistingGrantReason}`,
+      };
+    }
     return {
       status: rule.effectiveFrom ? "NOT_APPLICABLE_RATIONE_TEMPORIS" : "DATE_TO_VERIFY",
       reasoning: `La data rilevante (${refLabel}) precede l'efficacia della disciplina (${start}).`,
@@ -349,10 +388,20 @@ function assessTemporal(rule: CatalogRule, referenceDate: string | null, analysi
   return { status: "APPLICABLE", reasoning: `Disciplina vigente alla ${anchorLabel[rule.anchor]} (${refLabel}), nella versione allora in vigore.` };
 }
 
-function firstDate(texts: readonly string[], pattern?: RegExp): string | null {
-  const dates = texts.filter((text) => !pattern || pattern.test(text)).flatMap(extractIsoDates);
-  return dates.length ? dates.sort()[0] : null;
+function uniqueDate(texts: readonly string[], pattern?: RegExp): string | null {
+  const dates = [...new Set(texts.filter((text) => !pattern || pattern.test(text)).flatMap(extractIsoDates))];
+  return dates.length === 1 ? dates[0] : null;
 }
+
+const REGIME_TEMPORAL_STATUS: Readonly<Record<PortRegimeSourceStatus, LegalRuleTemporalStatus>> = {
+  FULLY_APPLICABLE: "APPLICABLE",
+  PARTIALLY_APPLICABLE: "PROSPECTIVE_ONLY",
+  PREVIOUS_TEXT_APPLICABLE: "APPLICABLE_PREVIOUS_VERSION",
+  NOT_APPLICABLE_RATIONE_TEMPORIS: "NOT_APPLICABLE_RATIONE_TEMPORIS",
+  SUPERSEDED: "SUPERSEDED",
+  APPLICABILITY_TO_VERIFY: "APPLICABILITY_TO_VERIFY",
+  DATE_TO_VERIFY: "DATE_TO_VERIFY",
+};
 
 export function buildLegalApplication(input: {
   issues: readonly LegalApplicationIssueInput[];
@@ -361,35 +410,57 @@ export function buildLegalApplication(input: {
   context?: LegalApplicationContext;
   /** Grant date reconstructed by the port-regime coordination when the registry is not linked. */
   documentedGrantDate?: string | null;
+  portMatter?: boolean;
+  portRegime?: PortRegimeCoordination | null;
+  documentaryPhase?: { concluded: boolean; reviewPending: boolean };
 }): readonly StructuredReportLegalApplication[] {
   const items = input.knowledgeItems.filter((item) => item.status !== "REJECTED");
   const allTexts = items.map((item) => item.normalizedText);
-  const concluded = input.context
+  const portMatter = input.portMatter ?? isPortConcessionMatter({
+    knowledgeItems: items,
+    issueTexts: input.issues.map((issue) => issue.text),
+  });
+  const portRegime = input.portRegime ?? (portMatter ? buildPortRegimeCoordination({
+    knowledgeItems: items,
+    analysisDate: input.analysisDate,
+    registryGrant: input.context?.concessione ?? null,
+    extractIsoDates,
+  }) : null);
+  const maritimeMatter = portMatter || Boolean(input.context?.concessione) || [...allTexts, ...input.issues.map((issue) => issue.text)].some((text) =>
+    /demani\w* marittim|concession\w*[^.]{0,40}marittim|cod(?:ice)?\.?\s+(?:della\s+)?nav(?:igazione)?\.?|autorit[àa] marittim/i.test(text));
+  const concluded = input.documentaryPhase?.concluded || (input.context
     ? ["CONCLUSO", "ARCHIVIATO"].includes(input.context.stato)
       || input.context.dataProvvedimentoFinale !== null
       || input.context.finalAct !== null
-    : false;
-  const reviewPending = input.context?.documentTitles.some((title) => /riesame|autotutela/i.test(title)) ?? false;
-  const grantDate = isoDay(input.context?.concessione?.dataRilascio)
-    ?? input.documentedGrantDate
-    ?? firstDate(allTexts, /concession\w*[^.]{0,40}(?:n\.|numero|rilasciat|del)/i);
+    : false);
+  const reviewPending = input.documentaryPhase?.reviewPending
+    ?? input.context?.documentTitles.some((title) => /riesame|autotutela/i.test(title))
+    ?? false;
+  const grantCandidate = portMatter
+    ? portRegime?.grantDate.date ?? input.documentedGrantDate ?? null
+    : isoDay(input.context?.concessione?.dataRilascio)
+      ?? input.documentedGrantDate
+      ?? uniqueDate(allTexts, /concession\w*[^.]{0,40}(?:n\.|numero|rilasciat|del)/i);
+  const grantDate = grantCandidate && grantCandidate <= input.analysisDate ? grantCandidate : null;
   const decisionDate = isoDay(input.context?.finalAct?.dataAtto) ?? isoDay(input.context?.dataProvvedimentoFinale)
-    ?? (concluded ? firstDate(allTexts, /provvediment\w* (?:finale|di decadenza)|decret\w*|determinazion\w*/i) : null);
+    ?? (concluded ? uniqueDate(allTexts, /provvediment\w* (?:finale|di decadenza)|decret\w*|determinazion\w*/i) : null);
 
   return input.issues.map((issue) => {
     const originIds = new Set(issue.originatingItemIds);
     const related = items.filter((item) => originIds.has(item.id));
     const caseText = [issue.text, ...related.map((item) => item.normalizedText)].join(" \n ");
-    const conductDate = firstDate(related.filter((item) => ["FACT", "EVENT"].includes(item.kind)).map((item) => item.normalizedText))
-      ?? firstDate(related.map((item) => item.normalizedText)) ?? firstDate([issue.text]);
-    const actDate = decisionDate ?? isoDay(input.context?.dataAvvio) ?? input.analysisDate;
+    const conductDate = uniqueDate([
+      ...related.filter((item) => ["FACT", "EVENT"].includes(item.kind)).map((item) => item.normalizedText),
+      issue.text,
+    ]);
+    const actDate = decisionDate ?? (!concluded ? isoDay(input.context?.dataAvvio) : null);
     const relevantDates = [
-      ...(conductDate ? [{ label: "Fatti contestati", date: conductDate, basis: "Data più risalente dei fatti documentati per la questione" }] : []),
+      ...(conductDate ? [{ label: "Fatti contestati", date: conductDate, basis: "Unica data individuata nei fatti collegati alla questione, da verificare" }] : []),
       ...(grantDate ? [{ label: "Titolo concessorio", date: grantDate, basis: input.context?.concessione ? "Dato del registro concessioni" : "Data ricavata dai documenti del fascicolo" }] : []),
       ...(decisionDate ? [{ label: "Provvedimento finale", date: decisionDate, basis: "Data dell'atto conclusivo" }] : []),
       { label: "Analisi", date: input.analysisDate, basis: "Revisione del quadro documentale utilizzata" },
     ];
-    const elementAnalysis = assessIssueProfile({
+    const elementAnalysis = portMatter ? assessIssueProfile({
       issueText: issue.text,
       relatedItems: related,
       analysisDate: input.analysisDate,
@@ -398,14 +469,30 @@ export function buildLegalApplication(input: {
         memorieRicevute: input.context.memorieRicevute ?? false,
         controdeduzioniValutate: input.context.controdeduzioniValutate ?? false,
       } : null,
-    });
+    }) : null;
     const profileRuleIds = new Set(elementAnalysis?.ruleIds ?? []);
-    const rules = CATALOG.filter((rule) => profileRuleIds.has(rule.id) || rule.trigger.test(caseText)).map((rule) => {
+    const rules = CATALOG.filter((rule) =>
+      (rule.scope === "GENERAL" || (rule.scope === "MARITIME" && maritimeMatter) || (rule.scope === "PORT" && portMatter))
+      && (profileRuleIds.has(rule.id) || rule.trigger.test(caseText))).map((rule) => {
       const referenceDate = rule.anchor === "CONDUCT" ? conductDate
         : rule.anchor === "GRANT" ? grantDate
           : rule.anchor === "ACT" ? actDate
             : grantDate ?? conductDate;
-      const temporal = assessTemporal(rule, referenceDate, input.analysisDate);
+      const sourceId = rule.id === "DM_202_2022" ? "DI_202_2022" : rule.id;
+      const coordinatedSource = portRegime?.sources.find((source) => source.sourceId === sourceId);
+      const temporal = coordinatedSource
+        ? { status: REGIME_TEMPORAL_STATUS[coordinatedSource.status], reasoning: coordinatedSource.reasoning }
+        : assessTemporal(rule, referenceDate, input.analysisDate);
+      const nextVersion = referenceDate
+        ? rule.versions?.filter((version) => referenceDate < version.from).sort((left, right) => left.from.localeCompare(right.from))[0]
+        : undefined;
+      const application = temporal.status === "APPLICABLE_PREVIOUS_VERSION"
+        ? nextVersion?.applicationBefore ?? `Verificare il testo previgente alla data rilevante prima di applicare la disciplina successiva. ${rule.application}`
+        : temporal.status === "APPLICABILITY_TO_VERIFY"
+          ? `Verificare i presupposti della disposizione per questa vicenda prima di applicarla. ${rule.application}`
+        : temporal.status === "DATE_TO_VERIFY" && rule.versions?.some((version) => version.applicationBefore)
+          ? `La data rilevante non è verificata: individuare prima la versione applicabile. ${rule.application}`
+          : rule.application;
       return {
         ruleId: rule.id,
         citation: rule.citation,
@@ -414,23 +501,24 @@ export function buildLegalApplication(input: {
         referenceDate,
         temporalStatus: temporal.status,
         temporalReasoning: temporal.reasoning,
-        applicationToFacts: rule.application,
-        officialUrl: ruleUrl(rule, rule.normattivaUrn && referenceDate && temporal.status !== "NOT_APPLICABLE_RATIONE_TEMPORIS" ? referenceDate : null),
+        applicationToFacts: application,
+        officialUrl: ruleUrl(rule, rule.normattivaUrn && referenceDate && ["APPLICABLE", "APPLICABLE_PREVIOUS_VERSION"].includes(temporal.status) ? referenceDate : null),
       } satisfies StructuredReportLegalRuleApplication;
     });
     const operative = rules.filter((rule) => ["APPLICABLE", "APPLICABLE_PREVIOUS_VERSION"].includes(rule.temporalStatus));
     const catalogById = new Map(CATALOG.map((rule) => [rule.id, rule]));
     const favorableArguments = [
-      ...operative.map((rule) => `${rule.citation}: ${catalogById.get(rule.ruleId)!.favorable}`),
+      ...operative.filter((rule) => rule.temporalStatus === "APPLICABLE").map((rule) => `${rule.citation}: ${catalogById.get(rule.ruleId)!.favorable}`),
       ...issue.favorableAuthorities.map((authority) => `${authority.title}${authority.rationale ? `: ${authority.rationale}` : ""}`),
     ];
     const contraryArguments = [
-      ...rules.map((rule) => `${rule.citation}: ${catalogById.get(rule.ruleId)!.contrary}`),
+      ...operative.filter((rule) => rule.temporalStatus === "APPLICABLE").map((rule) => `${rule.citation}: ${catalogById.get(rule.ruleId)!.contrary}`),
       ...issue.contraryAuthorities.map((authority) => `${authority.title}${authority.rationale ? `: ${authority.rationale}` : ""}`),
     ];
     const grounded = issue.favorableAuthorities.length + issue.contraryAuthorities.length > 0;
     const excluded = rules.filter((rule) => ["NOT_APPLICABLE_RATIONE_TEMPORIS", "PROSPECTIVE_ONLY"].includes(rule.temporalStatus));
     const undetermined = rules.filter((rule) => rule.temporalStatus === "DATE_TO_VERIFY");
+    const scopeToVerify = rules.filter((rule) => rule.temporalStatus === "APPLICABILITY_TO_VERIFY");
     const missingCore = elementAnalysis?.elements.filter((element) => element.core && element.status === "NOT_PROVEN") ?? [];
     const conclusion = [
       elementAnalysis ? `Qualificazione: ${elementAnalysis.qualification}` : "",
@@ -440,13 +528,21 @@ export function buildLegalApplication(input: {
         : "Dai documenti non emerge una disposizione del catalogo verificato sicuramente applicabile: la qualificazione richiede l'individuazione professionale della norma.",
       excluded.length ? `Non sono applicabili retroattivamente ai fatti: ${excluded.map((rule) => rule.citation).join("; ")}; ne restano gli effetti per gli adempimenti successivi.` : "",
       undetermined.length ? `Per ${undetermined.map((rule) => rule.citation).join("; ")} occorre prima accertare la data rilevante.` : "",
+      scopeToVerify.length ? `Per ${scopeToVerify.map((rule) => rule.citation).join("; ")} occorre prima verificare i presupposti di applicazione alla vicenda.` : "",
       grounded
-        ? `L'orientamento è confrontato con ${issue.favorableAuthorities.length ? "fonti verificate favorevoli" : "nessuna fonte favorevole verificata"} e ${issue.contraryAuthorities.length ? "fonti verificate contrarie" : "nessuna fonte contraria verificata"}: la conclusione resta subordinata alla verifica professionale.`
-        : "Non risultano ancora pronunce verificate pertinenti: la conclusione è preliminare e fondata sul solo dato normativo.",
+        ? `L'orientamento è confrontato con ${issue.favorableAuthorities.length ? "fonti verificate e classificate dal professionista come favorevoli" : "nessuna fonte favorevole verificata e classificata"} e ${issue.contraryAuthorities.length ? "fonti verificate e classificate dal professionista come contrarie" : "nessuna fonte contraria verificata e classificata"}: la conclusione resta subordinata alla verifica professionale.`
+        : operative.length
+          ? "Non risultano ancora pronunce verificate pertinenti: la conclusione è preliminare e fondata sul solo dato normativo."
+          : "Non risultano ancora pronunce verificate pertinenti: individuare e verificare le fonti normative e giurisprudenziali prima di concludere.",
     ].filter(Boolean).join(" ");
-    const consequences = concluded ? [
+    const consequences = !portMatter ? [
+      ...(concluded && reviewPending ? ["Valutare l'istanza di riesame alla luce del provvedimento, dei motivi dedotti e della disciplina applicabile, senza presumere l'obbligo di annullamento."] : []),
+      concluded
+        ? "Verificare efficacia, comunicazioni ed eventuali adempimenti conseguenti al provvedimento documentato."
+        : "Accertare competenza, fatti, disciplina e garanzie partecipative applicabili prima di assumere iniziative.",
+    ] : concluded ? [
       ...(reviewPending ? ["Istanza di riesame: istruirla come procedimento distinto, valutando motivi nuovi, interesse pubblico attuale, affidamento e termine dell'annullamento d'ufficio (art. 21-nonies L. 241/1990)."] : []),
-      "Il provvedimento finale è impugnabile davanti al TAR entro 60 giorni dalla notificazione o piena conoscenza (art. 29 c.p.a.) o con ricorso straordinario al Presidente della Repubblica entro 120 giorni (art. 9 d.P.R. 24 novembre 1971, n. 1199): verificare notifiche e pendenze prima di ogni ulteriore atto.",
+      "Verificare se il provvedimento sia impugnabile, la giurisdizione, l'eventuale rito speciale e i rimedi concretamente disponibili; accertare notificazione o piena conoscenza, decorrenza ed eventuali termini già trascorsi prima di indicare una scadenza (art. 29 c.p.a.; art. 9 d.P.R. 24 novembre 1971, n. 1199).",
       "Esecuzione: programmare solo gli adempimenti conseguenti all'atto efficace (riconsegna, verifiche tecniche, posizioni contabili), senza riavviare il procedimento concluso.",
     ] : [
       "Prima di qualsiasi provvedimento: contestazione specifica, termine per le deduzioni e valutazione espressa delle stesse.",
@@ -466,7 +562,8 @@ export function buildLegalApplication(input: {
       contraryAuthorities: issue.contraryAuthorities,
       favorableArguments,
       contraryArguments,
-      conclusionStatus: grounded ? "GROUNDED_ON_VERIFIED_AUTHORITIES" : "NORMATIVE_ONLY_PRELIMINARY",
+      conclusionStatus: grounded ? "GROUNDED_ON_VERIFIED_AUTHORITIES"
+        : operative.length ? "NORMATIVE_ONLY_PRELIMINARY" : "SOURCES_TO_VERIFY",
       conclusion,
       consequences,
       elementAnalysis,

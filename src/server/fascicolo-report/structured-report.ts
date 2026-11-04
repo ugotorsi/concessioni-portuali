@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 
+import {
+  hasProfessionalSourceClassification,
+  isProfessionallyUsableSource,
+  SOURCE_REVIEW_POLICY,
+  UNREVIEWED_SOURCE_NOTICE,
+} from "@/lib/professional-research-sources";
 import { stableStringify } from "@/server/audit/hash";
+import { detectActPhase, type ActPhaseDetection } from "@/server/fascicolo-acts/templates";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
 
 import { buildLegalApplication, extractIsoDates, type StructuredReportLegalApplication } from "./legal-application";
@@ -17,10 +24,13 @@ type Direction = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESS
 
 export interface StructuredReportResearchResultInput {
   resultId: string;
+  missionId?: string;
   title: string;
   sourceUrl: string | null;
   provider: string | null;
   supportDirection: Direction;
+  classificationSource?: "PROVIDER_OUTPUT" | "SYNTHETIC_TEST" | "HUMAN_REVIEW" | "AI_CLASSIFIER";
+  classificationReviewAuditId?: string | null;
   classificationReviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
   classificationRationale: string | null;
   relevantPassage?: string | null;
@@ -58,6 +68,7 @@ export interface StructuredReportAuthority {
   assessmentId: string;
   sourceChainFingerprint: string;
   citationAnchors: readonly JsonRecord[];
+  classificationReviewAuditId?: string;
   rationale: string | null;
 }
 
@@ -73,6 +84,7 @@ export interface StructuredReportQuestion {
   contraryAuthorities: readonly StructuredReportAuthority[];
   nonUsableResults: readonly {
     resultId: string;
+    missionId?: string;
     title: string;
     sourceUrl?: string | null;
     direction: Direction;
@@ -84,6 +96,10 @@ export interface StructuredReportQuestion {
 }
 
 export interface StructuredReportOperationalStep {
+  /** Stable semantic identity; archived reports without it retain their legacy title identity. */
+  activityCode?: string;
+  documentCode?: string;
+  necessity?: "REQUIRED" | "CONDITIONAL" | "NOT_JUSTIFIED";
   title: string;
   action: string;
   office: string;
@@ -91,6 +107,7 @@ export interface StructuredReportOperationalStep {
   completionGate: string;
   draftTitle?: string;
   draftTemplate?: string;
+  additionalDrafts?: readonly { documentCode: string; title: string; template: string }[];
 }
 
 export interface StructuredReportOperationalAlternative {
@@ -150,6 +167,8 @@ export interface StructuredReportRegulatoryApplicability {
 
 export interface StructuredFascicoloReportPayload {
   contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
+  /** Absent in older snapshots whose source classifications cannot be assumed confirmed. */
+  sourceReviewPolicy?: typeof SOURCE_REVIEW_POLICY;
   tenantId: string;
   procedimentoId: string;
   knowledgeRevisionId: string;
@@ -215,6 +234,7 @@ function visibleItems(items: readonly StructuredKnowledgeReadItem[]): readonly S
 }
 
 function authority(result: StructuredReportResearchResultInput): StructuredReportAuthority {
+  if (!isProfessionallyUsableSource(result)) throw new Error("SOURCE_CLASSIFICATION_NOT_READY");
   const assessment = result.sourceAssessment!;
   return {
     resultId: result.resultId,
@@ -224,16 +244,25 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
     assessmentId: assessment.assessmentId,
     sourceChainFingerprint: assessment.chainFingerprint,
     citationAnchors: [...assessment.citationAnchors],
+    classificationReviewAuditId: result.classificationReviewAuditId!,
     rationale: result.classificationRationale,
   };
 }
 
 function nonUsableReasons(result: StructuredReportResearchResultInput): readonly string[] {
-  const reasons = result.sourceAssessment?.blockingReasons ?? ["MISSING_CURRENT_SOURCE_ASSESSMENT"];
+  const assessment = result.sourceAssessment;
+  const reasons = assessment?.blockingReasons ?? [];
   return [...new Set([
     ...reasons,
+    ...(!assessment?.isCurrent ? ["MISSING_CURRENT_SOURCE_ASSESSMENT"] : []),
+    ...(assessment && !assessment.usable && !assessment.blockingReasons.length ? ["SOURCE_NOT_USABLE"] : []),
+    ...(assessment?.manualReviewRequired ? ["MANUAL_REVIEW_REQUIRED"] : []),
     ...(result.classificationReviewStatus === "REJECTED" ? ["CLASSIFICATION_REJECTED"] : []),
-    ...(result.sourceAssessment?.citationAnchors.length ? [] : ["CITATION_ANCHOR_REQUIRED"]),
+    ...(result.classificationReviewStatus === "AI_PROPOSED" ? ["CLASSIFICATION_NOT_HUMAN_CONFIRMED"] : []),
+    ...(result.classificationReviewStatus === "HUMAN_CONFIRMED" && !hasProfessionalSourceClassification(result)
+      ? ["CLASSIFICATION_ATTESTATION_REQUIRED"] : []),
+    ...(!["SUPPORTS", "OPPOSES"].includes(result.supportDirection) ? ["DIRECTION_NOT_DECISIVE"] : []),
+    ...(assessment?.citationAnchors.length ? [] : ["CITATION_ANCHOR_REQUIRED"]),
   ])].sort();
 }
 
@@ -243,15 +272,11 @@ function projectQuestion(
 ): StructuredReportQuestion {
   const mission = missionsByQuestion.get(item.semanticKey) ?? null;
   const results = [...(mission?.results ?? [])].sort(byId);
-  const usable = (result: StructuredReportResearchResultInput) => result.classificationReviewStatus !== "REJECTED"
-    && result.sourceAssessment?.isCurrent === true
-    && result.sourceAssessment.usable
-    && result.sourceAssessment.citationAnchors.length > 0;
-  const favorableAuthorities = results.filter((result) => usable(result) && result.supportDirection === "SUPPORTS").map(authority);
-  const contraryAuthorities = results.filter((result) => usable(result) && result.supportDirection === "OPPOSES").map(authority);
-  const nonUsableResults = results.filter((result) => !usable(result) || !["SUPPORTS", "OPPOSES"].includes(result.supportDirection))
+  const favorableAuthorities = results.filter((result) => isProfessionallyUsableSource(result) && result.supportDirection === "SUPPORTS").map(authority);
+  const contraryAuthorities = results.filter((result) => isProfessionallyUsableSource(result) && result.supportDirection === "OPPOSES").map(authority);
+  const nonUsableResults = results.filter((result) => !isProfessionallyUsableSource(result))
     .map((result) => ({
-      resultId: result.resultId, title: result.title, sourceUrl: result.sourceUrl,
+      resultId: result.resultId, missionId: result.missionId, title: result.title, sourceUrl: result.sourceUrl,
       direction: result.supportDirection,
       rationale: result.relevantPassage ?? result.classificationRationale,
       reasons: nonUsableReasons(result),
@@ -265,6 +290,8 @@ function projectQuestion(
     ...(item.status === "AI_PROPOSED" ? ["QUESTION_NOT_HUMAN_CONFIRMED"] : []),
     ...(mission?.status === "COMPLETED" ? [] : ["RESEARCH_NOT_COMPLETED"]),
     ...(favorableAuthorities.length > 0 && contraryAuthorities.length === 0 ? ["NO_USABLE_CONTRARY_AUTHORITY"] : []),
+    ...(results.some((result) => result.classificationReviewStatus !== "REJECTED"
+      && !hasProfessionalSourceClassification(result)) ? [UNREVIEWED_SOURCE_NOTICE] : []),
   ])].sort();
   return {
     knowledgeItemId: item.id,
@@ -285,11 +312,24 @@ function projectQuestion(
 const DEFAULT_DECISION_OPTIONS = "Scegliere fra archiviazione, regolarizzazione con prescrizioni, penali se predeterminate nel titolo, ripristino o decadenza.";
 
 const PROFILE_DECISION_OPTIONS: Record<string, string> = {
-  THIRD_PARTY_USE: "Scegliere fra archiviazione, regolarizzazione mediante autorizzazione (art. 45-bis cod. nav.; art. 18, comma 9, ultimo periodo, L. 84/1994) se l'attività è affidabile, diffida a cessare l'uso non autorizzato entro un termine, e decadenza (art. 47, lett. e, cod. nav.; art. 18, comma 11, L. 84/1994) solo come misura proporzionata alla gravità e alla durata.",
-  INVESTMENT_DEFAULT: "Scegliere fra archiviazione per giustificato motivo, diffida ad adempiere con nuovo cronoprogramma, revisione del programma o del PEF (con notifica ad ART se successiva al 01/03/2026), penali solo se predeterminate nel bando o nel titolo, e decadenza come extrema ratio.",
+  THIRD_PARTY_USE: "Valutare archiviazione, eventuale autorizzazione preventiva per l'affidamento futuro se consentita dalla disciplina applicabile, oppure cessazione dell'uso non autorizzato ove ne ricorrano i presupposti. Non presumere che l'autorizzazione sani automaticamente la condotta pregressa. Valutare la decadenza solo dopo avere individuato e verificato la specifica fattispecie: l'art. 47, lett. e), cod. nav. richiede sostituzione abusiva nel godimento, distinta dal solo affidamento di attività; verificare anche l'art. 18, comma 11, L. 84/1994.",
+  INVESTMENT_DEFAULT: "Valutare archiviazione per giustificato motivo, eventuale diffida, revisione del programma o del PEF, penali e decadenza. Prima di attribuire obblighi di notifica ad ART o applicare penali, verificare ambito e presupposti delle misure pertinenti, il bando e il titolo.",
   UNAUTHORIZED_OCCUPATION: "Scegliere fra archiviazione, variazione assentita del titolo se compatibile (art. 24 reg. nav. mar.), ingiunzione di sgombero e rimessa in pristino (art. 54 cod. nav., potere autonomo dalla decadenza), decadenza solo per inosservanza grave degli obblighi del titolo, e segnalazione all'autorità giudiziaria se ne ricorrono i presupposti.",
   FEE_PAYMENT: "Scegliere fra messa in mora e recupero del credito con interessi, imputazione dei versamenti, rateizzazione se ammessa dall'ente, escussione della garanzia se prevista dal titolo, e decadenza (art. 47, lett. d, cod. nav.) solo se è raggiunto il numero di rate omesse fissato dall'atto di concessione.",
 };
+
+function decisionDraft(issueText: string): string {
+  return [
+    `Oggetto: schema di decisione sulla seguente questione — ${issueText}.`,
+    "Autorità e competenza da verificare: [ORGANO COMPETENTE E FONDAMENTO]. Responsabile: [RESPONSABILE].",
+    "Fatti e documenti: [FATTI ACCERTATI, ALLEGAZIONI, ELEMENTI CONTRARI E RIFERIMENTI DOCUMENTALI].",
+    "Disciplina applicabile: [FONTI UFFICIALI, VERSIONI E DATE RILEVANTI, PRESUPPOSTI VERIFICATI].",
+    "Istruttoria e partecipazione: [GARANZIE APPLICABILI, EVENTUALI OSSERVAZIONI E LORO VALUTAZIONE].",
+    "Motivazione: [VALUTAZIONE DELLE ALTERNATIVE E DELLE RAGIONI FAVOREVOLI E CONTRARIE].",
+    "Esito proposto: [DECISIONE MOTIVATA E CONSEGUENZE EFFETTIVAMENTE DOVUTE]. Data e sottoscrizione: [DA INSERIRE DOPO VERIFICA].",
+    "Bozza soggetta ad approvazione umana; nessuna firma, protocollazione o comunicazione automatica.",
+  ].join("\n\n");
+}
 
 function profileOperationalSteps(
   issueText: string,
@@ -307,6 +347,8 @@ function profileOperationalSteps(
   const decisionOptions = PROFILE_DECISION_OPTIONS[profile.profileId] ?? DEFAULT_DECISION_OPTIONS;
   return [
     {
+      activityCode: `PROFILE:${profile.profileId}:EVIDENCE`,
+      necessity: "REQUIRED",
       title: `1. ${subject}: completare la prova dei requisiti`,
       action: open.length
         ? `Requisiti ancora da provare o confermare: ${open.map((element) =>
@@ -319,6 +361,8 @@ function profileOperationalSteps(
       completionGate: `Ogni requisito essenziale (${substantive.filter((element) => element.core).map((element) => element.requirement.toLowerCase()).join("; ")}) è provato oppure motivatamente escluso`,
     },
     {
+      activityCode: `PROFILE:${profile.profileId}:QUALIFICATION`,
+      necessity: "REQUIRED",
       title: `2. ${subject}: qualificazione giuridica`,
       action: profile.qualification,
       office: "Ufficio legale o concessioni dell'ente concedente; il professionista valida la qualificazione",
@@ -328,6 +372,8 @@ function profileOperationalSteps(
         : "Qualificazione motivata e validata dal professionista",
     },
     {
+      activityCode: `PROFILE:${profile.profileId}:${contested ? "ASSESS_DEFENSE" : "CONTESTATION"}`,
+      necessity: contested ? "REQUIRED" : coreMet ? "CONDITIONAL" : "NOT_JUSTIFIED",
       title: `3. ${subject}: ${contested ? "valutare le deduzioni del concessionario" : "contestazione degli addebiti"}`,
       action: contested
         ? `Contestazione già registrata. ${contraddittorio?.reasoning ?? ""} Valutare ogni deduzione rispetto ai singoli requisiti prima di qualsiasi misura.`
@@ -340,6 +386,7 @@ function profileOperationalSteps(
         ? "Ogni deduzione ha ricevuto una valutazione espressa"
         : "Contestazione notificata con termine per le deduzioni, oppure motivata decisione di non procedere",
       ...(contested || !coreMet ? {} : {
+        documentCode: "CONTESTAZIONE_ADDEBITI",
         draftTitle: "Contestazione degli addebiti",
         draftTemplate: [
           `Oggetto: contestazione degli addebiti — ${subject}.`,
@@ -356,11 +403,16 @@ function profileOperationalSteps(
       }),
     },
     {
+      activityCode: `PROFILE:${profile.profileId}:DECISION`,
+      necessity: "REQUIRED",
       title: `4. ${subject}: decisione motivata e proporzionata`,
       action: `${decisionOptions} Motivare su ciascun requisito, sulle deduzioni e sulla proporzionalità rispetto a gravità e durata della condotta.`,
       office: "Organo dell'ente concedente competente per il provvedimento",
       requiredDocuments: ["Esito motivato per ciascun requisito", "Valutazione delle deduzioni", "Schema di provvedimento e piano di verifica degli adempimenti"],
       completionGate: "Autorizzazione umana all'adozione dopo verifica di competenza, motivazione e garanzie",
+      documentCode: "SCHEMA_DECISIONE",
+      draftTitle: "Schema di decisione motivata",
+      draftTemplate: decisionDraft(issueText),
     },
   ];
 }
@@ -369,7 +421,20 @@ function buildOperationalPlans(
   issues: StructuredFascicoloReportPayload["legalIssues"],
   knowledge: StructuredKnowledgeReadModel,
   proceduralContext?: StructuredReportProceduralContext,
+  portMatter = false,
+  detectedPhase?: ActPhaseDetection,
 ): readonly StructuredReportOperationalPlan[] {
+  const phase = detectedPhase ?? detectActPhase({
+    proceduralContext,
+    documentedFramework: {
+      partyRoles: knowledge.partyRoles,
+      facts: knowledge.facts,
+      timeline: knowledge.events,
+      legalActs: knowledge.legalActs,
+      measures: knowledge.measures,
+      contradictions: knowledge.contradictions,
+    },
+  });
   const evidenceItems = [
     ...knowledge.facts, ...knowledge.legalActs, ...knowledge.measures,
     ...knowledge.events, ...knowledge.gaps, ...knowledge.deadlineCandidates,
@@ -390,17 +455,16 @@ function buildOperationalPlans(
     const caseText = [issue.text, ...related.map((item) => item.normalizedText)].join(" ");
     const concernsInstallation = /container|manufatt|prefabbricat|installazion/i.test(caseText)
       && /concession|demanial|portual/i.test(caseText);
-    const proceedingConcluded = proceduralContext
-      ? ["CONCLUSO", "ARCHIVIATO"].includes(proceduralContext.stato)
-        || proceduralContext.dataProvvedimentoFinale !== null
-        || proceduralContext.finalAct !== null
-      : false;
-    const reviewPending = proceduralContext?.documentTitles.some((title) => /riesame|autotutela/i.test(title)) ?? false;
+    const proceedingConcluded = phase.phase === "POST_DECISION";
+    const reviewPending = phase.reviewPending;
     const finalActLabel = proceduralContext?.finalAct
       ? `${proceduralContext.finalAct.numeroAtto} del ${proceduralContext.finalAct.dataAtto}`
       : "provvedimento finale";
     const postDecisionSteps: StructuredReportOperationalStep[] = [
       ...(reviewPending ? [{
+        activityCode: "PORT:POST:REVIEW",
+        documentCode: "RISCONTRO_RIESAME",
+        necessity: "REQUIRED" as const,
         title: "1. Istruire l'istanza di riesame come procedimento distinto",
         action: `Confrontare i motivi dell'istanza con ${finalActLabel}, distinguendo fatti nuovi, errori prospettati, documenti già valutati e interesse pubblico attuale. Non riavviare né duplicare il procedimento concluso.`,
         office: "Responsabile del riesame o dell'autotutela, con supporto dell'ufficio legale e dell'ufficio concessioni",
@@ -410,6 +474,9 @@ function buildOperationalPlans(
         draftTemplate: "Oggetto: istanza di riesame relativa a [TITOLO/ATTO]. Esaminata l'istanza prot. [PROTOCOLLO], l'Autorità ricostruisce separatamente ciascun motivo, i fatti nuovi e gli atti già valutati; verifica competenza, disciplina applicabile nel tempo, interesse pubblico attuale e affidamento; determina [ESITO MOTIVATO]. Campi da completare: [ORGANO COMPETENTE], [TERMINE], [MOTIVI], [DOCUMENTI], [ESITO]. Bozza soggetta ad approvazione umana; nessun invio automatico.",
       }] : []),
       {
+        activityCode: "PORT:POST:FINAL_ACT_REVIEW",
+        documentCode: "NOTA_TENUTA_PROVVEDIMENTO",
+        necessity: "REQUIRED",
         title: reviewPending ? "2. Verificare la tenuta del provvedimento finale" : "1. Verificare la tenuta del provvedimento finale",
         action: `Riesaminare ${finalActLabel} rispetto a competenza, successione temporale delle fonti, prova dei singoli addebiti, trattamento delle regolarizzazioni, contraddittorio, proporzionalità e motivazione. Separare penali, decadenza e obblighi regolatori.`,
         office: "Ufficio concessioni con supporto legale e tecnico-contabile",
@@ -419,6 +486,9 @@ function buildOperationalPlans(
         draftTemplate: "La nota verifica: (1) competenza; (2) disciplina ratione temporis; (3) fatti provati, allegazioni e lacune; (4) difese e controdeduzioni; (5) regolarizzazioni; (6) proporzionalità; (7) distinzione tra penali e decadenza; (8) motivazione. Per ogni punto indicare [ELEMENTI FAVOREVOLI], [ELEMENTI CONTRARI], [RISCHIO], [CONCLUSIONE]. Bozza soggetta ad approvazione umana.",
       },
       {
+        activityCode: "PORT:POST:FOLLOW_UP",
+        documentCode: "VERBALE_RICONSEGNA",
+        necessity: "CONDITIONAL",
         title: reviewPending ? "3. Governare esecuzione, contenzioso e obblighi residui" : "2. Governare esecuzione, contenzioso e obblighi residui",
         action: "Programmare soltanto gli adempimenti conseguenti all'atto efficace: riconsegna e inventario, controlli tecnici, tutela patrimoniale, riconciliazione canoni, conservazione della prova e comunicazioni regolatorie effettivamente dovute.",
         office: "Ufficio demanio, area tecnica, ragioneria e ufficio legale secondo competenza",
@@ -430,6 +500,8 @@ function buildOperationalPlans(
     ];
     const preDecisionSteps: StructuredReportOperationalStep[] = [
       {
+        activityCode: "PORT:FACTS",
+        necessity: "REQUIRED",
         title: "1. Accertare i fatti e gli obblighi concessori",
         action: "L'ente concedente deve confrontare titolo e prescrizioni con lo stato dei luoghi e l'uso effettivo, distinguendo elementi provati, indizi, atti mancanti ed eventuali autorizzazioni successive. Verificare chi sia l'autorità competente per ciascun potere.",
         office: "Responsabile del procedimento e ufficio demanio dell'ente concedente; ufficio tecnico e autorità marittima secondo le competenze accertate",
@@ -439,6 +511,8 @@ function buildOperationalPlans(
         completionGate: "Fatti, titoli, soggetti, competenza e possibili violazioni verificati con istruttoria documentata",
       },
       {
+        activityCode: "PORT:QUALIFICATION",
+        necessity: "REQUIRED",
         title: "2. Qualificare le violazioni e valutare i procedimenti conseguenti",
         action: concernsInstallation
           ? "Verificare separatamente se ricorrono i presupposti di decadenza ex art. 47 cod. nav. (in particolare lett. f per inadempimento di obblighi, lett. c solo se vi e mutamento sostanziale non autorizzato dello scopo) e di intervento sulle innovazioni abusive ex art. 54 cod. nav. Accertare l'autorità competente, incluse le distinte competenze degli artt. 48 e 54, e la normativa applicabile nel tempo."
@@ -448,21 +522,116 @@ function buildOperationalPlans(
         completionGate: "Distinta qualificazione giuridica dei possibili procedimenti, verificata da un professionista",
       },
       {
-        title: "3. Garantire contestazione e contraddittorio",
-        action: "Se sussistono presupposti sufficienti, predisporre gli atti di avvio e di contestazione di competenza dell'ente; garantire accesso, partecipazione e valutazione delle deduzioni. Per la decadenza rispettare il termine assegnato alle deduzioni dall'art. 47 cod. nav. e verificare le altre garanzie applicabili.",
+        activityCode: "PORT:PARTICIPATION",
+        necessity: "CONDITIONAL",
+        title: proceduralContext?.contestazioneFormaleInviata
+          ? "3. Valutare il contraddittorio già avviato"
+          : "3. Garantire contestazione e contraddittorio",
+        action: proceduralContext?.contestazioneFormaleInviata
+          ? "La contestazione risulta già inviata: verificare ricezione, garanzie applicabili e valutazione delle eventuali deduzioni senza duplicarla."
+          : "Se sussistono presupposti sufficienti, predisporre gli atti di avvio e di contestazione di competenza dell'ente; garantire accesso, partecipazione e valutazione delle deduzioni. Per la decadenza rispettare il termine assegnato alle deduzioni dall'art. 47 cod. nav. e verificare le altre garanzie applicabili.",
         office: "Responsabile del procedimento dell'autorità effettivamente competente",
         requiredDocuments: ["Relazione istruttoria e atti probatori", "Bozza di contestazione e comunicazioni procedimentali", "Deduzioni, osservazioni e documenti del concessionario", "Verifica delle notificazioni e dei termini concretamente applicabili"],
         completionGate: "Contraddittorio effettivo e documentato; nessun provvedimento anticipato prima dell'istruttoria dovuta",
+        ...(proceduralContext?.contestazioneFormaleInviata ? {} : {
+          documentCode: "COMUNICAZIONE_ISTRUTTORIA",
+          draftTitle: "Schema di comunicazione istruttoria",
+          draftTemplate: `Oggetto: comunicazione istruttoria relativa a ${issue.text}.\n\nPredisporre solo se l'iniziativa è giustificata e non già eseguita. Indicare [FATTI E DOCUMENTI], [FONDAMENTO NORMATIVO VIGENTE], [AUTORITÀ COMPETENTE], [DESTINATARI], [GARANZIE E TERMINI VERIFICATI].\n\nBozza soggetta ad approvazione umana; nessun invio automatico.`,
+        }),
       },
       {
+        activityCode: "PORT:DECISION",
+        necessity: "REQUIRED",
         title: "4. Motivare la decisione e controllarne gli effetti",
         action: "Concludere con decisione motivata sui presupposti, sulle osservazioni e sulla proporzionalità: archiviazione, eventuale misura ripristinatoria, decadenza o altra misura consentita. Distinguere poteri e autorità, pianificare l'esecuzione e documentare i successivi controlli senza automatismi.",
         office: "Organo dell'ente concedente o diversa autorità individuata dalla legge per ciascun provvedimento",
         requiredDocuments: ["Esito dell'istruttoria con confronto fra alternative", "Valutazione delle deduzioni e della proporzionalità", "Schema di provvedimento e modalità di comunicazione", "Piano di verifica degli adempimenti e degli eventuali obblighi di ripristino"],
         completionGate: "Motivazione, competenza, garanzie e verifiche professionali completate; autorizzazione umana all'adozione",
+        documentCode: "SCHEMA_DECISIONE",
+        draftTitle: "Schema di decisione motivata",
+        draftTemplate: decisionDraft(issue.text),
       },
     ];
-    const profile = proceedingConcluded ? null : assessIssueProfile({
+    const genericPreDecisionSteps: StructuredReportOperationalStep[] = [
+      {
+        activityCode: "GENERAL:FACTS",
+        necessity: "REQUIRED",
+        title: "1. Accertare fatti e documenti",
+        action: "Ricostruire i fatti rilevanti e distinguere documenti acquisiti, elementi da verificare e possibili circostanze contrarie.",
+        office: "Responsabile del procedimento e uffici competenti da verificare",
+        requiredDocuments: ["Istanza o atto di avvio", "Documenti e riscontri pertinenti alla questione"],
+        completionGate: "Fatti, documenti e lacune sono identificati e valutati dal professionista",
+      },
+      {
+        activityCode: "GENERAL:LEGAL",
+        necessity: "REQUIRED",
+        title: "2. Verificare disciplina e competenza",
+        action: "Individuare le fonti e la loro applicabilità temporale, i presupposti e l'autorità competente; valutare anche gli argomenti contrari.",
+        office: "Ufficio competente e supporto giuridico",
+        requiredDocuments: ["Fonti ufficiali vigenti alle date rilevanti", "Atti e prescrizioni pertinenti"],
+        completionGate: "Disciplina, competenza e presupposti sono verificati e motivati",
+      },
+      {
+        activityCode: "GENERAL:PARTICIPATION",
+        necessity: "CONDITIONAL",
+        title: "3. Valutare partecipazione e contraddittorio",
+        action: "Accertare se e quali garanzie partecipative siano applicabili, evitando comunicazioni o termini non verificati.",
+        office: "Responsabile del procedimento",
+        requiredDocuments: ["Comunicazioni, eventuali memorie e prove della loro ricezione"],
+        completionGate: "Le garanzie applicabili e le eventuali osservazioni sono verificate e documentate",
+        documentCode: "COMUNICAZIONE_ISTRUTTORIA",
+        draftTitle: "Schema di comunicazione istruttoria",
+        draftTemplate: `Oggetto: eventuale comunicazione istruttoria relativa a ${issue.text}.\n\nPrima dell'utilizzo verificare se la comunicazione sia dovuta e non sia già stata effettuata. Indicare [DESTINATARI], [FATTI E DOCUMENTI], [FONDAMENTO NORMATIVO], [AUTORITÀ COMPETENTE], [GARANZIE E TERMINI APPLICABILI].\n\nBozza soggetta ad approvazione umana; nessun invio automatico.`,
+      },
+      {
+        activityCode: "GENERAL:DECISION",
+        necessity: "REQUIRED",
+        title: "4. Motivare la decisione e i controlli",
+        action: "Valutare le alternative consentite, motivare la decisione e individuare soltanto gli adempimenti effettivamente dovuti.",
+        office: "Organo competente da verificare",
+        requiredDocuments: ["Istruttoria e valutazione delle osservazioni", "Schema di decisione e riscontri pertinenti"],
+        completionGate: "Competenza, motivazione, garanzie e conseguenze sono verificate dal professionista",
+        documentCode: "SCHEMA_DECISIONE",
+        draftTitle: "Schema di decisione motivata",
+        draftTemplate: decisionDraft(issue.text),
+      },
+    ];
+    const genericPostDecisionSteps: StructuredReportOperationalStep[] = [
+      ...(reviewPending ? [{
+        activityCode: "GENERAL:POST:REVIEW",
+        necessity: "REQUIRED" as const,
+        title: "1. Istruire l'eventuale riesame",
+        action: "Esaminare separatamente i motivi dell'istanza, l'atto finale, la competenza e la disciplina applicabile.",
+        office: "Ufficio competente per il riesame da verificare",
+        requiredDocuments: ["Istanza e allegati", "Provvedimento finale e atti istruttori"],
+        completionGate: "Ogni motivo è valutato e l'esito è motivato",
+        documentCode: "RISCONTRO_RIESAME",
+        draftTitle: "Schema di riscontro all'istanza di riesame",
+        draftTemplate: `Oggetto: istanza di riesame relativa a ${issue.text}.\n\nIndicare [ISTANZA E PROTOCOLLO], [ATTO OGGETTO DI RIESAME], [ORGANO COMPETENTE], [MOTIVI E DOCUMENTI], [DISCIPLINA E TERMINI VERIFICATI], [VALUTAZIONE DEI MOTIVI E DEGLI ELEMENTI CONTRARI], [ESITO MOTIVATO].\n\nBozza soggetta ad approvazione umana; nessun invio automatico.`,
+      }] : []),
+      {
+        activityCode: "GENERAL:POST:FINAL_ACT_REVIEW",
+        necessity: "REQUIRED",
+        title: "Verificare il provvedimento finale",
+        action: "Controllare competenza, motivazione, disciplina temporale, partecipazione ed eventuali elementi contrari.",
+        office: "Ufficio competente e supporto giuridico",
+        requiredDocuments: ["Provvedimento finale", "Fascicolo istruttorio e comunicazioni"],
+        completionGate: "La verifica motivata del provvedimento è documentata",
+        documentCode: "NOTA_VERIFICA_PROVVEDIMENTO",
+        draftTitle: "Nota di verifica del provvedimento",
+        draftTemplate: `Oggetto: verifica del provvedimento relativo a ${issue.text}.\n\nEsaminare [ATTO E DOCUMENTI], [COMPETENZA], [FONTI E DATE], [FATTI E PRESUPPOSTI], [PARTECIPAZIONE], [ELEMENTI FAVOREVOLI E CONTRARI], [RISCHI E CONCLUSIONI MOTIVATE].\n\nNota preliminare soggetta a verifica professionale.`,
+      },
+      {
+        activityCode: "GENERAL:POST:FOLLOW_UP",
+        necessity: "CONDITIONAL",
+        title: "Verificare gli adempimenti successivi",
+        action: "Individuare gli effetti e gli eventuali adempimenti effettivamente dovuti, senza presumere nuove iniziative.",
+        office: "Uffici competenti da verificare",
+        requiredDocuments: ["Provvedimento efficace e documenti sui suoi effetti"],
+        completionGate: "Gli adempimenti dovuti e i relativi esiti sono verificati",
+      },
+    ];
+    const profile = !portMatter || proceedingConcluded ? null : assessIssueProfile({
       issueText: issue.text,
       relatedItems: related,
       analysisDate: new Date(knowledge.revision.createdAt).toISOString().slice(0, 10),
@@ -473,9 +642,22 @@ function buildOperationalPlans(
       } : null,
     });
     const steps = proceedingConcluded
-      ? postDecisionSteps
-      : profile ? profileOperationalSteps(issue.text, profile) : preDecisionSteps;
-    const alternatives: StructuredReportOperationalAlternative[] = concernsInstallation ? [
+      ? portMatter ? postDecisionSteps : genericPostDecisionSteps
+      : portMatter ? profile ? profileOperationalSteps(issue.text, profile) : preDecisionSteps : genericPreDecisionSteps;
+    const alternatives: StructuredReportOperationalAlternative[] = !portMatter ? [
+      {
+        title: "Valutare le opzioni consentite dalla disciplina applicabile",
+        whenApplicable: "Dopo verifica delle fonti, della competenza e dei fatti",
+        practicalRoute: "Confrontare gli esiti consentiti e motivare la scelta senza attivarli automaticamente.",
+        riskOrLimit: "Non presumere poteri, obblighi o termini non accertati.",
+      },
+      {
+        title: "Escludere motivatamente iniziative non giustificate",
+        whenApplicable: "Quando non risultano i presupposti della specifica iniziativa",
+        practicalRoute: "Documentare gli elementi considerati e le ragioni dell'esclusione.",
+        riskOrLimit: "Rivalutare la conclusione se emergono fatti o fonti nuovi.",
+      },
+    ] : concernsInstallation ? [
       {
         title: "Valutare il procedimento di decadenza (art. 47 cod. nav.)",
         whenApplicable: "Se la violazione degli obblighi concessori risulta comprovata (lett. f), oppure se e accertato un mutamento sostanziale non autorizzato dello scopo (lett. c), verificando ogni requisito della fattispecie",
@@ -539,7 +721,11 @@ function buildOperationalPlans(
       outstandingEvidence,
       legalSourceStatus: sourceReady ? "VERIFIED_SOURCES_ATTACHED" : "LEGAL_RESEARCH_REQUIRED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
-      recommendedNextStep: proceedingConcluded
+      recommendedNextStep: !portMatter
+        ? proceedingConcluded
+          ? "Verificare l'atto finale e l'eventuale riesame senza riavviare automaticamente il procedimento."
+          : "Accertare fatti, documenti, disciplina applicabile e competenza prima di scegliere iniziative."
+        : proceedingConcluded
         ? `Il procedimento risulta concluso${proceduralContext?.finalAct ? ` con l'atto ${proceduralContext.finalAct.numeroAtto}` : ""}: priorità a tenuta dell'atto, riesame, contenzioso, esecuzione e obblighi residui. Non proporre un nuovo avvio per i medesimi fatti.`
         : "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.",
       steps,
@@ -552,16 +738,17 @@ function buildOperationalPlans(
 const ART_242_SOURCE_URL = "https://www.autorita-trasporti.it/wp-content/uploads/2025/12/All.-A-delibera-n.-242_2025_signed.pdf";
 
 function buildRegulatoryApplicability(
+  analysisDate: string,
   context?: StructuredReportProceduralContext,
   documentedGrantDate?: string | null,
 ): readonly StructuredReportRegulatoryApplicability[] {
   const grantDate = context?.concessione?.dataRilascio.slice(0, 10) ?? documentedGrantDate ?? null;
-  if (!grantDate) return [];
+  if (!grantDate || grantDate > analysisDate || analysisDate < "2026-03-01") return [];
   const preExisting = grantDate < "2026-03-01";
   const basis = context?.concessione ? "" : " Data del titolo ricavata dai documenti: confermarla collegando la concessione nel registro.";
   const applicability = (preExisting
-    ? "Concessione preesistente: applicazione dal 1 marzo 2026 nei limiti della misura 1.2, punto iii; nessuna qualificazione retroattiva delle condotte anteriori; l'intero atto si applica a modifiche del contenuto e vicende soggettive successive (punto ii)."
-    : "Concessione rilasciata dopo l'entrata in vigore: verificare l'intero atto di regolazione e la disciplina della procedura di rilascio.") + basis;
+    ? "La data del titolo non prova che fosse in essere il 1 marzo 2026. Solo accertata tale condizione verificare le misure elencate al punto iii; per aggiornamenti o revisioni valutare i presupposti del punto ii, senza presumere il perfezionamento di un'istanza. Nessuna qualificazione retroattiva delle condotte anteriori."
+    : "Titolo rilasciato non prima dell'entrata in vigore: verificare l'ambito della misura 1.2, punto i, e i presupposti di ciascun adempimento.") + basis;
   const row = (
     measure: string,
     trigger: string,
@@ -572,14 +759,14 @@ function buildRegulatoryApplicability(
     effectiveFrom: "1 marzo 2026",
     trigger,
     applicability,
-    authorityAction,
-    deadline,
+    authorityAction: `Se la misura e i suoi presupposti sono applicabili: ${authorityAction}`,
+    deadline: `${deadline} Non è una scadenza verificata del fascicolo.`,
     officialSourceUrl: ART_242_SOURCE_URL,
   });
   return [
     row("3.7", "Istanza rilevante di revisione o aggiornamento di concessione, PI o PEF.", "Vigilare sul titolo e notificare l'istanza ad ART; distinguere revisione, differimento investimenti, modifica del titolo ed estensione della durata.", "Alla ricezione o emersione dell'istanza rilevante."),
     row("3.13", "Rilascio o cambio di controllo del concessionario e condizioni concorrenziali.", "Valutare capacità e relazioni societarie; informare annualmente ART sull'applicazione della misura.", "Cadenza annuale; verificare le istruzioni operative ART."),
-    row("3.18", "Monitoraggio di investimenti, obiettivi di traffico e livelli occupazionali.", "Svolgere il monitoraggio annuale e comunicarne gli esiti ad ART; applicare penali soltanto se predeterminate nel bando o nel titolo.", "Cadenza annuale."),
+    row("3.18", "Monitoraggio di investimenti, obiettivi di traffico e livelli occupazionali.", "Svolgere il monitoraggio annuale e comunicarne gli esiti ad ART; valutare le penali nella misura in cui sono definite in sede di bando.", "Cadenza annuale."),
     row("3.19", "Nuove infrastrutture pubbliche che incidono sull'equilibrio concorrenziale originario.", "Valutare revisione di concessione e PEF oppure, nei casi rilevanti, revoca e nuova gara con comunicazione ad ART.", "Prima della decisione sulla revisione o sulla diversa misura."),
     row("3.20", "Istanza di estensione della durata ai sensi del D.M. 202/2022 e del D.M. 110/2023.", "Notificare l'istanza documentata ad ART e acquisire il parere vincolante sulla coerenza con il PEF.", "Parere ART entro 30 giorni dalla ricezione di tutte le informazioni necessarie."),
     row("4", "Concessione vigente di area o banchina portuale.", "Acquisire e verificare la contabilità separata secondo gli schemi regolatori.", "Coordinare con la trasmissione annuale della misura 15."),
@@ -606,7 +793,9 @@ export function buildStructuredFascicoloReport(input: {
   }
   const missionsByQuestion = new Map([...groupedMissions].map(([semanticKey, questionMissions]) => {
     const primary = questionMissions.find((mission) => mission.mode !== "ADVERSE_SEARCH") ?? questionMissions[0];
-    const results = [...new Map(questionMissions.flatMap((mission) => mission.results)
+    const results = [...new Map(questionMissions.flatMap((mission) => mission.results.map((result) => ({
+      ...result, missionId: mission.missionId,
+    })))
       .map((result) => [result.resultId, result])).values()].sort(byId);
     return [semanticKey, {
       ...primary,
@@ -646,6 +835,8 @@ export function buildStructuredFascicoloReport(input: {
       provider: result.provider,
       relevantPassage: result.relevantPassage ?? null,
       direction: result.supportDirection,
+      classificationSource: result.classificationSource ?? null,
+      classificationReviewAuditId: result.classificationReviewAuditId ?? null,
       reviewStatus: result.classificationReviewStatus,
       rationale: result.classificationRationale,
     })),
@@ -669,8 +860,21 @@ export function buildStructuredFascicoloReport(input: {
       registryGrant: input.proceduralContext?.concessione ?? null,
       extractIsoDates,
     }) : null;
+  const phase = detectActPhase({
+    proceduralContext: input.proceduralContext,
+    documentedFramework: {
+      partyRoles: input.knowledge.partyRoles,
+      facts: input.knowledge.facts,
+      timeline: input.knowledge.events,
+      legalActs: input.knowledge.legalActs,
+      measures: input.knowledge.measures,
+      contradictions: input.knowledge.contradictions,
+    },
+  });
   const payload: StructuredFascicoloReportPayload = {
     contractVersion: STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION,
+    ...(questions.some((question) => question.favorableAuthorities.length + question.contraryAuthorities.length > 0)
+      ? { sourceReviewPolicy: SOURCE_REVIEW_POLICY } : {}),
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
     knowledgeRevisionId: input.knowledge.revision.id,
@@ -692,8 +896,8 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
-    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext),
-    regulatoryApplicability: buildRegulatoryApplicability(input.proceduralContext, portRegime?.grantDate.date),
+    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext, portRegime !== null, phase),
+    regulatoryApplicability: portRegime ? buildRegulatoryApplicability(analysisDate, input.proceduralContext, portRegime.grantDate.date) : [],
     portRegime,
     legalApplication: buildLegalApplication({
       issues: legalIssues.map((issue) => {
@@ -714,6 +918,9 @@ export function buildStructuredFascicoloReport(input: {
       analysisDate,
       context: input.proceduralContext,
       documentedGrantDate: portRegime?.grantDate.date ?? null,
+      portMatter: portRegime !== null,
+      portRegime,
+      documentaryPhase: { concluded: phase.phase === "POST_DECISION", reviewPending: phase.reviewPending },
     }),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,

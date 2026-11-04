@@ -103,6 +103,24 @@ describe("structured fascicolo report repository on disposable PGlite", () => {
     expect(history.find((snapshot) => snapshot.id === second.snapshot.id)?.status).toBe("CURRENT");
   });
 
+  it("reuses the original snapshot when a previously superseded report becomes current again", async () => {
+    const db = await database();
+    const repository = context(db);
+    const first = await persistStructuredFascicoloReport(report(), repository);
+    const second = await persistStructuredFascicoloReport(report("tenant-a", "procedure-a", "revision-a", "CHANGED"), repository);
+    const restored = await persistStructuredFascicoloReport(report(), repository);
+    const history = await listStructuredFascicoloReportSnapshots({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repository);
+    expect(restored).toMatchObject({
+      outcome: "REUSED",
+      snapshot: { id: first.snapshot.id, status: "CURRENT", supersededBySnapshotId: null, staleReasons: [] },
+    });
+    expect(history).toHaveLength(2);
+    expect(history.find((snapshot) => snapshot.id === second.snapshot.id)).toMatchObject({
+      status: "SUPERSEDED", supersededBySnapshotId: first.snapshot.id,
+    });
+    expect(restored.snapshot.generatedAt).toEqual(first.snapshot.generatedAt);
+  });
+
   it("marks drift stale and never leaks snapshots across tenant/procedure scope", async () => {
     const db = await database();
     const repository = context(db);

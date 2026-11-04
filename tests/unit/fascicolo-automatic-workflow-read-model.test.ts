@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { findManyMissions, countMissions, findManyHistoricalResults } = vi.hoisted(() => ({
+const { findManyMissions, countMissions, findManyHistoricalResults, findManyReviewEvents } = vi.hoisted(() => ({
   findManyMissions: vi.fn(),
   countMissions: vi.fn(),
   findManyHistoricalResults: vi.fn(),
+  findManyReviewEvents: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -19,6 +20,7 @@ vi.mock("@/lib/prisma", () => ({
     asyncJob: { findMany: vi.fn(async () => []) },
     researchMissionRecord: { findMany: findManyMissions, count: countMissions },
     researchQuestionResultRecord: { findMany: findManyHistoricalResults },
+    activityLog: { findMany: findManyReviewEvents },
   },
 }));
 
@@ -41,12 +43,14 @@ vi.mock("@/server/legal-research/automatic-research-policy", () => ({
 }));
 
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
+import { classificationReviewFingerprint } from "@/server/legal-research/question-result-attestation";
 
 describe("Lotto 3A fascicolo automatic workflow read model", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     countMissions.mockResolvedValue(1);
     findManyHistoricalResults.mockResolvedValue([{ researchQuestionSemanticKey: "c".repeat(64) }]);
+    findManyReviewEvents.mockResolvedValue([]);
     findManyMissions.mockImplementation(async (query) => {
       expect(query.where).toEqual({ tenantId: "tenant-1", caseId: "procedure-1", lifecycleStatus: "CURRENT" });
       return [{
@@ -136,6 +140,41 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
         }],
       }];
     });
+  });
+
+  it("only accepts the latest authorized audit event matching the exact classification and mission", async () => {
+      const missions = await findManyMissions({ where: { tenantId: "tenant-1", caseId: "procedure-1", lifecycleStatus: "CURRENT" } });
+      const result = missions[0].questionResults[0];
+      result.classificationSource = "HUMAN_REVIEW";
+      result.classificationReviewStatus = "HUMAN_CONFIRMED";
+      result.classificationRationale = "Il passaggio affronta la medesima questione controversa.";
+      findManyMissions.mockResolvedValue(missions);
+      const fingerprint = classificationReviewFingerprint({
+        tenantId: "tenant-1", missionId: "mission-current", resultId: result.id, direction: result.supportDirection,
+        reviewStatus: result.classificationReviewStatus, confidence: result.classificationConfidence, rationale: result.classificationRationale,
+      });
+      findManyReviewEvents.mockResolvedValue([{
+        id: "review-audit", entitaId: result.id, userId: "reviewer", userRole: "GIURIDICO",
+        metadata: { missionId: "mission-current", classificationFingerprint: fingerprint },
+      }]);
+      let model = await getFascicoloAutomaticWorkflowReadModel("procedure-1");
+      expect(model?.missions[0].results[0].classificationReviewAuditId).toBe("review-audit");
+      expect(findManyReviewEvents).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ enteId: "tenant-1", entitaId: { in: [result.id] } }),
+      }));
+      result.supportDirection = "OPPOSES";
+      model = await getFascicoloAutomaticWorkflowReadModel("procedure-1");
+      expect(model?.missions[0].results[0].classificationReviewAuditId).toBeNull();
+      result.supportDirection = "SUPPORTS";
+      findManyReviewEvents.mockResolvedValue([{
+        id: "unauthorized-audit", entitaId: result.id, userId: "operator", userRole: "OPERATORE_SOCIETA",
+        metadata: { classificationFingerprint: fingerprint },
+      }, {
+        id: "old-audit", entitaId: result.id, userId: "reviewer", userRole: "GIURIDICO",
+        metadata: { classificationFingerprint: fingerprint },
+      }]);
+      model = await getFascicoloAutomaticWorkflowReadModel("procedure-1");
+      expect(model?.missions[0].results[0].classificationReviewAuditId).toBeNull();
   });
 
   it("shows only CURRENT missions and their bundles while reporting the HISTORICAL count", async () => {

@@ -75,8 +75,10 @@ function mission(overrides: Partial<StructuredReportMissionInput> = {}): Structu
       sourceUrl: "https://example.test/support",
       provider: "official-provider",
       supportDirection: "SUPPORTS",
+      classificationSource: "HUMAN_REVIEW",
+      classificationReviewAuditId: "audit-support",
       classificationReviewStatus: "HUMAN_CONFIRMED",
-      classificationRationale: "Passaggio favorevole",
+      classificationRationale: "Il passaggio affronta la medesima questione controversa.",
       sourceAssessment: {
         assessmentId: "assessment-support",
         chainFingerprint: sha("s"),
@@ -155,10 +157,9 @@ describe("deterministic structured fascicolo report", () => {
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
     });
     expect(report.payload.operationalPlans?.[0].steps).toHaveLength(4);
-    expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("art. 47");
-    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("decadenza"))).toBe(true);
-    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("ripristino"))).toBe(true);
-    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("Archiviare"))).toBe(true);
+    expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("fonti");
+    expect(JSON.stringify(report.payload.operationalPlans)).not.toContain("art. 47");
+    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("Escludere"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.length).toBeGreaterThan(1);
     expect(report.payload.operationalPlans?.[0].steps[0].requiredDocuments.length).toBeGreaterThan(0);
 
@@ -166,12 +167,17 @@ describe("deterministic structured fascicolo report", () => {
     expect(report.payload.legalIssues[0].questions[0]).toMatchObject({
       missionId: "mission-current",
       favorableAuthorities: [{ resultId: "support-result", citationAnchors: [{ page: 4, paragraph: "12" }] }],
-      contraryAuthorities: [{ resultId: "oppose-result", citationAnchors: [{ section: "3" }] }],
+      contraryAuthorities: [],
       nonUsableResults: [{
         resultId: "blocked-result",
+        missionId: "mission-current",
         sourceUrl: "https://example.test/candidate",
         rationale: "Principio segnalato dal connettore, da riscontrare",
-        reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"],
+        reasons: ["CITATION_ANCHOR_REQUIRED", "CLASSIFICATION_NOT_HUMAN_CONFIRMED", "MANUAL_REVIEW_REQUIRED", "MISSING_FULL_TEXT"],
+      }, {
+        resultId: "oppose-result",
+        missionId: "mission-adverse",
+        reasons: ["CLASSIFICATION_NOT_HUMAN_CONFIRMED"],
       }],
       gaps: ["UNCOVERED_ELEMENT"],
     });
@@ -179,11 +185,67 @@ describe("deterministic structured fascicolo report", () => {
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
   });
 
+  it("requires a motivated, audited human classification in addition to the current technical source gates", () => {
+      const confirmed = mission().results[0];
+      const assessment = confirmed.sourceAssessment!;
+      const cases: ReadonlyArray<{
+        name: string;
+        result: typeof confirmed;
+        usable: boolean;
+      }> = [
+        { name: "audited human review", result: confirmed, usable: true },
+        { name: "AI proposal", result: { ...confirmed, classificationReviewStatus: "AI_PROPOSED" }, usable: false },
+        { name: "rejected review", result: { ...confirmed, classificationReviewStatus: "REJECTED" }, usable: false },
+        { name: "missing provenance", result: { ...confirmed, classificationSource: undefined }, usable: false },
+        { name: "missing audit", result: { ...confirmed, classificationReviewAuditId: null }, usable: false },
+        { name: "missing rationale", result: { ...confirmed, classificationRationale: null }, usable: false },
+        { name: "short rationale", result: { ...confirmed, classificationRationale: "troppo breve" }, usable: false },
+        { name: "obsolete source assessment", result: { ...confirmed, sourceAssessment: { ...assessment, isCurrent: false } }, usable: false },
+        { name: "blocked source", result: { ...confirmed, sourceAssessment: { ...assessment, usable: false, blockingReasons: ["MISSING_FULL_TEXT"] } }, usable: false },
+        { name: "manual review", result: { ...confirmed, sourceAssessment: { ...assessment, manualReviewRequired: true } }, usable: false },
+        { name: "missing citation", result: { ...confirmed, sourceAssessment: { ...assessment, citationAnchors: [] } }, usable: false },
+        { name: "neutral source", result: { ...confirmed, supportDirection: "NEUTRAL" }, usable: false },
+      ];
+      for (const testCase of cases) {
+        const report = buildStructuredFascicoloReport({
+          tenantId: "tenant-1", procedimentoId: "procedure-1", knowledge: knowledge(),
+          missions: [mission({ results: [testCase.result] })],
+        });
+        const question = report.payload.legalIssues[0].questions[0];
+        expect(question.favorableAuthorities.length, testCase.name).toBe(testCase.usable ? 1 : 0);
+        expect(question.nonUsableResults.length, testCase.name).toBe(testCase.usable ? 0 : 1);
+        if (testCase.usable) {
+          expect(question.favorableAuthorities[0].classificationReviewAuditId).toBe("audit-support");
+          expect(report.payload.sourceReviewPolicy).toBe("PROFESSIONAL_CLASSIFICATION_REQUIRED_V1");
+        }
+      }
+    });
+
+  it("includes an independently reviewed contrary source from its own adverse mission", () => {
+      const contrary = {
+        ...mission().results[1],
+        classificationSource: "HUMAN_REVIEW" as const,
+        classificationReviewAuditId: "audit-adverse",
+        classificationReviewStatus: "HUMAN_CONFIRMED" as const,
+        classificationRationale: "Il caso contrario affronta un limite pertinente alla controversia.",
+      };
+      const report = buildStructuredFascicoloReport({
+        tenantId: "tenant-1", procedimentoId: "procedure-1", knowledge: knowledge(),
+        missions: [mission({ results: [mission().results[0]] }), mission({
+          missionId: "mission-adverse", mode: "ADVERSE_SEARCH", results: [contrary],
+        })],
+      });
+      expect(report.payload.legalIssues[0].questions[0].contraryAuthorities)
+        .toMatchObject([{ resultId: "oppose-result", classificationReviewAuditId: "audit-adverse" }]);
+    });
   it("recognizes a concluded Selvara review and never proposes restarting the proceeding", () => {
     const report = buildStructuredFascicoloReport({
       tenantId: "tenant-1",
       procedimentoId: "procedure-selvara",
-      knowledge: knowledge(),
+      knowledge: {
+        ...knowledge(),
+        legalActs: [{ ...item("port-title", "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale di Selvara." }],
+      },
       missions: [mission()],
       proceduralContext: {
         stato: "CONCLUSO",
@@ -229,9 +291,11 @@ describe("deterministic structured fascicolo report", () => {
       "3.7", "3.13", "3.18", "3.19", "3.20", "4", "5", "15",
     ]);
     expect(report.payload.regulatoryApplicability?.every((row) =>
-      row.applicability.includes("nessuna qualificazione retroattiva"))).toBe(true);
+      row.applicability.includes("non prova che fosse in essere"))).toBe(true);
+    expect(report.payload.regulatoryApplicability?.every((row) =>
+      row.deadline.includes("Non è una scadenza verificata del fascicolo"))).toBe(true);
     expect(report.payload.regulatoryApplicability?.find((row) => row.measure === "3.18")?.authorityAction)
-      .toContain("soltanto se predeterminate");
+      .toContain("definite in sede di bando");
   });
 
   it("is stable across input order and changes when CURRENT source state changes", () => {
@@ -274,6 +338,8 @@ describe("deterministic structured fascicolo report", () => {
           ...mission().results[2],
           resultId: "reviewed-not-usable",
           supportDirection: "OPPOSES",
+          classificationSource: "HUMAN_REVIEW",
+          classificationReviewAuditId: "audit-blocked",
           classificationReviewStatus: "HUMAN_CONFIRMED",
           classificationRationale: "Classificazione contraria motivata dal revisore.",
         }, {
@@ -290,7 +356,7 @@ describe("deterministic structured fascicolo report", () => {
     expect(question.favorableAuthorities.map((authority) => authority.resultId)).toEqual(["reviewed-usable"]);
     expect(question.contraryAuthorities).toEqual([]);
     expect(question.nonUsableResults).toEqual(expect.arrayContaining([
-      expect.objectContaining({ resultId: "reviewed-not-usable", reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"] }),
+      expect.objectContaining({ resultId: "reviewed-not-usable", reasons: ["CITATION_ANCHOR_REQUIRED", "MANUAL_REVIEW_REQUIRED", "MISSING_FULL_TEXT"] }),
       expect.objectContaining({ resultId: "reviewed-neutral", direction: "NEUTRAL" }),
     ]));
   });
@@ -306,20 +372,54 @@ describe("profile-specific operational plans", () => {
     const report = buildStructuredFascicoloReport({
       tenantId: "tenant-1",
       procedimentoId: "procedure-profile",
-      knowledge: { ...base, facts: [use, invest], gaps: [], legalIssues: [thirdParty, investment], researchQuestions: [] },
+      knowledge: {
+        ...base,
+        facts: [use, invest],
+        legalActs: [{ ...item("port-title", "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale." }],
+        gaps: [],
+        legalIssues: [thirdParty, investment],
+        researchQuestions: [],
+      },
       missions: [],
     });
     const plans = report.payload.operationalPlans ?? [];
     const third = plans.find((plan) => plan.issueText.startsWith("Uso di M4"))!;
     const inv = plans.find((plan) => plan.issueText.startsWith("Inadempimento"))!;
     expect(third.steps[0].title).toBe("1. Uso di M4 da parte di terzo operatore: completare la prova dei requisiti");
-    expect(third.steps[1].action).toMatch(/art\. 18, comma 9/);
-    expect(third.steps[1].action).toMatch(/art\. 47, lett\. e/);
-    expect(third.steps[2].draftTitle).toBe("Contestazione degli addebiti");
-    expect(third.steps[2].draftTemplate).toContain("[TERMINE DA VERIFICARE]");
+    expect(third.steps[1].action).toContain("il solo mancato reperimento del documento non dimostra");
+    expect(third.steps[1].requiredDocuments.join(" ")).toMatch(/art\. 18, comma 9/);
+    expect(third.steps[2].necessity).toBe("NOT_JUSTIFIED");
+    expect(third.steps[2].action).toContain("Non avviare la contestazione");
+    expect(third.steps[2].draftTitle).toBeUndefined();
     expect(inv.steps[0].action).toMatch(/Mancata, ritardata o incompleta esecuzione/);
     expect(inv.steps[2].action).toMatch(/Non avviare la contestazione/);
     expect(inv.steps[2].draftTemplate).toBeUndefined();
     expect(new Set(plans.flatMap((plan) => plan.steps.map((step) => step.title))).size).toBe(8);
+
+    const supportedUse = {
+      ...use,
+      normalizedText: "Il contratto attribuisce stabilmente a Magazzini Levante 180 m² di M4 con proprio personale. La gestione è stata affidata senza autorizzazione dell'ente concedente.",
+    };
+    const supported = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-profile-supported",
+      knowledge: {
+        ...base,
+        facts: [supportedUse],
+        legalActs: [{ ...item("port-title-supported", "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale." }],
+        gaps: [],
+        legalIssues: [thirdParty],
+        researchQuestions: [],
+      },
+      missions: [],
+    }).payload.operationalPlans?.[0];
+    expect(supported?.steps[1].action).toMatch(/art\. 47, lett\. e/);
+    expect(supported?.steps[1].requiredDocuments.join(" ")).toContain("solo se ricorre sostituzione nel godimento");
+    expect(supported?.steps[3].action).toContain("autorizzazione preventiva per l'affidamento futuro");
+    expect(supported?.steps[3].action).toContain("Non presumere che l'autorizzazione sani automaticamente la condotta pregressa");
+    expect(supported?.steps[3].action).toContain("richiede sostituzione abusiva nel godimento");
+    expect(supported?.steps[2].necessity).toBe("CONDITIONAL");
+    expect(supported?.steps[2].draftTitle).toBe("Contestazione degli addebiti");
+    expect(supported?.steps[2].draftTemplate).toContain("[TERMINE DA VERIFICARE]");
   });
 });

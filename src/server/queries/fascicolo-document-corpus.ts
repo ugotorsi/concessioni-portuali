@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   getCurrentTenantContext,
@@ -274,14 +275,15 @@ export interface FascicoloDocumentCorpusAsyncJobAccess extends FascicoloDocument
 
 async function readFascicoloDocumentCorpus(
   input: FascicoloDocumentCorpusScope,
+  client: Pick<Prisma.TransactionClient, "procedimento" | "documento" | "documentExtractionAttempt" | "asyncJob"> = prisma,
 ): Promise<FascicoloDocumentCorpus | null> {
-  const procedimento = await prisma.procedimento.findFirst({
+  const procedimento = await client.procedimento.findFirst({
     where: { id: input.procedimentoId, enteId: input.tenantId },
     select: { id: true },
   });
   if (!procedimento) return null;
 
-  const documents = await prisma.documento.findMany({
+  const documents = await client.documento.findMany({
     where: {
       enteId: input.tenantId,
       procedimentoId: input.procedimentoId,
@@ -300,7 +302,7 @@ async function readFascicoloDocumentCorpus(
   );
   const attempts = versionedDocuments.length === 0
     ? []
-    : await prisma.documentExtractionAttempt.findMany({
+    : await client.documentExtractionAttempt.findMany({
         where: {
           tenantId: input.tenantId,
           procedimentoId: input.procedimentoId,
@@ -336,7 +338,7 @@ async function readFascicoloDocumentCorpus(
   }));
   const jobs = logicalOperationIds.length === 0
     ? []
-    : await prisma.asyncJob.findMany({
+    : await client.asyncJob.findMany({
         where: {
           operation: DOCUMENT_EXTRACTION_OPERATION,
           tenantId: input.tenantId,
@@ -358,6 +360,13 @@ async function readFascicoloDocumentCorpus(
     attempts,
     jobs,
   });
+}
+
+export async function readFascicoloDocumentCorpusInTransaction(
+  input: FascicoloDocumentCorpusScope,
+  client: Prisma.TransactionClient,
+): Promise<FascicoloDocumentCorpus | null> {
+  return readFascicoloDocumentCorpus(input, client);
 }
 
 export async function getFascicoloDocumentCorpus(input: {

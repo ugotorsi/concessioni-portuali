@@ -1,7 +1,14 @@
+import Link from "next/link";
 import { AlertTriangle, BookOpen, Download, ExternalLink } from "lucide-react";
 
 import { formatDateIT } from "@/lib/utils";
-import { documentReferenceLabel } from "@/lib/professional-text";
+import { projectProfessionalResearch } from "@/lib/professional-research-sources";
+import {
+  documentNamesByReference,
+  humanizeProfessionalText,
+  isInternalProfessionalDiagnostic,
+  professionalGapSummaries,
+} from "@/lib/professional-text";
 import type {
   PortRegimeCoordination,
   StructuredFascicoloReportPayload,
@@ -28,6 +35,7 @@ export function fascicoloReportStatusLabel(status: StructuredReportSnapshotStatu
 }
 
 function professionalNote(value: string): string | null {
+  if (isInternalProfessionalDiagnostic(value)) return null;
   const labels: Readonly<Record<string, string>> = {
     CURRENT_RESEARCH_MISSION_MISSING: "La ricerca non è ancora disponibile per una delle questioni.",
     DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES: "Le scadenze individuate richiedono verifica prima dell’uso operativo.",
@@ -38,12 +46,17 @@ function professionalNote(value: string): string | null {
     QUESTION_NOT_HUMAN_CONFIRMED: "Una o più questioni richiedono conferma professionale.",
     RESEARCH_NOT_COMPLETED: "Una o più ricerche non risultano completate.",
     RESEARCH_STATE_CHANGED: "Lo stato delle ricerche è cambiato dopo la generazione.",
+    REPORT_PROJECTION_CHANGED: "I criteri di rappresentazione del rapporto sono cambiati dopo la generazione.",
     SOURCE_STATE_CHANGED: "Lo stato di utilizzabilità delle fonti è cambiato dopo la generazione.",
     SUPERSEDED_BY_MATERIAL_CHANGE: "Il rapporto è stato superato dopo modifiche rilevanti al fascicolo.",
     UNCOVERED_ELEMENT: "Un elemento della questione non risulta ancora coperto dalle fonti disponibili.",
   };
   if (labels[value]) return labels[value];
-  return /^[A-Z][A-Z0-9_]+$/.test(value) ? null : value;
+  return /^[A-Z][A-Z0-9_]+$/.test(value) ? null : humanizeProfessionalText(value);
+}
+
+function professionalContent(value: string): string {
+  return isInternalProfessionalDiagnostic(value) ? "" : humanizeProfessionalText(value);
 }
 
 function uniqueNotes(values: readonly string[]): readonly string[] {
@@ -69,7 +82,8 @@ function usableAuthorities(payload: StructuredFascicoloReportPayload): readonly 
 function TextList({ items }: { items: readonly { normalizedText: string }[] }) {
   return (
     <ul className="space-y-2 text-sm leading-6 text-slate-700">
-      {items.map((item, index) => <li key={`${item.normalizedText}-${index}`} className="[overflow-wrap:anywhere]">{item.normalizedText}</li>)}
+      {items.filter((item) => !isInternalProfessionalDiagnostic(item.normalizedText))
+        .map((item, index) => <li key={`${item.normalizedText}-${index}`} className="[overflow-wrap:anywhere]">{humanizeProfessionalText(item.normalizedText)}</li>)}
     </ul>
   );
 }
@@ -93,16 +107,16 @@ function AuthorityGroup({ title, authorities }: { title: string; authorities: re
           <details key={`${authority.direction}-${authority.resultId}`} className="rounded-md border border-slate-200 bg-white">
             <summary className="cursor-pointer p-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-              <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{authority.title}</p>
+              <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(authority.title) || "Fonte da verificare"}</p>
               <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">{authority.direction}</span>
               </div>
             </summary>
             <div className="border-t border-slate-200 p-3">
-              <p className="text-xs font-medium text-emerald-800">Fonte verificata e utilizzabile</p>
-              {authority.rationale ? <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">{authority.rationale}</p> : null}
+              <p className="text-xs font-medium text-emerald-800">Fonte verificata e classificata dal professionista</p>
+              {authority.rationale && professionalContent(authority.rationale) ? <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">{professionalContent(authority.rationale)}</p> : null}
               {authority.sourceUrl ? (
                 <a href={authority.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#075985] underline underline-offset-4">
-                  Apri la fonte ufficiale <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  Apri la fonte <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
               ) : null}
             </div>
@@ -122,15 +136,15 @@ export function UnverifiedCandidateSources({ question }: { question: StructuredR
       <div className="border-t border-amber-200 p-3">
       <p className="mt-1 text-xs text-amber-900">
         Risultati preliminari dei connettori: non sono ancora fonti utilizzabili per conclusioni professionali.
-        Devono essere controllati identità, testo, citazioni e applicabilità temporale.
+        Devono essere controllati identità, testo, citazioni, applicabilità temporale e pertinenza al caso.
       </p>
       <ul className="mt-2 space-y-3">
         {candidates.map((candidate) => (
           <li key={candidate.resultId} className="border-t border-amber-200 pt-2 text-sm text-slate-800">
-            <p className="font-medium [overflow-wrap:anywhere]">{candidate.title}</p>
-            {candidate.rationale ? (
+            <p className="font-medium [overflow-wrap:anywhere]">{professionalContent(candidate.title) || "Fonte da verificare"}</p>
+            {candidate.rationale && professionalContent(candidate.rationale) ? (
               <p className="mt-1 leading-6 [overflow-wrap:anywhere]">
-                Rilevanza preliminare segnalata, da riscontrare: {candidate.rationale}
+                Rilevanza preliminare segnalata, da riscontrare: {professionalContent(candidate.rationale)}
               </p>
             ) : null}
             {candidate.sourceUrl ? (
@@ -146,88 +160,13 @@ export function UnverifiedCandidateSources({ question }: { question: StructuredR
   );
 }
 
-export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFascicoloReportPayload["operationalPlans"]> }) {
-  if (plans.length === 0) return null;
-  return (
-    <ContentSection title="Percorsi operativi da valutare">
-      <p className="mb-4 text-sm leading-6 text-amber-900">
-        Ipotesi istruttorie preliminari, non pareri conclusivi né atti autorizzati. Il professionista deve
-        verificare titolo, fonti, competenza e termini, quindi scegliere e approvare ogni iniziativa.
-      </p>
-      <div className="space-y-5">
-        {plans.map((plan) => (
-          <article key={plan.issueSemanticKey} className="rounded-lg border border-slate-200 bg-white p-4">
-            <h4 className="font-semibold text-slate-950">{plan.issueText}</h4>
-            <p className="mt-2 text-sm text-slate-700">{plan.recommendedNextStep}</p>
-            <p className="mt-2 text-xs font-medium text-amber-900">
-              {plan.legalSourceStatus === "LEGAL_RESEARCH_REQUIRED"
-                ? "Normativa e giurisprudenza ancora da verificare"
-                : "Fonti collegate: verificare pertinenza e applicabilità prima di procedere"}
-            </p>
-            {plan.outstandingEvidence.length > 0 ? (
-              <div className="mt-3">
-                <h5 className="text-sm font-semibold text-slate-900">Documenti e fatti mancanti</h5>
-                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
-                  {plan.outstandingEvidence.map((gap) => <li key={gap}>{gap}</li>)}
-                </ul>
-              </div>
-            ) : null}
-            <div className="mt-4">
-              <h5 className="text-sm font-semibold text-slate-900">Come procedere</h5>
-              <ol className="mt-2 space-y-3">
-                {plan.steps.map((step) => (
-                  <li key={step.title} className="rounded-md bg-slate-50 p-3">
-                    <p className="text-sm font-semibold text-slate-950">{step.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-700">{step.action}</p>
-                    <p className="mt-2 text-xs text-slate-600">Interlocutore: {step.office}</p>
-                    <p className="mt-1 text-xs font-semibold text-slate-700">Documenti necessari</p>
-                    <ul className="mt-1 list-disc pl-5 text-xs leading-5 text-slate-700">
-                      {step.requiredDocuments.map((document) => <li key={document}>{document}</li>)}
-                    </ul>
-                    <p className="mt-2 text-xs text-slate-600">Condizione per proseguire: {step.completionGate}</p>
-                    {step.draftTemplate ? (
-                      <details className="mt-3 rounded-md border border-slate-200 bg-white">
-                        <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-slate-800">
-                          Apri facsimile: {step.draftTitle ?? "atto operativo"}
-                        </summary>
-                        <pre className="whitespace-pre-wrap border-t border-slate-200 p-3 font-sans text-xs leading-5 text-slate-700">
-                          {step.draftTemplate}
-                        </pre>
-                      </details>
-                    ) : null}
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="mt-4">
-              <h5 className="text-sm font-semibold text-slate-900">Alternative giuridico-operative</h5>
-              <div className="mt-2 space-y-3">
-                {plan.alternatives.map((alternative) => (
-                  <div key={alternative.title} className="border-l-2 border-[#0b7285] pl-3">
-                    <p className="text-sm font-semibold text-slate-950">{alternative.title}</p>
-                    <p className="mt-1 text-sm text-slate-700">Quando: {alternative.whenApplicable}</p>
-                    <p className="mt-1 text-sm text-slate-700">Percorso: {alternative.practicalRoute}</p>
-                    <p className="mt-1 text-sm text-amber-900">Rischio: {alternative.riskOrLimit}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <p className="mt-4 text-sm text-slate-700">{plan.deadlineReview}</p>
-            {plan.sourceDocumentRefs.length > 0 ? (
-              <p className="mt-2 text-xs text-slate-500">Riferimenti documentali: {plan.sourceDocumentRefs.map(documentReferenceLabel).join("; ")}</p>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </ContentSection>
-  );
-}
-
 const TEMPORAL_STATUS_LABELS: Readonly<Record<StructuredReportLegalApplication["rules"][number]["temporalStatus"], string>> = {
   APPLICABLE: "Applicabile",
   APPLICABLE_PREVIOUS_VERSION: "Applicabile nel testo previgente",
   NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",
   PROSPECTIVE_ONLY: "Solo per adempimenti successivi",
+  SUPERSEDED: "Sostituita per nuove procedure",
+  APPLICABILITY_TO_VERIFY: "Presupposti da verificare",
   DATE_TO_VERIFY: "Data da accertare",
 };
 
@@ -244,6 +183,7 @@ const PORT_REGIME_STATUS_LABELS: Readonly<Record<PortRegimeCoordination["sources
   PREVIOUS_TEXT_APPLICABLE: "Testo previgente",
   NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",
   SUPERSEDED: "Sostituita",
+  APPLICABILITY_TO_VERIFY: "Presupposti da verificare",
   DATE_TO_VERIFY: "Data da accertare",
 };
 
@@ -254,20 +194,20 @@ export function PortRegimeSection({ regime }: { regime: PortRegimeCoordination }
     <ContentSection title="Coordinamento del regime concessorio portuale nel tempo">
       <div className="space-y-3 text-sm leading-6 text-slate-700">
         <ul className="space-y-1">
-          <li>{dateLine(regime.procedureStartDate)}</li>
-          <li>{dateLine(regime.grantDate)}</li>
+          <li>{professionalContent(dateLine(regime.procedureStartDate))}</li>
+          <li>{professionalContent(dateLine(regime.grantDate))}</li>
         </ul>
         <div className="space-y-2">
           {regime.sources.map((source) => (
             <details key={source.sourceId} className="rounded-md border border-slate-200 bg-slate-50">
               <summary className="cursor-pointer px-3 py-2">
-                <span className="font-medium text-slate-950">{source.citation}</span>
+                <span className="font-medium text-slate-950">{professionalContent(source.citation)}</span>
                 <span className="ml-2 text-xs font-semibold text-slate-600">{PORT_REGIME_STATUS_LABELS[source.status]}</span>
               </summary>
               <div className="space-y-1 border-t border-slate-200 px-3 py-2">
-                <p>{source.reasoning}</p>
+                <p>{professionalContent(source.reasoning)}</p>
                 {source.operativeConsequences.length ? (
-                  <ul className="list-disc space-y-1 pl-5">{source.operativeConsequences.map((consequence) => <li key={consequence}>{consequence}</li>)}</ul>
+                  <ul className="list-disc space-y-1 pl-5">{source.operativeConsequences.filter(professionalContent).map((consequence) => <li key={consequence}>{professionalContent(consequence)}</li>)}</ul>
                 ) : null}
                 <a href={source.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
                   Testo ufficiale <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
@@ -276,8 +216,8 @@ export function PortRegimeSection({ regime }: { regime: PortRegimeCoordination }
             </details>
           ))}
         </div>
-        <p><strong>Conclusione:</strong> {regime.conclusion}</p>
-        <ul className="list-disc space-y-1 pl-5 text-xs text-slate-500">{regime.limits.map((limit) => <li key={limit}>{limit}</li>)}</ul>
+        <p><strong>Conclusione:</strong> {professionalContent(regime.conclusion)}</p>
+        <ul className="list-disc space-y-1 pl-5 text-xs text-slate-500">{regime.limits.filter(professionalContent).map((limit) => <li key={limit}>{professionalContent(limit)}</li>)}</ul>
       </div>
     </ContentSection>
   );
@@ -289,12 +229,14 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
     <ContentSection title="Analisi giuridica: applicazione delle norme ai fatti">
       <div className="space-y-3">
         {items.map((item) => (
-          <details key={item.issueSemanticKey} className="rounded-md border border-slate-200 bg-white" aria-label={`Analisi: ${item.issueText}`}>
+          <details key={item.issueSemanticKey} className="rounded-md border border-slate-200 bg-white" aria-label={`Analisi: ${professionalContent(item.issueText) || "questione da verificare"}`}>
             <summary className="cursor-pointer p-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-                <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{item.issueText}</p>
+                <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(item.issueText) || "Questione da verificare"}</p>
                 <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">
-                  {item.conclusionStatus === "GROUNDED_ON_VERIFIED_AUTHORITIES" ? "Con giurisprudenza verificata" : "Preliminare: solo dato normativo"}
+                  {item.conclusionStatus === "GROUNDED_ON_VERIFIED_AUTHORITIES" ? "Con fonti verificate e classificate"
+                    : item.rules.some((rule) => ["APPLICABLE", "APPLICABLE_PREVIOUS_VERSION"].includes(rule.temporalStatus))
+                      ? "Preliminare: solo dato normativo" : "Fonti da verificare"}
                 </span>
               </div>
             </summary>
@@ -303,7 +245,7 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                 <h5 className="font-semibold text-slate-950">Date rilevanti</h5>
                 <ul className="mt-1 space-y-1">
                   {item.relevantDates.map((date) => (
-                    <li key={`${date.label}-${date.date}`}><strong>{date.label}:</strong> {formatDateIT(new Date(`${date.date}T00:00:00Z`))} — {date.basis}</li>
+                    <li key={`${date.label}-${date.date}`}><strong>{professionalContent(date.label)}:</strong> {formatDateIT(new Date(`${date.date}T00:00:00Z`))} — {professionalContent(date.basis)}</li>
                   ))}
                 </ul>
               </section>
@@ -311,9 +253,9 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                 <section>
                   <h5 className="font-semibold text-slate-950">Fatti e prova documentale</h5>
                   <ul className="mt-1 space-y-1">
-                    {item.facts.map((fact) => (
+                    {item.facts.filter((fact) => professionalContent(fact.text)).map((fact) => (
                       <li key={fact.text} className="[overflow-wrap:anywhere]">
-                        {fact.text}
+                        {professionalContent(fact.text)}
                         <span className="text-xs text-slate-500"> ({fact.humanConfirmed ? "confermato" : "da confermare"}{fact.pages.length ? `; pag. ${fact.pages.join(", ")}` : ""})</span>
                       </li>
                     ))}
@@ -327,13 +269,13 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                     {item.rules.map((rule) => (
                       <details key={rule.ruleId} className="rounded-md border border-slate-200 bg-slate-50">
                         <summary className="cursor-pointer px-3 py-2">
-                          <span className="font-medium text-slate-950">{rule.citation}</span>
+                          <span className="font-medium text-slate-950">{professionalContent(rule.citation)}</span>
                           <span className="ml-2 text-xs font-semibold text-slate-600">{TEMPORAL_STATUS_LABELS[rule.temporalStatus]}</span>
                         </summary>
                         <div className="space-y-1 border-t border-slate-200 px-3 py-2">
-                          <p><strong>Oggetto:</strong> {rule.subject}</p>
-                          <p><strong>Vigenza:</strong> {rule.temporalReasoning}</p>
-                          <p><strong>Applicazione ai fatti:</strong> {rule.applicationToFacts}</p>
+                          <p><strong>Oggetto:</strong> {professionalContent(rule.subject)}</p>
+                          <p><strong>Vigenza:</strong> {professionalContent(rule.temporalReasoning)}</p>
+                          <p><strong>Applicazione ai fatti:</strong> {professionalContent(rule.applicationToFacts)}</p>
                           <a href={rule.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
                             Testo ufficiale{rule.referenceDate ? " nella versione alla data rilevante" : ""} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                           </a>
@@ -346,25 +288,25 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
               <div className="grid gap-4 lg:grid-cols-2">
                 <section>
                   <h5 className="font-semibold text-slate-950">Argomenti a sostegno</h5>
-                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.favorableArguments.map((argument) => <li key={argument}>{argument}</li>)}</ul>
+                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.favorableArguments.filter(professionalContent).map((argument) => <li key={argument}>{professionalContent(argument)}</li>)}</ul>
                 </section>
                 <section>
                   <h5 className="font-semibold text-slate-950">Argomenti contrari e rischi</h5>
-                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.contraryArguments.map((argument) => <li key={argument}>{argument}</li>)}</ul>
+                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.contraryArguments.filter(professionalContent).map((argument) => <li key={argument}>{professionalContent(argument)}</li>)}</ul>
                 </section>
               </div>
               {item.elementAnalysis ? (
                 <section aria-label="Analisi degli elementi della fattispecie">
-                  <h5 className="font-semibold text-slate-950">Elementi della fattispecie: {item.elementAnalysis.label}</h5>
+                  <h5 className="font-semibold text-slate-950">Elementi della fattispecie: {professionalContent(item.elementAnalysis.label)}</h5>
                   <ul className="mt-2 space-y-2">
                     {item.elementAnalysis.elements.map((element) => (
                       <li key={element.elementId} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
                         <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-                          <span className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{element.requirement}</span>
+                          <span className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(element.requirement)}</span>
                           <span className="shrink-0 rounded border border-slate-300 bg-white px-2 py-0.5 text-xs font-semibold text-slate-700">{ELEMENT_STATUS_LABELS[element.status]}</span>
                         </div>
-                        <p className="text-xs text-slate-500">{element.legalBasis}</p>
-                        <p className="mt-1">{element.reasoning}</p>
+                        <p className="text-xs text-slate-500">{professionalContent(element.legalBasis)}</p>
+                        <p className="mt-1">{professionalContent(element.reasoning)}</p>
                       </li>
                     ))}
                   </ul>
@@ -372,11 +314,11 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
               ) : null}
               <section>
                 <h5 className="font-semibold text-slate-950">Conclusione motivata</h5>
-                <p className="mt-1">{item.conclusion}</p>
+                <p className="mt-1">{professionalContent(item.conclusion)}</p>
               </section>
               <section>
                 <h5 className="font-semibold text-slate-950">Conseguenze operative e processuali</h5>
-                <ul className="mt-1 list-disc space-y-1 pl-5">{item.consequences.map((consequence) => <li key={consequence}>{consequence}</li>)}</ul>
+                <ul className="mt-1 list-disc space-y-1 pl-5">{item.consequences.filter(professionalContent).map((consequence) => <li key={consequence}>{professionalContent(consequence)}</li>)}</ul>
               </section>
             </div>
           </details>
@@ -401,12 +343,12 @@ function RegulatoryApplicability({
         <div className="space-y-3 border-t border-slate-200 p-4">
           {rows.map((row) => (
             <article key={row.measure} className="rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-700">
-              <h4 className="font-semibold text-slate-950">Misura {row.measure}</h4>
-              <p><strong>Efficacia:</strong> {row.effectiveFrom}</p>
-              <p><strong>Fattispecie:</strong> {row.trigger}</p>
-              <p><strong>Applicabilità:</strong> {row.applicability}</p>
-              <p><strong>Adempimento AdSP:</strong> {row.authorityAction}</p>
-              <p><strong>Scadenza:</strong> {row.deadline}</p>
+              <h4 className="font-semibold text-slate-950">Misura {professionalContent(row.measure)}</h4>
+              <p><strong>Efficacia:</strong> {professionalContent(row.effectiveFrom)}</p>
+              <p><strong>Fattispecie:</strong> {professionalContent(row.trigger)}</p>
+              <p><strong>Applicabilità:</strong> {professionalContent(row.applicability)}</p>
+              <p><strong>Adempimento AdSP:</strong> {professionalContent(row.authorityAction)}</p>
+              <p><strong>Scadenza:</strong> {professionalContent(row.deadline)}</p>
               <a href={row.officialSourceUrl} target="_blank" rel="noreferrer" className="font-medium text-[#075985] underline underline-offset-4">
                 Allegato A ufficiale ART
               </a>
@@ -418,7 +360,13 @@ function RegulatoryApplicability({
   );
 }
 
-function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload }) {
+function ReportContent({
+  payload, procedimentoId, documents,
+}: {
+  payload: StructuredFascicoloReportPayload;
+  procedimentoId: string;
+  documents: ReadonlyArray<{ id: string; nome: string }>;
+}) {
   const framework = payload.documentedFramework;
   const frameworkGroups = [
     { title: "Ruoli e soggetti", items: framework.partyRoles },
@@ -426,13 +374,21 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
     { title: "Misure", items: framework.measures },
   ].filter((group) => group.items.length > 0);
   const questions = allQuestions(payload);
-  const authorities = usableAuthorities(payload);
+  const research = projectProfessionalResearch(payload);
+  const authorities = research.authoritiesAttested ? usableAuthorities(payload) : [];
   const favorable = authorities.filter((authority) => authority.direction === "Favorevole");
   const contrary = authorities.filter((authority) => authority.direction === "Contraria");
   const limitations = uniqueNotes([
+    ...(research.legacyWarning ? [research.legacyWarning] : []),
     ...payload.limitations,
     ...questions.flatMap((question) => [...question.gaps, ...question.limitations]),
   ]);
+  const documentNames = documentNamesByReference([
+    ...payload.gaps,
+    ...payload.deadlineCandidates,
+    ...Object.values(framework).flat(),
+  ], documents);
+  const professionalGaps = professionalGapSummaries(payload.gaps, documentNames);
 
   return (
     <div className="space-y-5">
@@ -456,12 +412,12 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
           <div className="space-y-4">
             {payload.legalIssues.map((issue) => (
               <article key={issue.knowledgeItemId} className="border-l-2 border-[#0b7285] pl-4">
-                <h4 className="font-medium text-slate-950 [overflow-wrap:anywhere]">{issue.text}</h4>
+                <h4 className="font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(issue.text) || "Questione da verificare"}</h4>
                 {issue.questions.length > 0 ? (
                   <ul className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">
                     {issue.questions.map((question) => (
                       <li key={question.knowledgeItemId}>
-                        <p>{question.text}</p>
+                        <p>{professionalContent(question.text)}</p>
                       </li>
                     ))}
                   </ul>
@@ -470,7 +426,7 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
             ))}
             {payload.unassignedQuestions.map((question) => (
               <article key={question.knowledgeItemId} className="border-l-2 border-slate-300 pl-4 text-sm leading-6 text-slate-700">
-                <p>{question.text}</p>
+                <p>{professionalContent(question.text)}</p>
               </article>
             ))}
           </div>
@@ -487,18 +443,25 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
       ) : null}
 
       {payload.portRegime ? <PortRegimeSection regime={payload.portRegime} /> : null}
-      {payload.legalApplication?.length ? <LegalApplicationSection items={payload.legalApplication} /> : null}
+      {research.applications.length ? <LegalApplicationSection items={research.applications} /> : null}
 
       {payload.regulatoryApplicability?.length ? <RegulatoryApplicability rows={payload.regulatoryApplicability} /> : null}
 
-      {payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
+      {payload.operationalPlans?.length ? (
+        <ContentSection title="Seguito operativo">
+          <p className="text-sm text-slate-700">
+            Le attività, i relativi atti e gli esiti sono consultabili nella{" "}
+            <Link href={`/procedimenti/${procedimentoId}?section=proposals`} className="font-medium text-sky-700 underline">sezione Proposte</Link>.
+          </p>
+        </ContentSection>
+      ) : null}
 
       {framework.contradictions.length > 0 ? <ContentSection title="Criticità"><TextList items={framework.contradictions} /></ContentSection> : null}
 
-      {payload.gaps.length > 0 || limitations.length > 0 ? (
+      {professionalGaps.length > 0 || limitations.length > 0 ? (
         <ContentSection title="Limiti e punti da approfondire">
           <ul className="space-y-2 text-sm leading-6 text-slate-700">
-            {payload.gaps.map((gap) => <li key={gap.id}>{gap.normalizedText}</li>)}
+            {professionalGaps.map((gap) => <li key={gap}>{gap}</li>)}
             {limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}
           </ul>
         </ContentSection>
@@ -541,7 +504,7 @@ function ReportDiagnostics({ payload }: { payload: StructuredFascicoloReportPayl
       <div className="mt-3 space-y-4 border-t border-slate-200 pt-3">
         {questions.map((question) => (
           <article key={question.semanticKey}>
-            <p className="text-sm font-medium text-slate-900">{question.text}</p>
+            <p className="text-sm font-medium text-slate-900">{professionalContent(question.text)}</p>
             <UnverifiedCandidateSources question={question} />
           </article>
         ))}
@@ -554,10 +517,12 @@ export function FascicoloReport({
   procedimentoId,
   showDiagnostics = false,
   snapshots,
+  documents = [],
 }: {
   procedimentoId: string;
   showDiagnostics?: boolean;
   snapshots: readonly FascicoloReportSnapshot[];
+  documents?: ReadonlyArray<{ id: string; nome: string }>;
 }) {
   const report = snapshots.find((snapshot) => snapshot.status === "CURRENT")
     ?? snapshots.find((snapshot) => snapshot.status === "STALE")
@@ -604,7 +569,7 @@ export function FascicoloReport({
               </div>
             ) : null}
           </section>
-          <ReportContent payload={report.payload} />
+          <ReportContent payload={report.payload} procedimentoId={procedimentoId} documents={documents} />
           {showDiagnostics ? <ReportDiagnostics payload={report.payload} /> : null}
         </>
       ) : (

@@ -55,11 +55,15 @@ describe("buildLegalApplication", () => {
     ]);
     expect(ruleStatus(result, "COD_NAV_47")).toBe("APPLICABLE");
     expect(ruleStatus(result, "COD_NAV_54")).toBe("APPLICABLE");
-    expect(ruleStatus(result, "L84_ART18")).toBe("APPLICABLE");
-    expect(ruleStatus(result, "ART_242_2025")).toBe("PROSPECTIVE_ONLY");
+    const argumentsOnAbuse = result.contraryArguments.join(" ");
+    expect(argumentsOnAbuse).toContain("assensi pregressi");
+    expect(argumentsOnAbuse).toContain("non prova di per sé un titolo o un assenso valido");
+    expect(argumentsOnAbuse).not.toContain("tolleranza documentata dell'amministrazione o la natura amovibile e assentita del manufatto escludono");
+    expect(ruleStatus(result, "L84_ART18")).toBe("APPLICABILITY_TO_VERIFY");
+    expect(ruleStatus(result, "ART_242_2025")).toBe("APPLICABILITY_TO_VERIFY");
     expect(result.rules.find((rule) => rule.ruleId === "COD_NAV_47")!.officialUrl).toContain("!vig=2024-09-10");
     expect(result.conclusionStatus).toBe("GROUNDED_ON_VERIFIED_AUTHORITIES");
-    expect(result.conclusion).toContain("Non sono applicabili retroattivamente");
+    expect(result.conclusion).toContain("occorre prima verificare i presupposti");
     expect(result.contraryArguments.some((argument) => argument.startsWith("Cons. Stato"))).toBe(true);
     expect(result.consequences.join(" ")).toContain("riesame");
     expect(result.consequences.join(" ")).toContain("art. 29 c.p.a.");
@@ -86,9 +90,13 @@ describe("buildLegalApplication", () => {
     });
 
     expect(ruleStatus(result, "L84_ART18")).toBe("APPLICABLE_PREVIOUS_VERSION");
-    expect(ruleStatus(result, "DM_202_2022")).toBe("NOT_APPLICABLE_RATIONE_TEMPORIS");
-    expect(ruleStatus(result, "DM_110_2023")).toBe("NOT_APPLICABLE_RATIONE_TEMPORIS");
-    expect(ruleStatus(result, "ART_242_2025")).toBe("PROSPECTIVE_ONLY");
+    expect(ruleStatus(result, "DM_202_2022")).toBe("PROSPECTIVE_ONLY");
+    expect(result.rules.find((rule) => rule.ruleId === "DM_202_2022")?.temporalReasoning)
+      .toMatch(/artt\. 6 \(modifica del contenuto\).*7 \(vicende soggettive\).*8 \(avvicendamento\).*9 \(verifiche annuali\)/);
+    expect(ruleStatus(result, "DM_110_2023")).toBe("APPLICABILITY_TO_VERIFY");
+    expect(ruleStatus(result, "ART_242_2025")).toBe("APPLICABILITY_TO_VERIFY");
+    expect(result.rules.find((rule) => rule.ruleId === "ART_242_2025")?.temporalReasoning)
+      .toContain("non dimostra che fosse in essere");
     expect(result.rules.find((rule) => rule.ruleId === "DM_202_2022")!.officialUrl).not.toContain("!vig=");
     expect(result.conclusionStatus).toBe("NORMATIVE_ONLY_PRELIMINARY");
     expect(result.consequences.join(" ")).toContain("contestazione specifica");
@@ -97,7 +105,7 @@ describe("buildLegalApplication", () => {
   it("requires the relevant date before applying conduct rules when documents do not state it", () => {
     const [result] = buildLegalApplication({
       issues: [{
-        semanticKey: "issue-3", text: "Opere abusive sul demanio", originatingItemIds: [],
+        semanticKey: "issue-3", text: "Opere abusive sul demanio marittimo", originatingItemIds: [],
         favorableAuthorities: [], contraryAuthorities: [],
       }],
       knowledgeItems: [],
@@ -105,6 +113,60 @@ describe("buildLegalApplication", () => {
     });
     expect(ruleStatus(result, "COD_NAV_54")).toBe("DATE_TO_VERIFY");
     expect(result.conclusion).toContain("occorre prima accertare la data rilevante");
+  });
+
+  it.each([
+    ["17/04/2001", "APPLICABLE_PREVIOUS_VERSION", "il testo richiedeva casi eccezionali"],
+    ["18/04/2001", "APPLICABLE", "non richiede più, di per sé, casi eccezionali"],
+    ["15/10/2026", "APPLICABLE", "non richiede più, di per sé, casi eccezionali"],
+  ] as const)("applies the correct art. 45-bis version for conduct on %s", (date, status, wording) => {
+    const [result] = buildLegalApplication({
+      issues: [{
+        semanticKey: "third-party", text: "Affidamento a terzi nella concessione portuale",
+        originatingItemIds: ["fact"], favorableAuthorities: [], contraryAuthorities: [],
+      }],
+      knowledgeItems: [item("fact", "FACT", `La gestione è stata affidata a terzi il ${date}.`)],
+      analysisDate: "2026-11-03",
+    });
+    const rule = result.rules.find((entry) => entry.ruleId === "COD_NAV_45BIS");
+    expect(rule?.temporalStatus).toBe(status);
+    expect(rule?.applicationToFacts).toContain(wording);
+    expect(rule?.officialUrl).toContain(";327:1~art45bis!vig=");
+  });
+
+  it("does not choose a version of art. 45-bis when dates are absent or ambiguous", () => {
+    for (const text of [
+      "La gestione è stata affidata a terzi, senza data documentata.",
+      "La gestione è stata affidata a terzi fra il 17/04/2001 e il 18/04/2001.",
+    ]) {
+      const [result] = buildLegalApplication({
+        issues: [{
+          semanticKey: "third-party", text: "Affidamento a terzi nella concessione portuale",
+          originatingItemIds: ["fact"], favorableAuthorities: [], contraryAuthorities: [],
+        }],
+        knowledgeItems: [item("fact", "FACT", text)],
+        analysisDate: "2026-11-03",
+      });
+      const rule = result.rules.find((entry) => entry.ruleId === "COD_NAV_45BIS");
+      expect(rule?.referenceDate).toBeNull();
+      expect(rule?.temporalStatus).toBe("DATE_TO_VERIFY");
+      expect(rule?.applicationToFacts).toContain("individuare prima la versione applicabile");
+    }
+  });
+
+  it("does not import maritime law into a non-port administrative issue", () => {
+    const [result] = buildLegalApplication({
+      issues: [{
+        semanticKey: "municipal", text: "Decadenza dell'autorizzazione commerciale per lavori abusivi al terminal ferroviario",
+        originatingItemIds: [], favorableAuthorities: [], contraryAuthorities: [],
+      }],
+      knowledgeItems: [],
+      analysisDate: "2026-11-03",
+    });
+    expect(result.rules.map((rule) => rule.ruleId)).not.toContain("COD_NAV_47");
+    expect(result.rules.map((rule) => rule.ruleId)).not.toContain("COD_NAV_54");
+    expect(result.elementAnalysis).toBeNull();
+    expect(result.consequences.join(" ")).not.toMatch(/cod\. nav\.|art\. 54|concessionario/i);
   });
 
   it("is deterministic for identical inputs", () => {

@@ -22,7 +22,7 @@ interface AcceptanceCase {
   mustRecommend: string[];
   mustNotRecommend: string[];
   expectedRules: Record<string, LegalRuleTemporalStatus>;
-  expectedConclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES" | "NORMATIVE_ONLY_PRELIMINARY";
+  expectedConclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES" | "NORMATIVE_ONLY_PRELIMINARY" | "SOURCES_TO_VERIFY";
   verifiedAuthority?: boolean;
 }
 
@@ -62,7 +62,7 @@ const CASES: AcceptanceCase[] = [
     expectedReviewPending: true,
     mustRecommend: [],
     mustNotRecommend: ["CATALOG:COMUNICAZIONE_AVVIO", "CATALOG:PROVVEDIMENTO_FINALE"],
-    expectedRules: { COD_NAV_47: "APPLICABLE", L84_ART18: "APPLICABLE", ART_242_2025: "PROSPECTIVE_ONLY" },
+    expectedRules: { COD_NAV_47: "APPLICABLE", L84_ART18: "APPLICABILITY_TO_VERIFY", ART_242_2025: "APPLICABILITY_TO_VERIFY" },
     expectedConclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES",
     verifiedAuthority: true,
   },
@@ -97,8 +97,8 @@ const CASES: AcceptanceCase[] = [
     mustNotRecommend: ["CATALOG:PROVVEDIMENTO_FINALE"],
     expectedRules: {
       L84_ART18: "APPLICABLE_PREVIOUS_VERSION",
-      DM_202_2022: "NOT_APPLICABLE_RATIONE_TEMPORIS",
-      ART_242_2025: "PROSPECTIVE_ONLY",
+      DM_202_2022: "PROSPECTIVE_ONLY",
+      ART_242_2025: "APPLICABILITY_TO_VERIFY",
     },
     expectedConclusionStatus: "NORMATIVE_ONLY_PRELIMINARY",
   },
@@ -136,7 +136,7 @@ const CASES: AcceptanceCase[] = [
     mustRecommend: [],
     mustNotRecommend: ["CATALOG:COMUNICAZIONE_AVVIO"],
     expectedRules: { COD_NAV_47: "DATE_TO_VERIFY" },
-    expectedConclusionStatus: "NORMATIVE_ONLY_PRELIMINARY",
+    expectedConclusionStatus: "SOURCES_TO_VERIFY",
   },
   {
     name: "Synthetic insufficient evidence: no dates, no title",
@@ -145,10 +145,10 @@ const CASES: AcceptanceCase[] = [
     analysisDate: "2026-11-03",
     expectedPhase: "INITIAL",
     expectedReviewPending: false,
-    mustRecommend: ["CATALOG:COMUNICAZIONE_AVVIO"],
-    mustNotRecommend: [],
+    mustRecommend: [],
+    mustNotRecommend: ["CATALOG:COMUNICAZIONE_AVVIO"],
     expectedRules: { COD_NAV_54: "DATE_TO_VERIFY" },
-    expectedConclusionStatus: "NORMATIVE_ONLY_PRELIMINARY",
+    expectedConclusionStatus: "SOURCES_TO_VERIFY",
   },
 ];
 
@@ -164,13 +164,16 @@ describe("cross-case acceptance matrix", () => {
     const recommended = catalog.recommended.map((template) => template.templateKey);
     for (const key of testCase.mustRecommend) expect(recommended).toContain(key);
     for (const key of testCase.mustNotRecommend) expect(recommended).not.toContain(key);
-    expect(catalog.recommended.length + catalog.others.length).toBeGreaterThanOrEqual(8);
+    if (context.concessione && catalog.phase !== "POST_DECISION") {
+      expect(catalog.recommended.length + catalog.others.length).toBeGreaterThan(0);
+    }
     for (const template of [...catalog.recommended, ...catalog.others]) {
       expect(template.body).toContain("nessuna firma, protocollazione, notifica o invio automatici");
     }
     if (context.concessione) {
       const avvio = [...catalog.recommended, ...catalog.others].find((template) => template.templateKey === "CATALOG:COMUNICAZIONE_AVVIO");
-      expect(avvio?.body).toContain(context.concessione.numeroAtto);
+      if (catalog.phase === "INITIAL") expect(avvio?.body).toContain(context.concessione.numeroAtto);
+      else expect(avvio).toBeUndefined();
     }
 
     const [application] = buildLegalApplication({
@@ -185,6 +188,7 @@ describe("cross-case acceptance matrix", () => {
       }],
       knowledgeItems: [],
       analysisDate: testCase.analysisDate,
+      portMatter: true,
       context: {
         stato: context.stato,
         dataAvvio: context.dataAvvio,
@@ -200,6 +204,10 @@ describe("cross-case acceptance matrix", () => {
       expect(application.rules.find((rule) => rule.ruleId === ruleId)?.temporalStatus, ruleId).toBe(status);
     }
     expect(application.conclusionStatus).toBe(testCase.expectedConclusionStatus);
+    if (testCase.expectedConclusionStatus === "SOURCES_TO_VERIFY") {
+      expect(application.rules.every((rule) => !["APPLICABLE", "APPLICABLE_PREVIOUS_VERSION"].includes(rule.temporalStatus))).toBe(true);
+      expect(application.conclusion).not.toContain("fondata sul solo dato normativo");
+    }
     for (const rule of application.rules) {
       expect(rule.officialUrl).toMatch(/^https:\/\//);
       expect(rule.temporalReasoning.length).toBeGreaterThan(0);
@@ -207,6 +215,10 @@ describe("cross-case acceptance matrix", () => {
     expect(application.consequences.length).toBeGreaterThan(0);
 
     const template = catalog.recommended[0] ?? catalog.others[0];
+    if (!template) {
+      expect(catalog.phase === "POST_DECISION" || !context.concessione).toBe(true);
+      return;
+    }
     const content = normalizeActDraftContent({
       templateKey: template.templateKey,
       issueSemanticKey: template.issueSemanticKey,

@@ -1,5 +1,13 @@
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
 
+import {
+  documentNamesByReference,
+  humanizeProfessionalText,
+  isInternalProfessionalDiagnostic,
+  professionalGapSummaries,
+} from "@/lib/professional-text";
+import { projectProfessionalResearch } from "@/lib/professional-research-sources";
+
 import type { StructuredReportSnapshotRecord } from "./repository";
 
 export interface ProfessionalReportSection {
@@ -15,10 +23,9 @@ export interface ProfessionalReportDocument {
 }
 
 function cleanProfessionalText(value: string): string {
-  return value
-    .replace(/\bDOCUMENT_\d+(?:\.PAGE_\d+)?\b/g, "")
+  if (isInternalProfessionalDiagnostic(value)) return "";
+  return humanizeProfessionalText(value)
     .replace(/\bPAGE_\d+\b/g, "")
-    .replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g, "")
     .replace(/\s+([,.;:])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -29,7 +36,8 @@ function unique(values: readonly string[]): string[] {
 }
 
 function professionalNotes(values: readonly string[]): string[] {
-  return unique(values).filter((value) => !/\b[A-Z][A-Z0-9]{4,}\b/.test(value));
+  return unique(values.filter((value) => !isInternalProfessionalDiagnostic(value)))
+    .filter((value) => !/\b[A-Z][A-Z0-9]{4,}\b/.test(value));
 }
 
 const ELEMENT_STATUS_TEXT = {
@@ -41,19 +49,27 @@ const ELEMENT_STATUS_TEXT = {
 
 export function buildProfessionalReportDocument(
   snapshot: StructuredReportSnapshotRecord,
+  documents: ReadonlyArray<{ id: string; nome: string }> = [],
 ): ProfessionalReportDocument {
   const payload = snapshot.payload;
+  const documentNames = documentNamesByReference([
+    ...payload.gaps,
+    ...payload.deadlineCandidates,
+    ...Object.values(payload.documentedFramework).flat(),
+  ], documents);
   const questions = [
     ...payload.legalIssues.flatMap((issue) => issue.questions),
     ...payload.unassignedQuestions,
   ];
-  const authorities = unique(questions.flatMap((question) => [
+  const research = projectProfessionalResearch(payload);
+  const authorities = research.authoritiesAttested ? unique(questions.flatMap((question) => [
     ...question.favorableAuthorities.map((authority) =>
       `${authority.title}${authority.rationale ? ` — ${authority.rationale}` : ""}`),
     ...question.contraryAuthorities.map((authority) =>
       `${authority.title}${authority.rationale ? ` — ${authority.rationale}` : ""}`),
-  ]));
+  ])) : [];
   const limitations = professionalNotes([
+    ...(research.legacyWarning ? [research.legacyWarning] : []),
     ...payload.limitations,
     ...questions.flatMap((question) => [...question.gaps, ...question.limitations]),
   ]);
@@ -107,7 +123,7 @@ export function buildProfessionalReportDocument(
     },
     {
       title: "Analisi giuridica: applicazione delle norme ai fatti",
-      paragraphs: unique((payload.legalApplication ?? []).flatMap((item) => [
+      paragraphs: unique(research.applications.flatMap((item) => [
         `Questione: ${item.issueText}`,
         `Date rilevanti: ${item.relevantDates.map((date) => `${date.label} ${date.date.split("-").reverse().join("/")}`).join("; ")}.`,
         ...item.facts.map((fact) => `Fatto${fact.humanConfirmed ? "" : " (da confermare)"}: ${fact.text}${fact.pages.length ? ` (pag. ${fact.pages.join(", ")})` : ""}`),
@@ -130,18 +146,14 @@ export function buildProfessionalReportDocument(
       title: "Valutazione delle criticità",
       paragraphs: unique([
         ...payload.documentedFramework.contradictions.map((item) => item.normalizedText),
-        ...payload.gaps.map((item) => item.normalizedText),
+        ...professionalGapSummaries(payload.gaps, documentNames),
       ]),
     },
     {
-      title: "Proposte operative",
-      paragraphs: unique((payload.operationalPlans ?? []).flatMap((plan) => [
-        `${plan.issueText}: ${plan.recommendedNextStep}`,
-        ...plan.steps.map((step) =>
-          `${step.title}. ${step.action} Ufficio competente: ${step.office}. Criterio di completamento: ${step.completionGate}`),
-        ...plan.alternatives.map((alternative) =>
-          `${alternative.title}. Quando: ${alternative.whenApplicable}. Percorso: ${alternative.practicalRoute}. Rischio: ${alternative.riskOrLimit}`),
-      ])),
+      title: "Seguito operativo",
+      paragraphs: payload.operationalPlans?.length
+        ? ["Per le attività, gli atti e gli esiti si rinvia alla sezione Proposte del fascicolo."]
+        : [],
     },
     {
       title: "Conclusioni e limiti",

@@ -37,6 +37,7 @@ function snapshot(): StructuredReportSnapshotRecord {
     generatedAt: new Date("2026-11-03T10:00:00.000Z"),
     payload: {
       contractVersion: "STRUCTURED_FASCICOLO_REPORT_V1",
+      sourceReviewPolicy: "PROFESSIONAL_CLASSIFICATION_REQUIRED_V1",
       tenantId: "tenant-1",
       procedimentoId: "procedure-1",
       knowledgeRevisionId: "revision-1",
@@ -75,6 +76,7 @@ function snapshot(): StructuredReportSnapshotRecord {
             assessmentId: "assessment",
             sourceChainFingerprint: "chain",
             citationAnchors: [{ section: "4" }],
+            classificationReviewAuditId: "review-audit",
             rationale: "Principio pertinente ai fatti.",
           }],
           contraryAuthorities: [],
@@ -89,7 +91,17 @@ function snapshot(): StructuredReportSnapshotRecord {
         }],
       }],
       unassignedQuestions: [],
-      gaps: [],
+      gaps: [
+        {
+          ...item("gap-plan", "Manca la planimetria aggiornata"),
+          payload: { impact: "Il confronto del perimetro resta incerto." },
+          evidence: [{ basisRef: "DOCUMENT_1.PAGE_3", documentoId: "doc-1", documentFileVersionId: null, pageNumber: 3, textSha256: "hash" }],
+        },
+        item("gap-page-1", "Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_1.PAGE_3."),
+        item("gap-page-2", "Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_1.PAGE_8."),
+        item("gap-compile", "COMPILATION:REBUILT:DOCUMENT_COVERAGE_GAP_ADDED:documentInventory.0"),
+        item("gap-inventory", "DOCUMENT_INVENTORY:server-inventory-123:UNCERTAIN:DOCUMENT_1.PAGE_8:Classificazione server-side prudenziale."),
+      ],
       deadlineCandidates: [],
       operationalPlans: [],
       regulatoryApplicability: [],
@@ -115,8 +127,51 @@ function snapshot(): StructuredReportSnapshotRecord {
 }
 
 describe("structured fascicolo professional export", () => {
+  it("suspends unattested historical sources and derived conclusions in RTF and PDF without rewriting the snapshot", async () => {
+    const original = snapshot();
+    const legacy: StructuredReportSnapshotRecord = {
+      ...original,
+      payload: {
+        ...original.payload,
+        sourceReviewPolicy: undefined,
+        legalApplication: (original.payload.legalApplication ?? []).map((item) => ({
+          ...item,
+          issueSemanticKey: "issue-key",
+          conclusionStatus: "GROUNDED_ON_VERIFIED_AUTHORITIES",
+          conclusion: "Conclusione fondata sulla fonte storica non attestata.",
+          favorableArguments: ["Argomento derivato dalla fonte storica non attestata."],
+        })),
+      },
+    };
+    const before = JSON.stringify(legacy);
+    const document = buildProfessionalReportDocument(legacy);
+    const text = JSON.stringify(document);
+    expect(text).toContain("non è attestata la valutazione professionale della pertinenza");
+    expect(text).toContain("La conclusione basata sulle fonti di questa versione è sospesa");
+    expect(text).not.toContain("Consiglio di Stato, decisione verificata");
+    expect(text).not.toContain("Argomento derivato dalla fonte storica");
+    expect(text).not.toContain("Conclusione fondata sulla fonte storica");
+    const rtf = renderProfessionalReportRtf(document).toString("utf8");
+    expect(rtf).toContain("valutazione professionale della pertinenza");
+    expect(rtf).not.toContain("Consiglio di Stato, decisione verificata");
+    expect(rtf).not.toMatch(/CLASSIFICATION_|DOCUMENT_INVENTORY|COMPILATION|DOCUMENT_\d+/);
+    const pdf = await renderProfessionalReportPdf(document);
+    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const parsed = await getDocument({ data: new Uint8Array(pdf), useSystemFonts: true }).promise;
+    const pdfText: string[] = [];
+    for (let pageNumber = 1; pageNumber <= parsed.numPages; pageNumber += 1) {
+      const content = await (await parsed.getPage(pageNumber)).getTextContent();
+      pdfText.push(...content.items.flatMap((item) => "str" in item ? [item.str] : []));
+    }
+    await parsed.destroy();
+    expect(pdfText.join(" ")).toContain("valutazione professionale della pertinenza");
+    expect(pdfText.join(" ")).not.toContain("Consiglio di Stato, decisione verificata");
+    expect(pdfText.join(" ")).not.toContain("Conclusione fondata sulla fonte storica");
+    expect(JSON.stringify(legacy)).toBe(before);
+  });
+
   it("projects only professional content from the immutable snapshot", () => {
-    const document = buildProfessionalReportDocument(snapshot());
+    const document = buildProfessionalReportDocument(snapshot(), [{ id: "doc-1", nome: "Titolo.pdf" }]);
     const text = JSON.stringify(document);
     expect(text).toContain("Concessione n. 17/2023");
     expect(text).toContain("Consiglio di Stato, decisione verificata");
@@ -129,6 +184,10 @@ describe("structured fascicolo professional export", () => {
     expect(text).not.toContain("INTERNAL_CODE");
     expect(text).not.toContain("DOCUMENT_1");
     expect(text).not.toContain("COMPILATION");
+    expect(text).not.toContain("DOCUMENT_INVENTORY");
+    expect(text).toContain("non è stato possibile verificare il contenuto interpretativo alle pagine 3, 8");
+    expect(text).toContain("Riferimenti documentali: documento 1 (Titolo.pdf).");
+    expect(text).toContain("Effetto indicato, da verificare: Il confronto del perimetro resta incerto.");
     expect(text).not.toContain("reportFingerprint");
   });
 
@@ -136,12 +195,25 @@ describe("structured fascicolo professional export", () => {
     const rtf = renderProfessionalReportRtf(buildProfessionalReportDocument(snapshot())).toString("utf8");
     expect(rtf).toMatch(/^\{\\rtf1/);
     expect(rtf).toContain("\\{riserva\\}");
+    expect(rtf).toContain("Effetto indicato, da verificare: Il confronto del perimetro resta incerto.");
     expect(rtf).not.toContain("Foreign draft law");
+    expect(rtf).not.toMatch(/DOCUMENT_INVENTORY|COMPILATION|DOCUMENT_\d+|INTERNAL_CODE/);
   });
 
-  it("renders a non-empty PDF", async () => {
+  it("renders a PDF without exposing diagnostic codes in extracted text", async () => {
     const pdf = await renderProfessionalReportPdf(buildProfessionalReportDocument(snapshot()));
     expect(pdf.subarray(0, 4).toString("ascii")).toBe("%PDF");
     expect(pdf.byteLength).toBeGreaterThan(1_000);
+    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await getDocument({ data: new Uint8Array(pdf), useSystemFonts: true }).promise;
+    const text: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const content = await (await document.getPage(pageNumber)).getTextContent();
+      text.push(...content.items.flatMap((item) => "str" in item ? [item.str] : []));
+    }
+    await document.destroy();
+    expect(text.join(" ")).toContain("Consiglio di Stato, decisione verificata");
+    expect(text.join(" ").replace(/\s+/g, " ")).toContain("Il confronto del perimetro resta incerto.");
+    expect(text.join(" ")).not.toMatch(/DOCUMENT_INVENTORY|COMPILATION|DOCUMENT_\d+|INTERNAL_CODE/);
   });
 });

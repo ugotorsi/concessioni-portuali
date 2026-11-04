@@ -11,6 +11,11 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
 import type { AuthorityCandidate, ResearchMission } from "@/server/legal-research/bridge";
 import {
+  CLASSIFICATION_REVIEW_ACTION,
+  CLASSIFICATION_REVIEW_ENTITY,
+  classificationReviewFingerprint,
+} from "@/server/legal-research/question-result-attestation";
+import {
   deriveResearchQuestionCoverage,
   deriveResearchResultSourceState,
   type ResearchCoverageGap,
@@ -147,6 +152,7 @@ export interface FascicoloAutomaticWorkflowReadModel {
       relevantPassage: string | null;
       supportDirection: ResearchResultSupportDirection;
       classificationSource: ResearchResultClassificationSource;
+      classificationReviewAuditId?: string | null;
       classificationConfidence: number | null;
       classificationRationale: string | null;
       classificationReviewStatus: ResearchResultReviewStatus;
@@ -282,7 +288,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     }),
     prisma.structuredFascicoloReportSnapshot.findMany({
       where: { tenantId, procedimentoId },
-      orderBy: [{ generatedAt: "desc" }, { id: "desc" }],
+      orderBy: [{ status: "asc" }, { generatedAt: "desc" }, { id: "desc" }],
       take: 50,
       select: {
         id: true,
@@ -407,6 +413,45 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     getFascicoloDocumentCorpus({ tenantId, procedimentoId }),
   ]);
   if (!documentCorpus) return null;
+
+  const humanResultIds = missions.flatMap((mission) => mission.questionResults
+    .filter((result) => result.classificationSource === "HUMAN_REVIEW")
+    .map((result) => result.id));
+  const reviewEvents = humanResultIds.length ? await prisma.activityLog.findMany({
+    where: {
+      enteId: tenantId,
+      azione: CLASSIFICATION_REVIEW_ACTION,
+      entita: CLASSIFICATION_REVIEW_ENTITY,
+      entitaId: { in: humanResultIds },
+      esito: "SUCCESS",
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { id: true, entitaId: true, userId: true, userRole: true, metadata: true },
+  }) : [];
+  const latestReviewByResult = new Map<string, typeof reviewEvents[number]>();
+  for (const event of reviewEvents) {
+    if (event.entitaId && !latestReviewByResult.has(event.entitaId)) latestReviewByResult.set(event.entitaId, event);
+  }
+  const reviewAuditId = (missionId: string, result: {
+    id: string;
+    supportDirection: string;
+    classificationReviewStatus: string;
+    classificationConfidence: number | null;
+    classificationRationale: string | null;
+  }): string | null => {
+    const event = latestReviewByResult.get(result.id);
+    if (!event?.userId || !["ADMIN", "GIURIDICO"].includes(event.userRole ?? "")) return null;
+    const fingerprint = classificationReviewFingerprint({
+      tenantId,
+      missionId,
+      resultId: result.id,
+      direction: result.supportDirection,
+      reviewStatus: result.classificationReviewStatus,
+      confidence: result.classificationConfidence,
+      rationale: result.classificationRationale,
+    });
+    return record(event.metadata)?.classificationFingerprint === fingerprint ? event.id : null;
+  };
 
   const analysisJobs = candidateJobs.filter((job) => job.operation === FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION);
   const researchJobs = candidateJobs.filter((job) => job.operation === RESEARCH_MISSION_EXECUTION_OPERATION);
@@ -630,6 +675,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           relevantPassage: text(result.candidateSnapshot.relevantPassage),
           supportDirection: result.supportDirection,
           classificationSource: result.classificationSource,
+          classificationReviewAuditId: reviewAuditId(mission.id, result),
           classificationConfidence: result.classificationConfidence,
           classificationRationale: result.classificationRationale,
           classificationReviewStatus: result.classificationReviewStatus,
@@ -720,6 +766,8 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               provider: candidate.providerId ?? candidate.toolId ?? null,
               relevantPassage: text(candidate.relevantPassage),
               supportDirection: result.supportDirection,
+              classificationSource: result.classificationSource,
+              classificationReviewAuditId: reviewAuditId(mission.id, result),
               classificationReviewStatus: result.classificationReviewStatus,
               classificationRationale: result.classificationRationale,
               sourceAssessment: assessment ? {
@@ -746,6 +794,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         ...(snapshot.knowledgeRevisionId === structuredReport.payload.knowledgeRevisionId ? [] : ["KNOWLEDGE_REVISION_CHANGED"]),
         ...(snapshot.researchStateFingerprint === structuredReport.payload.researchStateFingerprint ? [] : ["RESEARCH_STATE_CHANGED"]),
         ...(snapshot.sourceStateFingerprint === structuredReport.payload.sourceStateFingerprint ? [] : ["SOURCE_STATE_CHANGED"]),
+        ...(snapshot.reportFingerprint === structuredReport.reportFingerprint ? [] : ["REPORT_PROJECTION_CHANGED"]),
       ] : snapshot.staleReasons;
       return {
         snapshotId: snapshot.id,

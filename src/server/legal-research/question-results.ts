@@ -1,10 +1,18 @@
 import { createHash } from "node:crypto";
 
 import type { Prisma } from "@/generated/prisma/client";
+import { canValidateReport, type DemoRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
 import type { AuthorityCandidate, AuthoritySupportDirection, ResearchMissionStatus } from "./bridge";
+import {
+  CLASSIFICATION_REVIEW_ACTION,
+  CLASSIFICATION_REVIEW_ENTITY,
+  classificationReviewFingerprint,
+  type ClassificationReviewValues,
+} from "./question-result-attestation";
 import { initializeDiscoveredSourceAssessment } from "./source-chain-persistence";
 
 export type ResearchResultSupportDirection = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESSED";
@@ -16,6 +24,10 @@ export type ResearchQuestionExecutionState = "DEFERRED" | "PENDING" | "IN_PROGRE
 
 export interface ResearchQuestionResultSqlExecutor {
   query<T>(sql: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
+  auditClassificationReview?(input: {
+    values: ClassificationReviewValues;
+    actor: { userId: string; role: DemoRole };
+  }): Promise<void>;
 }
 
 export interface ResearchQuestionResultContext {
@@ -70,7 +82,27 @@ function executor(client: Pick<Prisma.TransactionClient, "$queryRawUnsafe">): Re
 
 const defaultContext: ResearchQuestionResultContext = {
   read: executor(prisma),
-  transaction: (operation) => runSerializableTransactionWithRetry((tx) => operation(executor(tx))),
+  transaction: (operation) => runSerializableTransactionWithRetry((tx) => operation({
+    ...executor(tx),
+    auditClassificationReview: async ({ values, actor }) => {
+      await createAuditLogInTransaction(tx, {
+        azione: CLASSIFICATION_REVIEW_ACTION,
+        entita: CLASSIFICATION_REVIEW_ENTITY,
+        entitaId: values.resultId,
+        enteId: values.tenantId,
+        esito: "SUCCESS",
+        actor: { userId: actor.userId, userRole: actor.role },
+        metadata: {
+          missionId: values.missionId,
+          direction: values.direction,
+          reviewStatus: values.reviewStatus,
+          confidence: values.confidence,
+          rationale: values.rationale,
+          classificationFingerprint: classificationReviewFingerprint(values),
+        },
+      });
+    },
+  })),
   initializeSourceAssessment: initializeDiscoveredSourceAssessment,
 };
 
@@ -148,7 +180,9 @@ export async function reviewResearchQuestionResult(input: {
   reviewStatus: "HUMAN_CONFIRMED" | "REJECTED";
   confidence: number | null;
   rationale: string;
+  actor: { userId: string; role: DemoRole };
 }, overrides: Partial<ResearchQuestionResultContext> = {}): Promise<ResearchQuestionResultSnapshot> {
+  if (!input.actor.userId.trim() || !canValidateReport(input.actor.role)) throw new Error("RESEARCH_REVIEW_FORBIDDEN");
   if (input.confidence !== null && (input.confidence < 0 || input.confidence > 1)) throw new Error("INVALID_CLASSIFICATION_CONFIDENCE");
   const rationale = input.rationale.trim();
   if (rationale.length < 20) throw new Error("INVALID_CLASSIFICATION_RATIONALE");
@@ -172,6 +206,19 @@ export async function reviewResearchQuestionResult(input: {
       RETURNING result.*
     `, [input.resultId, input.tenantId, input.direction, input.confidence, rationale.slice(0, 2000), input.reviewStatus, input.missionId]);
     if (!updated.rows[0]) throw new Error("RESEARCH_QUESTION_RESULT_NOT_FOUND");
+    if (!tx.auditClassificationReview) throw new Error("RESEARCH_REVIEW_AUDIT_UNAVAILABLE");
+    await tx.auditClassificationReview({
+      actor: input.actor,
+      values: {
+        tenantId: input.tenantId,
+        missionId: input.missionId,
+        resultId: input.resultId,
+        direction: input.direction,
+        reviewStatus: input.reviewStatus,
+        confidence: input.confidence,
+        rationale: rationale.slice(0, 2000),
+      },
+    });
     return updated.rows[0];
   });
 }
