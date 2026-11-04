@@ -1,40 +1,23 @@
+import Link from "next/link";
 import { FilePenLine, FileText, History, Link2, Paperclip } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { formatDateIT } from "@/lib/utils";
 import {
-  createActDraftAction,
   restoreActDraftVersionAction,
   saveActDraftVersionAction,
 } from "@/server/actions/fascicolo-acts";
 import {
+  actDraftMatchesTemplate,
   ACT_DRAFT_STATUSES,
   ACT_DRAFT_STATUS_LABELS,
   changedActDraftFields,
   type ActDraft,
 } from "@/server/fascicolo-acts/model";
-import { ACT_PHASE_LABELS, type ActTemplate, type ActTemplateCatalog } from "@/server/fascicolo-acts/templates";
+import { ACT_PHASE_LABELS, type ActTemplateCatalog } from "@/server/fascicolo-acts/templates";
+import type { ActivityRecord, ActivitySpec } from "@/server/fascicolo-operational-activities/model";
 
 const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-600 focus:outline-none";
-
-function TemplateCard({ template, procedimentoId, canManage }: { template: ActTemplate; procedimentoId: string; canManage: boolean }) {
-  return (
-    <details className="rounded-md border border-slate-200 bg-white px-4 py-3">
-      <summary className="cursor-pointer text-sm font-medium text-slate-900">
-        {template.title}
-        <span className="ml-2 text-xs font-normal text-slate-500">{template.legalBasis}</span>
-      </summary>
-      <pre className="mt-3 whitespace-pre-wrap font-sans text-sm text-slate-700">{template.body}</pre>
-      {canManage ? (
-        <form action={createActDraftAction} className="mt-3">
-          <input type="hidden" name="procedimentoId" value={procedimentoId} />
-          <input type="hidden" name="templateKey" value={template.templateKey} />
-          <Button type="submit" size="sm">Crea bozza da questo modello</Button>
-        </form>
-      ) : null}
-    </details>
-  );
-}
 
 function DraftEditor({
   draft, drafts, procedimentoId, attachmentOptions,
@@ -69,7 +52,7 @@ function DraftEditor({
         <label className="block text-sm font-medium text-slate-700">Scadenza interna
           <input type="date" name="dueDate" defaultValue={current.dueDate ?? ""} className={inputClass} />
         </label>
-        <label className="block text-sm font-medium text-slate-700">Avanzamento (%)
+        <label className="block text-sm font-medium text-slate-700">Avanzamento della bozza (%)
           <input type="number" name="progress" min={0} max={100} step={5} defaultValue={current.progress} className={inputClass} />
         </label>
       </div>
@@ -106,20 +89,23 @@ function DraftEditor({
 }
 
 function DraftCard({
-  draft, drafts, procedimentoId, canManage, attachmentOptions,
+  draft, drafts, procedimentoId, canManage, attachmentOptions, issueLabel, activityLabel, activityKey,
 }: {
   draft: ActDraft;
   drafts: readonly ActDraft[];
   procedimentoId: string;
   canManage: boolean;
   attachmentOptions: ReadonlyArray<{ id: string; nome: string }>;
+  issueLabel: string | null;
+  activityLabel: string | null;
+  activityKey: string | null;
 }) {
   const current = draft.current;
   const titleByKey = new Map(drafts.map((candidate) => [candidate.draftKey, candidate.current.title]));
   const nameById = new Map(attachmentOptions.map((option) => [option.id, option.nome]));
   const exportBase = `/procedimenti/${procedimentoId}/atti/${draft.draftKey}/export`;
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-4" aria-label={current.title}>
+    <article id={`draft-${draft.draftKey}`} className="rounded-lg border border-slate-200 bg-white p-4" aria-label={current.title}>
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold text-slate-900">{current.title}</h3>
@@ -128,6 +114,16 @@ function DraftCard({
             {current.assignee ? `assegnata a ${current.assignee}` : "assegnatario da individuare"}
             {current.dueDate ? ` · scadenza ${formatDateIT(new Date(`${current.dueDate}T00:00:00.000Z`))}` : ""}
           </p>
+          <p className="mt-1 text-xs text-slate-600">
+            Problematica: {issueLabel ?? "collegamento da verificare"}
+            {activityLabel ? ` · Attività: ${activityLabel}` : ""}
+          </p>
+          {activityKey ? (
+            <Link className="mt-1 inline-block text-xs text-sky-700 underline"
+              href={`/procedimenti/${procedimentoId}?section=proposals&activity=${activityKey}#activity-${activityKey}`}>
+              Torna all&apos;attività
+            </Link>
+          ) : null}
         </div>
         <div className="flex gap-2 text-sm">
           <a className="text-sky-700 underline" href={`${exportBase}?format=pdf`}>PDF</a>
@@ -198,14 +194,17 @@ function DraftCard({
 }
 
 export function FascicoloActsWorkspace({
-  procedimentoId, catalog, drafts, canManage, attachmentOptions,
+  procedimentoId, catalog, drafts, canManage, attachmentOptions, activitySpecs, activities,
 }: {
   procedimentoId: string;
   catalog: ActTemplateCatalog;
   drafts: readonly ActDraft[];
   canManage: boolean;
   attachmentOptions: ReadonlyArray<{ id: string; nome: string }>;
+  activitySpecs: readonly ActivitySpec[];
+  activities: readonly ActivityRecord[];
 }) {
+  const templates = [...catalog.recommended, ...catalog.others];
   return (
     <section className="space-y-6" aria-label="Atti del procedimento">
       <div>
@@ -216,6 +215,10 @@ export function FascicoloActsWorkspace({
           Fase rilevata: <strong>{ACT_PHASE_LABELS[catalog.phase]}</strong>
           {catalog.reviewPending ? " – risulta un'istanza di riesame o autotutela da istruire separatamente" : ""}.
           Ogni salvataggio crea una nuova versione immutabile registrata nel registro di audit. Le bozze non vengono firmate, protocollate né inviate automaticamente.
+        </p>
+        <p className="mt-2 text-sm text-slate-600">
+          L&apos;avanzamento della bozza non coincide con il completamento dell&apos;attività. Per predisporre un atto,
+          {" "}<Link className="text-sky-700 underline" href={`/procedimenti/${procedimentoId}?section=proposals`}>aprire la relativa attività nelle Proposte</Link>.
         </p>
         {catalog.documentaryAhead ? (
           <div role="note" className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -236,36 +239,38 @@ export function FascicoloActsWorkspace({
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-slate-900">Bozze in lavorazione ({drafts.length})</h3>
         {drafts.length === 0 ? (
-          <p className="text-sm text-slate-600">Nessuna bozza ancora creata. Scegli un modello tra quelli suggeriti per la fase corrente.</p>
-        ) : drafts.map((draft) => (
-          <DraftCard
-            key={draft.draftKey}
-            draft={draft}
-            drafts={drafts}
-            procedimentoId={procedimentoId}
-            canManage={canManage}
-            attachmentOptions={attachmentOptions}
-          />
-        ))}
+          <p className="text-sm text-slate-600">Nessuna bozza ancora creata.</p>
+        ) : drafts.map((draft) => {
+          const matches = templates.filter((candidate) => actDraftMatchesTemplate(draft, {
+            templateKey: candidate.templateKey,
+            issueSemanticKey: candidate.issueSemanticKey,
+            legacyTemplateKeys: candidate.legacyTemplateKeys,
+          }));
+          const template = matches.length === 1 ? matches[0] : undefined;
+          const issueTemplate = template ?? templates.find((candidate) =>
+            candidate.issueSemanticKey !== null && candidate.issueSemanticKey === draft.current.issueSemanticKey);
+          const linkedActivities = activities.filter((activity) =>
+            activity.current.drafts.some((link) => link.draftKey === draft.draftKey));
+          const exactSpecs = activitySpecs.filter((spec) => spec.issueSemanticKey === draft.current.issueSemanticKey
+            && spec.documents.some((document) => document.templateKey === draft.current.templateKey));
+          const linkedKey = linkedActivities.length === 1 ? linkedActivities[0].activityKey
+            : linkedActivities.length === 0 && exactSpecs.length === 1 ? exactSpecs[0].activityKey : null;
+          const activityKey = activitySpecs.some((spec) => spec.activityKey === linkedKey) ? linkedKey : null;
+          return (
+            <DraftCard
+              key={draft.draftKey}
+              draft={draft}
+              drafts={drafts}
+              procedimentoId={procedimentoId}
+              canManage={canManage}
+              attachmentOptions={attachmentOptions}
+              issueLabel={issueTemplate?.issueText ?? null}
+              activityLabel={template?.activityTitle ?? null}
+              activityKey={activityKey}
+            />
+          );
+        })}
       </div>
-
-      <div className="space-y-2">
-        <h3 className="text-base font-semibold text-slate-900">Modelli suggeriti per la fase</h3>
-        {catalog.recommended.map((template) => (
-          <TemplateCard key={template.templateKey} template={template} procedimentoId={procedimentoId} canManage={canManage} />
-        ))}
-      </div>
-
-      {catalog.others.length ? (
-        <details className="space-y-2">
-          <summary className="cursor-pointer text-base font-semibold text-slate-900">Altri modelli disponibili ({catalog.others.length})</summary>
-          <div className="mt-2 space-y-2">
-            {catalog.others.map((template) => (
-              <TemplateCard key={template.templateKey} template={template} procedimentoId={procedimentoId} canManage={canManage} />
-            ))}
-          </div>
-        </details>
-      ) : null}
     </section>
   );
 }

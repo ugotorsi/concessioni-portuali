@@ -1,20 +1,29 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure } from "@/server/audit/auditLog";
-import { ACT_DRAFT_ENTITY, ACT_DRAFT_STATUSES, actDraftEntityId } from "@/server/fascicolo-acts/model";
-import { listActAttachmentOptions, listActDraftVersions, saveActDraftVersion, type ActDraftActor, type ActDraftScope } from "@/server/fascicolo-acts/repository";
-import { buildActTemplateCatalog, findActTemplate } from "@/server/fascicolo-acts/templates";
+import { ACT_DRAFT_ENTITY, ACT_DRAFT_STATUSES, actDraftEntityId, stableActDraftKey } from "@/server/fascicolo-acts/model";
+import { associateLegacyActDraft, listActAttachmentOptions, listActDraftVersions, saveActDraftVersion, type ActDraftActor, type ActDraftScope } from "@/server/fascicolo-acts/repository";
+import { buildActTemplateCatalog, findActTemplate, reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
+import { ActivityWorkflowError, buildActivitySpecs } from "@/server/fascicolo-operational-activities/model";
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
 
 const scopeSchema = z.object({ procedimentoId: z.string().trim().min(1).max(256) });
 
-const createSchema = scopeSchema.extend({ templateKey: z.string().trim().min(1).max(160) }).strict();
+const createSchema = scopeSchema.extend({
+  activityKey: z.string().regex(/^activity_[a-f0-9]{32}$/),
+  expectedActivityVersion: z.coerce.number().int().positive(),
+  expectedSpecFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  expectedReportFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  expectedCorpusFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  templateKey: z.string().trim().min(1).max(160),
+}).strict();
 
 const saveSchema = scopeSchema.extend({
   draftKey: z.string().trim().min(1).max(64),
@@ -34,6 +43,19 @@ const restoreSchema = scopeSchema.extend({
   draftKey: z.string().trim().min(1).max(64),
   expectedVersion: z.coerce.number().int().positive(),
   restoreVersion: z.coerce.number().int().positive(),
+}).strict();
+
+const associateSchema = scopeSchema.extend({
+  activityKey: z.string().regex(/^activity_[a-f0-9]{32}$/),
+  expectedActivityVersion: z.coerce.number().int().positive(),
+  expectedSpecFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  expectedReportFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  expectedCorpusFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  templateKey: z.string().trim().min(1).max(160),
+  draftKey: z.string().trim().min(1).max(64),
+  expectedDraftVersion: z.coerce.number().int().positive(),
+  note: z.string().trim().min(3).max(1_900),
+  confirmed: z.literal("true"),
 }).strict();
 
 async function authorizedScope(procedimentoId: string): Promise<{ scope: ActDraftScope; actor: ActDraftActor; label: string; responsabile: string | null; unita: string | null }> {
@@ -101,21 +123,63 @@ function actsPath(procedimentoId: string): string {
 export async function createActDraftAction(formData: FormData): Promise<void> {
   const input = createSchema.parse({
     procedimentoId: formData.get("procedimentoId"),
+    activityKey: formData.get("activityKey"),
+    expectedActivityVersion: formData.get("expectedActivityVersion"),
+    expectedSpecFingerprint: formData.get("expectedSpecFingerprint"),
+    expectedReportFingerprint: formData.get("expectedReportFingerprint"),
+    expectedCorpusFingerprint: formData.get("expectedCorpusFingerprint"),
     templateKey: formData.get("templateKey"),
   });
   const authorized = await authorizedScope(input.procedimentoId);
+  let savedDraft: Awaited<ReturnType<typeof saveActDraftVersion>> | null = null;
+  let errorCode: string | null = null;
   try {
     const workflow = await getFascicoloAutomaticWorkflowReadModel(input.procedimentoId);
+    const report = workflow?.structuredReport;
+    if (!report || report.payload.tenantId !== authorized.scope.tenantId
+      || report.reportFingerprint !== input.expectedReportFingerprint || workflow.analysisUpdate.status !== "CURRENT"
+      || workflow.analysisUpdate.corpusFingerprint !== input.expectedCorpusFingerprint) {
+      throw new ActivityWorkflowError("STALE_SPEC", "Il quadro documentale o il rapporto non sono più attuali.");
+    }
+    const specs = buildActivitySpecs(report.payload);
+    const spec = specs.find((item) => item.activityKey === input.activityKey);
+    if (!spec || spec.fingerprint !== input.expectedSpecFingerprint || spec.necessity === "NOT_JUSTIFIED"
+      || !spec.documents.some((item) => item.templateKey === input.templateKey)) {
+      throw new ActivityWorkflowError("INVALID_DRAFT", "L'attività o il documento non sono disponibili nel percorso corrente.");
+    }
     const catalog = buildActTemplateCatalog({
-      payload: workflow?.structuredReport?.payload ?? null,
+      payload: report.payload,
       context: { procedimentoLabel: authorized.label, responsabile: authorized.responsabile, unitaOrganizzativa: authorized.unita },
     });
     const template = findActTemplate(catalog, input.templateKey);
-    if (!template) throw new Error("Modello di atto non disponibile per il procedimento corrente.");
-    await saveActDraftVersion({
+    if (!template || template.source !== "REPORT_PLAN" || template.issueSemanticKey !== spec.issueSemanticKey) {
+      throw new ActivityWorkflowError("INVALID_DRAFT", "Modello di atto non disponibile per l'attività corrente.");
+    }
+    const possibleLegacyKeys = template.issueSemanticKey && template.activityTitle
+      ? [
+          `PLAN:${template.title}`,
+          reportPlanTemplateKey(template.issueSemanticKey, template.activityTitle, template.title),
+        ]
+      : [];
+    savedDraft = await saveActDraftVersion({
       scope: authorized.scope,
-      draftKey: null,
+      draftKey: stableActDraftKey(template.templateKey, template.issueSemanticKey),
       expectedVersion: 0,
+      idempotentCreate: true,
+      creationIdentity: {
+        legacyTemplateKeys: template.legacyTemplateKeys ?? [],
+        ambiguousLegacyKeys: possibleLegacyKeys.filter((key) =>
+          key !== template.templateKey && !template.legacyTemplateKeys?.includes(key)),
+      },
+      guidedContext: {
+        knowledgeRevisionId: report.payload.knowledgeRevisionId,
+        reportFingerprint: input.expectedReportFingerprint,
+        expectedCorpusFingerprint: input.expectedCorpusFingerprint,
+        specs,
+        spec,
+        expectedActivityVersion: input.expectedActivityVersion,
+        templateKey: input.templateKey,
+      },
       actor: authorized.actor,
       content: {
         templateKey: template.templateKey,
@@ -132,10 +196,80 @@ export async function createActDraftAction(formData: FormData): Promise<void> {
       },
     });
   } catch (error) {
+    errorCode = error instanceof ActivityWorkflowError ? error.code : "UNEXPECTED_ERROR";
+    if (errorCode === "UNEXPECTED_ERROR") {
+      console.error("guided_act_creation_failed", { procedimentoId: input.procedimentoId, error });
+    }
     await auditBlocked(authorized.scope, authorized.actor, null, error);
-    throw error;
   }
   revalidatePath(actsPath(input.procedimentoId));
+  if (errorCode) {
+    redirect(`${actsPath(input.procedimentoId)}?section=proposals&activity=${input.activityKey}&activityError=${encodeURIComponent(errorCode)}#activity-${input.activityKey}`);
+  }
+  const draftKey = savedDraft?.draftKey;
+  if (!draftKey) throw new Error("La bozza non è stata individuata né creata.");
+  redirect(`${actsPath(input.procedimentoId)}?section=acts#draft-${draftKey}`);
+}
+
+export async function associateLegacyActDraftAction(formData: FormData): Promise<void> {
+  const input = associateSchema.parse({
+    procedimentoId: formData.get("procedimentoId"),
+    activityKey: formData.get("activityKey"),
+    expectedActivityVersion: formData.get("expectedActivityVersion"),
+    expectedSpecFingerprint: formData.get("expectedSpecFingerprint"),
+    expectedReportFingerprint: formData.get("expectedReportFingerprint"),
+    expectedCorpusFingerprint: formData.get("expectedCorpusFingerprint"),
+    templateKey: formData.get("templateKey"),
+    draftKey: formData.get("draftKey"),
+    expectedDraftVersion: formData.get("expectedDraftVersion"),
+    note: formData.get("note"),
+    confirmed: formData.get("confirmed"),
+  });
+  const authorized = await authorizedScope(input.procedimentoId);
+  let errorCode: string | null = null;
+  try {
+    const workflow = await getFascicoloAutomaticWorkflowReadModel(input.procedimentoId);
+    const report = workflow?.structuredReport;
+    if (!report || report.payload.tenantId !== authorized.scope.tenantId
+      || report.reportFingerprint !== input.expectedReportFingerprint || workflow.analysisUpdate.status !== "CURRENT"
+      || workflow.analysisUpdate.corpusFingerprint !== input.expectedCorpusFingerprint) {
+      throw new ActivityWorkflowError("STALE_SPEC", "Il quadro documentale o il rapporto non sono più attuali.");
+    }
+    const specs = buildActivitySpecs(report.payload);
+    const spec = specs.find((item) => item.activityKey === input.activityKey);
+    const document = spec?.documents.find((item) => item.templateKey === input.templateKey);
+    if (!spec || !document || spec.fingerprint !== input.expectedSpecFingerprint || spec.necessity === "NOT_JUSTIFIED") {
+      throw new ActivityWorkflowError("STALE_SPEC", "L'attività o il documento non sono disponibili nel percorso corrente.");
+    }
+    const legacyKeys = [
+      `PLAN:${document.title}`,
+      reportPlanTemplateKey(spec.issueSemanticKey, spec.title, document.title),
+    ].filter((key) => key !== document.templateKey && !document.legacyTemplateKeys.includes(key));
+    await associateLegacyActDraft({
+      scope: authorized.scope,
+      actor: authorized.actor,
+      knowledgeRevisionId: report.payload.knowledgeRevisionId,
+      reportFingerprint: input.expectedReportFingerprint,
+      expectedCorpusFingerprint: input.expectedCorpusFingerprint,
+      specs,
+      spec,
+      expectedActivityVersion: input.expectedActivityVersion,
+      draftKey: input.draftKey,
+      expectedDraftVersion: input.expectedDraftVersion,
+      templateKey: input.templateKey,
+      legacyKeys,
+      note: input.note,
+    });
+  } catch (error) {
+    errorCode = error instanceof ActivityWorkflowError ? error.code : "UNEXPECTED_ERROR";
+    if (errorCode === "UNEXPECTED_ERROR") {
+      console.error("legacy_act_association_failed", { procedimentoId: input.procedimentoId, error });
+    }
+    await auditBlocked(authorized.scope, authorized.actor, input.draftKey, error);
+  }
+  revalidatePath(actsPath(input.procedimentoId));
+  const errorQuery = errorCode ? `&activityError=${encodeURIComponent(errorCode)}` : "";
+  redirect(`${actsPath(input.procedimentoId)}?section=proposals&activity=${input.activityKey}${errorQuery}#activity-${input.activityKey}`);
 }
 
 export async function saveActDraftVersionAction(formData: FormData): Promise<void> {
@@ -199,18 +333,21 @@ export async function restoreActDraftVersionAction(formData: FormData): Promise<
   try {
     const versions = await listActDraftVersions(authorized.scope);
     const source = versions.find((version) => version.draftKey === input.draftKey && version.version === input.restoreVersion);
-    if (!source) throw new Error("Versione da ripristinare non disponibile.");
+    const current = versions.filter((version) => version.draftKey === input.draftKey)
+      .sort((left, right) => right.version - left.version)[0];
+    if (!source || !current) throw new Error("Versione da ripristinare non disponibile.");
     await saveActDraftVersion({
       scope: authorized.scope,
       draftKey: input.draftKey,
       expectedVersion: input.expectedVersion,
       actor: authorized.actor,
       content: {
-        templateKey: source.templateKey,
-        issueSemanticKey: source.issueSemanticKey,
+        templateKey: current.templateKey,
+        issueSemanticKey: current.issueSemanticKey,
         title: source.title,
         body: source.body,
-        status: source.status === "ARCHIVIATA" ? "BOZZA" : source.status,
+        status: source.status === "ARCHIVIATA" ? "BOZZA"
+          : source.status === "APPROVATA_INTERNAMENTE" ? "IN_REVISIONE" : source.status,
         assignee: source.assignee,
         dueDate: source.dueDate,
         progress: source.progress,

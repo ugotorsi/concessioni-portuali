@@ -448,6 +448,7 @@ describe("B2C9C1A3B1 authorized verified byte reader", () => {
         fileName: "originale.pdf",
         sizeBytes: VERIFIED_BODY.length,
         sha256: VERIFIED_SHA,
+        fileVersionId: FILE_VERSION_ID,
       });
       expect(result.status === "AVAILABLE_VERIFIED" && result.body).toBe(VERIFIED_BODY);
       expect(readDocumentFileFromProviderMock).toHaveBeenCalledTimes(1);

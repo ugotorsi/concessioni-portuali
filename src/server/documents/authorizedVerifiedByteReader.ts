@@ -22,6 +22,7 @@ export type AuthorizedDocumentByteReadResult =
       fileName: string;
       sizeBytes: number;
       sha256: string;
+      fileVersionId: string;
     };
 
 export type DocumentReadAuthorizationErrorCode =
@@ -378,5 +379,6 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
     fileName: hasNonBlank(documento.originalName) ? documento.originalName!.trim() : documento.nome,
     sizeBytes: manifest.sizeBytes,
     sha256: manifest.sha256,
+    fileVersionId: manifest.id,
   };
 }

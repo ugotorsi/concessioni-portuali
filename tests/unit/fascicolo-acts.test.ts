@@ -2,14 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildActExportDocument,
+  actDraftMatchesTemplate,
   bodySha256,
   changedActDraftFields,
   normalizeActDraftContent,
   projectActDrafts,
+  stableActDraftKey,
   type ActDraftContent,
   type ActDraftVersion,
 } from "@/server/fascicolo-acts/model";
-import { buildActTemplateCatalog, detectActPhase, findActTemplate } from "@/server/fascicolo-acts/templates";
+import { buildActTemplateCatalog, detectActPhase, findActTemplate, reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
 import type { StructuredReportProceduralContext } from "@/server/fascicolo-report/structured-report";
 
 function context(overrides: Partial<StructuredReportProceduralContext> = {}): StructuredReportProceduralContext {
@@ -67,6 +69,66 @@ function version(draftKey: string, versionNumber: number, overrides: Partial<Act
 }
 
 describe("fascicolo act templates", () => {
+  it("leaves unverified deadlines, consequences and assumptions for professional assessment", () => {
+    const catalog = buildActTemplateCatalog({ payload: { proceduralContext: context() }, context: templateContext });
+    const start = findActTemplate(catalog, "CATALOG:COMUNICAZIONE_AVVIO")!.body;
+    const integration = findActTemplate(catalog, "CATALOG:RICHIESTA_INTEGRAZIONE")!.body;
+    const objection = findActTemplate(catalog, "CATALOG:PREAVVISO_RIGETTO")!.body;
+    const decision = findActTemplate(catalog, "CATALOG:PROVVEDIMENTO_FINALE")!.body;
+    expect(start).toContain("[TERMINE E DECORRENZA VERIFICATI PER IL PROCEDIMENTO]");
+    expect(start).not.toContain("decorrente dalla ricezione");
+    expect(integration).toContain("[DISCIPLINA E PRESUPPOSTI VERIFICATI PER IL PROCEDIMENTO]");
+    expect(objection).toContain("[TERMINE, DECORRENZA E MODALITÀ VERIFICATI");
+    expect(objection).not.toContain("Entro dieci giorni");
+    expect(decision).toContain("[INDICARE SOLO DOPO VERIFICA DELLA GIURISDIZIONE");
+    expect(decision).not.toMatch(/entro (60|120) giorni|sono stati contestati gli addebiti/i);
+  });
+
+  it("uses stable draft identities scoped to both the activity template and legal issue", () => {
+    const first = reportPlanTemplateKey("issue-m4", "Contestare uso M4", "Contestazione degli addebiti");
+    const second = reportPlanTemplateKey("issue-investments", "Contestare uso M4", "Contestazione degli addebiti");
+    const third = reportPlanTemplateKey("issue-m4", "Contestare condotta diversa", "Contestazione degli addebiti");
+    expect(first).toBe(reportPlanTemplateKey("issue-m4", "Contestare uso M4", "Contestazione degli addebiti"));
+    expect(first).not.toBe(second);
+    expect(stableActDraftKey(first, "issue-m4")).toBe(stableActDraftKey(first, "issue-m4"));
+    expect(stableActDraftKey(first, "issue-m4")).not.toBe(stableActDraftKey(first, "issue-investments"));
+    expect(first).not.toBe(third);
+    expect(stableActDraftKey(first, "issue-m4")).not.toBe(stableActDraftKey(third, "issue-m4"));
+  });
+
+  it("recognizes legacy report-plan drafts only for their matching issue and preserves their history", () => {
+    const legacyTitle = "Contestazione degli addebiti";
+    const drafts = projectActDrafts([
+      version("legacy-1", 1, {
+        templateKey: `PLAN:${legacyTitle}`,
+        issueSemanticKey: "issue-m4",
+        title: legacyTitle,
+      }),
+      version("legacy-1", 2, {
+        templateKey: "REPORT_PLAN:v2:issue-m4",
+        issueSemanticKey: "issue-m4",
+        title: legacyTitle,
+      }),
+      version("legacy-2", 1, {
+        templateKey: `PLAN:${legacyTitle}`,
+        issueSemanticKey: "issue-investments",
+        title: legacyTitle,
+      }),
+    ]);
+
+    expect(drafts).toHaveLength(2);
+    expect(actDraftMatchesTemplate(drafts.find((draft) => draft.draftKey === "legacy-1")!, {
+      templateKey: "REPORT_PLAN:v2:issue-m4",
+      issueSemanticKey: "issue-m4",
+      legacyTemplateKey: `PLAN:${legacyTitle}`,
+    })).toBe(true);
+    expect(actDraftMatchesTemplate(drafts.find((draft) => draft.draftKey === "legacy-2")!, {
+      templateKey: "REPORT_PLAN:v2:issue-m4",
+      issueSemanticKey: "issue-m4",
+      legacyTemplateKey: `PLAN:${legacyTitle}`,
+    })).toBe(false);
+  });
+
   it("detects the administrative phase from the procedural context", () => {
     expect(detectActPhase({ proceduralContext: context() }).phase).toBe("INITIAL");
     expect(detectActPhase({ proceduralContext: context({ contestazioneFormaleInviata: true }) }).phase).toBe("INSTRUCTION");
@@ -103,6 +165,14 @@ describe("fascicolo act templates", () => {
     expect(detectActPhase({
       proceduralContext: context(),
       documentedFramework: framework([knowledge("Proposta di provvedimento di decadenza da sottoporre al dirigente")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Non risulta inviata la contestazione degli addebiti.")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Bozza di comunicazione di avvio da valutare.")]),
     })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
     expect(detectActPhase({
       proceduralContext: context(),
@@ -224,16 +294,31 @@ describe("fascicolo act templates", () => {
     expect(undocumentedKeys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
   });
 
-  it("does not recommend acts already performed according to the procedural metadata", () => {
+  it("does not offer or create acts already performed according to the procedural metadata", () => {
     const catalog = buildActTemplateCatalog({
       payload: { proceduralContext: context({ comunicazioneAvvioInviata: true, contestazioneFormaleInviata: true }) },
       context: templateContext,
     });
     expect(catalog.phase).toBe("INSTRUCTION");
-    const keys = catalog.recommended.map((template) => template.templateKey);
+    const keys = [...catalog.recommended, ...catalog.others].map((template) => template.templateKey);
     expect(keys).not.toContain("CATALOG:COMUNICAZIONE_AVVIO");
     expect(keys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
     expect(keys).toContain("CATALOG:VALUTAZIONE_CONTRODEDUZIONI");
+    expect(findActTemplate(catalog, "CATALOG:CONTESTAZIONE_DECADENZA")).toBeNull();
+  });
+
+  it("excludes completed phases and port-specific templates from unrelated proceedings", () => {
+    const concluded = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ stato: "CONCLUSO" }) },
+      context: templateContext,
+    });
+    expect(findActTemplate(concluded, "CATALOG:COMUNICAZIONE_AVVIO")).toBeNull();
+    expect(findActTemplate(concluded, "CATALOG:CONTESTAZIONE_DECADENZA")).toBeNull();
+    const generic = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ concessione: null }) },
+      context: templateContext,
+    });
+    expect([...generic.recommended, ...generic.others]).toEqual([]);
   });
 });
 
@@ -256,7 +341,6 @@ describe("fascicolo act versioning", () => {
       version("a", 1),
       version("a", 2, { body: "Testo rivisto", status: "IN_REVISIONE", progress: 50 }),
       version("b", 1, { title: "Provvedimento", dependencies: ["a"], dueDate: "2026-12-01" }),
-      version("a", 2, { body: "duplicate replay" }),
     ]);
     expect(drafts.map((draft) => draft.draftKey)).toEqual(["b", "a"]);
     const draftA = drafts.find((draft) => draft.draftKey === "a");
@@ -265,6 +349,11 @@ describe("fascicolo act versioning", () => {
     expect(drafts.find((draft) => draft.draftKey === "b")?.openDependencies).toEqual(["a"]);
     expect(changedActDraftFields(draftA!.history[1], draftA!.history[0])).toEqual(["testo", "stato", "avanzamento"]);
     expect(changedActDraftFields(null, draftA!.history[1])).toEqual(["prima versione"]);
+    expect(() => projectActDrafts([
+      version("a", 1),
+      version("a", 2, { body: "Testo rivisto" }),
+      version("a", 2, { body: "Versione concorrente" }),
+    ])).toThrow("versioni duplicate");
 
     const resolved = projectActDrafts([
       version("a", 1, { status: "APPROVATA_INTERNAMENTE" }),

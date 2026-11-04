@@ -1,5 +1,8 @@
+import { createHash } from "node:crypto";
+
 import type {
   StructuredFascicoloReportPayload,
+  StructuredReportOperationalStep,
   StructuredReportProceduralContext,
 } from "@/server/fascicolo-report/structured-report";
 
@@ -20,6 +23,11 @@ export interface ActTemplate {
   body: string;
   source: "CATALOG" | "REPORT_PLAN";
   issueSemanticKey: string | null;
+  issueText?: string;
+  activityTitle?: string;
+  activityCode?: string;
+  documentCode?: string;
+  legacyTemplateKeys?: readonly string[];
   /**
    * Issue profile and fact elements that make the template pertinent: it is recommended only when the
    * report assesses that profile with every listed element documented (proven or indicated).
@@ -65,8 +73,8 @@ const CATALOG: readonly ActTemplate[] = [
       "Ai sensi degli artt. 7 e 8 della L. 7 agosto 1990, n. 241, si comunica l'avvio del procedimento indicato in oggetto.",
       "Amministrazione competente: [ENTE]. Ufficio competente: [UNITÀ ORGANIZZATIVA]. Responsabile del procedimento: [RESPONSABILE].",
       "Oggetto e presupposti: [SINTESI DEI FATTI ACCERTATI CON RIFERIMENTO AI DOCUMENTI].",
-      "Termine di conclusione: [TERMINE] decorrente dalla ricezione della presente; in caso di inerzia sono esperibili i rimedi di legge, compreso il potere sostitutivo di cui all'art. 2, comma 9-bis, L. 241/1990.",
-      "Gli atti possono essere consultati presso [UFFICIO E MODALITÀ DI ACCESSO]. Entro [TERMINE PER MEMORIE] giorni è possibile presentare memorie scritte e documenti, che l'Amministrazione ha l'obbligo di valutare ove pertinenti (art. 10 L. 241/1990).",
+      "Termine di conclusione e relativa decorrenza: [TERMINE E DECORRENZA VERIFICATI PER IL PROCEDIMENTO]. Rimedi applicabili in caso di inerzia: [RIMEDI E PRESUPPOSTI VERIFICATI].",
+      "Gli atti possono essere consultati presso [UFFICIO E MODALITÀ DI ACCESSO]. Partecipazione, memorie e documenti: [GARANZIE, EVENTUALI TERMINI E MODALITÀ VERIFICATI PER IL CASO].",
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
   },
@@ -81,7 +89,7 @@ const CATALOG: readonly ActTemplate[] = [
       "Oggetto: richiesta di integrazione documentale – procedimento [PROCEDIMENTO].",
       "Nell'ambito dell'istruttoria, ai sensi dell'art. 6, comma 1, lett. b), L. 241/1990, si chiede di trasmettere entro [TERMINE] giorni:",
       "1. [DOCUMENTO MANCANTE E RAGIONE DELLA RICHIESTA];\n2. [DOCUMENTO MANCANTE E RAGIONE DELLA RICHIESTA];\n3. [DOCUMENTO MANCANTE E RAGIONE DELLA RICHIESTA].",
-      "La richiesta è limitata agli atti non già in possesso dell'Amministrazione (art. 18 L. 241/1990). In mancanza, l'istruttoria proseguirà sulla base degli atti disponibili.",
+      "Verificare previamente la disponibilità e l'acquisibilità d'ufficio dei documenti richiesti. Conseguenze dell'eventuale mancata integrazione: [DISCIPLINA E PRESUPPOSTI VERIFICATI PER IL PROCEDIMENTO].",
       "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
@@ -130,9 +138,9 @@ const CATALOG: readonly ActTemplate[] = [
     issueSemanticKey: null,
     body: [
       "Oggetto: opere e innovazioni non autorizzate su area demaniale – concessione n. [CONCESSIONE].",
-      "Accertato con verbale n. [NUMERO] del [DATA] che sono state eseguite le seguenti opere non autorizzate: [DESCRIZIONE OPERE, DIMENSIONI, UBICAZIONE].",
-      "Verificata la competenza dell'autorità che adotta l'atto ai sensi dell'art. 54 cod. nav. e valutate le deduzioni presentate in data [DATA],",
-      "si ingiunge di rimettere le cose in pristino entro [TERMINE] giorni, con l'avvertenza che in mancanza si provvederà d'ufficio a spese dell'interessato.",
+      "Accertamenti e loro riferimenti: [VERBALE, DATA, OPERE, DIMENSIONI, UBICAZIONE E ASSENZA DI AUTORIZZAZIONE, SE DOCUMENTATA].",
+      "Competenza, presupposti dell'art. 54 cod. nav. e valutazione delle eventuali deduzioni: [VERIFICHE E MOTIVAZIONE DOCUMENTATE].",
+      "Eventuale ingiunzione e conseguenze dell'inottemperanza: [MISURA, TERMINE E FONDAMENTO DOPO VERIFICA].",
       "Restano impregiudicate le valutazioni sulla decadenza ai sensi dell'art. 47 cod. nav., oggetto di procedimento distinto.",
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
@@ -147,8 +155,8 @@ const CATALOG: readonly ActTemplate[] = [
     body: [
       "Oggetto: comunicazione dei motivi ostativi all'accoglimento dell'istanza prot. [PROTOCOLLO] del [DATA].",
       "Ai sensi dell'art. 10-bis L. 241/1990 si comunicano i motivi che ostano all'accoglimento:\n1. [MOTIVO, CON RIFERIMENTO NORMATIVO E DOCUMENTALE];\n2. [MOTIVO, CON RIFERIMENTO NORMATIVO E DOCUMENTALE].",
-      "Entro dieci giorni dal ricevimento è possibile presentare osservazioni scritte, eventualmente corredate da documenti. La comunicazione sospende i termini di conclusione del procedimento, che ricominciano a decorrere dieci giorni dopo la presentazione delle osservazioni o, in mancanza, dalla scadenza del termine.",
-      "Nel provvedimento finale l'Amministrazione darà conto delle ragioni dell'eventuale mancato accoglimento delle osservazioni.",
+      "Osservazioni e documenti: [TERMINE, DECORRENZA E MODALITÀ VERIFICATI NELLA DISCIPLINA APPLICABILE]. Effetti sui termini del procedimento: [EFFETTI E DECORRENZE VERIFICATI].",
+      "Nel provvedimento finale valutare e motivare l'eventuale mancato accoglimento delle osservazioni secondo la disciplina applicabile.",
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
   },
@@ -178,9 +186,9 @@ const CATALOG: readonly ActTemplate[] = [
       "IL [ORGANO COMPETENTE]",
       "Visti: il codice della navigazione, in particolare l'art. 47; la L. 28 gennaio 1994, n. 84; la L. 7 agosto 1990, n. 241; la concessione n. [CONCESSIONE]; [ALTRI ATTI].",
       "Premesso che: [RICOSTRUZIONE CRONOLOGICA DEI FATTI CON RIFERIMENTI DOCUMENTALI].",
-      "Considerato che: con nota [PROTOCOLLO] del [DATA] sono stati contestati gli addebiti; il concessionario ha presentato deduzioni in data [DATA], valutate come segue: [VALUTAZIONE]; la disciplina applicabile ratione temporis è [DISCIPLINA]; la misura è proporzionata perché [MOTIVAZIONE].",
+      "Considerato che: [CONTESTAZIONI E DEDUZIONI EFFETTIVAMENTE DOCUMENTATE E LORO VALUTAZIONE]; la disciplina applicabile ratione temporis è [DISCIPLINA VERIFICATA]; la misura è proporzionata perché [MOTIVAZIONE].",
       "DETERMINA\n1. [DISPOSITIVO];\n2. [ADEMPIMENTI CONSEGUENTI E TERMINI];\n3. [COMUNICAZIONI].",
-      "Avverso il presente provvedimento è ammesso ricorso al TAR competente entro 60 giorni dalla comunicazione (art. 29 c.p.a.) o ricorso straordinario al Presidente della Repubblica entro 120 giorni (art. 9 d.P.R. 1199/1971). L'atto diviene efficace con la comunicazione al destinatario (art. 21-bis L. 241/1990).",
+      "Rimedi, autorità e termini di impugnazione: [INDICARE SOLO DOPO VERIFICA DELLA GIURISDIZIONE, DEL RITO, DELLA DECORRENZA E DEL CASO]. Efficacia e comunicazione: [DISCIPLINA E PRESUPPOSTI VERIFICATI].",
       HUMAN_APPROVAL_NOTICE,
     ].join("\n\n"),
   },
@@ -195,9 +203,9 @@ const CATALOG: readonly ActTemplate[] = [
     body: [
       "Oggetto: canone demaniale – concessione n. [CONCESSIONE] – messa in mora.",
       "Destinatario: [CONCESSIONARIO], [DOMICILIO DIGITALE].",
-      "Dalla documentazione contabile risulta quanto segue:\n- rata: [RATA E SCADENZA DA TITOLO]; importo dovuto: [IMPORTO DOVUTO];\n- versamenti ricevuti: [DATA, IMPORTO E CAUSALE DI CIASCUN VERSAMENTO];\n- residuo: [IMPORTO RESIDUO], oltre interessi nella misura di legge.",
+      "Dalla documentazione contabile verificata risulta quanto segue:\n- rata: [RATA E SCADENZA DA TITOLO]; importo dovuto: [IMPORTO DOVUTO];\n- versamenti ricevuti: [DATA, IMPORTO E CAUSALE DI CIASCUN VERSAMENTO];\n- residuo e interessi eventualmente dovuti: [IMPORTI E FONDAMENTO VERIFICATI].",
       "Imputazione dei versamenti: [IMPUTAZIONE AI SENSI DELL'ART. 1193 C.C. O DICHIARATA DAL DEBITORE].",
-      "Si invita al versamento del residuo entro [TERMINE] giorni dal ricevimento, con l'avvertenza che in mancanza si procederà al recupero coattivo [ED ESCUSSIONE DELLA GARANZIA, SE PREVISTA DAL TITOLO].",
+      "Si invita al versamento del residuo entro [TERMINE], con [DECORRENZA VERIFICATA]. Conseguenze del mancato versamento: [RIMEDI E PRESUPPOSTI VERIFICATI, COMPRESA L'EVENTUALE GARANZIA].",
       "[SOLO SE VERIFICATO NEL TITOLO: si rappresenta che l'omesso pagamento di [NUMERO] rate costituisce causa di decadenza ai sensi dell'art. 47, lett. d), cod. nav. e della clausola [CLAUSOLA] del titolo.]",
       "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
       HUMAN_APPROVAL_NOTICE,
@@ -232,7 +240,7 @@ const CATALOG: readonly ActTemplate[] = [
     body: [
       "Oggetto: concessione n. [CONCESSIONE] – utilizzo di [AREA O MANUFATTO] da parte di [SOGGETTO TERZO].",
       "Dai documenti acquisiti risulta che [SOGGETTO TERZO] utilizza [AREA O MANUFATTO] in forza di [CONTRATTO O TITOLO DICHIARATO] ([DOCUMENTO E PAGINA]).",
-      "Non risulta agli atti un'autorizzazione dell'autorità concedente all'affidamento ad altri delle attività oggetto della concessione (art. 45-bis cod. nav.; art. 18, comma 9, ultimo periodo, L. 84/1994) né al subingresso (art. 46 cod. nav.).",
+      "Autorizzazioni e qualificazione dell'affidamento o del subingresso: [ESITO DELLA RICERCA DOCUMENTALE E DISCIPLINA APPLICABILE, DA VERIFICARE]. L'assenza di un documento nel fascicolo non prova da sola la mancata autorizzazione.",
       "Si chiede di trasmettere entro [TERMINE] giorni: il contratto con il terzo, la descrizione delle attività svolte, la loro durata e il rapporto con l'oggetto del titolo, nonché ogni assenso eventualmente ottenuto.",
       "Si avverte che, all'esito, l'Amministrazione valuterà l'eventuale regolarizzazione o, in mancanza dei presupposti, la contestazione degli addebiti ai sensi dell'art. 47 cod. nav. e dell'art. 18, comma 11, L. 84/1994.",
       "Responsabile del procedimento: [RESPONSABILE] – [UNITÀ ORGANIZZATIVA].",
@@ -266,6 +274,16 @@ const DOCUMENTARY_PHASE_SIGNALS: ReadonlyArray<[ActPhase, RegExp]> = [
 
 const REVIEW_SIGNAL = /riesame|autotutela/i;
 const TENTATIVE_SIGNAL = /\b(?:propost\w*|schema|bozza|ipotes\w*|eventual\w*|possibil\w*|preannunci\w*|intendimento|ai fini (?:della|di una)|potrebbe|potrà)\b/i;
+const NEGATED_BEFORE = /\b(?:non|nessun[ao]|mancat[ao]|assenza\s+di)\s+(?:[^\s.;:]+\s+){0,5}$/i;
+const NEGATED_AFTER = /^\s+(?:non|mai)\s+(?:[^\s.;:]+\s+){0,4}(?:inviat\w*|adottat\w*|effettuat\w*|ricevut\w*|svolta|risulta)/i;
+
+function isDocumentedPhaseSignal(text: string, pattern: RegExp): boolean {
+  const match = pattern.exec(text);
+  if (!match || TENTATIVE_SIGNAL.test(text)) return false;
+  const before = text.slice(Math.max(0, match.index - 100), match.index);
+  const after = text.slice(match.index + match[0].length, match.index + match[0].length + 100);
+  return !NEGATED_BEFORE.test(before) && !NEGATED_AFTER.test(after);
+}
 
 type PhasePayload = Pick<StructuredFascicoloReportPayload, "proceduralContext" | "operationalPlans">
   & Partial<Pick<StructuredFascicoloReportPayload, "documentedFramework" | "legalApplication" | "portRegime">>;
@@ -281,14 +299,11 @@ function documentaryEvidence(payload: PhasePayload | null): readonly string[] {
 export function detectActPhase(payload: PhasePayload | null): ActPhaseDetection {
   const context = payload?.proceduralContext;
   const evidenceTexts = documentaryEvidence(payload);
-  const reviewSignals = evidenceTexts.filter((text) => REVIEW_SIGNAL.test(text));
-  const reviewPending = (context?.documentTitles.some((title) => REVIEW_SIGNAL.test(title)) ?? false)
+  const reviewSignals = evidenceTexts.filter((text) => isDocumentedPhaseSignal(text, REVIEW_SIGNAL));
+  const reviewPending = (context?.documentTitles.some((title) => isDocumentedPhaseSignal(title, REVIEW_SIGNAL)) ?? false)
     || reviewSignals.length > 0;
-  const postDecisionPlan = (payload?.operationalPlans ?? []).some((plan) =>
-    plan.steps.some((step) => /tenuta del provvedimento finale/i.test(step.title)));
-
   let authoritativePhase: ActPhase = "INITIAL";
-  if (concludedFromContext(context) || postDecisionPlan) authoritativePhase = "POST_DECISION";
+  if (concludedFromContext(context)) authoritativePhase = "POST_DECISION";
   else if (context && (context.controdeduzioniValutate || context.checklistContraddittorioCompleta)) authoritativePhase = "DECISION";
   else if (context && (context.comunicazioneAvvioInviata || context.contestazioneFormaleInviata
     || context.memorieRicevute || context.audizioneSvolta)) authoritativePhase = "INSTRUCTION";
@@ -296,8 +311,7 @@ export function detectActPhase(payload: PhasePayload | null): ActPhaseDetection 
   let documentaryPhase: ActPhase = "INITIAL";
   const phaseSignals: string[] = [];
   for (const [phase, pattern] of DOCUMENTARY_PHASE_SIGNALS) {
-    const matches = evidenceTexts.filter((text) =>
-      pattern.test(text) && (phase !== "POST_DECISION" || !TENTATIVE_SIGNAL.test(text)));
+    const matches = evidenceTexts.filter((text) => isDocumentedPhaseSignal(text, pattern));
     if (matches.length > 0) {
       documentaryPhase = phase;
       phaseSignals.push(...matches);
@@ -331,26 +345,90 @@ export function fillTemplatePlaceholders(
   );
 }
 
+export function reportStepDocuments(step: StructuredReportOperationalStep): ReadonlyArray<{
+  title: string;
+  body: string;
+  documentCode?: string;
+}> {
+  const documents = [
+    ...(step.draftTemplate ? [{
+      title: step.draftTitle ?? step.title,
+      body: step.draftTemplate,
+      documentCode: step.documentCode,
+    }] : []),
+    ...(step.additionalDrafts ?? []).map((document) => ({
+      title: document.title,
+      body: document.template,
+      documentCode: document.documentCode,
+    })),
+  ];
+  const identities = documents.map((document) => document.documentCode ?? document.title);
+  if (new Set(identities).size !== identities.length) throw new Error("Tipologie di documento duplicate nella stessa attività.");
+  return documents;
+}
+
+export function reportStepDocumentIdentity(
+  plan: Pick<NonNullable<StructuredFascicoloReportPayload["operationalPlans"]>[number], "issueSemanticKey" | "steps">,
+  step: StructuredReportOperationalStep,
+  document: { title: string; documentCode?: string },
+): { templateKey: string; legacyTemplateKeys: readonly string[] } {
+  const templateKey = reportPlanTemplateKey(
+    plan.issueSemanticKey, step.title, document.title, step.activityCode, document.documentCode,
+  );
+  const titleBasedKey = reportPlanTemplateKey(plan.issueSemanticKey, step.title, document.title);
+  const sameTitleCount = plan.steps.flatMap(reportStepDocuments)
+    .filter((candidate) => candidate.title === document.title).length;
+  const sameStepAndTitleCount = plan.steps
+    .filter((candidate) => candidate.title === step.title)
+    .flatMap(reportStepDocuments)
+    .filter((candidate) => candidate.title === document.title).length;
+  return {
+    templateKey,
+    legacyTemplateKeys: [
+      ...(titleBasedKey === templateKey || sameStepAndTitleCount !== 1 ? [] : [titleBasedKey]),
+      ...(sameTitleCount === 1 ? [`PLAN:${document.title}`] : []),
+    ],
+  };
+}
+
 function planTemplates(payload: Pick<StructuredFascicoloReportPayload, "operationalPlans"> | null, phase: ActPhase): ActTemplate[] {
   const templates = new Map<string, ActTemplate>();
   for (const plan of payload?.operationalPlans ?? []) {
     for (const step of plan.steps) {
-      if (!step.draftTemplate) continue;
-      const title = step.draftTitle ?? step.title;
-      const templateKey = `PLAN:${title}`;
-      if (templates.has(templateKey)) continue;
-      templates.set(templateKey, {
-        templateKey,
-        title,
-        legalBasis: `Percorso operativo del rapporto professionale – ${plan.issueText}`,
-        phases: [phase],
-        body: step.draftTemplate,
-        source: "REPORT_PLAN",
-        issueSemanticKey: plan.issueSemanticKey,
-      });
+      for (const document of reportStepDocuments(step)) {
+        const { templateKey, legacyTemplateKeys } = reportStepDocumentIdentity(plan, step, document);
+        if (templates.has(templateKey)) throw new Error("Identità del modello di atto duplicata nel rapporto.");
+        templates.set(templateKey, {
+          templateKey,
+          title: document.title,
+          legalBasis: `Percorso operativo del rapporto professionale – ${plan.issueText}`,
+          phases: [phase],
+          body: document.body,
+          source: "REPORT_PLAN",
+          issueSemanticKey: plan.issueSemanticKey,
+          issueText: plan.issueText,
+          activityTitle: step.title,
+          activityCode: step.activityCode,
+          documentCode: document.documentCode,
+          legacyTemplateKeys,
+        });
+      }
     }
   }
   return [...templates.values()];
+}
+
+export function reportPlanTemplateKey(
+  issueSemanticKey: string,
+  activityTitle: string,
+  documentTitle: string,
+  activityCode?: string,
+  documentCode?: string,
+): string {
+  const issueKey = createHash("sha256").update(issueSemanticKey, "utf8").digest("hex").slice(0, 12);
+  const activityKey = createHash("sha256").update(activityCode ?? activityTitle, "utf8").digest("hex").slice(0, 12);
+  const documentKey = createHash("sha256").update(documentCode ?? documentTitle, "utf8").digest("hex").slice(0, 12);
+  return `PLAN:${issueKey}:${activityKey}:${documentKey}`;
 }
 
 export function buildActTemplateCatalog(input: {
@@ -377,10 +455,9 @@ export function buildActTemplateCatalog(input: {
     if (!analysis) return /decadenz|inadempi|violazion|abusiv|omess|mancat\w* (?:pagament|esecuzion)/i.test(entry.issueText);
     return (analysis.elements ?? []).filter((element) => element.core).every((element) => documented(element.status));
   });
-  const concessionMatter = applications.length === 0
-    || Boolean(input.payload?.proceduralContext?.concessione)
+  const concessionMatter = Boolean(input.payload?.proceduralContext?.concessione)
     || Boolean(input.payload?.portRegime)
-    || applications.some((entry) => /concession|demani|banchin|portual|canone/i.test(entry.issueText))
+    || applications.some((entry) => /demani\w* marittim|concession\w*[^.]{0,40}(?:marittim|portual|porto)|area portual|banchin\w* portual|cod(?:ice)?\.?\s+(?:della\s+)?nav/i.test(entry.issueText))
     || documentaryEvidence(input.payload).some((text) => /concession\w* demanial|demanio marittim|area demanial/i.test(text));
   const pertinent = (template: ActTemplate) =>
     template.phases.includes(phase)
@@ -389,7 +466,10 @@ export function buildActTemplateCatalog(input: {
     && (template.templateKey !== "CATALOG:CONTESTAZIONE_DECADENZA" || decadenceContestable)
     && (!template.requires || requirementMet(template.requires));
   const fromPlans = planTemplates(input.payload, phase).map(fill);
-  const catalog = CATALOG.map(fill);
+  const catalog = concessionMatter ? CATALOG
+    .filter((template) => !alreadyPerformed(template, input.payload?.proceduralContext)
+      && template.phases.some((candidate) => PHASE_ORDER.indexOf(candidate) >= PHASE_ORDER.indexOf(phase)))
+    .map(fill) : [];
   return {
     ...detection,
     recommended: [...fromPlans, ...catalog.filter(pertinent)],

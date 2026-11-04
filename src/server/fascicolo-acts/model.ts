@@ -7,6 +7,7 @@ import type { ProfessionalReportDocument } from "@/server/fascicolo-report/profe
 export const ACT_DRAFT_SCHEMA_VERSION = "FASCICOLO_ACT_DRAFT_V1" as const;
 export const ACT_DRAFT_ENTITY = "FascicoloActDraft" as const;
 export const ACT_DRAFT_AUDIT_ACTION = "FASCICOLO_ACT_DRAFT_VERSION_SAVED" as const;
+export const ACT_DRAFT_LOCK_NAMESPACE = "fascicolo-act-draft:v1" as const;
 
 export const ACT_DRAFT_STATUSES = ["BOZZA", "IN_REVISIONE", "APPROVATA_INTERNAMENTE", "ARCHIVIATA"] as const;
 export type ActDraftStatus = (typeof ACT_DRAFT_STATUSES)[number];
@@ -62,8 +63,25 @@ export interface ActDraft {
   openDependencies: readonly string[];
 }
 
+export function actDraftMatchesTemplate(
+  draft: ActDraft,
+  input: { templateKey: string; issueSemanticKey: string | null; legacyTemplateKey?: string; legacyTemplateKeys?: readonly string[] },
+): boolean {
+  const keys = new Set([input.templateKey, ...(input.legacyTemplateKeys ?? []), ...(input.legacyTemplateKey ? [input.legacyTemplateKey] : [])]);
+  return draft.current.issueSemanticKey === input.issueSemanticKey
+    && keys.has(draft.current.templateKey);
+}
+
 export function actDraftEntityId(procedimentoId: string, draftKey: string): string {
   return `${procedimentoId}::${draftKey}`;
+}
+
+export function stableActDraftKey(
+  templateKey: string,
+  issueSemanticKey: string | null,
+): string {
+  const identity = `${issueSemanticKey ?? "unassigned"}\u0000${templateKey}\u0000default`;
+  return `act_${createHash("sha256").update(identity, "utf8").digest("hex").slice(0, 24)}`;
 }
 
 export function bodySha256(body: string): string {
@@ -86,11 +104,17 @@ export function projectActDrafts(versions: readonly ActDraftVersion[]): ActDraft
   const byDraft = new Map<string, ActDraftVersion[]>();
   for (const version of versions) {
     const list = byDraft.get(version.draftKey) ?? [];
-    if (!list.some((existing) => existing.version === version.version)) list.push(version);
+    if (list.some((existing) => existing.version === version.version)) {
+      throw new Error("La cronologia della bozza contiene versioni duplicate.");
+    }
+    list.push(version);
     byDraft.set(version.draftKey, list);
   }
   const drafts = [...byDraft.entries()].map(([draftKey, list]) => {
     const history = [...list].sort((left, right) => right.version - left.version);
+    if (history.some((version, index) => version.version !== history.length - index)) {
+      throw new Error("La cronologia della bozza non è continua.");
+    }
     return { draftKey, current: history[0], history };
   });
   const statusByKey = new Map(drafts.map((draft) => [draft.draftKey, draft.current.status]));
