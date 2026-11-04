@@ -6,9 +6,14 @@ import { signIn } from "next-auth/react";
 interface LoginCredentialsFormProps {
   initialErrorMessage: string | null;
   callbackUrl?: string;
+  passwordRecoveryEnabled?: boolean;
 }
 
-export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: LoginCredentialsFormProps) {
+export function LoginCredentialsForm({
+  initialErrorMessage,
+  callbackUrl,
+  passwordRecoveryEnabled = false,
+}: LoginCredentialsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialErrorMessage);
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -29,61 +34,63 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
       return;
     }
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      mfaCode: mfaRequired ? mfaCode : undefined,
-      callbackUrl: callbackUrl ?? "/dashboard",
-      redirect: false,
-    });
-
-    if (result?.error === "MFA_REQUIRED") {
-      setMfaRequired(true);
-      setErrorMessage("Inserisci il codice generato dalla tua app Authenticator.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (result?.error === "MFA_INVALID") {
-      setMfaRequired(true);
-      setErrorMessage(
-        "Codice Authenticator non valido o scaduto. Inserisci il codice corrente e riprova.",
-      );
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (result?.error === "MFA_RATE_LIMITED") {
-      setErrorMessage("Troppi tentativi MFA. Attendi prima di riprovare.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!result || result.error) {
-      setErrorMessage("Credenziali non valide o account temporaneamente bloccato.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (callbackUrl) {
-      window.location.assign(callbackUrl);
-      return;
-    }
-
-    const sessionResponse = await fetch("/api/auth/session", { cache: "no-store" });
-    let redirectPath = "/dashboard";
-
-    if (sessionResponse.ok) {
-      const session = (await sessionResponse.json()) as {
-        user?: { role?: string };
-      };
-
-      if (session.user?.role === "VIEWER_ADSP") {
-        redirectPath = "/adsp";
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        mfaCode: mfaRequired ? mfaCode : undefined,
+        callbackUrl: callbackUrl ?? "/dashboard",
+        redirect: false,
+      });
+  
+      if (result?.error === "MFA_REQUIRED") {
+        setMfaRequired(true);
+        setErrorMessage("Inserisci il codice generato dalla tua app Authenticator.");
+        return;
       }
+  
+      if (result?.error === "MFA_INVALID") {
+        setMfaRequired(true);
+        setErrorMessage(
+          "Codice Authenticator non valido o scaduto. Inserisci il codice corrente e riprova.",
+        );
+        return;
+      }
+  
+      if (result?.error === "MFA_RATE_LIMITED") {
+        setErrorMessage("Troppi tentativi MFA. Attendi prima di riprovare.");
+        return;
+      }
+  
+      if (!result || result.error) {
+        setErrorMessage("Credenziali non valide o account temporaneamente bloccato.");
+        return;
+      }
+  
+      if (callbackUrl) {
+        window.location.assign(callbackUrl);
+        return;
+      }
+  
+      const sessionResponse = await fetch("/api/auth/session", { cache: "no-store" });
+      let redirectPath = "/dashboard";
+  
+      if (sessionResponse.ok) {
+        const session = (await sessionResponse.json()) as {
+          user?: { role?: string };
+        };
+  
+        if (session.user?.role === "VIEWER_ADSP") {
+          redirectPath = "/adsp";
+        }
+      }
+  
+      window.location.assign(redirectPath);
+    } catch {
+      setErrorMessage("Impossibile completare l’accesso. Verifica la connessione e riprova.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    window.location.assign(redirectPath);
   }
 
   return (
@@ -141,6 +148,14 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
       >
         {isSubmitting ? "Accesso in corso..." : "Accedi"}
       </button>
+      {passwordRecoveryEnabled ? (
+        <a
+          href="/password-recovery"
+          className="text-sm font-medium text-slate-700 underline underline-offset-4"
+        >
+          Password dimenticata?
+        </a>
+      ) : null}
     </form>
   );
 }

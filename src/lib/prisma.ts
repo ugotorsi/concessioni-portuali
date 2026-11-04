@@ -7,6 +7,25 @@ const globalForPrisma = globalThis as unknown as {
 };
 let prismaClient: PrismaClient | undefined;
 
+/**
+ * Opt-in environment guard: when EXPECTED_DATABASE_HOST_PREFIX is set, refuse to
+ * connect to any database whose host does not start with that prefix. This
+ * prevents isolated environments from inheriting a foreign DATABASE_URL.
+ */
+export function assertExpectedDatabaseHost(databaseUrl: string, expectedHostPrefix: string | undefined) {
+  const expected = expectedHostPrefix?.trim();
+  if (!expected) return;
+  let host: string;
+  try {
+    host = new URL(databaseUrl).hostname;
+  } catch {
+    throw new Error("DATABASE_HOST_GUARD_REJECTED: DATABASE_URL is not a valid connection URL.");
+  }
+  if (!host.startsWith(expected)) {
+    throw new Error("DATABASE_HOST_GUARD_REJECTED: DATABASE_URL host does not match EXPECTED_DATABASE_HOST_PREFIX.");
+  }
+}
+
 function getPrismaClient(): PrismaClient {
   const existingClient = prismaClient ?? globalForPrisma.prisma;
   if (existingClient) return existingClient;
@@ -15,6 +34,8 @@ function getPrismaClient(): PrismaClient {
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set. Configure a PostgreSQL connection string before using the database.");
   }
+
+  assertExpectedDatabaseHost(databaseUrl, process.env.EXPECTED_DATABASE_HOST_PREFIX);
 
   const client = new PrismaClient({
     adapter: new PrismaPg(

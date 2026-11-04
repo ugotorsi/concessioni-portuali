@@ -26,6 +26,16 @@ export class RuntimeBudgetPolicyMissingError extends Error {
   }
 }
 
+export class RuntimeCostSettlementRequiredError extends Error {
+  constructor(
+    readonly actualAmount: number,
+    readonly originalError: unknown,
+  ) {
+    super("RUNTIME_COST_SETTLEMENT_REQUIRED");
+    this.name = "RuntimeCostSettlementRequiredError";
+  }
+}
+
 export interface RuntimeCostContext {
   transaction<T>(operation: (executor: RuntimeSqlExecutor) => Promise<T>): Promise<T>;
 }
@@ -110,9 +120,9 @@ export async function reserveRuntimeCost(input: {
     } else await tx.query(`
       INSERT INTO "RuntimeCostReservation" (
         "id","tenantId","procedimentoId","jobId","provider","operationType","currency",
-        "estimatedAmount","reservedAmount","status","idempotencyKey","expiresAt"
+        "estimatedAmount","reservedAmount","status","idempotencyKey","expiresAt","updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::numeric,$8::numeric,'RESERVED',$9,
-        CURRENT_TIMESTAMP+($10*INTERVAL '1 second'))
+        CURRENT_TIMESTAMP+($10*INTERVAL '1 second'),CURRENT_TIMESTAMP)
     `, [id, input.tenantId, input.procedimentoId, input.jobId, input.provider,
       input.operationType, currency, amount, key, ttl]);
     return { reservationId: id, outcome: "RESERVED" };
@@ -158,6 +168,13 @@ export async function withRuntimeCostGate<T>(
     await settleRuntimeCost({ reservationId: reservation.reservationId, actualAmount: result.actualAmount }, context);
     return result.value;
   } catch (error) {
+    if (error instanceof RuntimeCostSettlementRequiredError) {
+      await settleRuntimeCost({
+        reservationId: reservation.reservationId,
+        actualAmount: error.actualAmount,
+      }, context);
+      throw error.originalError;
+    }
     await releaseRuntimeCost(reservation.reservationId, context);
     throw error;
   }

@@ -77,8 +77,12 @@ export function DirectDocumentUploadForm({
   className,
   submitLabel,
   purpose = "DOCUMENT",
-  successMessage = "Documento caricato, verificato e registrato.",
-  failureMessage,
+  successMessage = purpose === "REQUIREMENT_EVIDENCE"
+    ? "Documento caricato e associato."
+    : "Documento caricato, verificato e registrato.",
+  failureMessage = purpose === "REQUIREMENT_EVIDENCE"
+    ? "Caricamento non completato. Verificare i dati e riprovare."
+    : undefined,
 }: DirectDocumentUploadFormProps) {
   const router = useRouter();
   const operationIdRef = useRef<string | null>(null);
@@ -185,23 +189,24 @@ export function DirectDocumentUploadForm({
       onChange={startNewFileAttempt}
       className={className}
     >
-      {children}
-      <div className="md:col-span-full">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Caricamento in corso..." : submitLabel}
-        </Button>
-        {progress !== null ? (
-          <div className="mt-2" aria-live="polite">
-            <div className="h-2 overflow-hidden rounded bg-slate-200">
-              <div className="h-full bg-[#173d4f] transition-[width]" style={{ width: `${progress}%` }} />
+      <fieldset disabled={pending} className="contents">
+        {children}
+        <div className="md:col-span-full">
+          <Button type="submit" disabled={pending}>
+            {pending ? "Caricamento in corso..." : submitLabel}
+          </Button>
+          {progress !== null ? (
+            <div className="mt-2" aria-live="polite">
+              <div className="h-2 overflow-hidden rounded bg-slate-200">
+                <div className="h-full bg-[#173d4f] transition-[width]" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-slate-600">{progress}% · {message}</p>
             </div>
-            <p className="mt-1 text-xs text-slate-600">{progress}% · {message}</p>
-          </div>
-        ) : message ? (
-          <p role="status" className="mt-2 text-sm text-slate-700">{message}</p>
-        ) : null}
-        {error ? <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p> : null}
-      </div>
+          ) : null}
+          {progress === null && message ? <p role="status" className="mt-2 text-sm text-slate-700">{message}</p> : null}
+          {error ? <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p> : null}
+        </div>
+      </fieldset>
     </form>
   );
 }

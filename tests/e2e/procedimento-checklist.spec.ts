@@ -1,18 +1,11 @@
 import { expect, test } from "playwright/test";
-
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
-}
+import { loginAndExpectLanding } from "./helpers/auth";
 
 test("procedimento checklist section and update form visibility by role", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/procedimenti");
-  const detailLink = page.locator('a[href^="/procedimenti/"]', { hasText: "Apri scheda" }).first();
+  const detailLink = page.locator('main table a[href^="/procedimenti/"]').first();
   await expect(detailLink).toBeVisible();
   const detailHref = await detailLink.getAttribute("href");
   expect(detailHref).toBeTruthy();
@@ -46,13 +39,13 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "Documenti", exact: true }).click();
   await expect(page).toHaveURL(/\?section=documents$/);
   await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
   await expect(page.getByText("Atti e documenti acquisiti nel fascicolo.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
+  await expect(page.getByText("Documento non ancora verificato").first()).toBeVisible();
   await expect(page.getByText("Direzione non indicata")).toHaveCount(0);
   await expect(page.getByText("Canale non indicato")).toHaveCount(0);
   await expect(page.getByText("Protocollo non indicato")).toHaveCount(0);
@@ -70,20 +63,19 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(page.locator('ol[aria-label="Eventi cronologici"] > li').first()).toBeVisible();
   await expect(page.getByLabel("Tipo evento")).toBeVisible();
   await expect(page.getByText("Fonte:").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
   await expect(page.locator("main table")).toHaveCount(0);
   await expect(page.locator("#panoramica")).toHaveCount(0);
 
   await page.getByRole("link", { name: "Concessione", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "4. Contesto concessorio" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "7. Pagamenti critici" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Concessione", exact: true })).toBeVisible();
+  await expect(page.getByText("Pagamenti critici", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "Ricerca", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Riferimenti normativi collegati" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ricerca", exact: true })).toBeVisible();
 
-  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=istruttoria`);
   await page.reload();
-  await expect(page).toHaveURL(/\?section=analysis$/);
+  await expect(page).toHaveURL(/\?section=istruttoria$/);
 
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toBeVisible();
   await expect(page.getByText(/Checklist (completa|incompleta)/i)).toBeVisible();
@@ -98,17 +90,16 @@ test("procedimento checklist section and update form visibility by role", async 
   await page.getByRole("button", { name: "Aggiorna checklist" }).click();
 
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
-  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=istruttoria`);
   await expect(page.getByText(/Istanza di parte/i).first()).toBeVisible();
   await expect(page.getByText(/Preavviso in gestione/i)).toBeVisible();
 
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);
 
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
-  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=istruttoria`);
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Aggiorna checklist" })).toHaveCount(0);

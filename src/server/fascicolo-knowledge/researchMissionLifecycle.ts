@@ -57,14 +57,21 @@ export async function reconcileKnowledgeResearchMissions(input: {
   knowledgeRevisionId: string;
   assignedActorId: string | null;
   plans: readonly KnowledgeResearchMissionPlan[];
+  allowBuildingRevision?: boolean;
 }, overrides: Partial<ResearchMissionLifecycleContext> = {}): Promise<readonly KnowledgeMissionLifecycleResult[]> {
   const context = { ...defaultContext, ...overrides };
   return context.transaction(async (tx) => {
     const revision = await tx.query<{ id: string }>(`
       SELECT "id" FROM "FascicoloKnowledgeRevision"
-      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3 AND "status" = 'CURRENT'
+      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+        AND ("status" = 'CURRENT' OR ($4::boolean AND "status" = 'BUILDING'))
       FOR UPDATE
-    `, [input.knowledgeRevisionId, input.tenantId, input.procedimentoId]);
+    `, [
+      input.knowledgeRevisionId,
+      input.tenantId,
+      input.procedimentoId,
+      input.allowBuildingRevision === true,
+    ]);
     if (revision.rows.length !== 1) throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
     const executablePlans = input.plans.filter((plan) => plan.mission !== null
       && (plan.execution === "ADMITTED" || plan.execution === "DEFERRED_BY_POLICY"));
@@ -72,6 +79,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
     const currentMissionIds: string[] = [];
     for (const plan of executablePlans) {
       const mission = plan.mission!;
+      const planAssignee = plan.autonomousActorId ?? input.assignedActorId;
       const existing = await tx.query<{
         id: string;
         status: ResearchMissionStatus;
@@ -117,13 +125,13 @@ export async function reconcileKnowledgeResearchMissions(input: {
           RETURNING "status", "assignedActorId"
         `, [missionId, input.tenantId, input.procedimentoId, input.knowledgeRevisionId,
           plan.legalIssueSemanticKey, plan.questionSemanticKey, JSON.stringify(plan.referenceDateBasis),
-          input.assignedActorId, plan.execution]);
+          planAssignee, plan.execution]);
         operationalStatus = updated.rows[0].status;
         assignedActorId = updated.rows[0].assignedActorId;
       } else {
         missionId = mission.missionId;
         outcome = "CREATED";
-        assignedActorId = input.assignedActorId;
+        assignedActorId = planAssignee;
         operationalStatus = assignedActorId === null || plan.execution === "DEFERRED_BY_POLICY"
           ? "DEFERRED"
           : "PENDING";
@@ -136,7 +144,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
           ) VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8, $9::jsonb, $10, $11, $12, $12, $13, $14, $15::jsonb, 'CURRENT', $16::"ResearchMissionStatus",
             CASE WHEN $16 = 'DEFERRED' THEN CURRENT_TIMESTAMP ELSE NULL END,
             CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `, [missionId, input.tenantId, input.assignedActorId, mission.version, input.procedimentoId,
+        `, [missionId, input.tenantId, planAssignee, mission.version, input.procedimentoId,
           mission.caseReference.fascicoloReference ?? null, mission.referenceDate, mission.mode,
           JSON.stringify(mission), payloadFingerprint(mission as unknown as JsonValue), plan.missionFingerprint,
           input.knowledgeRevisionId, plan.legalIssueSemanticKey, plan.questionSemanticKey,
@@ -158,6 +166,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
       SET "lifecycleStatus" = 'HISTORICAL', "updatedAt" = CURRENT_TIMESTAMP
       WHERE "tenantId" = $1 AND "caseId" = $2
         AND "researchQuestionSemanticKey" IS NOT NULL
+        AND "professionalQuestionVersionId" IS NULL
         AND "lifecycleStatus" = 'CURRENT'
         AND NOT ("id" = ANY($3::text[]))
     `, [input.tenantId, input.procedimentoId, currentMissionIds]);
@@ -179,6 +188,7 @@ export async function admitDeferredKnowledgeResearchMissionWave(input: {
       FROM "ResearchMissionRecord"
       WHERE "tenantId" = $1 AND "caseId" = $2
         AND "lifecycleStatus" = 'CURRENT' AND "status" = 'DEFERRED'
+        AND "payload" ->> 'executionChannel' = 'SERVER_AUTONOMOUS'
         AND "researchQuestionSemanticKey" IS NOT NULL
       ORDER BY "researchQuestionSemanticKey", "id"
       FOR UPDATE

@@ -32,10 +32,11 @@ describe("MFA security primitives", () => {
 
     expect(encrypted).not.toContain(secret);
     expect(decryptMfaSecret(encrypted)).toBe(secret);
-    const segments = encrypted.split(".");
-    const ciphertext = segments[3];
-    segments[3] = `${ciphertext[0] === "A" ? "B" : "A"}${ciphertext.slice(1)}`;
-    expect(() => decryptMfaSecret(segments.join("."))).toThrow();
+    const parts = encrypted.split(".");
+    const ciphertext = Buffer.from(parts[3], "base64url");
+    ciphertext[0] ^= 1;
+    parts[3] = ciphertext.toString("base64url");
+    expect(() => decryptMfaSecret(parts.join("."))).toThrow();
   });
 
   it("verifies only valid TOTP values", () => {

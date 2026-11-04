@@ -11,6 +11,7 @@ import {
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
 import {
   OPENAI_ANALYSIS_MODEL,
+  OPENAI_DEFAULT_REGION,
   createOpenAiAnalysisProvider,
   type OpenAiFetch,
   type OpenAiRegion,
@@ -25,6 +26,7 @@ const REQUIRED_ENV_NAMES = [
   "AI_OPENAI_TIMEOUT_MS",
   "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
   "AI_OPENAI_MAX_OUTPUT_TOKENS",
+  "AI_OPENAI_MAX_INPUT_TOKENS",
   "AI_MAX_INPUT_BYTES",
 ] as const;
 
@@ -36,6 +38,7 @@ type ProviderFactory = (config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
 }) => AiAnalysisProvider;
@@ -46,6 +49,7 @@ interface ParsedSmokeConfig {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   maxInputBytes: number;
 }
 
@@ -126,8 +130,11 @@ function positiveInteger(env: SmokeEnv, envName: RequiredEnvName): number {
 }
 
 function parseSmokeConfig(env: SmokeEnv): ParsedSmokeConfig {
-  const region = requiredString(env, "AI_OPENAI_REGION");
-  if (region !== "GLOBAL" && region !== "EU") {
+  const configuredRegion = env.AI_OPENAI_REGION;
+  const region = configuredRegion === undefined
+    ? OPENAI_DEFAULT_REGION
+    : configuredRegion.trim();
+  if (region !== OPENAI_DEFAULT_REGION) {
     return failConfig("AI_OPENAI_REGION");
   }
   return {
@@ -136,6 +143,7 @@ function parseSmokeConfig(env: SmokeEnv): ParsedSmokeConfig {
     timeoutMs: positiveInteger(env, "AI_OPENAI_TIMEOUT_MS"),
     maxRawResponseBytes: positiveInteger(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
     maxOutputTokens: positiveInteger(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+    maxInputTokens: positiveInteger(env, "AI_OPENAI_MAX_INPUT_TOKENS"),
     maxInputBytes: positiveInteger(env, "AI_MAX_INPUT_BYTES"),
   };
 }
@@ -417,6 +425,7 @@ export async function runOpenAiSyntheticSmoke(options: {
       timeoutMs: config.timeoutMs,
       maxRawResponseBytes: config.maxRawResponseBytes,
       maxOutputTokens: config.maxOutputTokens,
+      maxInputTokens: config.maxInputTokens,
       region: config.region,
       ...(options.transport ? { transport: options.transport } : {}),
     });

@@ -1,15 +1,8 @@
 import { expect, test } from "playwright/test";
-
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
-}
+import { loginAndExpectLanding } from "./helpers/auth";
 
 test("admin consulta il modulo mappa operativo", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/mappa");
   await expect(page).toHaveURL(/\/mappa$/);
@@ -30,8 +23,7 @@ test("admin consulta il modulo mappa operativo", async ({ page }) => {
 });
 
 test("viewer adsp può consultare la mappa in sola lettura", async ({ page }) => {
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
   await page.goto("/mappa");
   await expect(page).toHaveURL(/\/mappa$/);

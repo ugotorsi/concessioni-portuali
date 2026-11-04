@@ -6,12 +6,23 @@ Percorso: problematica → analisi giuridica → attività → atti → esecuzio
 
 Il workflow non introduce tabelle o colonne. Attività, transizioni, evidenze e
 collegamenti alle bozze sono eventi immutabili in `ActivityLog`; proposte,
-riconciliazioni, Knowledge, snapshot del rapporto e documenti usano tabelle già
-presenti nelle 53 migrazioni e già lette o scritte dal codice in Production.
-Il confronto degli identificatori SQL nel codice modificato con il commit
-`f0454b4` non rileva nuovi oggetti di schema.
+riconciliazioni, Knowledge, snapshot del rapporto e documenti usano tabelle
+esistenti.
 
-**Nessuna migrazione è necessaria per questo rilascio.**
+Dopo l'integrazione di `release/v7-integrated-services` il ramo contiene 59
+migrazioni. Le sei aggiunte sono `20261018_technical_source_research`,
+`20261020_fascicolo_analysis_evaluation`,
+`20261023_fascicolo_knowledge_stable_identity_contract`,
+`20261029_v7_provider_output_recovery`,
+`20261101_research_provider_oauth_credential` e
+`20261107_professional_legal_questions`. Il 4 novembre 2026 una lettura in
+transazione `READ ONLY` di `_prisma_migrations` sul branch Neon Production
+`production-v7-selvara-candidate-20261029` ha accertato 59 migrazioni su 59,
+tutte completate e nessuna annullata. È lo stesso endpoint usato dal worker
+Render e protetto da `EXPECTED_DATABASE_HOST_PREFIX`.
+
+**Nessuna migrazione è necessaria per questo rilascio.** Né la build né
+`release-production.ts` eseguono migrazioni.
 
 ### Drift preesistente fra migrazioni e `schema.prisma`
 
@@ -132,3 +143,83 @@ migrazioni o scritture sui dati esistenti.
 Dopo il rilascio i rapporti vanno rigenerati, cioè archiviati di nuovo, perché
 l'impronta del contenuto cambia. Le cinque bozze M4 e la coda delle proposte
 Selvara non vengono modificate.
+
+## Ripristino del motore di analisi (4 novembre 2026)
+
+### Cause accertate
+
+- **Codice non allineato.** Dal 3 novembre Production eseguiva questo ramo,
+  privo di 140 commit di `release/v7-integrated-services`. Mancavano:
+  - la correzione P2010, cioè l'`INSERT` raw in `RuntimeCostReservation` senza
+    `"updatedAt"`, che è NOT NULL;
+  - il percorso manuale che legge `MANUAL_RESEARCH_EXECUTION_ENABLED`;
+  - il concatenamento della ricerca dopo l'analisi.
+
+  Il ramo integra ora `release/v7` (`cea3b6e`).
+- **`AUTOMATIC_RESEARCH_POLICY_OR_SCOPE_INVALID`.** È l'esito corretto dei
+  controlli. Con AUTOMAZIONE OFF, o con il procedimento fuori allowlist, la
+  ricerca automatica è negata. L'esito ora riporta un codice specifico:
+  automazione disattivata, tenant o procedimento non ammesso, configurazione
+  incompleta.
+- **Coda ferma.** Il job in coda dal 1° novembre è un `DOCUMENT_EXTRACTION_V1`
+  di sistema relativo a `NOETRA_V7_COLLAUDO_INTEGRATO_DEMO.pdf` (1,9 KB),
+  caricato in Selvara durante il collaudo V7. Il worker one-off delle 11:10 lo
+  ha avviato con i filtri corretti ma non lo ha preso in carico. Il codice di
+  presa in carico è identico a quello attuale e il predicato risulta oggi
+  soddisfatto. Il worker leggeva quindi un database diverso: la guardia
+  `EXPECTED_DATABASE_HOST_PREFIX` è stata introdotta la sera stessa e ora
+  punta all'endpoint Production. Lo stato STOPPED è quello normale dei worker
+  one-off (`EXIT_ON_IDLE`).
+- **PDF canonico non estratto.** Il PDF Selvara di 40 pagine non ha alcun
+  tentativo né alcun job di estrazione: l'ammissione avveniva solo nel vecchio
+  `uploadService`. Il PDF non è difettoso. In un collaudo isolato
+  sull'originale identico (SHA-256 `644e0433…`) le 40 pagine hanno testo
+  diretto sufficiente, 45.975 caratteri, senza OCR. Le pagine fisiche 2–12
+  riportano la numerazione interna 7–17: le pagine interne 1–6 mancano
+  nell'originale e non sono un difetto di estrazione.
+
+### Correzioni
+
+- `runManualLegalAnalysisPipeline`, cioè il pulsante ADMIN+MFA in
+  `/admin/runtime`, ammette prima un'estrazione locale per i documenti
+  correnti mai estratti. L'estrazione non usa provider e non ha costo, e
+  l'esito è `DOCUMENT_EXTRACTION_STARTED`. Una richiesta ripetuta non crea
+  job duplicati: il conflitto di idempotenza vale come ammissione già
+  avvenuta. Le estrazioni fallite non vengono ripetute senza permesso di
+  ripetizione. Dopo l'estrazione si richiede di nuovo l'analisi.
+- Stati espliciti delle missioni di ricerca: richiesta, in coda, in
+  esecuzione, bloccata, fallita, completata senza risultati, con fonti da
+  verificare, validata. Una missione senza avanzamento oltre la soglia è
+  bloccata e non più «in corso».
+
+### Verifiche sulla revisione integrata
+
+- `tsc`: superato.
+- `npm run test:ci`: 4.419 test superati, 0 falliti, 34 saltati. I test
+  saltati sono 5 file Postgres attivati da variabile d'ambiente.
+- ESLint sui 318 file modificati: nessun errore nuovo. I 28 errori presenti
+  sono già in `release/v7`.
+- `npm run build`: superato.
+- E2E guidato su database isolato con 59 migrazioni: 5/5.
+- Collaudo isolato del pulsante manuale su PostgreSQL:
+  - prima richiesta: 1 job di estrazione;
+  - seconda richiesta: nessun duplicato;
+  - worker: `SUCCEEDED`, corpus `READY`, 40 pagine;
+  - terza richiesta: rifiutata con `ANALYSIS_ACTIVATION_DISABLED`, come
+    previsto senza provider AI.
+
+### Operazioni Production ancora da autorizzare
+
+1. Decidere se archiviare `NOETRA_V7_COLLAUDO_INTEGRATO_DEMO.pdf` da Selvara
+   prima dell'estrazione. Il job in coda verrebbe altrimenti eseguito dal
+   primo worker di estrazione attivato per il fascicolo e il documento di
+   prova entrerebbe nella Knowledge.
+2. Facoltativo: ridistribuire il worker Render `srv-daoptbp42hec73fmquo0`
+   dalla revisione rilasciata. Oggi i job one-off usano la build `9c4fa0c`,
+   che contiene già la correzione P2010.
+3. Estrazione del PDF canonico con il pulsante manuale: locale, senza costo.
+4. Analisi AI del corpus: costo stimato `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR`.
+5. Ricerca reale con provider, entro i limiti di budget configurati.
+
+AUTOMAZIONE resta OFF: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` e
+`SERVER_AUTONOMOUS_RESEARCH_ENABLED` non attivato.

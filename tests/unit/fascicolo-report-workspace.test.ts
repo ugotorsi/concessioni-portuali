@@ -11,13 +11,13 @@ import {
 } from "@/components/procedimenti/FascicoloReport";
 import type { StructuredFascicoloReportPayload } from "@/server/fascicolo-report";
 
-function payload(): StructuredFascicoloReportPayload {
+function payload(label: string = "corrente"): StructuredFascicoloReportPayload {
   const item = (id: string, normalizedText: string) => ({
     id, kind: "FACT" as const, semanticKey: id, contentFingerprint: id, normalizedText,
     payload: {}, confidence: 90, status: "HUMAN_CONFIRMED" as const, reviewVersion: 1, evidence: [],
   });
   const authority = (resultId: string, title: string, sourceUrl: string) => ({
-    resultId, title, sourceUrl, provider: "hidden-provider", assessmentId: `assessment-${resultId}`,
+    resultId, candidateId: `candidate-${resultId}`, title, sourceUrl, provider: "hidden-provider", assessmentId: `assessment-${resultId}`,
     classificationReviewAuditId: `review-${resultId}`,
     sourceChainFingerprint: `chain-${resultId}`, citationAnchors: [{ page: 1 }], rationale: `Valutazione ${title}`,
   });
@@ -38,7 +38,7 @@ function payload(): StructuredFascicoloReportPayload {
     knowledgeStateFingerprint: "knowledge", researchStateFingerprint: "research", sourceStateFingerprint: "source",
     documentedFramework: {
       partyRoles: [item("role-1", "Autorità portuale quale ente concedente")],
-      facts: [item("fact-1", "Occupazione rilevata oltre la superficie assentita")], timeline: [],
+      facts: [item("fact-1", `Occupazione rilevata oltre la superficie assentita - ${label}`)], timeline: [],
       legalActs: [item("act-1", "Concessione demaniale n. 42")], measures: [],
       contradictions: [{ ...item("contradiction-1", "Superficie indicata in modo non uniforme"), contradictedItemIds: ["fact-1"] }],
     },
@@ -55,12 +55,24 @@ function payload(): StructuredFascicoloReportPayload {
       item("gap-inventory", "DOCUMENT_INVENTORY:server-inventory-123:UNCERTAIN:DOCUMENT_1.PAGE_9:Classificazione server-side prudenziale."),
       item("gap-proceeding", "PROCEEDING_IDENTITY:REBUILT:VERIFIED:ISSUE_CANONI"),
     ], deadlineCandidates: [],
+    legalCompleteness: {
+      issueCoverage: "DOCUMENTED_ISSUES_STRUCTURED",
+      documentNeed: "ADDITIONAL_DOCUMENTS_REQUIRED",
+      researchNeed: "RESEARCH_QUESTIONS_STRUCTURED",
+      signalItemIds: ["act-1", "contradiction-1", "gap-1"],
+      gapItemIds: ["gap-1"],
+      reasonCodes: [
+        "ADDITIONAL_DOCUMENTS_REQUIRED",
+        "DOCUMENTED_ISSUES_STRUCTURED",
+        "RESEARCH_QUESTIONS_STRUCTURED",
+      ],
+    },
     limitations: ["RESEARCH_NOT_COMPLETED", "INTERNAL_WARNING_NOT_FOR_UI"],
   };
 }
 
 function snapshot(status: FascicoloReportSnapshot["status"], id: string = status): FascicoloReportSnapshot {
-  return { id, status, payload: payload(), staleReasons: status === "SUPERSEDED" ? ["SUPERSEDED_BY_MATERIAL_CHANGE"] : [], generatedAt: new Date("2026-10-01T10:00:00.000Z") };
+  return { id, status, payload: payload(id === "CURRENT" ? "corrente" : id), staleReasons: status === "SUPERSEDED" ? ["SUPERSEDED_BY_MATERIAL_CHANGE"] : [], generatedAt: new Date("2026-10-01T10:00:00.000Z") };
 }
 
 function render(snapshots: readonly FascicoloReportSnapshot[], showDiagnostics = false): string {
@@ -83,6 +95,7 @@ describe("Fascicolo report workspace", () => {
     expect(html).toContain("Fatti rilevanti");
     expect(html).toContain("Questioni giuridiche");
     expect(html).toContain("Criticità");
+    expect(html).toContain("Controllo di completezza giuridica");
     expect(html).not.toContain("Conclusioni");
     expect(html).not.toContain("Misure</h4>");
   });
@@ -144,6 +157,149 @@ describe("Fascicolo report workspace", () => {
     expect(stale).not.toContain("/report/export");
   });
 
+  it("separates verified pertinent, unverifiable and excluded non-pertinent official sources", () => {
+    const current = snapshot("CURRENT");
+    const question = current.payload.legalIssues[0].questions[0];
+    const withRelevance = {
+      ...current,
+      payload: {
+        ...current.payload,
+        legalIssues: [{
+          ...current.payload.legalIssues[0],
+          questions: [{
+            ...question,
+            nonUsableResults: [
+              { resultId: "pert", title: "Legge 28 gennaio 1994, n. 84", sourceUrl: "https://www.normattiva.it/x", direction: "UNASSESSED", rationale: null, reasons: ["PROFESSIONAL_DIRECTION_REVIEW_REQUIRED"], relevance: "PERTINENTE_VERIFICATA_DA_CLASSIFICARE", relevanceNote: "Testo ufficiale acquisito da Normattiva; articolo pertinente individuato." },
+              { resultId: "nv", title: "Legge regionale 5/2020", sourceUrl: null, direction: "UNASSESSED", rationale: null, reasons: ["OFFICIAL_SOURCE_NOT_VERIFIABLE:REGIONAL_OR_SPECIAL_SERIES_ACT_NOT_COVERED"], relevance: "NON_VERIFICABILE" },
+              { resultId: "np", title: "D.Lgs. 112/2015 (ferroviario)", sourceUrl: null, direction: "UNASSESSED", rationale: null, reasons: ["NOT_PERTINENT_TO_QUESTION"], relevance: "NON_PERTINENTE" },
+            ],
+          }],
+        }],
+      },
+    } as unknown as FascicoloReportSnapshot;
+    const html = render([withRelevance], true);
+    expect(html).toContain("Fonti ufficiali acquisite con corrispondenza testuale");
+    expect(html).toContain("pertinenza da confermare");
+    expect(html).toContain("Legge 28 gennaio 1994, n. 84");
+    expect(html).toContain("non verificabili o da verificare");
+    expect(html).toContain("Legge regionale 5/2020");
+    expect(html).toContain("Fonti escluse perché non pertinenti al quesito (1)");
+    expect(html).toContain("D.Lgs. 112/2015 (ferroviario)");
+  });
+
+  it("renders verified sources as the basis of issue-specific legal reasoning", () => {
+    const current = snapshot("CURRENT");
+    const html = render([{
+      ...current,
+      payload: {
+        ...current.payload,
+        legalAnalyses: [{
+          issueSemanticKey: "issue-key",
+          issueText: "Conformità dell’occupazione",
+          status: "CONTESTED",
+          documentedFacts: [{
+            statement: "Occupazione rilevata oltre la superficie assentita",
+            documentReferences: ["DOCUMENT_1.PAGE_4"],
+          }],
+          questions: ["Quale disciplina si applica?"],
+          verifiedSources: [{
+            resultId: "source-favorable",
+            title: "Consiglio di Stato, sentenza favorevole",
+            sourceUrl: "https://example.test/favorevole",
+            provider: "Moonlit",
+            direction: "SUPPORTS",
+            relevantPassage: "La misura richiede la verifica concreta dei presupposti.",
+            rationale: "Principio pertinente alla fattispecie.",
+            citationAnchors: [{ paragraph: 12 }],
+          }],
+          applications: [{
+            applicationId: "application-1",
+            outcome: "APPLICABLE",
+            checks: [{
+              criterion: "Presupposti fattuali",
+              outcome: "SATISFIED",
+              rationale: "Il verbale documenta l’occupazione oltre il titolo.",
+              decisiveFacts: ["Occupazione rilevata oltre la superficie assentita"],
+            }],
+            conclusion: "La fonte è applicabile al fatto documentato, ferma la verifica professionale.",
+          }],
+          competingArguments: {
+            supporting: ["La misura richiede la verifica concreta dei presupposti."],
+            opposing: ["La rimozione spontanea può incidere sulla proporzionalità."],
+          },
+          professionalReasoning: {
+            version: "LEGAL_ANALYSIS_CONTRIBUTION_V1",
+            contributionId: "contribution-1",
+            legalIssueSemanticKey: "a".repeat(64),
+            researchQuestionSemanticKey: "b".repeat(64),
+            issueStatement: "Occorre valutare la conformità dell’occupazione rispetto al titolo concessorio.",
+            ruleApplications: [{
+              title: "Presupposti della misura",
+              rule: "La misura richiede la verifica concreta dei presupposti previsti dalla disciplina applicabile.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              relevantFacts: "Il verbale documenta l’occupazione oltre la superficie assentita dal titolo.",
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              application: "Il fatto documentato integra il presupposto materiale, salvo verifica della planimetria vigente.",
+              outcome: "Il presupposto appare integrato in via preliminare, con riserva sulla delimitazione assentita.",
+            }],
+            supportingArguments: [{
+              text: "La difformità documentata sostiene l’esercizio del potere previsto dalla disciplina verificata.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+            }],
+            contraryArguments: [{
+              text: "La rimozione spontanea può incidere sulla proporzionalità della misura conclusiva.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+            }],
+            evidenceAssessment: {
+              strengths: [{
+                text: "Il verbale individua la consistenza materiale e la collocazione dell’occupazione.",
+                sourceCandidateIds: ["candidate-source-favorable"],
+                factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              }],
+              weaknesses: [{
+                text: "Manca ancora il confronto con la planimetria allegata al titolo vigente.",
+                sourceCandidateIds: ["candidate-source-favorable"],
+                factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              }],
+              missingEvidence: ["Acquisire la planimetria aggiornata allegata al titolo concessorio vigente."],
+            },
+            reasonedConclusion: {
+              text: "La tesi è sostenibile in via preliminare, ma dipende dal confronto con la planimetria vigente.",
+              confidence: "MEDIUM",
+              decisiveSourceCandidateIds: ["candidate-source-favorable"],
+              decisiveFactBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              conditions: ["Confermare la delimitazione assentita dal titolo vigente."],
+            },
+            strategies: [{
+              title: "Confronto tecnico-documentale",
+              rationale: "Acquisire la planimetria vigente prima di definire la qualificazione giuridica della difformità.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              risks: ["Una planimetria diversa potrebbe escludere o ridimensionare la difformità contestata."],
+            }],
+            uncertainties: ["La delimitazione esatta dell’area assentita richiede verifica documentale."],
+          },
+          assessment: "La tesi è sostenibile, ma deve confrontarsi con la proporzionalità.",
+          missingEvidence: ["Planimetria aggiornata"],
+          recommendedActions: ["Acquisire la planimetria aggiornata e confrontarla con il titolo."],
+          professionalReviewRequired: true,
+        }],
+      },
+    }]);
+
+    expect(html).toContain("Analisi giuridica");
+    expect(html).toContain("Fatti documentati rilevanti");
+    expect(html).toContain("DOCUMENT_1.PAGE_4");
+    expect(html).toContain("Fonti verificate");
+    expect(html).toContain("Applicazione ai fatti");
+    expect(html).toContain("Presupposti fattuali");
+    expect(html).toContain("Valutazione conclusiva");
+    expect(html).toContain("Iniziative mirate");
+    expect(html).not.toContain("COMPILATION:REBUILT");
+  });
+
   it("renders professional limitations and previous versions without internal data", () => {
     const html = render([snapshot("CURRENT"), snapshot("SUPERSEDED", "old-report")]);
     expect(html).toContain("Limiti e punti da approfondire");
@@ -158,6 +314,8 @@ describe("Fascicolo report workspace", () => {
     expect(html).not.toContain("DOCUMENT_1.PAGE");
     expect(html).toContain("Versioni precedenti");
     expect(html).toContain("Superato");
+    expect(html).toContain("Rapporto storico del 01/10/2026");
+    expect(html).toContain("Occupazione rilevata oltre la superficie assentita - old-report");
     expect(html).not.toContain("INTERNAL_WARNING_NOT_FOR_UI");
     expect(html).not.toContain("hidden-provider");
     expect(html).not.toContain("chain-source");

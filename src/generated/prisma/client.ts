@@ -277,10 +277,30 @@ export type LegalSourceCandidateResolution = Prisma.LegalSourceCandidateResoluti
  */
 export type AsyncJob = Prisma.AsyncJobModel
 /**
+ * Model V7ProviderOutputRecoveryArtifact
+ * 
+ */
+export type V7ProviderOutputRecoveryArtifact = Prisma.V7ProviderOutputRecoveryArtifactModel
+/**
+ * Model ResearchProviderOAuthCredential
+ * 
+ */
+export type ResearchProviderOAuthCredential = Prisma.ResearchProviderOAuthCredentialModel
+/**
  * Model RuntimeWorkerHeartbeat
  * 
  */
 export type RuntimeWorkerHeartbeat = Prisma.RuntimeWorkerHeartbeatModel
+/**
+ * Model FascicoloAnalysisEvaluationPermit
+ * 
+ */
+export type FascicoloAnalysisEvaluationPermit = Prisma.FascicoloAnalysisEvaluationPermitModel
+/**
+ * Model FascicoloAnalysisEvaluationArtifact
+ * 
+ */
+export type FascicoloAnalysisEvaluationArtifact = Prisma.FascicoloAnalysisEvaluationArtifactModel
 /**
  * Model RuntimeBudgetPolicy
  * 
@@ -306,6 +326,21 @@ export type ConcessioneExpiryChangeCommand = Prisma.ConcessioneExpiryChangeComma
  * 
  */
 export type ResearchMissionRecord = Prisma.ResearchMissionRecordModel
+/**
+ * Model ProfessionalLegalQuestion
+ * 
+ */
+export type ProfessionalLegalQuestion = Prisma.ProfessionalLegalQuestionModel
+/**
+ * Model ProfessionalLegalQuestionVersion
+ * 
+ */
+export type ProfessionalLegalQuestionVersion = Prisma.ProfessionalLegalQuestionVersionModel
+/**
+ * Model TechnicalSourceResearchRecord
+ * 
+ */
+export type TechnicalSourceResearchRecord = Prisma.TechnicalSourceResearchRecordModel
 /**
  * Model ResearchExecutionAttempt
  * 
@@ -447,6 +482,11 @@ export type FascicoloSubject = Prisma.FascicoloSubjectModel
  */
 export type FascicoloSubjectIdentifier = Prisma.FascicoloSubjectIdentifierModel
 /**
+ * Model FascicoloKnowledgeIdentity
+ * 
+ */
+export type FascicoloKnowledgeIdentity = Prisma.FascicoloKnowledgeIdentityModel
+/**
  * Model FascicoloKnowledgeItem
  * 
  */
@@ -456,6 +496,11 @@ export type FascicoloKnowledgeItem = Prisma.FascicoloKnowledgeItemModel
  * 
  */
 export type FascicoloKnowledgeEvidence = Prisma.FascicoloKnowledgeEvidenceModel
+/**
+ * Model FascicoloKnowledgeEvidenceSpan
+ * 
+ */
+export type FascicoloKnowledgeEvidenceSpan = Prisma.FascicoloKnowledgeEvidenceSpanModel
 /**
  * Model FascicoloKnowledgeRelation
  * 

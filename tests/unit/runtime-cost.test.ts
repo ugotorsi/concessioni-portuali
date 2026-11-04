@@ -6,6 +6,7 @@ import {
   RuntimeBudgetExceededError,
   RuntimeBudgetPolicyMissingError,
   RuntimeCostReservationConflictError,
+  RuntimeCostSettlementRequiredError,
   settleRuntimeCost,
   withRuntimeCostGate,
   type RuntimeCostContext,
@@ -63,6 +64,7 @@ describe("Lotto 8 runtime cost gate", () => {
     await expect(reserveRuntimeCost(reservation, db)).resolves.toMatchObject({ outcome: "RESERVED" });
     expect(String(db.query.mock.calls[1][0])).toContain("FOR UPDATE");
     expect(String(db.query.mock.calls[5][0])).toContain("INSERT INTO \"RuntimeCostReservation\"");
+    expect(String(db.query.mock.calls[5][0])).toContain('"updatedAt"');
   });
 
   it("reuses an existing reservation idempotently", async () => {
@@ -111,6 +113,48 @@ describe("Lotto 8 runtime cost gate", () => {
       db,
     )).rejects.toBe(providerFailure);
     expect(String(db.query.mock.calls[6][0])).toContain('"status"=\'RELEASED\'');
+  });
+
+  it("settles a conservative amount once when a sent provider call has an uncertain outcome", async () => {
+    const db = context([
+      [], policies,
+      [{ amount: "0.000000" }], [{ amount: "0.000000" }], [{ amount: "0.000000" }],
+      [],
+      [],
+    ]);
+    const providerFailure = new Error("synthetic uncertain provider failure");
+
+    await expect(withRuntimeCostGate(
+      reservation,
+      async () => {
+        throw new RuntimeCostSettlementRequiredError(0.5, providerFailure);
+      },
+      db,
+    )).rejects.toBe(providerFailure);
+    expect(String(db.query.mock.calls[6][0])).toContain("\"status\"='SETTLED'");
+    expect(String(db.query.mock.calls[6][0])).not.toContain("\"status\"='RELEASED'");
+  });
+
+  it("keeps the settled provider cost when a downstream quality gate fails", async () => {
+    const db = context([
+      [], policies,
+      [{ amount: "0.000000" }], [{ amount: "0.000000" }], [{ amount: "0.000000" }],
+      [],
+      [],
+    ]);
+    const qualityFailure = new Error("synthetic quality gate failure");
+
+    await expect((async () => {
+      await withRuntimeCostGate(
+        reservation,
+        async () => ({ value: "provider-output", actualAmount: 1.25 }),
+        db,
+      );
+      throw qualityFailure;
+    })()).rejects.toBe(qualityFailure);
+    expect(String(db.query.mock.calls[6][0])).toContain("\"status\"='SETTLED'");
+    expect(db.query.mock.calls.filter(([sql]) =>
+      String(sql).includes("\"status\"='RELEASED'"))).toHaveLength(0);
   });
 
   it("rechecks caps before reactivating a released reservation", async () => {

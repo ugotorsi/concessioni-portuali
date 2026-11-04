@@ -26,6 +26,7 @@ import {
   assistedVerificationPreClaimStatus,
   createAssistedVerificationSnapshot,
   type AssistedVerificationSnapshot,
+  type LegalApplicabilityReview,
 } from "@/server/legal-research/assisted-verification";
 import { RESEARCH_BRIDGE_VERSION, createResearchMission } from "@/server/legal-research/bridge";
 import { ResearchPersistenceError } from "@/server/legal-research/persistence";
@@ -173,6 +174,75 @@ function storedVerification(snapshot: AssistedVerificationSnapshot, sequence: nu
   };
 }
 
+function applicabilityProposal(): LegalApplicabilityReview {
+  return {
+    version: "LEGAL_APPLICABILITY_REVIEW_V1",
+    reviewId: "applicability-review-a",
+    applicationId: "application-a",
+    knowledgeRevisionId: "knowledge-revision-a",
+    legalIssueSemanticKey: "legal-issue-a",
+    candidateEvidenceSourceId: "source-assessment-a",
+    candidateSourceVersionId: "source-version-a",
+    candidateProvisionReference: "art. 30 legge 1/2026",
+    legalAuthorityKind: "LEGISLATION",
+    factBindings: [{ knowledgeItemId: "fact-a", role: "PROCEEDING_STARTED" }],
+    factualApplicability: {
+      outcome: "TO_VERIFY",
+      rationale: "La sussunzione automatica richiede la verifica del professionista.",
+      decisiveKnowledgeItemIds: ["fact-a"],
+    },
+    ruleOrchestrator: {
+      input: { enteId: "tenant-a", referenceDate: "2026-09-26T00:00:00.000Z" },
+      source: {
+        id: "source-family-a",
+        stableKey: "law-1-2026",
+        title: "Legge 1/2026",
+        documentType: "LAW",
+        legalRank: "PRIMARY",
+        territorialScope: "ITALY",
+        sourceNumber: "1",
+        sourceDate: "2026-01-01",
+        issuingBody: "Legislatore",
+        status: "CURRENT",
+        role: "CONFORMATIVE",
+        confidence: "HIGH",
+        humanReviewRequired: true,
+        isConformative: true,
+        isExtractable: true,
+        relativePath: null,
+        effectiveFrom: "2026-01-01",
+        effectiveTo: null,
+        applicable: true,
+        exclusionReasons: [],
+      },
+      ruleMatched: true,
+      resolutionFingerprint: "f".repeat(64),
+    },
+    normRelationship: {
+      outcome: "UNRESOLVED",
+      rationale: "La relazione di specialita richiede verifica.",
+      competingEvidenceSourceId: null,
+    },
+    transitionalDiscipline: {
+      status: "VERIFIED_PRESENT",
+      evidenceSourceId: "source-assessment-a",
+      provisionReference: "art. 30 legge 1/2026",
+      effectiveFrom: "2026-01-01T00:00:00.000Z",
+      effect: "EXCLUDES_PENDING_PROCEEDINGS",
+      determiningFactRole: "PROCEEDING_STARTED",
+      previousRegimeEvidenceSourceId: null,
+      exceptions: [],
+      interpretationRationale: "La disposizione esclude espressamente i procedimenti pendenti.",
+    },
+    reviewStatus: "AI_PROPOSED",
+    reviewerAttestation: {
+      reviewedByActorId: "automatic-worker",
+      reviewedAt: "2026-09-26T09:00:00.000Z",
+      rationale: "Proposta automatica basata sulla fonte ufficiale verificata.",
+    },
+  };
+}
+
 describe("assisted verification application route", () => {
   it.each(["reviewedByActorId", "reviewedAt", "basisFingerprint", "callerVerified"])("rejects caller-supplied search attestation %s", async field => {
     const response = await POST(post({ action: "REVIEW_ADVERSE_SEARCH", missionId, recordId: reviewCommand.recordId, [field]: "forged" }));
@@ -229,6 +299,182 @@ describe("assisted verification application route", () => {
     const response = await POST(post(reviewCommand));
 
     expect(response.status).toBe(403);
+    expect(persistAssistedVerificationMock).not.toHaveBeenCalled();
+  });
+
+  it("confirms an AI applicability proposal with server-owned professional attestation", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T11:00:00.000Z"));
+    const proposal = applicabilityProposal();
+    const proposalSnapshot = createAssistedVerificationSnapshot({
+      missionId,
+      sources: [],
+      legalApplicabilityReviews: [proposal],
+    });
+    const current = storedVerification(proposalSnapshot, 7);
+    const confirmedSnapshot = createAssistedVerificationSnapshot({
+      ...proposalSnapshot,
+      legalApplicabilityReviews: [{
+        ...proposal,
+        factualApplicability: {
+          ...proposal.factualApplicability,
+          outcome: "SATISFIED",
+          rationale: "Il professionista ha verificato la corrispondenza tra fatti documentati e fattispecie.",
+        },
+        reviewStatus: "HUMAN_CONFIRMED",
+        reviewerAttestation: {
+          reviewedByActorId: context.userId,
+          reviewedAt: "2026-09-26T11:00:00.000Z",
+          rationale: "Fonte, date, fatti e clausola transitoria verificati professionalmente.",
+        },
+      }],
+    });
+    getLatestAssistedVerificationMock.mockResolvedValue(current);
+    persistAssistedVerificationMock.mockResolvedValue({
+      outcome: "CREATED",
+      verification: storedVerification(confirmedSnapshot, 8),
+    });
+
+    const response = await POST(post({
+      action: "CONFIRM_LEGAL_APPLICABILITY",
+      missionId,
+      recordId: current.recordId,
+      review: {
+        ...proposal,
+        factualApplicability: {
+          ...proposal.factualApplicability,
+          outcome: "SATISFIED",
+          rationale: "Il professionista ha verificato la corrispondenza tra fatti documentati e fattispecie.",
+        },
+      },
+      correctionRationale: "Fonte, date, fatti e clausola transitoria verificati professionalmente.",
+    }));
+
+    expect(response.status).toBe(201);
+    expect(persistAssistedVerificationMock).toHaveBeenCalledWith({
+      snapshot: confirmedSnapshot,
+      actor: { actorId: context.userId, tenantId: context.defaultTenantId },
+      expectedPreviousRecordId: current.recordId,
+    });
+    expect(proposal.reviewStatus).toBe("AI_PROPOSED");
+    vi.useRealTimers();
+  });
+
+  it.each([
+    ["candidate source", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      candidateEvidenceSourceId: "substituted-assessment",
+    })],
+    ["source version", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      candidateSourceVersionId: "substituted-version",
+    })],
+    ["fact bindings", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      factBindings: [{ knowledgeItemId: "substituted-fact", role: "OTHER" as const }],
+    })],
+    ["target proceeding identity", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      targetProceedingIdentity: {
+        canonicalAnchorSemanticKey: "c".repeat(64),
+        kind: "ADMINISTRATIVE_ORIGINAL" as const,
+        verification: "DOCUMENTED" as const,
+        evidenceLinkIds: ["client-document:1:hash"],
+      },
+    })],
+    ["transitional evidence", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      transitionalDiscipline: proposal.transitionalDiscipline.status === "VERIFIED_PRESENT"
+        ? { ...proposal.transitionalDiscipline, evidenceSourceId: "substituted-assessment" }
+        : proposal.transitionalDiscipline,
+    })],
+    ["orchestrator fingerprint", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      ruleOrchestrator: {
+        ...proposal.ruleOrchestrator,
+        resolutionFingerprint: "0".repeat(64),
+      },
+    })],
+    ["structural identifiers", (proposal: LegalApplicabilityReview) => ({
+      ...proposal,
+      knowledgeRevisionId: "substituted-revision",
+      legalIssueSemanticKey: "f".repeat(64),
+    })],
+  ] as const)("rejects client substitution of %s", async (_name, substitute) => {
+    const proposal = applicabilityProposal();
+    const current = storedVerification(createAssistedVerificationSnapshot({
+      missionId,
+      sources: [],
+      legalApplicabilityReviews: [proposal],
+    }), 7);
+    getLatestAssistedVerificationMock.mockResolvedValue(current);
+
+    const response = await POST(post({
+      action: "CONFIRM_LEGAL_APPLICABILITY",
+      missionId,
+      recordId: current.recordId,
+      review: substitute(proposal),
+      correctionRationale: "Tentativo di sostituzione strutturale che deve essere respinto dal server.",
+    }));
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({
+      error: "LEGAL_APPLICABILITY_CORRECTION_NOT_ALLOWED",
+    });
+    expect(persistAssistedVerificationMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects replay of the same professional confirmation", async () => {
+    const proposal = applicabilityProposal();
+    const proposalSnapshot = createAssistedVerificationSnapshot({
+      missionId,
+      sources: [],
+      legalApplicabilityReviews: [proposal],
+    });
+    const current = storedVerification(proposalSnapshot, 7);
+    const confirmedSnapshot = createAssistedVerificationSnapshot({
+      ...proposalSnapshot,
+      legalApplicabilityReviews: [{
+        ...proposal,
+        reviewStatus: "HUMAN_CONFIRMED",
+        reviewerAttestation: {
+          reviewedByActorId: context.userId,
+          reviewedAt: "2026-09-26T11:00:00.000Z",
+          rationale: "Conferma professionale originale registrata dal server.",
+        },
+      }],
+    });
+    const confirmed = storedVerification(confirmedSnapshot, 8);
+    getLatestAssistedVerificationMock
+      .mockResolvedValueOnce(current)
+      .mockResolvedValueOnce(confirmed);
+    persistAssistedVerificationMock.mockResolvedValueOnce({
+      outcome: "CREATED",
+      verification: confirmed,
+    });
+    const command = {
+      action: "CONFIRM_LEGAL_APPLICABILITY" as const,
+      missionId,
+      recordId: current.recordId,
+      review: proposal,
+      correctionRationale: "Conferma professionale originale registrata dal server.",
+    };
+
+    expect((await POST(post(command))).status).toBe(201);
+    expect((await POST(post(command))).status).toBe(409);
+    expect(persistAssistedVerificationMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not confirm an applicability review that is absent from the current proposal", async () => {
+    const response = await POST(post({
+      action: "CONFIRM_LEGAL_APPLICABILITY",
+      missionId,
+      recordId: incompleteVerification.recordId,
+      review: applicabilityProposal(),
+      correctionRationale: "La proposta non appartiene alla versione corrente della verifica assistita.",
+    }));
+
+    expect(response.status).toBe(404);
     expect(persistAssistedVerificationMock).not.toHaveBeenCalled();
   });
 

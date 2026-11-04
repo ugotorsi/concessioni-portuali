@@ -431,12 +431,19 @@ export const ModelName = {
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
+  V7ProviderOutputRecoveryArtifact: 'V7ProviderOutputRecoveryArtifact',
+  ResearchProviderOAuthCredential: 'ResearchProviderOAuthCredential',
   RuntimeWorkerHeartbeat: 'RuntimeWorkerHeartbeat',
+  FascicoloAnalysisEvaluationPermit: 'FascicoloAnalysisEvaluationPermit',
+  FascicoloAnalysisEvaluationArtifact: 'FascicoloAnalysisEvaluationArtifact',
   RuntimeBudgetPolicy: 'RuntimeBudgetPolicy',
   RuntimeCostReservation: 'RuntimeCostReservation',
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  ProfessionalLegalQuestion: 'ProfessionalLegalQuestion',
+  ProfessionalLegalQuestionVersion: 'ProfessionalLegalQuestionVersion',
+  TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
   ResearchQuestionResultRecord: 'ResearchQuestionResultRecord',
@@ -465,8 +472,10 @@ export const ModelName = {
   FascicoloOperationalProposalMaterialization: 'FascicoloOperationalProposalMaterialization',
   FascicoloSubject: 'FascicoloSubject',
   FascicoloSubjectIdentifier: 'FascicoloSubjectIdentifier',
+  FascicoloKnowledgeIdentity: 'FascicoloKnowledgeIdentity',
   FascicoloKnowledgeItem: 'FascicoloKnowledgeItem',
   FascicoloKnowledgeEvidence: 'FascicoloKnowledgeEvidence',
+  FascicoloKnowledgeEvidenceSpan: 'FascicoloKnowledgeEvidenceSpan',
   FascicoloKnowledgeRelation: 'FascicoloKnowledgeRelation',
   FascicoloKnowledgeReviewEvent: 'FascicoloKnowledgeReviewEvent',
   AiFascicoloHumanReviewState: 'AiFascicoloHumanReviewState',
@@ -486,7 +495,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "v7ProviderOutputRecoveryArtifact" | "researchProviderOAuthCredential" | "runtimeWorkerHeartbeat" | "fascicoloAnalysisEvaluationPermit" | "fascicoloAnalysisEvaluationArtifact" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "professionalLegalQuestion" | "professionalLegalQuestionVersion" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeIdentity" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeEvidenceSpan" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3968,6 +3977,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    V7ProviderOutputRecoveryArtifact: {
+      payload: Prisma.$V7ProviderOutputRecoveryArtifactPayload<ExtArgs>
+      fields: Prisma.V7ProviderOutputRecoveryArtifactFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        findFirst: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        findMany: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>[]
+        }
+        create: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        createMany: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>[]
+        }
+        delete: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        update: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        deleteMany: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>[]
+        }
+        upsert: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$V7ProviderOutputRecoveryArtifactPayload>
+        }
+        aggregate: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateV7ProviderOutputRecoveryArtifact>
+        }
+        groupBy: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.V7ProviderOutputRecoveryArtifactGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.V7ProviderOutputRecoveryArtifactCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.V7ProviderOutputRecoveryArtifactCountAggregateOutputType> | number
+        }
+      }
+    }
+    ResearchProviderOAuthCredential: {
+      payload: Prisma.$ResearchProviderOAuthCredentialPayload<ExtArgs>
+      fields: Prisma.ResearchProviderOAuthCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ResearchProviderOAuthCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ResearchProviderOAuthCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.ResearchProviderOAuthCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ResearchProviderOAuthCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.ResearchProviderOAuthCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.ResearchProviderOAuthCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.ResearchProviderOAuthCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ResearchProviderOAuthCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.ResearchProviderOAuthCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        update: {
+          args: Prisma.ResearchProviderOAuthCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.ResearchProviderOAuthCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ResearchProviderOAuthCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ResearchProviderOAuthCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.ResearchProviderOAuthCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResearchProviderOAuthCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.ResearchProviderOAuthCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateResearchProviderOAuthCredential>
+        }
+        groupBy: {
+          args: Prisma.ResearchProviderOAuthCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResearchProviderOAuthCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ResearchProviderOAuthCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResearchProviderOAuthCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
     RuntimeWorkerHeartbeat: {
       payload: Prisma.$RuntimeWorkerHeartbeatPayload<ExtArgs>
       fields: Prisma.RuntimeWorkerHeartbeatFieldRefs
@@ -4039,6 +4196,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.RuntimeWorkerHeartbeatCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.RuntimeWorkerHeartbeatCountAggregateOutputType> | number
+        }
+      }
+    }
+    FascicoloAnalysisEvaluationPermit: {
+      payload: Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>
+      fields: Prisma.FascicoloAnalysisEvaluationPermitFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        update: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloAnalysisEvaluationPermit>
+        }
+        groupBy: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloAnalysisEvaluationPermitGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloAnalysisEvaluationPermitCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloAnalysisEvaluationPermitCountAggregateOutputType> | number
+        }
+      }
+    }
+    FascicoloAnalysisEvaluationArtifact: {
+      payload: Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>
+      fields: Prisma.FascicoloAnalysisEvaluationArtifactFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        update: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloAnalysisEvaluationArtifact>
+        }
+        groupBy: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloAnalysisEvaluationArtifactGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloAnalysisEvaluationArtifactCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloAnalysisEvaluationArtifactCountAggregateOutputType> | number
         }
       }
     }
@@ -4409,6 +4714,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ResearchMissionRecordCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ResearchMissionRecordCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProfessionalLegalQuestion: {
+      payload: Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>
+      fields: Prisma.ProfessionalLegalQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProfessionalLegalQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.ProfessionalLegalQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.ProfessionalLegalQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.ProfessionalLegalQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.ProfessionalLegalQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        delete: {
+          args: Prisma.ProfessionalLegalQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        update: {
+          args: Prisma.ProfessionalLegalQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProfessionalLegalQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProfessionalLegalQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProfessionalLegalQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.ProfessionalLegalQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProfessionalLegalQuestion>
+        }
+        groupBy: {
+          args: Prisma.ProfessionalLegalQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProfessionalLegalQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProfessionalLegalQuestionVersion: {
+      payload: Prisma.$ProfessionalLegalQuestionVersionPayload<ExtArgs>
+      fields: Prisma.ProfessionalLegalQuestionVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        findMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        create: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        createMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.ProfessionalLegalQuestionVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        update: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProfessionalLegalQuestionVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfessionalLegalQuestionVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.ProfessionalLegalQuestionVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProfessionalLegalQuestionVersion>
+        }
+        groupBy: {
+          args: Prisma.ProfessionalLegalQuestionVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProfessionalLegalQuestionVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfessionalLegalQuestionVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    TechnicalSourceResearchRecord: {
+      payload: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>
+      fields: Prisma.TechnicalSourceResearchRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TechnicalSourceResearchRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TechnicalSourceResearchRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.TechnicalSourceResearchRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TechnicalSourceResearchRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        findMany: {
+          args: Prisma.TechnicalSourceResearchRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        create: {
+          args: Prisma.TechnicalSourceResearchRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        createMany: {
+          args: Prisma.TechnicalSourceResearchRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TechnicalSourceResearchRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.TechnicalSourceResearchRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        update: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.TechnicalSourceResearchRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.TechnicalSourceResearchRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.TechnicalSourceResearchRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTechnicalSourceResearchRecord>
+        }
+        groupBy: {
+          args: Prisma.TechnicalSourceResearchRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TechnicalSourceResearchRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TechnicalSourceResearchRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TechnicalSourceResearchRecordCountAggregateOutputType> | number
         }
       }
     }
@@ -6484,6 +7011,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloKnowledgeIdentity: {
+      payload: Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>
+      fields: Prisma.FascicoloKnowledgeIdentityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloKnowledgeIdentityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloKnowledgeIdentityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloKnowledgeIdentityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloKnowledgeIdentityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloKnowledgeIdentityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloKnowledgeIdentityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloKnowledgeIdentityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloKnowledgeIdentityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloKnowledgeIdentityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        update: {
+          args: Prisma.FascicoloKnowledgeIdentityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloKnowledgeIdentityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloKnowledgeIdentityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloKnowledgeIdentityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloKnowledgeIdentityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeIdentityPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloKnowledgeIdentityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloKnowledgeIdentity>
+        }
+        groupBy: {
+          args: Prisma.FascicoloKnowledgeIdentityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloKnowledgeIdentityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloKnowledgeIdentityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloKnowledgeIdentityCountAggregateOutputType> | number
+        }
+      }
+    }
     FascicoloKnowledgeItem: {
       payload: Prisma.$FascicoloKnowledgeItemPayload<ExtArgs>
       fields: Prisma.FascicoloKnowledgeItemFieldRefs
@@ -6629,6 +7230,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FascicoloKnowledgeEvidenceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FascicoloKnowledgeEvidenceCountAggregateOutputType> | number
+        }
+      }
+    }
+    FascicoloKnowledgeEvidenceSpan: {
+      payload: Prisma.$FascicoloKnowledgeEvidenceSpanPayload<ExtArgs>
+      fields: Prisma.FascicoloKnowledgeEvidenceSpanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        update: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloKnowledgeEvidenceSpan>
+        }
+        groupBy: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloKnowledgeEvidenceSpanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloKnowledgeEvidenceSpanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloKnowledgeEvidenceSpanCountAggregateOutputType> | number
         }
       }
     }
@@ -8052,6 +8727,38 @@ export const AsyncJobScalarFieldEnum = {
 export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
 
 
+export const V7ProviderOutputRecoveryArtifactScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  corpusFingerprint: 'corpusFingerprint',
+  approvalId: 'approvalId',
+  outputFingerprint: 'outputFingerprint',
+  encryptedPayload: 'encryptedPayload',
+  sizeBytes: 'sizeBytes',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type V7ProviderOutputRecoveryArtifactScalarFieldEnum = (typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum)[keyof typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum]
+
+
+export const ResearchProviderOAuthCredentialScalarFieldEnum = {
+  provider: 'provider',
+  encryptedPayload: 'encryptedPayload',
+  stateVersion: 'stateVersion',
+  hasRefreshToken: 'hasRefreshToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  lastRefreshedAt: 'lastRefreshedAt',
+  lastRefreshErrorCode: 'lastRefreshErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchProviderOAuthCredentialScalarFieldEnum = (typeof ResearchProviderOAuthCredentialScalarFieldEnum)[keyof typeof ResearchProviderOAuthCredentialScalarFieldEnum]
+
+
 export const RuntimeWorkerHeartbeatScalarFieldEnum = {
   id: 'id',
   workerId: 'workerId',
@@ -8065,6 +8772,47 @@ export const RuntimeWorkerHeartbeatScalarFieldEnum = {
 } as const
 
 export type RuntimeWorkerHeartbeatScalarFieldEnum = (typeof RuntimeWorkerHeartbeatScalarFieldEnum)[keyof typeof RuntimeWorkerHeartbeatScalarFieldEnum]
+
+
+export const FascicoloAnalysisEvaluationPermitScalarFieldEnum = {
+  permitRef: 'permitRef',
+  evaluationId: 'evaluationId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  corpusFingerprint: 'corpusFingerprint',
+  operation: 'operation',
+  testCaseId: 'testCaseId',
+  maxCostAmount: 'maxCostAmount',
+  authorizedByUserId: 'authorizedByUserId',
+  authorizedAt: 'authorizedAt',
+  expiresAt: 'expiresAt',
+  consumedByJobId: 'consumedByJobId',
+  consumedAt: 'consumedAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type FascicoloAnalysisEvaluationPermitScalarFieldEnum = (typeof FascicoloAnalysisEvaluationPermitScalarFieldEnum)[keyof typeof FascicoloAnalysisEvaluationPermitScalarFieldEnum]
+
+
+export const FascicoloAnalysisEvaluationArtifactScalarFieldEnum = {
+  evaluationId: 'evaluationId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  jobId: 'jobId',
+  authorizationRef: 'authorizationRef',
+  testCaseId: 'testCaseId',
+  corpusFingerprint: 'corpusFingerprint',
+  contractVersion: 'contractVersion',
+  inputFingerprint: 'inputFingerprint',
+  outputFingerprint: 'outputFingerprint',
+  providerOutput: 'providerOutput',
+  provenance: 'provenance',
+  comparison: 'comparison',
+  maxCostAmount: 'maxCostAmount',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloAnalysisEvaluationArtifactScalarFieldEnum = (typeof FascicoloAnalysisEvaluationArtifactScalarFieldEnum)[keyof typeof FascicoloAnalysisEvaluationArtifactScalarFieldEnum]
 
 
 export const RuntimeBudgetPolicyScalarFieldEnum = {
@@ -8182,6 +8930,7 @@ export const ResearchMissionRecordScalarFieldEnum = {
   missionFingerprint: 'missionFingerprint',
   knowledgeRevisionId: 'knowledgeRevisionId',
   firstKnowledgeRevisionId: 'firstKnowledgeRevisionId',
+  professionalQuestionVersionId: 'professionalQuestionVersionId',
   legalIssueSemanticKey: 'legalIssueSemanticKey',
   researchQuestionSemanticKey: 'researchQuestionSemanticKey',
   referenceDateBasis: 'referenceDateBasis',
@@ -8199,6 +8948,58 @@ export const ResearchMissionRecordScalarFieldEnum = {
 } as const
 
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  createdByUserId: 'createdByUserId',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionScalarFieldEnum = (typeof ProfessionalLegalQuestionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionVersionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  version: 'version',
+  questionText: 'questionText',
+  theme: 'theme',
+  rationale: 'rationale',
+  referenceDate: 'referenceDate',
+  status: 'status',
+  semanticKey: 'semanticKey',
+  contentFingerprint: 'contentFingerprint',
+  createdByUserId: 'createdByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionVersionScalarFieldEnum = (typeof ProfessionalLegalQuestionVersionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionVersionScalarFieldEnum]
+
+
+export const TechnicalSourceResearchRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  missionId: 'missionId',
+  requestedByUserId: 'requestedByUserId',
+  questionSnapshot: 'questionSnapshot',
+  toolName: 'toolName',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  serviceVersion: 'serviceVersion',
+  verificationStatus: 'verificationStatus',
+  retrievedAt: 'retrievedAt'
+} as const
+
+export type TechnicalSourceResearchRecordScalarFieldEnum = (typeof TechnicalSourceResearchRecordScalarFieldEnum)[keyof typeof TechnicalSourceResearchRecordScalarFieldEnum]
 
 
 export const ResearchExecutionAttemptScalarFieldEnum = {
@@ -8786,6 +9587,19 @@ export const FascicoloSubjectIdentifierScalarFieldEnum = {
 export type FascicoloSubjectIdentifierScalarFieldEnum = (typeof FascicoloSubjectIdentifierScalarFieldEnum)[keyof typeof FascicoloSubjectIdentifierScalarFieldEnum]
 
 
+export const FascicoloKnowledgeIdentityScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  kind: 'kind',
+  createdInRevisionId: 'createdInRevisionId',
+  creationBasis: 'creationBasis',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeIdentityScalarFieldEnum = (typeof FascicoloKnowledgeIdentityScalarFieldEnum)[keyof typeof FascicoloKnowledgeIdentityScalarFieldEnum]
+
+
 export const FascicoloKnowledgeItemScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -8800,6 +9614,10 @@ export const FascicoloKnowledgeItemScalarFieldEnum = {
   confidence: 'confidence',
   status: 'status',
   reviewVersion: 'reviewVersion',
+  identityId: 'identityId',
+  identityState: 'identityState',
+  identityBasis: 'identityBasis',
+  identityCommandFingerprint: 'identityCommandFingerprint',
   createdAt: 'createdAt',
   supersededAt: 'supersededAt'
 } as const
@@ -8825,6 +9643,20 @@ export const FascicoloKnowledgeEvidenceScalarFieldEnum = {
 } as const
 
 export type FascicoloKnowledgeEvidenceScalarFieldEnum = (typeof FascicoloKnowledgeEvidenceScalarFieldEnum)[keyof typeof FascicoloKnowledgeEvidenceScalarFieldEnum]
+
+
+export const FascicoloKnowledgeEvidenceSpanScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  evidenceId: 'evidenceId',
+  startOffset: 'startOffset',
+  endOffset: 'endOffset',
+  quoteSha256: 'quoteSha256',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeEvidenceSpanScalarFieldEnum = (typeof FascicoloKnowledgeEvidenceSpanScalarFieldEnum)[keyof typeof FascicoloKnowledgeEvidenceSpanScalarFieldEnum]
 
 
 export const FascicoloKnowledgeRelationScalarFieldEnum = {
@@ -10263,6 +11095,20 @@ export type ListEnumResearchMissionStatusFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'ProfessionalLegalQuestionVersionStatus'
+ */
+export type EnumProfessionalLegalQuestionVersionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfessionalLegalQuestionVersionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProfessionalLegalQuestionVersionStatus[]'
+ */
+export type ListEnumProfessionalLegalQuestionVersionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfessionalLegalQuestionVersionStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'ResearchExecutionState'
  */
 export type EnumResearchExecutionStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResearchExecutionState'>
@@ -10711,6 +11557,20 @@ export type ListEnumFascicoloKnowledgeItemStatusFieldRefInput<$PrismaModel> = Fi
 
 
 /**
+ * Reference to a field of type 'FascicoloKnowledgeIdentityState'
+ */
+export type EnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloKnowledgeIdentityState'>
+    
+
+
+/**
+ * Reference to a field of type 'FascicoloKnowledgeIdentityState[]'
+ */
+export type ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloKnowledgeIdentityState[]'>
+    
+
+
+/**
  * Reference to a field of type 'FascicoloKnowledgeProvenanceType'
  */
 export type EnumFascicoloKnowledgeProvenanceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloKnowledgeProvenanceType'>
@@ -10908,12 +11768,19 @@ export type GlobalOmitConfig = {
   legalSourceCandidateAdmission?: Prisma.LegalSourceCandidateAdmissionOmit
   legalSourceCandidateResolution?: Prisma.LegalSourceCandidateResolutionOmit
   asyncJob?: Prisma.AsyncJobOmit
+  v7ProviderOutputRecoveryArtifact?: Prisma.V7ProviderOutputRecoveryArtifactOmit
+  researchProviderOAuthCredential?: Prisma.ResearchProviderOAuthCredentialOmit
   runtimeWorkerHeartbeat?: Prisma.RuntimeWorkerHeartbeatOmit
+  fascicoloAnalysisEvaluationPermit?: Prisma.FascicoloAnalysisEvaluationPermitOmit
+  fascicoloAnalysisEvaluationArtifact?: Prisma.FascicoloAnalysisEvaluationArtifactOmit
   runtimeBudgetPolicy?: Prisma.RuntimeBudgetPolicyOmit
   runtimeCostReservation?: Prisma.RuntimeCostReservationOmit
   fascicoloSignal?: Prisma.FascicoloSignalOmit
   concessioneExpiryChangeCommand?: Prisma.ConcessioneExpiryChangeCommandOmit
   researchMissionRecord?: Prisma.ResearchMissionRecordOmit
+  professionalLegalQuestion?: Prisma.ProfessionalLegalQuestionOmit
+  professionalLegalQuestionVersion?: Prisma.ProfessionalLegalQuestionVersionOmit
+  technicalSourceResearchRecord?: Prisma.TechnicalSourceResearchRecordOmit
   researchExecutionAttempt?: Prisma.ResearchExecutionAttemptOmit
   researchEvidenceBundleRecord?: Prisma.ResearchEvidenceBundleRecordOmit
   researchQuestionResultRecord?: Prisma.ResearchQuestionResultRecordOmit
@@ -10942,8 +11809,10 @@ export type GlobalOmitConfig = {
   fascicoloOperationalProposalMaterialization?: Prisma.FascicoloOperationalProposalMaterializationOmit
   fascicoloSubject?: Prisma.FascicoloSubjectOmit
   fascicoloSubjectIdentifier?: Prisma.FascicoloSubjectIdentifierOmit
+  fascicoloKnowledgeIdentity?: Prisma.FascicoloKnowledgeIdentityOmit
   fascicoloKnowledgeItem?: Prisma.FascicoloKnowledgeItemOmit
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceOmit
+  fascicoloKnowledgeEvidenceSpan?: Prisma.FascicoloKnowledgeEvidenceSpanOmit
   fascicoloKnowledgeRelation?: Prisma.FascicoloKnowledgeRelationOmit
   fascicoloKnowledgeReviewEvent?: Prisma.FascicoloKnowledgeReviewEventOmit
   aiFascicoloHumanReviewState?: Prisma.AiFascicoloHumanReviewStateOmit

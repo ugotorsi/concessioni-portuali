@@ -221,6 +221,7 @@ export type FascicoloKnowledgeRevisionWhereInput = {
   tenant?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   items?: Prisma.FascicoloKnowledgeItemListRelationFilter
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityListRelationFilter
   relations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
   researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
   firstResearchMissions?: Prisma.ResearchMissionRecordListRelationFilter
@@ -242,6 +243,7 @@ export type FascicoloKnowledgeRevisionOrderByWithRelationInput = {
   tenant?: Prisma.EnteOrderByWithRelationInput
   procedimento?: Prisma.ProcedimentoOrderByWithRelationInput
   items?: Prisma.FascicoloKnowledgeItemOrderByRelationAggregateInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityOrderByRelationAggregateInput
   relations?: Prisma.FascicoloKnowledgeRelationOrderByRelationAggregateInput
   researchMissions?: Prisma.ResearchMissionRecordOrderByRelationAggregateInput
   firstResearchMissions?: Prisma.ResearchMissionRecordOrderByRelationAggregateInput
@@ -268,6 +270,7 @@ export type FascicoloKnowledgeRevisionWhereUniqueInput = Prisma.AtLeast<{
   tenant?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   items?: Prisma.FascicoloKnowledgeItemListRelationFilter
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityListRelationFilter
   relations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
   researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
   firstResearchMissions?: Prisma.ResearchMissionRecordListRelationFilter
@@ -319,6 +322,7 @@ export type FascicoloKnowledgeRevisionCreateInput = {
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -338,6 +342,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateInput = {
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -357,6 +362,7 @@ export type FascicoloKnowledgeRevisionUpdateInput = {
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -376,6 +382,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -638,6 +645,20 @@ export type FascicoloKnowledgeRevisionUpdateOneRequiredWithoutOperationalProposa
   update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloKnowledgeRevisionUpdateToOneWithWhereWithoutOperationalProposalsInput, Prisma.FascicoloKnowledgeRevisionUpdateWithoutOperationalProposalsInput>, Prisma.FascicoloKnowledgeRevisionUncheckedUpdateWithoutOperationalProposalsInput>
 }
 
+export type FascicoloKnowledgeRevisionCreateNestedOneWithoutCreatedIdentitiesInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionCreateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedCreateWithoutCreatedIdentitiesInput>
+  connectOrCreate?: Prisma.FascicoloKnowledgeRevisionCreateOrConnectWithoutCreatedIdentitiesInput
+  connect?: Prisma.FascicoloKnowledgeRevisionWhereUniqueInput
+}
+
+export type FascicoloKnowledgeRevisionUpdateOneRequiredWithoutCreatedIdentitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionCreateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedCreateWithoutCreatedIdentitiesInput>
+  connectOrCreate?: Prisma.FascicoloKnowledgeRevisionCreateOrConnectWithoutCreatedIdentitiesInput
+  upsert?: Prisma.FascicoloKnowledgeRevisionUpsertWithoutCreatedIdentitiesInput
+  connect?: Prisma.FascicoloKnowledgeRevisionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloKnowledgeRevisionUpdateToOneWithWhereWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUpdateWithoutCreatedIdentitiesInput>, Prisma.FascicoloKnowledgeRevisionUncheckedUpdateWithoutCreatedIdentitiesInput>
+}
+
 export type FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionCreateWithoutItemsInput, Prisma.FascicoloKnowledgeRevisionUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.FascicoloKnowledgeRevisionCreateOrConnectWithoutItemsInput
@@ -677,6 +698,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutTenantInput = {
   supersededAt?: Date | string | null
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -695,6 +717,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutTenantInput = {
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -755,6 +778,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutProcedimentoInput = {
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -773,6 +797,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutProcedimentoInput = 
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -818,6 +843,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutResearchMissionsInput = {
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutKnowledgeRevisionInput
@@ -836,6 +862,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutResearchMissionsInpu
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
@@ -859,6 +886,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutFirstResearchMissionsInput = 
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutKnowledgeRevisionInput
@@ -877,6 +905,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutFirstResearchMission
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
@@ -911,6 +940,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutResearchMissionsInput = {
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -929,6 +959,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutResearchMissionsInpu
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -958,6 +989,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutFirstResearchMissionsInput = 
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -976,6 +1008,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutFirstResearchMission
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -994,6 +1027,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutStructuredReportsInput = {
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1012,6 +1046,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutStructuredReportsInp
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1046,6 +1081,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutStructuredReportsInput = {
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1064,6 +1100,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutStructuredReportsInp
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1082,6 +1119,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutOperationalProposalsInput = {
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1100,6 +1138,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutOperationalProposals
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1134,6 +1173,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutOperationalProposalsInput = {
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1152,10 +1192,103 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutOperationalProposals
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
+}
+
+export type FascicoloKnowledgeRevisionCreateWithoutCreatedIdentitiesInput = {
+  id?: string
+  corpusFingerprint: string
+  contractVersion: string
+  status?: $Enums.FascicoloKnowledgeRevisionStatus
+  warnings?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  completedAt?: Date | string | null
+  supersededAt?: Date | string | null
+  tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
+  items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
+  firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
+  structuredReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutKnowledgeRevisionInput
+  operationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutKnowledgeRevisionInput
+}
+
+export type FascicoloKnowledgeRevisionUncheckedCreateWithoutCreatedIdentitiesInput = {
+  id?: string
+  tenantId: string
+  procedimentoId: string
+  corpusFingerprint: string
+  contractVersion: string
+  status?: $Enums.FascicoloKnowledgeRevisionStatus
+  warnings?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  completedAt?: Date | string | null
+  supersededAt?: Date | string | null
+  items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
+  firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
+  structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
+  operationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
+}
+
+export type FascicoloKnowledgeRevisionCreateOrConnectWithoutCreatedIdentitiesInput = {
+  where: Prisma.FascicoloKnowledgeRevisionWhereUniqueInput
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionCreateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedCreateWithoutCreatedIdentitiesInput>
+}
+
+export type FascicoloKnowledgeRevisionUpsertWithoutCreatedIdentitiesInput = {
+  update: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionUpdateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedUpdateWithoutCreatedIdentitiesInput>
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionCreateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedCreateWithoutCreatedIdentitiesInput>
+  where?: Prisma.FascicoloKnowledgeRevisionWhereInput
+}
+
+export type FascicoloKnowledgeRevisionUpdateToOneWithWhereWithoutCreatedIdentitiesInput = {
+  where?: Prisma.FascicoloKnowledgeRevisionWhereInput
+  data: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionUpdateWithoutCreatedIdentitiesInput, Prisma.FascicoloKnowledgeRevisionUncheckedUpdateWithoutCreatedIdentitiesInput>
+}
+
+export type FascicoloKnowledgeRevisionUpdateWithoutCreatedIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  corpusFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumFascicoloKnowledgeRevisionStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeRevisionStatus
+  warnings?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
+  items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
+  firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
+  structuredReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutKnowledgeRevisionNestedInput
+  operationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutKnowledgeRevisionNestedInput
+}
+
+export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutCreatedIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  corpusFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumFascicoloKnowledgeRevisionStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeRevisionStatus
+  warnings?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
+  firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
+  structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
+  operationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
 }
 
 export type FascicoloKnowledgeRevisionCreateWithoutItemsInput = {
@@ -1169,6 +1302,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutItemsInput = {
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1187,6 +1321,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutItemsInput = {
   createdAt?: Date | string
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
@@ -1221,6 +1356,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutItemsInput = {
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1239,6 +1375,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1258,6 +1395,7 @@ export type FascicoloKnowledgeRevisionCreateWithoutRelationsInput = {
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeRevisionsInput
   items?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutCreatedInRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutFirstKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutKnowledgeRevisionInput
@@ -1276,6 +1414,7 @@ export type FascicoloKnowledgeRevisionUncheckedCreateWithoutRelationsInput = {
   completedAt?: Date | string | null
   supersededAt?: Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutRevisionInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutCreatedInRevisionInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutFirstKnowledgeRevisionInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutKnowledgeRevisionInput
@@ -1310,6 +1449,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutRelationsInput = {
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -1328,6 +1468,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutRelationsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
   structuredReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
@@ -1357,6 +1498,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutTenantInput = {
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1375,6 +1517,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutTenantInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1417,6 +1560,7 @@ export type FascicoloKnowledgeRevisionUpdateWithoutProcedimentoInput = {
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeRevisionsNestedInput
   items?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1435,6 +1579,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateWithoutProcedimentoInput = 
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput
+  createdIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutCreatedInRevisionNestedInput
   relations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutRevisionNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionNestedInput
   firstResearchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionNestedInput
@@ -1461,6 +1606,7 @@ export type FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutProcedimentoInpu
 
 export type FascicoloKnowledgeRevisionCountOutputType = {
   items: number
+  createdIdentities: number
   relations: number
   researchMissions: number
   firstResearchMissions: number
@@ -1470,6 +1616,7 @@ export type FascicoloKnowledgeRevisionCountOutputType = {
 
 export type FascicoloKnowledgeRevisionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | FascicoloKnowledgeRevisionCountOutputTypeCountItemsArgs
+  createdIdentities?: boolean | FascicoloKnowledgeRevisionCountOutputTypeCountCreatedIdentitiesArgs
   relations?: boolean | FascicoloKnowledgeRevisionCountOutputTypeCountRelationsArgs
   researchMissions?: boolean | FascicoloKnowledgeRevisionCountOutputTypeCountResearchMissionsArgs
   firstResearchMissions?: boolean | FascicoloKnowledgeRevisionCountOutputTypeCountFirstResearchMissionsArgs
@@ -1492,6 +1639,13 @@ export type FascicoloKnowledgeRevisionCountOutputTypeDefaultArgs<ExtArgs extends
  */
 export type FascicoloKnowledgeRevisionCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FascicoloKnowledgeItemWhereInput
+}
+
+/**
+ * FascicoloKnowledgeRevisionCountOutputType without action
+ */
+export type FascicoloKnowledgeRevisionCountOutputTypeCountCreatedIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloKnowledgeIdentityWhereInput
 }
 
 /**
@@ -1544,6 +1698,7 @@ export type FascicoloKnowledgeRevisionSelect<ExtArgs extends runtime.Types.Exten
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   items?: boolean | Prisma.FascicoloKnowledgeRevision$itemsArgs<ExtArgs>
+  createdIdentities?: boolean | Prisma.FascicoloKnowledgeRevision$createdIdentitiesArgs<ExtArgs>
   relations?: boolean | Prisma.FascicoloKnowledgeRevision$relationsArgs<ExtArgs>
   researchMissions?: boolean | Prisma.FascicoloKnowledgeRevision$researchMissionsArgs<ExtArgs>
   firstResearchMissions?: boolean | Prisma.FascicoloKnowledgeRevision$firstResearchMissionsArgs<ExtArgs>
@@ -1600,6 +1755,7 @@ export type FascicoloKnowledgeRevisionInclude<ExtArgs extends runtime.Types.Exte
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   items?: boolean | Prisma.FascicoloKnowledgeRevision$itemsArgs<ExtArgs>
+  createdIdentities?: boolean | Prisma.FascicoloKnowledgeRevision$createdIdentitiesArgs<ExtArgs>
   relations?: boolean | Prisma.FascicoloKnowledgeRevision$relationsArgs<ExtArgs>
   researchMissions?: boolean | Prisma.FascicoloKnowledgeRevision$researchMissionsArgs<ExtArgs>
   firstResearchMissions?: boolean | Prisma.FascicoloKnowledgeRevision$firstResearchMissionsArgs<ExtArgs>
@@ -1622,6 +1778,7 @@ export type $FascicoloKnowledgeRevisionPayload<ExtArgs extends runtime.Types.Ext
     tenant: Prisma.$EntePayload<ExtArgs>
     procedimento: Prisma.$ProcedimentoPayload<ExtArgs>
     items: Prisma.$FascicoloKnowledgeItemPayload<ExtArgs>[]
+    createdIdentities: Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>[]
     relations: Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>[]
     researchMissions: Prisma.$ResearchMissionRecordPayload<ExtArgs>[]
     firstResearchMissions: Prisma.$ResearchMissionRecordPayload<ExtArgs>[]
@@ -2036,6 +2193,7 @@ export interface Prisma__FascicoloKnowledgeRevisionClient<T, Null = never, ExtAr
   tenant<T extends Prisma.EnteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnteDefaultArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   procedimento<T extends Prisma.ProcedimentoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProcedimentoDefaultArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.FascicoloKnowledgeRevision$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevision$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdIdentities<T extends Prisma.FascicoloKnowledgeRevision$createdIdentitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevision$createdIdentitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   relations<T extends Prisma.FascicoloKnowledgeRevision$relationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevision$relationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   researchMissions<T extends Prisma.FascicoloKnowledgeRevision$researchMissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevision$researchMissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchMissionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   firstResearchMissions<T extends Prisma.FascicoloKnowledgeRevision$firstResearchMissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevision$firstResearchMissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchMissionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2502,6 +2660,30 @@ export type FascicoloKnowledgeRevision$itemsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.FascicoloKnowledgeItemScalarFieldEnum | Prisma.FascicoloKnowledgeItemScalarFieldEnum[]
+}
+
+/**
+ * FascicoloKnowledgeRevision.createdIdentities
+ */
+export type FascicoloKnowledgeRevision$createdIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeIdentity
+   */
+  select?: Prisma.FascicoloKnowledgeIdentitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeIdentity
+   */
+  omit?: Prisma.FascicoloKnowledgeIdentityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeIdentityInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeIdentityWhereInput
+  orderBy?: Prisma.FascicoloKnowledgeIdentityOrderByWithRelationInput | Prisma.FascicoloKnowledgeIdentityOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloKnowledgeIdentityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloKnowledgeIdentityScalarFieldEnum | Prisma.FascicoloKnowledgeIdentityScalarFieldEnum[]
 }
 
 /**

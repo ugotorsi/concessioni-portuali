@@ -63,6 +63,7 @@ test("pdf report access policy by role and validation", async ({ page }) => {
   await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto(`/report/${reportId}`);
+  await page.getByText("Altro", { exact: true }).click();
 
   const pdfLink = page.getByRole("link", { name: "Scarica PDF istituzionale" });
   await expect(pdfLink).toBeVisible();

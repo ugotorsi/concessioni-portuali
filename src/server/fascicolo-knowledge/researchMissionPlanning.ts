@@ -3,13 +3,30 @@ import { createHash } from "node:crypto";
 import { createResearchMission, RESEARCH_BRIDGE_VERSION, type ResearchCapability, type ResearchMission } from "@/server/legal-research/bridge";
 
 import { canonicalJson } from "./canonicalization";
+import { isCanonicalIdentityV3Enabled } from "./canonicalIntegrationGate";
 import type { JsonValue, KnowledgeItemReviewStatus } from "./contracts";
 import type { KnowledgeRevisionSnapshot } from "./repository";
 
 export const DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT = 5;
 
+export interface KnowledgeReferenceDateConfirmation {
+  questionSemanticKey: string;
+  confirmedDate: string;
+  sourceId: string;
+  sourceVersion: string;
+}
+
+export interface AutonomousResearchAuthorization {
+  authorized: boolean;
+  workerActorId: string | null;
+}
+
 export interface ResearchExecutionPolicy {
   maxQuestionsPerWave: number;
+  allowBuildingRevision?: boolean;
+  referenceDateConfirmations?: readonly KnowledgeReferenceDateConfirmation[];
+  /** Routes policy-authorized missions to the server worker instead of the ChatGPT connector. */
+  autonomousResearch?: (mission: ResearchMission) => AutonomousResearchAuthorization;
 }
 
 export interface KnowledgeResearchMissionPlan {
@@ -30,6 +47,7 @@ export interface KnowledgeResearchMissionPlan {
   execution: "ADMITTED" | "BLOCKED_FOR_REVIEW" | "DEFERRED_BY_POLICY" | "REJECTED";
   blockReason: string | null;
   mission: ResearchMission | null;
+  autonomousActorId?: string | null;
 }
 
 type SnapshotItem = KnowledgeRevisionSnapshot["items"][number];
@@ -66,6 +84,12 @@ function statusAllowsMission(status: KnowledgeItemReviewStatus): boolean {
   return status !== "REJECTED";
 }
 
+function identityAllowsMission(item: SnapshotItem): boolean {
+  return !isCanonicalIdentityV3Enabled()
+    || item.identityState === "VERIFIED_NEW"
+    || item.identityState === "VERIFIED_CONTINUATION";
+}
+
 export function buildKnowledgeResearchMissionPlans(
   revision: KnowledgeRevisionSnapshot,
   policy: ResearchExecutionPolicy = { maxQuestionsPerWave: DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT },
@@ -73,12 +97,17 @@ export function buildKnowledgeResearchMissionPlans(
   if (!Number.isInteger(policy.maxQuestionsPerWave) || policy.maxQuestionsPerWave < 0) {
     throw new Error("INVALID_RESEARCH_EXECUTION_POLICY");
   }
-  if (revision.status !== "CURRENT") throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  if (revision.status !== "CURRENT"
+    && !(policy.allowBuildingRevision && revision.status === "BUILDING")) {
+    throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  }
   const itemById = new Map(revision.items.map((item) => [item.id, item]));
   const itemBySemanticKey = new Map(revision.items.map((item) => [item.semanticKey, item]));
   const issueByQuestion = new Map(revision.relations
     .filter((relation) => relation.relationType === "QUESTION_FOR_ISSUE")
     .map((relation) => [relation.sourceItemId, relation.targetItemId]));
+  const confirmationByQuestion = new Map((policy.referenceDateConfirmations ?? [])
+    .map((confirmation) => [confirmation.questionSemanticKey, confirmation]));
   const originsByIssue = new Map<string, string[]>();
   for (const relation of revision.relations.filter((candidate) => candidate.relationType === "ISSUE_DERIVED_FROM")) {
     const values = originsByIssue.get(relation.sourceItemId) ?? [];
@@ -86,37 +115,83 @@ export function buildKnowledgeResearchMissionPlans(
     originsByIssue.set(relation.sourceItemId, values);
   }
   const candidates = revision.items.filter((item) => item.kind === "RESEARCH_QUESTION").map((question) => {
-    const payload = object(question.structuredPayload);
+    const questionPayload = object(question.structuredPayload);
     const issue = itemById.get(issueByQuestion.get(question.id) ?? "");
     const originIds = issue ? [...(originsByIssue.get(issue.id) ?? [])].sort() : [];
     const origins = originIds.map((id) => itemById.get(id)).filter((item): item is SnapshotItem => Boolean(item));
-    const basis = object(payload.referenceDateBasis);
-    const basisType = string(basis.type) ?? "UNKNOWN";
-    const basisSemanticKey = string(basis.itemSemanticKey);
-    const basisItem = basisSemanticKey ? itemBySemanticKey.get(basisSemanticKey) : undefined;
-    const userConfirmedDateSource = object(basis.userConfirmedDateSource);
-    const confirmedDate = string(userConfirmedDateSource.confirmedDate);
-    const confirmationSourceId = string(userConfirmedDateSource.sourceId);
-    const confirmationSourceVersion = string(userConfirmedDateSource.sourceVersion);
-    const declaredDate = string(payload.referenceDate);
-    const derivedDate = basisType === "USER_CONFIRMED" ? confirmedDate : dateFromBasis(basisItem);
+    const evaluateReferenceDate = (payload: Record<string, JsonValue>) => {
+      const basis = object(payload.referenceDateBasis);
+      const basisType = string(basis.type) ?? "UNKNOWN";
+      const basisSemanticKey = string(basis.itemSemanticKey);
+      const basisItem = basisSemanticKey ? itemBySemanticKey.get(basisSemanticKey) : undefined;
+      const userConfirmedDateSource = object(basis.userConfirmedDateSource);
+      const confirmedDate = string(userConfirmedDateSource.confirmedDate);
+      const confirmationSourceId = string(userConfirmedDateSource.sourceId);
+      const confirmationSourceVersion = string(userConfirmedDateSource.sourceVersion);
+      const declaredDate = string(payload.referenceDate);
+      const derivedDate = basisType === "USER_CONFIRMED" ? confirmedDate : dateFromBasis(basisItem);
+      const basisLinkedToIssue = basisItem !== undefined && originIds.includes(basisItem.id);
+      const basisPayload = basisItem ? object(basisItem.structuredPayload) : {};
+      const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT" && basisLinkedToIssue)
+        || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE" && basisLinkedToIssue)
+        || (basisType === "CHALLENGED_ACT_DATE"
+          && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
+          && basisPayload.proceduralRole === "CHALLENGED_ACT" && basisLinkedToIssue)
+        || (basisType === "USER_CONFIRMED" && basisItem === undefined
+          && confirmationSourceId !== null && confirmationSourceVersion !== null && confirmedDate !== null);
+      const dateValid = basisType !== "UNKNOWN" && basisKindValid && declaredDate !== null && declaredDate === derivedDate;
+      return {
+        basis,
+        basisType,
+        basisSemanticKey,
+        basisItem,
+        confirmedDate,
+        confirmationSourceId,
+        confirmationSourceVersion,
+        declaredDate,
+        dateValid,
+      };
+    };
+    const documentaryDate = evaluateReferenceDate(questionPayload);
+    const confirmation = confirmationByQuestion.get(question.semanticKey);
+    // A human confirmation only fills a missing or unverifiable date; evidence-backed dates always win.
+    const payload: Record<string, JsonValue> = !documentaryDate.dateValid && confirmation ? {
+      ...questionPayload,
+      referenceDate: confirmation.confirmedDate,
+      referenceDateBasis: {
+        type: "USER_CONFIRMED",
+        itemSemanticKey: null,
+        rationale: "Data di riferimento confermata da un amministratore con traccia di audit.",
+        userConfirmedDateSource: {
+          sourceId: confirmation.sourceId,
+          sourceVersion: confirmation.sourceVersion,
+          confirmedDate: confirmation.confirmedDate,
+        },
+      },
+    } : questionPayload;
+    const {
+      basis,
+      basisType,
+      basisSemanticKey,
+      basisItem,
+      confirmedDate,
+      confirmationSourceId,
+      confirmationSourceVersion,
+      declaredDate,
+      dateValid,
+    } = payload === questionPayload ? documentaryDate : evaluateReferenceDate(payload);
     const mode = string(payload.mode) === "ADVERSE" ? "ADVERSE" : "PRIMARY";
     const capabilities = [...new Set([
       ...strings(payload.requestedCapabilities),
       "EXACT_RETRIEVAL",
     ])].sort() as ResearchCapability[];
     const canonicalQuestion = string(payload.canonicalQuestion) ?? question.normalizedText;
-    const issueValid = issue?.kind === "LEGAL_ISSUE" && statusAllowsMission(issue.status) && origins.length === originIds.length && origins.length > 0;
-    const basisLinkedToIssue = basisItem !== undefined && originIds.includes(basisItem.id);
-    const basisPayload = basisItem ? object(basisItem.structuredPayload) : {};
-    const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT" && basisLinkedToIssue)
-      || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE" && basisLinkedToIssue)
-      || (basisType === "CHALLENGED_ACT_DATE"
-        && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
-        && basisPayload.proceduralRole === "CHALLENGED_ACT" && basisLinkedToIssue)
-      || (basisType === "USER_CONFIRMED" && basisItem === undefined
-        && confirmationSourceId !== null && confirmationSourceVersion !== null && confirmedDate !== null);
-    const dateValid = basisType !== "UNKNOWN" && basisKindValid && declaredDate !== null && declaredDate === derivedDate;
+    const issueValid = issue?.kind === "LEGAL_ISSUE"
+      && statusAllowsMission(issue.status)
+      && identityAllowsMission(issue)
+      && origins.length === originIds.length
+      && origins.length > 0
+      && origins.every(identityAllowsMission);
     const missionFingerprint = fingerprint({
       fingerprintVersion: "KNOWLEDGE_RESEARCH_MISSION_V2",
       canonicalQuestion,
@@ -144,6 +219,9 @@ export function buildKnowledgeResearchMissionPlans(
     if (!statusAllowsMission(question.status)) {
       execution = "REJECTED";
       blockReason = "QUESTION_REJECTED";
+    } else if (!identityAllowsMission(question)) {
+      execution = "BLOCKED_FOR_REVIEW";
+      blockReason = "KNOWLEDGE_IDENTITY_UNVERIFIED";
     } else if (!issueValid) {
       execution = "BLOCKED_FOR_REVIEW";
       blockReason = "ISSUE_OR_ORIGIN_INVALID";
@@ -154,16 +232,19 @@ export function buildKnowledgeResearchMissionPlans(
       execution = "BLOCKED_FOR_REVIEW";
       blockReason = "ADVERSE_NOT_AUTOMATED";
     }
-    const mission = execution === "ADMITTED" && issue && declaredDate ? createResearchMission({
+    const missionFor = (
+      assumptionsFingerprint: string,
+      executionChannel: "CHATGPT_CONNECTOR" | "SERVER_AUTONOMOUS",
+    ) => createResearchMission({
       kind: "RESEARCH_MISSION",
       version: RESEARCH_BRIDGE_VERSION,
       caseReference: { caseId: revision.procedimentoId, fascicoloReference: revision.procedimentoId },
-      legalIssueIds: [issue.semanticKey],
+      legalIssueIds: [issue!.semanticKey],
       legalPropositionIds: [],
       referenceDate: `${declaredDate}T00:00:00.000Z`,
       mode: "DISCOVER_AUTHORITIES",
       researchQuestion: canonicalQuestion,
-      assumptionsFingerprint: missionFingerprint,
+      assumptionsFingerprint,
       knownAuthorities: [],
       excludedAuthorities: [],
       preferredSourceFamilies: ["ITALIAN_LEGISLATION", "GIUSTIZIA_AMMINISTRATIVA"],
@@ -174,7 +255,26 @@ export function buildKnowledgeResearchMissionPlans(
       budget: { maxTotalResearchCalls: 6, maxMoonlitCalls: 2, maxSimpliciterCalls: 2, maxLegalDataHunterCalls: 2 },
       status: "PENDING",
       executionPlan: { requiredCapabilities: capabilities },
-    }) : null;
+      ...(executionChannel === "SERVER_AUTONOMOUS" ? { executionChannel } : {}),
+    });
+    let mission: ResearchMission | null = null;
+    let finalFingerprint = missionFingerprint;
+    let autonomousActorId: string | null = null;
+    if (execution === "ADMITTED" && issue && declaredDate) {
+      const authorization = policy.autonomousResearch?.(missionFor(missionFingerprint, "SERVER_AUTONOMOUS"));
+      if (authorization?.authorized && authorization.workerActorId) {
+        // The channel is part of the identity so a connector mission is superseded, never silently reassigned.
+        finalFingerprint = fingerprint({
+          fingerprintVersion: "KNOWLEDGE_RESEARCH_MISSION_CHANNEL_V1",
+          baseFingerprint: missionFingerprint,
+          executionChannel: "SERVER_AUTONOMOUS",
+        });
+        mission = missionFor(finalFingerprint, "SERVER_AUTONOMOUS");
+        autonomousActorId = authorization.workerActorId;
+      } else {
+        mission = missionFor(missionFingerprint, "CHATGPT_CONNECTOR");
+      }
+    }
     return {
       questionItemId: question.id,
       questionSemanticKey: question.semanticKey,
@@ -193,10 +293,11 @@ export function buildKnowledgeResearchMissionPlans(
           confirmedDate: confirmedDate!,
         } : null,
       },
-      missionFingerprint,
+      missionFingerprint: finalFingerprint,
       execution,
       blockReason,
       mission,
+      autonomousActorId,
     } satisfies KnowledgeResearchMissionPlan;
   }).sort((left, right) => priorityRank[left.priority] - priorityRank[right.priority]
     || left.questionSemanticKey.localeCompare(right.questionSemanticKey));

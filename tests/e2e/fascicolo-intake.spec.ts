@@ -11,7 +11,6 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
   await expect(page.getByRole("heading", { name: "Riferimenti" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Dati concessione" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Soggetti" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Documenti iniziali" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Crea fascicolo" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Annulla" })).toBeVisible();
 
@@ -21,10 +20,9 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
     "Riferimenti",
     "Dati concessione",
     "Soggetti",
-    "Documenti iniziali",
   ]);
   await expect(page.getByLabel("Titolo fascicolo")).toBeVisible();
-  await expect(page.locator('[name="documentiIniziali"]')).toBeVisible();
+  await expect(page.locator('[name="documentiIniziali"]')).toHaveCount(0);
 
   await expect(page.locator('[name="autoritaCompetenteIniziale"]')).toBeVisible();
 
@@ -45,8 +43,8 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
   await page.goto("/procedimenti", { waitUntil: "domcontentloaded" });
 
   const intakeList = page.getByRole("heading", { name: "Fascicoli in preparazione" }).locator("..");
-  const intakeLink = intakeList.locator('a[href^="/procedimenti/"]').first();
-  test.skip(await intakeLink.count() === 0, "Nessun FascicoloIntake disponibile nel dataset E2E");
+  const intakeLink = intakeList.getByRole("link", { name: /Fascicolo intake E2E/ });
+  await expect(intakeLink).toBeVisible();
   await intakeLink.click();
 
   const fascicoloNav = page.getByRole("navigation", { name: "Navigazione del fascicolo" });
@@ -66,10 +64,10 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
   ]);
   await expect(page.locator("#panoramica").getByText("Stato del fascicolo", { exact: true })).toBeVisible();
   await expect(page.locator("#panoramica").getByText("Concessione / titolo", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Documenti" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true, level: 2 })).toHaveCount(0);
   await page.getByRole("link", { name: "Documenti", exact: true }).click();
   await expect(page).toHaveURL(/\?section=documents$/);
-  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true, level: 2 })).toBeVisible();
   await expect(page.getByText("Atti e documenti acquisiti nel fascicolo.")).toBeVisible();
   await expect(page.getByText("Direzione non indicata")).toHaveCount(0);
   const intakeAttachDocument = page.getByRole("button", { name: "Allega documento" });

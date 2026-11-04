@@ -36,6 +36,15 @@ function knowledge(options: {
   return {
     version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
     subjects: [],
+    sourceQuotes: [{
+      itemLocalId: "fact-1",
+      basisRef: evidence.basisRef,
+      quote: "La concessione",
+    }, {
+      itemLocalId: "basis-1",
+      basisRef: evidence.basisRef,
+      quote: "Istanza",
+    }],
     items: [
       {
         localId: "fact-1", kind: "FACT", confidence: 90, basisRefs: [evidence.basisRef],
@@ -154,6 +163,42 @@ describe("Lotto 3 research mission planning", () => {
     expect(JSON.stringify(plan)).not.toContain("1970-01-01");
   });
 
+  it("admits an unknown reference date only after a traceable human confirmation", () => {
+    const revision = snapshot(knowledge({ basisType: "UNKNOWN", referenceDate: null }));
+    const blocked = buildKnowledgeResearchMissionPlans(revision)[0];
+    const confirmation = {
+      questionSemanticKey: blocked.questionSemanticKey,
+      confirmedDate: "2026-10-15",
+      sourceId: "activity-log-1",
+      sourceVersion: "REFERENCE_DATE_CONFIRMATION_V1",
+    };
+    const plan = buildKnowledgeResearchMissionPlans(revision, { maxQuestionsPerWave: 3, referenceDateConfirmations: [confirmation] })[0];
+    expect(plan).toMatchObject({ execution: "ADMITTED", referenceDate: "2026-10-15", blockReason: null });
+    expect(JSON.stringify(plan)).toContain("activity-log-1");
+    expect(plan.missionFingerprint).not.toBe(
+      buildKnowledgeResearchMissionPlans(revision, {
+        maxQuestionsPerWave: 3,
+        referenceDateConfirmations: [{ ...confirmation, sourceId: "activity-log-2" }],
+      })[0].missionFingerprint,
+    );
+  });
+
+  it("ignores confirmations for questions with an evidence-backed reference date", () => {
+    const revision = snapshot(knowledge());
+    const original = buildKnowledgeResearchMissionPlans(revision)[0];
+    const plan = buildKnowledgeResearchMissionPlans(revision, {
+      maxQuestionsPerWave: 3,
+      referenceDateConfirmations: [{
+        questionSemanticKey: original.questionSemanticKey,
+        confirmedDate: "2020-01-01",
+        sourceId: "activity-log-1",
+        sourceVersion: "REFERENCE_DATE_CONFIRMATION_V1",
+      }],
+    })[0];
+    expect(plan).toMatchObject({ execution: "ADMITTED", referenceDate: "2026-09-01" });
+    expect(plan.missionFingerprint).toBe(original.missionFingerprint);
+  });
+
   it("keeps the mission fingerprint stable for invariant assumptions", () => {
     const first = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
     const second = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
@@ -213,5 +258,35 @@ describe("Lotto 3 research mission planning", () => {
     const plans = buildKnowledgeResearchMissionPlans(snapshot(knowledge({ questions: 4 })), { maxQuestionsPerWave: 2 });
     expect(plans).toHaveLength(4);
     expect(plans.filter((plan) => plan.execution === "ADMITTED")).toHaveLength(2);
+  });
+
+  it("routes authorized missions to a distinct SERVER_AUTONOMOUS channel and fingerprint", () => {
+    const base = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
+    const seen: string[] = [];
+    const autonomous = buildKnowledgeResearchMissionPlans(snapshot(knowledge()), {
+      maxQuestionsPerWave: 5,
+      autonomousResearch: (mission) => {
+        seen.push(mission.executionChannel ?? "CHATGPT_CONNECTOR");
+        return { authorized: true, workerActorId: "worker-actor" };
+      },
+    })[0];
+    expect(seen).toEqual(["SERVER_AUTONOMOUS"]);
+    expect(base.mission?.executionChannel ?? "CHATGPT_CONNECTOR").toBe("CHATGPT_CONNECTOR");
+    expect(base.autonomousActorId ?? null).toBeNull();
+    expect(autonomous.mission?.executionChannel).toBe("SERVER_AUTONOMOUS");
+    expect(autonomous.autonomousActorId).toBe("worker-actor");
+    expect(autonomous.missionFingerprint).not.toBe(base.missionFingerprint);
+    expect(autonomous.mission?.missionId).not.toBe(base.mission?.missionId);
+  });
+
+  it("keeps the ChatGPT connector channel when autonomous research is not authorized", () => {
+    const base = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
+    const denied = buildKnowledgeResearchMissionPlans(snapshot(knowledge()), {
+      maxQuestionsPerWave: 5,
+      autonomousResearch: () => ({ authorized: false, workerActorId: null }),
+    })[0];
+    expect(denied.mission?.executionChannel ?? "CHATGPT_CONNECTOR").toBe("CHATGPT_CONNECTOR");
+    expect(denied.missionFingerprint).toBe(base.missionFingerprint);
+    expect(denied.autonomousActorId ?? null).toBeNull();
   });
 });

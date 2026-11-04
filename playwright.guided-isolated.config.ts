@@ -38,6 +38,7 @@ export default defineConfig({
       DATABASE_URL: databaseUrl,
       NEXTAUTH_URL: "http://localhost:3119",
       NEXTAUTH_SECRET: "isolated-only-test-secret-not-for-deployment",
+      MFA_ENCRYPTION_KEY: Buffer.from("isolated-only-mfa-key-not-prod!!").toString("base64"),
       NODE_ENV: "development",
       VERCEL_ENV: "test",
       DOCUMENT_STORAGE_BACKEND: "local",

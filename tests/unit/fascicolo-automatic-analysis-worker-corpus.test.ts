@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getCurrentKnowledgeRevision: vi.fn(),
   admitAsyncJob: vi.fn(),
   requestDocumentWorkerActivation: vi.fn(),
+  isAutomationEnabled: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -22,6 +23,9 @@ vi.mock("@/server/async-jobs/persistence", () => ({
 }));
 vi.mock("@/server/async-jobs/documentWorkerActivation", () => ({
   requestDocumentWorkerActivation: mocks.requestDocumentWorkerActivation,
+}));
+vi.mock("@/server/automation/automationControl", () => ({
+  isAutomationEnabled: mocks.isAutomationEnabled,
 }));
 vi.mock("@/server/fascicolo-knowledge", async (importOriginal) => ({
   ...await importOriginal<typeof import("@/server/fascicolo-knowledge")>(),
@@ -56,8 +60,9 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
     mocks.admitAsyncJob.mockResolvedValue({ outcome: "CREATED", job: { id: "analysis-job" } });
     mocks.requestDocumentWorkerActivation.mockResolvedValue({
       outcome: "REQUESTED",
-      jobId: "job-render-analysis",
+      renderJobId: "job-render-analysis",
     });
+    mocks.isAutomationEnabled.mockResolvedValue(true);
   });
 
   it("activates only the scoped document-analysis worker after admission", async () => {
@@ -84,8 +89,12 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
       procedimentoId: "procedure-a",
     }));
     expect(mocks.requestDocumentWorkerActivation).toHaveBeenCalledWith(
-      "DOCUMENT_ANALYSIS",
-      "procedure-a",
+      {
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "analysis-job",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+      },
     );
   });
 
@@ -105,6 +114,21 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
       policyDecisionRef: "OCR_PERMIT_A",
       actorId: "ocr-worker",
     });
+  });
+
+  it("does not admit or activate analysis when automation is OFF", async () => {
+    mocks.isAutomationEnabled.mockResolvedValue(false);
+
+    await expect(ensureFascicoloDocumentCorpusUpdateJob({
+      sourceJobId: "ocr-job-a",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      extractionAttemptId: "attempt-a",
+    })).resolves.toEqual({ outcome: "AUTOMATION_OFF", job: null });
+
+    expect(mocks.asyncJobFindUnique).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJob).not.toHaveBeenCalled();
+    expect(mocks.requestDocumentWorkerActivation).not.toHaveBeenCalled();
   });
 
   it("uses the analysis job identity and authorization while executing the corpus analysis", async () => {

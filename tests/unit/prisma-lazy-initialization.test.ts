@@ -90,4 +90,24 @@ describe("lazy Prisma initialization", () => {
       (globalThis as { prisma?: unknown }).prisma,
     );
   });
+
+  it("refuses a DATABASE_URL whose host does not match EXPECTED_DATABASE_HOST_PREFIX", async () => {
+    process.env.DATABASE_URL = "postgresql://u:p@ep-other-host.example.test/db";
+    process.env.EXPECTED_DATABASE_HOST_PREFIX = "ep-expected.";
+    const { prisma } = await import("@/lib/prisma");
+
+    expect(() => Reflect.get(prisma, "user")).toThrow("DATABASE_HOST_GUARD_REJECTED");
+    expect(constructors.pool).not.toHaveBeenCalled();
+    delete process.env.EXPECTED_DATABASE_HOST_PREFIX;
+  });
+
+  it("accepts a DATABASE_URL whose host matches EXPECTED_DATABASE_HOST_PREFIX", async () => {
+    process.env.DATABASE_URL = "postgresql://u:p@ep-expected.example.test/db";
+    process.env.EXPECTED_DATABASE_HOST_PREFIX = "ep-expected.";
+    const { prisma } = await import("@/lib/prisma");
+
+    expect(prisma.user).toBeDefined();
+    expect(constructors.pool).toHaveBeenCalledOnce();
+    delete process.env.EXPECTED_DATABASE_HOST_PREFIX;
+  });
 });

@@ -221,6 +221,7 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
   await page.reload();
   await expect(decision).toContainText("Completamento verificato dal professionista");
   await page.getByRole("button", { name: "Logout", exact: true }).click();
+  await page.waitForURL(/\/login/);
   await login(page);
   await page.goto(`/procedimenti/${porto}?section=proposals&activity=${decisionKey}`);
   const restored = activity(await openIssue(page, "Occupazione oltre il perimetro di Porto Aurora"), /^6\..*decisione motivata/);

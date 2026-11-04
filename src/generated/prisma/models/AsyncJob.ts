@@ -470,6 +470,8 @@ export type AsyncJobWhereInput = {
   dependentJobs?: Prisma.AsyncJobListRelationFilter
   initiatingUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   costReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
 }
 
 export type AsyncJobOrderByWithRelationInput = {
@@ -515,6 +517,8 @@ export type AsyncJobOrderByWithRelationInput = {
   dependentJobs?: Prisma.AsyncJobOrderByRelationAggregateInput
   initiatingUser?: Prisma.UserOrderByWithRelationInput
   costReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitOrderByRelationAggregateInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactOrderByRelationAggregateInput
 }
 
 export type AsyncJobWhereUniqueInput = Prisma.AtLeast<{
@@ -563,6 +567,8 @@ export type AsyncJobWhereUniqueInput = Prisma.AtLeast<{
   dependentJobs?: Prisma.AsyncJobListRelationFilter
   initiatingUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   costReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
 }, "id" | "idempotencyKey">
 
 export type AsyncJobOrderByWithAggregationInput = {
@@ -690,6 +696,8 @@ export type AsyncJobCreateInput = {
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateInput = {
@@ -731,6 +739,8 @@ export type AsyncJobUncheckedCreateInput = {
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUpdateInput = {
@@ -772,6 +782,8 @@ export type AsyncJobUpdateInput = {
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateInput = {
@@ -813,6 +825,8 @@ export type AsyncJobUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobCreateManyInput = {
@@ -1068,6 +1082,11 @@ export type AsyncJobSumOrderByAggregateInput = {
   attemptCount?: Prisma.SortOrder
 }
 
+export type AsyncJobScalarRelationFilter = {
+  is?: Prisma.AsyncJobWhereInput
+  isNot?: Prisma.AsyncJobWhereInput
+}
+
 export type AsyncJobCreateNestedManyWithoutTenantInput = {
   create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutTenantInput, Prisma.AsyncJobUncheckedCreateWithoutTenantInput> | Prisma.AsyncJobCreateWithoutTenantInput[] | Prisma.AsyncJobUncheckedCreateWithoutTenantInput[]
   connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutTenantInput | Prisma.AsyncJobCreateOrConnectWithoutTenantInput[]
@@ -1264,6 +1283,36 @@ export type AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput = {
   deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
 }
 
+export type AsyncJobCreateNestedOneWithoutConsumedAnalysisEvaluationPermitsInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedCreateWithoutConsumedAnalysisEvaluationPermitsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutConsumedAnalysisEvaluationPermitsInput
+  connect?: Prisma.AsyncJobWhereUniqueInput
+}
+
+export type AsyncJobUpdateOneWithoutConsumedAnalysisEvaluationPermitsNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedCreateWithoutConsumedAnalysisEvaluationPermitsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutConsumedAnalysisEvaluationPermitsInput
+  upsert?: Prisma.AsyncJobUpsertWithoutConsumedAnalysisEvaluationPermitsInput
+  disconnect?: Prisma.AsyncJobWhereInput | boolean
+  delete?: Prisma.AsyncJobWhereInput | boolean
+  connect?: Prisma.AsyncJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AsyncJobUpdateToOneWithWhereWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUpdateWithoutConsumedAnalysisEvaluationPermitsInput>, Prisma.AsyncJobUncheckedUpdateWithoutConsumedAnalysisEvaluationPermitsInput>
+}
+
+export type AsyncJobCreateNestedOneWithoutFascicoloAnalysisEvaluationsInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput
+  connect?: Prisma.AsyncJobWhereUniqueInput
+}
+
+export type AsyncJobUpdateOneRequiredWithoutFascicoloAnalysisEvaluationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput
+  upsert?: Prisma.AsyncJobUpsertWithoutFascicoloAnalysisEvaluationsInput
+  connect?: Prisma.AsyncJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AsyncJobUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUpdateWithoutFascicoloAnalysisEvaluationsInput>, Prisma.AsyncJobUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
 export type AsyncJobCreateNestedOneWithoutCostReservationsInput = {
   create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedCreateWithoutCostReservationsInput>
   connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutCostReservationsInput
@@ -1318,6 +1367,8 @@ export type AsyncJobCreateWithoutTenantInput = {
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutTenantInput = {
@@ -1358,6 +1409,8 @@ export type AsyncJobUncheckedCreateWithoutTenantInput = {
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutTenantInput = {
@@ -1466,6 +1519,8 @@ export type AsyncJobCreateWithoutInitiatingUserInput = {
   dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutInitiatingUserInput = {
@@ -1506,6 +1561,8 @@ export type AsyncJobUncheckedCreateWithoutInitiatingUserInput = {
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutInitiatingUserInput = {
@@ -1572,6 +1629,8 @@ export type AsyncJobCreateWithoutProcedimentoInput = {
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutProcedimentoInput = {
@@ -1612,6 +1671,8 @@ export type AsyncJobUncheckedCreateWithoutProcedimentoInput = {
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutProcedimentoInput = {
@@ -1678,6 +1739,8 @@ export type AsyncJobCreateWithoutDependentJobsInput = {
   dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutDependentJobsInput = {
@@ -1718,6 +1781,8 @@ export type AsyncJobUncheckedCreateWithoutDependentJobsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutDependentJobsInput = {
@@ -1763,6 +1828,8 @@ export type AsyncJobCreateWithoutDependsOnJobInput = {
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
   costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutDependsOnJobInput = {
@@ -1803,6 +1870,8 @@ export type AsyncJobUncheckedCreateWithoutDependsOnJobInput = {
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutDependsOnJobInput = {
@@ -1864,6 +1933,8 @@ export type AsyncJobUpdateWithoutDependentJobsInput = {
   dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutDependentJobsInput = {
@@ -1904,6 +1975,8 @@ export type AsyncJobUncheckedUpdateWithoutDependentJobsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput = {
@@ -1920,6 +1993,374 @@ export type AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput = {
 export type AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput = {
   where: Prisma.AsyncJobScalarWhereInput
   data: Prisma.XOR<Prisma.AsyncJobUpdateManyMutationInput, Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobInput>
+}
+
+export type AsyncJobCreateWithoutConsumedAnalysisEvaluationPermitsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobUncheckedCreateWithoutConsumedAnalysisEvaluationPermitsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutConsumedAnalysisEvaluationPermitsInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedCreateWithoutConsumedAnalysisEvaluationPermitsInput>
+}
+
+export type AsyncJobUpsertWithoutConsumedAnalysisEvaluationPermitsInput = {
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedUpdateWithoutConsumedAnalysisEvaluationPermitsInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedCreateWithoutConsumedAnalysisEvaluationPermitsInput>
+  where?: Prisma.AsyncJobWhereInput
+}
+
+export type AsyncJobUpdateToOneWithWhereWithoutConsumedAnalysisEvaluationPermitsInput = {
+  where?: Prisma.AsyncJobWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutConsumedAnalysisEvaluationPermitsInput, Prisma.AsyncJobUncheckedUpdateWithoutConsumedAnalysisEvaluationPermitsInput>
+}
+
+export type AsyncJobUpdateWithoutConsumedAnalysisEvaluationPermitsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutConsumedAnalysisEvaluationPermitsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobCreateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+}
+
+export type AsyncJobUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
+export type AsyncJobUpsertWithoutFascicoloAnalysisEvaluationsInput = {
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  where?: Prisma.AsyncJobWhereInput
+}
+
+export type AsyncJobUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationsInput = {
+  where?: Prisma.AsyncJobWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutFascicoloAnalysisEvaluationsInput, Prisma.AsyncJobUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
+export type AsyncJobUpdateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
 }
 
 export type AsyncJobCreateWithoutCostReservationsInput = {
@@ -1960,6 +2401,8 @@ export type AsyncJobCreateWithoutCostReservationsInput = {
   dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
   dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutCostReservationsInput = {
@@ -2000,6 +2443,8 @@ export type AsyncJobUncheckedCreateWithoutCostReservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutConsumedByJobInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutCostReservationsInput = {
@@ -2056,6 +2501,8 @@ export type AsyncJobUpdateWithoutCostReservationsInput = {
   dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutCostReservationsInput = {
@@ -2096,6 +2543,8 @@ export type AsyncJobUncheckedUpdateWithoutCostReservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobCreateManyTenantInput = {
@@ -2174,6 +2623,8 @@ export type AsyncJobUpdateWithoutTenantInput = {
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutTenantInput = {
@@ -2214,6 +2665,8 @@ export type AsyncJobUncheckedUpdateWithoutTenantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutTenantInput = {
@@ -2330,6 +2783,8 @@ export type AsyncJobUpdateWithoutInitiatingUserInput = {
   dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutInitiatingUserInput = {
@@ -2370,6 +2825,8 @@ export type AsyncJobUncheckedUpdateWithoutInitiatingUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutInitiatingUserInput = {
@@ -2486,6 +2943,8 @@ export type AsyncJobUpdateWithoutProcedimentoInput = {
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutProcedimentoInput = {
@@ -2526,6 +2985,8 @@ export type AsyncJobUncheckedUpdateWithoutProcedimentoInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutProcedimentoInput = {
@@ -2642,6 +3103,8 @@ export type AsyncJobUpdateWithoutDependsOnJobInput = {
   dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
   costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutDependsOnJobInput = {
@@ -2682,6 +3145,8 @@ export type AsyncJobUncheckedUpdateWithoutDependsOnJobInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
   costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+  consumedAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutConsumedByJobNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutDependsOnJobInput = {
@@ -2730,11 +3195,15 @@ export type AsyncJobUncheckedUpdateManyWithoutDependsOnJobInput = {
 export type AsyncJobCountOutputType = {
   dependentJobs: number
   costReservations: number
+  consumedAnalysisEvaluationPermits: number
+  fascicoloAnalysisEvaluations: number
 }
 
 export type AsyncJobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   dependentJobs?: boolean | AsyncJobCountOutputTypeCountDependentJobsArgs
   costReservations?: boolean | AsyncJobCountOutputTypeCountCostReservationsArgs
+  consumedAnalysisEvaluationPermits?: boolean | AsyncJobCountOutputTypeCountConsumedAnalysisEvaluationPermitsArgs
+  fascicoloAnalysisEvaluations?: boolean | AsyncJobCountOutputTypeCountFascicoloAnalysisEvaluationsArgs
 }
 
 /**
@@ -2759,6 +3228,20 @@ export type AsyncJobCountOutputTypeCountDependentJobsArgs<ExtArgs extends runtim
  */
 export type AsyncJobCountOutputTypeCountCostReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RuntimeCostReservationWhereInput
+}
+
+/**
+ * AsyncJobCountOutputType without action
+ */
+export type AsyncJobCountOutputTypeCountConsumedAnalysisEvaluationPermitsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloAnalysisEvaluationPermitWhereInput
+}
+
+/**
+ * AsyncJobCountOutputType without action
+ */
+export type AsyncJobCountOutputTypeCountFascicoloAnalysisEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloAnalysisEvaluationArtifactWhereInput
 }
 
 
@@ -2805,6 +3288,8 @@ export type AsyncJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   dependentJobs?: boolean | Prisma.AsyncJob$dependentJobsArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
   costReservations?: boolean | Prisma.AsyncJob$costReservationsArgs<ExtArgs>
+  consumedAnalysisEvaluationPermits?: boolean | Prisma.AsyncJob$consumedAnalysisEvaluationPermitsArgs<ExtArgs>
+  fascicoloAnalysisEvaluations?: boolean | Prisma.AsyncJob$fascicoloAnalysisEvaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.AsyncJobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asyncJob"]>
 
@@ -2941,6 +3426,8 @@ export type AsyncJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   dependentJobs?: boolean | Prisma.AsyncJob$dependentJobsArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
   costReservations?: boolean | Prisma.AsyncJob$costReservationsArgs<ExtArgs>
+  consumedAnalysisEvaluationPermits?: boolean | Prisma.AsyncJob$consumedAnalysisEvaluationPermitsArgs<ExtArgs>
+  fascicoloAnalysisEvaluations?: boolean | Prisma.AsyncJob$fascicoloAnalysisEvaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.AsyncJobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AsyncJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2965,6 +3452,8 @@ export type $AsyncJobPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     dependentJobs: Prisma.$AsyncJobPayload<ExtArgs>[]
     initiatingUser: Prisma.$UserPayload<ExtArgs> | null
     costReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
+    consumedAnalysisEvaluationPermits: Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>[]
+    fascicoloAnalysisEvaluations: Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3403,6 +3892,8 @@ export interface Prisma__AsyncJobClient<T, Null = never, ExtArgs extends runtime
   dependentJobs<T extends Prisma.AsyncJob$dependentJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$dependentJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AsyncJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   initiatingUser<T extends Prisma.AsyncJob$initiatingUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$initiatingUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   costReservations<T extends Prisma.AsyncJob$costReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$costReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  consumedAnalysisEvaluationPermits<T extends Prisma.AsyncJob$consumedAnalysisEvaluationPermitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$consumedAnalysisEvaluationPermitsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloAnalysisEvaluations<T extends Prisma.AsyncJob$fascicoloAnalysisEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$fascicoloAnalysisEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3990,6 +4481,54 @@ export type AsyncJob$costReservationsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.RuntimeCostReservationScalarFieldEnum | Prisma.RuntimeCostReservationScalarFieldEnum[]
+}
+
+/**
+ * AsyncJob.consumedAnalysisEvaluationPermits
+ */
+export type AsyncJob$consumedAnalysisEvaluationPermitsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloAnalysisEvaluationPermit
+   */
+  select?: Prisma.FascicoloAnalysisEvaluationPermitSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloAnalysisEvaluationPermit
+   */
+  omit?: Prisma.FascicoloAnalysisEvaluationPermitOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloAnalysisEvaluationPermitInclude<ExtArgs> | null
+  where?: Prisma.FascicoloAnalysisEvaluationPermitWhereInput
+  orderBy?: Prisma.FascicoloAnalysisEvaluationPermitOrderByWithRelationInput | Prisma.FascicoloAnalysisEvaluationPermitOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloAnalysisEvaluationPermitWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloAnalysisEvaluationPermitScalarFieldEnum | Prisma.FascicoloAnalysisEvaluationPermitScalarFieldEnum[]
+}
+
+/**
+ * AsyncJob.fascicoloAnalysisEvaluations
+ */
+export type AsyncJob$fascicoloAnalysisEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloAnalysisEvaluationArtifact
+   */
+  select?: Prisma.FascicoloAnalysisEvaluationArtifactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloAnalysisEvaluationArtifact
+   */
+  omit?: Prisma.FascicoloAnalysisEvaluationArtifactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloAnalysisEvaluationArtifactInclude<ExtArgs> | null
+  where?: Prisma.FascicoloAnalysisEvaluationArtifactWhereInput
+  orderBy?: Prisma.FascicoloAnalysisEvaluationArtifactOrderByWithRelationInput | Prisma.FascicoloAnalysisEvaluationArtifactOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloAnalysisEvaluationArtifactWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum | Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum[]
 }
 
 /**

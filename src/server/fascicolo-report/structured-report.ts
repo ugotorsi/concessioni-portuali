@@ -9,7 +9,33 @@ import {
 import { stableStringify } from "@/server/audit/hash";
 import type { DocumentCoverageEntry } from "@/lib/document-coverage";
 import { detectActPhase, type ActPhaseDetection } from "@/server/fascicolo-acts/templates";
+import {
+  assessLegalCompleteness,
+  type LegalCompletenessAssessment,
+} from "@/server/fascicolo-knowledge/legalCompleteness";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
+import {
+  applicabilityDimensionsFromRuleOrchestrator,
+  assessLegalApplicability,
+  type ApplicabilityFactReference,
+  type LegalApplicabilityAssessment,
+  type TransitionalDiscipline,
+  type VerifiedProvisionReference,
+} from "@/server/legal-reasoning/applicability";
+import { documentedProceedingIdentity } from "@/server/legal-reasoning/applicability/proceeding-identity";
+import type { EvaluatedSourceResult } from "@/server/legal-rules/types";
+import type { LegalApplicabilityReview } from "@/server/legal-research/assisted-verification";
+import {
+  OFFICIAL_SOURCE_RELEVANCE_LABELS,
+  type OfficialSourceRelevance,
+} from "@/server/legal-research/official-source-relevance";
+import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
+import {
+  contributionBasisRefs,
+  contributionCandidateIds,
+  type LegalAnalysisContribution,
+} from "@/server/legal-research/legal-synthesis";
+import type { TemporalAssessmentResult } from "@/server/legal-sources/temporal";
 
 import { buildIssuePath, sharedAdminActsStep, type IssuePath, type SharedActivityNeed } from "./issue-paths";
 import { buildLegalApplication, extractIsoDates, type StructuredReportLegalApplication } from "./legal-application";
@@ -20,13 +46,27 @@ export type { StructuredReportLegalApplication } from "./legal-application";
 export type { PortRegimeCoordination } from "./port-regime";
 
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
+export const STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V2" as const;
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 type Direction = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESSED";
 
+function jsonRecord(value: unknown): JsonRecord {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as JsonRecord
+    : {};
+}
+
+function stringValues(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
 export interface StructuredReportResearchResultInput {
   resultId: string;
   missionId?: string;
+  candidateId?: string;
   title: string;
   sourceUrl: string | null;
   provider: string | null;
@@ -36,6 +76,8 @@ export interface StructuredReportResearchResultInput {
   classificationReviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
   classificationRationale: string | null;
   relevantPassage?: string | null;
+  /** Outcome of the official-source relevance check; absent for results never checked. */
+  officialRelevance?: OfficialSourceRelevance | null;
   sourceAssessment: {
     assessmentId: string;
     chainFingerprint: string;
@@ -45,6 +87,14 @@ export interface StructuredReportResearchResultInput {
     blockingReasons: readonly string[];
     manualReviewRequired: boolean;
     manualReviewReason: string | null;
+    sourceFamilyId?: string | null;
+    sourceVersionId?: string | null;
+    acquisitionId?: string | null;
+    temporalAssessmentId?: string | null;
+    sourceChain?: SourceChainSnapshot;
+    temporalAssessment?: TemporalAssessmentResult;
+    authorityKind?: LegalApplicabilityReview["legalAuthorityKind"];
+    provisionReference?: string;
   } | null;
 }
 
@@ -54,16 +104,32 @@ export interface StructuredReportMissionInput {
   missionFingerprint: string | null;
   knowledgeRevisionId: string | null;
   researchQuestionSemanticKey: string | null;
+  professionalQuestionVersionId?: string | null;
+  legalIssueSemanticKey?: string | null;
   lifecycleStatus: "CURRENT" | "HISTORICAL";
   status: string;
   question: string;
   coverageStatus: string;
   sourceGaps: readonly string[];
   results: readonly StructuredReportResearchResultInput[];
+  legalAnalysisContributions?: readonly LegalAnalysisContribution[];
+  legalApplicabilityReviews?: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+    orchestratorVerification?: Readonly<{
+      valid: boolean;
+      source: LegalApplicabilityReview["ruleOrchestrator"]["source"] | null;
+      ruleMatched: boolean;
+      resolvedSources?: readonly EvaluatedSourceResult[];
+      matchedSourceIds?: readonly string[];
+    }>;
+  }>[];
+  legalApplicabilityReviewIssues?: readonly string[];
 }
 
 export interface StructuredReportAuthority {
   resultId: string;
+  candidateId: string;
   title: string;
   sourceUrl: string | null;
   provider: string | null;
@@ -71,6 +137,7 @@ export interface StructuredReportAuthority {
   sourceChainFingerprint: string;
   citationAnchors: readonly JsonRecord[];
   classificationReviewAuditId?: string;
+  relevantPassage?: string | null;
   rationale: string | null;
 }
 
@@ -92,6 +159,9 @@ export interface StructuredReportQuestion {
     direction: Direction;
     rationale?: string | null;
     reasons: readonly string[];
+    /** Absent in archived snapshots created before the official relevance check. */
+    relevance?: NonUsableRelevance;
+    relevanceNote?: string | null;
   }[];
   gaps: readonly string[];
   limitations: readonly string[];
@@ -128,18 +198,92 @@ export interface StructuredReportOperationalAlternative {
   riskOrLimit: string;
 }
 
+export interface StructuredReportAdministrativeActDraft {
+  actType: string;
+  necessity: "REQUIRED_IF_PROCEEDING_STARTED" | "EVENTUAL" | "OPTIONAL";
+  sequence: number;
+  competentOffice: string;
+  legalBasis: string;
+  participationGuarantees: readonly string[];
+  subsequentCommunications: readonly string[];
+  templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE" | "STANDARD_ADAPTABLE";
+  adaptationInstructions: string;
+  automaticExecutionProhibited: true;
+  sections: {
+    heading: string;
+    subject: string;
+    premises: readonly string[];
+    documentedFacts: readonly string[];
+    investigation: readonly string[];
+    reasoning: readonly string[];
+    legalReferences: readonly string[];
+    operativePart: readonly string[];
+    communications: readonly string[];
+    signature: string;
+  };
+}
+
+export interface AdministrativeActInternalTemplate {
+  templateId: string;
+  templateVersion: string;
+  heading: string;
+  sectionOrder: readonly (keyof StructuredReportAdministrativeActDraft["sections"])[];
+  lockedClauses: readonly string[];
+}
+
+export interface AdaptedAdministrativeActDraft {
+  originalTemplate: AdministrativeActInternalTemplate;
+  adaptedSections: StructuredReportAdministrativeActDraft["sections"];
+  proposedIntegrations: readonly {
+    section: keyof StructuredReportAdministrativeActDraft["sections"];
+    content: string | readonly string[];
+  }[];
+  lockedClausesPreserved: readonly string[];
+  humanApprovalRequired: true;
+}
+
+export function adaptAdministrativeActToInternalTemplate(
+  draft: StructuredReportAdministrativeActDraft,
+  template: AdministrativeActInternalTemplate,
+): AdaptedAdministrativeActDraft {
+  const originalTemplate = structuredClone(template);
+  const adaptedSections = {
+    ...draft.sections,
+    heading: template.heading,
+  };
+  return {
+    originalTemplate,
+    adaptedSections,
+    proposedIntegrations: template.sectionOrder.map((section) => ({
+      section,
+      content: adaptedSections[section],
+    })),
+    lockedClausesPreserved: [...template.lockedClauses],
+    humanApprovalRequired: true,
+  };
+}
+
 export interface StructuredReportOperationalPlan {
   issueSemanticKey: string;
   issueText: string;
+  /** Release V2 fields: absent in reports generated before the merge. */
+  problem?: string;
+  evidence?: readonly string[];
+  legalQualification?: string;
   sourceDocumentRefs: readonly string[];
   outstandingEvidence: readonly string[];
   legalSourceStatus: "VERIFIED_SOURCES_ATTACHED" | "LEGAL_RESEARCH_REQUIRED";
   professionalStatus: "PRELIMINARY_NOT_APPROVED";
   recommendedNextStep: string;
+  proposedSolution?: string;
+  investigationActivities?: readonly string[];
+  actsToForm?: readonly string[];
+  modelsAvailable?: readonly string[];
   steps: readonly StructuredReportOperationalStep[];
   /** Shared activities that concern this issue but are tracked in another issue's plan. */
   sharedActivityRefs?: readonly StructuredReportSharedActivityRef[];
   alternatives: readonly StructuredReportOperationalAlternative[];
+  administrativeActs?: readonly StructuredReportAdministrativeActDraft[];
   deadlineReview: string;
 }
 
@@ -178,8 +322,80 @@ export interface StructuredReportRegulatoryApplicability {
   officialSourceUrl: string;
 }
 
+export interface StructuredReportLegalAnalysis {
+  issueSemanticKey: string;
+  issueText: string;
+  status: "RESEARCH_REQUIRED" | "MOTIVATION_REQUIRED" | "ARGUED" | "CONTESTED";
+  documentedFacts: readonly {
+    statement: string;
+    documentReferences: readonly string[];
+  }[];
+  questions: readonly string[];
+  verifiedSources: readonly {
+    resultId: string;
+    title: string;
+    sourceUrl: string | null;
+    provider: string | null;
+    direction: "SUPPORTS" | "OPPOSES";
+    relevantPassage: string | null;
+    rationale: string | null;
+    citationAnchors: readonly JsonRecord[];
+  }[];
+  applications: readonly {
+    applicationId: string;
+    outcome: "APPLICABLE" | "NOT_APPLICABLE" | "TO_VERIFY" | "NOT_EVALUATED";
+    checks: readonly {
+      criterion: string;
+      outcome: "SATISFIED" | "NOT_SATISFIED" | "TO_VERIFY";
+      rationale: string;
+      decisiveFacts: readonly string[];
+    }[];
+    conclusion: string;
+  }[];
+  competingArguments: {
+    supporting: readonly string[];
+    opposing: readonly string[];
+  };
+  professionalReasoning: LegalAnalysisContribution | null;
+  assessment: string;
+  missingEvidence: readonly string[];
+  recommendedActions: readonly string[];
+  professionalReviewRequired: true;
+}
+
+export type StructuredReportTechnicalVerificationStatus =
+  | "DA_VERIFICARE_SU_FONTE_ORIGINALE"
+  | "INDICATIVO_DA_VERIFICARE"
+  | "RISPOSTA_VUOTA_NON_PROBATORIA";
+
+export interface StructuredReportTechnicalSourceInput {
+  recordId: string;
+  missionId: string;
+  toolName: string;
+  questionSnapshot: string;
+  verificationStatus: string;
+  serviceVersion: string;
+  responseDigest: string;
+  retrievedAt: Date;
+}
+
+/** MCP technical/urban-planning acquisition: always non-probative, never a usable authority. */
+export interface StructuredReportTechnicalSource {
+  recordId: string;
+  missionId: string;
+  questionSemanticKey: string;
+  toolName: string;
+  question: string;
+  verificationStatus: StructuredReportTechnicalVerificationStatus;
+  probative: false;
+  serviceVersion: string;
+  responseDigest: string;
+  retrievedAt: string;
+  requiredVerification: string;
+}
+
 export interface StructuredFascicoloReportPayload {
-  contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
+  contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION | typeof STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION;
   /** Absent in older snapshots whose source classifications cannot be assumed confirmed. */
   sourceReviewPolicy?: typeof SOURCE_REVIEW_POLICY;
   tenantId: string;
@@ -198,6 +414,7 @@ export interface StructuredFascicoloReportPayload {
   documentCoverageCorpusFingerprint?: string;
   documentedFramework: {
     partyRoles: readonly StructuredKnowledgeReadItem[];
+    partyPositions?: readonly StructuredKnowledgeReadItem[];
     facts: readonly StructuredKnowledgeReadItem[];
     timeline: readonly StructuredKnowledgeReadItem[];
     legalActs: readonly StructuredKnowledgeReadItem[];
@@ -210,11 +427,39 @@ export interface StructuredFascicoloReportPayload {
     text: string;
     reviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED";
     originatingItemIds: readonly string[];
+    proceedingIdentity?: {
+      status: string;
+      action: string;
+      reason: string | null;
+      linkedAnchor: {
+        semanticKey: string;
+        kind: "LEGAL_ACT" | "MEASURE";
+        text: string;
+      } | null;
+      evidenceBasisRefs: readonly string[];
+      providerClaim: JsonRecord | null;
+      candidateAnchorSemanticKeys: readonly string[];
+    };
     questions: readonly StructuredReportQuestion[];
   }[];
   unassignedQuestions: readonly StructuredReportQuestion[];
   gaps: readonly StructuredKnowledgeReadItem[];
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
+  /** Generated for new reports; archived V1 snapshots remain readable without it. */
+  professionalNarrative?: {
+    status: "PRELIMINARY_DOCUMENT_BASED";
+    reconstruction: readonly string[];
+    chronology: readonly string[];
+    titlesObligationsAndDeadlines: readonly string[];
+    complianceAndAllegedBreaches: readonly string[];
+    contradictionsAndEvidenceGaps: readonly string[];
+    technicalAdministrativeAndLegalProfiles: readonly string[];
+    favorableArguments: readonly string[];
+    contraryArguments: readonly string[];
+    questionsForFurtherReview: readonly string[];
+    documentaryReferences: readonly string[];
+    legalResearchStatus: string;
+  };
   /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
   operationalPlans?: readonly StructuredReportOperationalPlan[];
   /** Additive applicability matrix. Older archived V1 reports may omit this field. */
@@ -223,6 +468,32 @@ export interface StructuredFascicoloReportPayload {
   legalApplication?: readonly StructuredReportLegalApplication[];
   /** Additive date-driven coordination of the port-concession regime. Older reports may omit it. */
   portRegime?: PortRegimeCoordination | null;
+  /** Source-grounded issue analysis. Absent from archived snapshots created before this compiler version. */
+  legalAnalyses?: readonly StructuredReportLegalAnalysis[];
+  /** Additive; present only when MCP acquisitions exist for CURRENT missions of this revision. */
+  technicalSources?: readonly StructuredReportTechnicalSource[];
+  /** Deterministic coverage check; never creates legal issues or research questions. */
+  legalCompleteness?: LegalCompletenessAssessment;
+  /** V2 only. V1 snapshots remain readable and are never rewritten. */
+  legalApplicability?: Readonly<{
+    assessmentVersion: "LEGAL_APPLICABILITY_V1";
+    applications: readonly Readonly<{
+      applicationId: string;
+      resultId: string;
+      legalIssueSemanticKey: string;
+      status: "ASSESSED" | "PRELIMINARY_AI_PROPOSED" | "NOT_EVALUATED" | "TO_VERIFY";
+      outcome: LegalApplicabilityAssessment["conclusion"]["outcome"] | "NOT_EVALUATED";
+      reasonCodes: readonly string[];
+      assessment: LegalApplicabilityAssessment | null;
+      reviewStatus: LegalApplicabilityReview["reviewStatus"] | null;
+      professionalReviewRequired: true;
+    }>[];
+    uncertainties: readonly Readonly<{
+      applicationId: string;
+      reasonCodes: readonly string[];
+      professionalReviewRequired: true;
+    }>[];
+  }>;
   limitations: readonly string[];
 }
 
@@ -233,6 +504,91 @@ export interface BuiltStructuredFascicoloReport {
 
 function fingerprint(value: unknown): string {
   return createHash("sha256").update(stableStringify(value), "utf8").digest("hex");
+}
+
+function itemBasisRefs(item: StructuredKnowledgeReadItem): readonly string[] {
+  return [...new Set(item.evidence.flatMap((evidence) => (
+    evidence.basisRef ? [evidence.basisRef] : []
+  )))].sort();
+}
+
+function narrativeLine(item: StructuredKnowledgeReadItem): string {
+  const refs = itemBasisRefs(item);
+  return `${item.normalizedText}${refs.length ? ` [${refs.join("; ")}]` : " [riferimento documentale non disponibile]"}`;
+}
+
+function buildProfessionalNarrative(
+  knowledge: StructuredKnowledgeReadModel,
+): NonNullable<StructuredFascicoloReportPayload["professionalNarrative"]> {
+  const visible = (items: readonly StructuredKnowledgeReadItem[]) => (
+    items.filter((item) => item.status !== "REJECTED")
+  );
+  const positions = visible(knowledge.partyPositions ?? []);
+  const facts = visible(knowledge.facts);
+  const events = visible(knowledge.events);
+  const acts = visible([...knowledge.legalActs, ...knowledge.measures]);
+  const deadlines = visible(knowledge.deadlineCandidates);
+  const gaps = visible(knowledge.gaps);
+  const issues = visible(knowledge.legalIssues);
+  const questions = visible(knowledge.researchQuestions);
+  const references = [...new Set([
+    ...positions,
+    ...facts,
+    ...events,
+    ...acts,
+    ...deadlines,
+    ...gaps,
+    ...issues,
+    ...questions,
+  ].flatMap(itemBasisRefs))].sort();
+  return {
+    status: "PRELIMINARY_DOCUMENT_BASED",
+    reconstruction: [
+      ...knowledge.subjects.map((subject) => (
+        `${subject.canonicalName}: soggetto documentale qualificato come ${subject.subjectType}.`
+      )),
+      ...visible(knowledge.partyRoles).map(narrativeLine),
+      ...facts.map(narrativeLine),
+    ],
+    chronology: events.map(narrativeLine),
+    titlesObligationsAndDeadlines: [...acts, ...deadlines].map(narrativeLine),
+    complianceAndAllegedBreaches: positions.map((item) => (
+      `Allegazione della parte, non assunta come fatto accertato: ${narrativeLine(item)}`
+    )),
+    contradictionsAndEvidenceGaps: [
+      ...visible(knowledge.contradictions).map(narrativeLine),
+      ...gaps.map(narrativeLine),
+    ],
+    technicalAdministrativeAndLegalProfiles: issues.map((item) => (
+      (() => {
+        const resolution = jsonRecord(jsonRecord(item.payload).targetProceedingResolution);
+        const identityStatus = typeof resolution.status === "string"
+          ? resolution.status === "VERIFIED"
+            ? "identita del procedimento verificata"
+            : `identita del procedimento incerta (${String(resolution.reason ?? resolution.status)})`
+          : "identita del procedimento non classificata";
+        return `Questione preliminare ricavata dal fascicolo; ${identityStatus}: ${narrativeLine(item)}`;
+      })()
+    )),
+    favorableArguments: positions
+      .filter((item) => {
+        const positionType = String(jsonRecord(item.payload).positionType ?? "");
+        return positionType === "CLAIM" || positionType === "REQUEST";
+      })
+      .map((item) => `Argomento della parte da verificare: ${narrativeLine(item)}`),
+    contraryArguments: positions
+      .filter((item) => {
+        const positionType = String(jsonRecord(item.payload).positionType ?? "");
+        return positionType === "DEFENSE" || positionType === "OBJECTION";
+      })
+      .map((item) => `Difesa o obiezione da verificare: ${narrativeLine(item)}`),
+    questionsForFurtherReview: [
+      ...questions.map(narrativeLine),
+      ...gaps.map((item) => `Lacuna probatoria: ${narrativeLine(item)}`),
+    ],
+    documentaryReferences: references,
+    legalResearchStatus: "Le ricostruzioni derivano esclusivamente dai documenti. Norme e giurisprudenza non accompagnate da fonti verificate restano da ricercare e non costituiscono conclusioni giuridiche definitive.",
+  };
 }
 
 function byId<T extends { id?: string; resultId?: string; missionId?: string; semanticKey?: string }>(left: T, right: T): number {
@@ -246,6 +602,263 @@ function normalizedItem(item: StructuredKnowledgeReadItem): StructuredKnowledgeR
   )) };
 }
 
+function itemDate(item: StructuredKnowledgeReadItem): string | null {
+  if (item.payload === null || typeof item.payload !== "object" || Array.isArray(item.payload)) return null;
+  const date = item.payload.date;
+  if (date === null || typeof date !== "object" || Array.isArray(date)) return null;
+  if (date.precision !== "EXACT" || typeof date.from !== "string" || item.evidence.length === 0) return null;
+  return date.to === null || date.to === date.from ? date.from : null;
+}
+
+function provision(
+  result: StructuredReportResearchResultInput,
+  reference: string,
+  _authorityKind: LegalApplicabilityReview["legalAuthorityKind"],
+): VerifiedProvisionReference | null {
+  const assessment = result.sourceAssessment;
+  if (!assessment?.sourceChain) return null;
+  return {
+    legalSourceId: assessment.sourceChain.sourceIdentityKey ?? assessment.assessmentId,
+    legalExpressionVersionId: assessment.sourceVersionId ?? assessment.sourceChain.sourceIdentityKey ?? assessment.assessmentId,
+    provisionReference: reference,
+    sourceAssessment: assessment.sourceChain,
+    citationAnchors: assessment.sourceChain.citationAnchors,
+    provenance: {
+      providerId: result.provider,
+      canonicalEvidenceId: assessment.assessmentId,
+      sourceUrl: result.sourceUrl,
+    },
+  };
+}
+
+function projectLegalApplicability(input: {
+  tenantId: string;
+  procedimentoId: string;
+  knowledge: StructuredKnowledgeReadModel;
+  missions: readonly StructuredReportMissionInput[];
+}): NonNullable<StructuredFascicoloReportPayload["legalApplicability"]> {
+  const items = new Map([
+    ...input.knowledge.facts,
+    ...input.knowledge.events,
+    ...input.knowledge.legalActs,
+    ...input.knowledge.measures,
+  ].map((item) => [item.id, item]));
+  const results = new Map(input.missions.flatMap((mission) => mission.results)
+    .flatMap((result) => result.sourceAssessment ? [[result.sourceAssessment.assessmentId, result] as const] : []));
+  const applications: NonNullable<StructuredFascicoloReportPayload["legalApplicability"]>["applications"][number][] = [];
+
+  for (const mission of input.missions) {
+    if (mission.lifecycleStatus !== "CURRENT" || mission.knowledgeRevisionId !== input.knowledge.revision.id) continue;
+    const reviewedAssessmentIds = new Set<string>();
+    for (const envelope of mission.legalApplicabilityReviews ?? []) {
+      const review = envelope.review;
+      reviewedAssessmentIds.add(review.candidateEvidenceSourceId);
+      const result = results.get(review.candidateEvidenceSourceId);
+      const reasonCodes: string[] = [];
+      if (!result?.sourceAssessment?.sourceChain || !result.sourceAssessment.temporalAssessment) reasonCodes.push("SOURCE_CHAIN_OR_TEMPORAL_ASSESSMENT_MISSING");
+      if (result?.sourceAssessment?.sourceChain && (
+        result.sourceAssessment.sourceChain.tenantId !== input.tenantId
+        || result.sourceAssessment.sourceChain.caseId !== input.procedimentoId
+        || result.sourceAssessment.sourceChain.missionId !== mission.missionId
+      )) reasonCodes.push("SOURCE_SCOPE_MISMATCH");
+      if (review.knowledgeRevisionId !== input.knowledge.revision.id) reasonCodes.push("APPLICABILITY_REVIEW_STALE");
+      if (review.legalIssueSemanticKey !== mission.legalIssueSemanticKey) reasonCodes.push("LEGAL_ISSUE_SCOPE_MISMATCH");
+      if (review.candidateSourceVersionId !== result?.sourceAssessment?.sourceVersionId) reasonCodes.push("SOURCE_VERSION_MISMATCH");
+      if (!envelope.orchestratorVerification?.valid) reasonCodes.push("RULE_ORCHESTRATOR_EVIDENCE_UNVERIFIED");
+      if (envelope.recordedByActorId === null
+        || review.reviewerAttestation.reviewedByActorId !== envelope.recordedByActorId) {
+        reasonCodes.push("REVIEWER_IDENTITY_MISMATCH");
+      }
+      const boundItems = review.factBindings.map((binding) => items.get(binding.knowledgeItemId));
+      if (boundItems.some((item) => !item)) reasonCodes.push("KNOWLEDGE_FACT_REFERENCE_INVALID");
+      const legalIssue = input.knowledge.legalIssues.find((item) => (
+        item.semanticKey === review.legalIssueSemanticKey
+      ));
+      const targetProceedingIdentity = legalIssue
+        ? documentedProceedingIdentity(legalIssue, "targetProceedingIdentity")
+        : null;
+      if (stableStringify(review.targetProceedingIdentity ?? null) !== stableStringify(targetProceedingIdentity)) {
+        reasonCodes.push("TARGET_PROCEEDING_IDENTITY_MISMATCH");
+      }
+      if (review.factBindings.some((binding) => {
+        const item = items.get(binding.knowledgeItemId);
+        return item && stableStringify(binding.proceedingIdentity ?? null)
+          !== stableStringify(documentedProceedingIdentity(item, "proceedingIdentity"));
+      })) reasonCodes.push("PROCEEDING_FACT_IDENTITY_MISMATCH");
+      if (review.factualApplicability.decisiveKnowledgeItemIds.some((id) => !items.has(id))) reasonCodes.push("DECISIVE_FACT_REFERENCE_INVALID");
+      if (reasonCodes.length || !result?.sourceAssessment?.sourceChain || !result.sourceAssessment.temporalAssessment) {
+        applications.push({
+          applicationId: review.applicationId,
+          resultId: result?.resultId ?? review.candidateEvidenceSourceId,
+          legalIssueSemanticKey: review.legalIssueSemanticKey,
+          status: "TO_VERIFY",
+          outcome: "TO_VERIFY",
+          reasonCodes: [...new Set(reasonCodes)].sort(),
+          assessment: null,
+          reviewStatus: review.reviewStatus,
+          professionalReviewRequired: true,
+        });
+        continue;
+      }
+      const candidateProvision = provision(result, review.candidateProvisionReference, review.legalAuthorityKind);
+      if (!candidateProvision) continue;
+      const orchestratorVerification = envelope.orchestratorVerification!;
+      const facts: ApplicabilityFactReference[] = review.factBindings.map((binding) => {
+        const item = items.get(binding.knowledgeItemId)!;
+        return {
+          factClaimId: item.id,
+          role: binding.role,
+          statement: item.normalizedText,
+          occurrenceDate: itemDate(item),
+          certainty: itemDate(item) ? "CERTAIN" : "UNCERTAIN",
+          value: binding.value,
+          evidenceLinkIds: item.evidence.map((evidence) => `${evidence.documentoId}:${evidence.pageNumber}:${evidence.textSha256}`),
+          proceedingIdentity: binding.proceedingIdentity ?? null,
+        };
+      });
+      let transitionalDiscipline: TransitionalDiscipline;
+      if (review.transitionalDiscipline.status === "VERIFIED_PRESENT") {
+        const transitionalResult = results.get(review.transitionalDiscipline.evidenceSourceId);
+        const transitionalProvision = transitionalResult && provision(
+          transitionalResult,
+          review.transitionalDiscipline.provisionReference,
+          "LEGISLATION",
+        );
+        const previousResult = review.transitionalDiscipline.previousRegimeEvidenceSourceId
+          ? results.get(review.transitionalDiscipline.previousRegimeEvidenceSourceId)
+          : null;
+        transitionalDiscipline = transitionalProvision ? {
+          ...review.transitionalDiscipline,
+          provision: transitionalProvision,
+          previousRegimeProvision: previousResult
+            ? provision(previousResult, previousResult.sourceAssessment?.provisionReference ?? "regime previgente", "LEGISLATION")
+            : null,
+          status: "VERIFIED_PRESENT",
+        } : {
+          status: "UNAVAILABLE",
+          expectedProvisionReference: review.transitionalDiscipline.provisionReference,
+          rationale: "La fonte della clausola transitoria non e collegata a una source-chain verificata.",
+        };
+      } else if (review.transitionalDiscipline.status === "VERIFIED_ABSENT") {
+        const absenceResult = results.get(review.transitionalDiscipline.evidenceSourceId);
+        const verificationSource = absenceResult && provision(
+          absenceResult,
+          review.candidateProvisionReference,
+          review.legalAuthorityKind,
+        );
+        transitionalDiscipline = verificationSource ? {
+          status: "VERIFIED_ABSENT",
+          verificationSource,
+          absenceAttestation: review.transitionalDiscipline.absenceAttestation,
+          rationale: review.transitionalDiscipline.rationale,
+        } : {
+          status: "UNAVAILABLE",
+          expectedProvisionReference: review.candidateProvisionReference,
+          rationale: "La verifica di assenza non e collegata a una source-chain verificata.",
+        };
+      } else {
+        transitionalDiscipline = review.transitionalDiscipline;
+      }
+      const assessment = assessLegalApplicability({
+        applicationId: review.applicationId,
+        legalAuthorityKind: review.legalAuthorityKind,
+        referenceDate: result.sourceAssessment.temporalAssessment.referenceDate,
+        candidateProvision,
+        chronologicalAssessment: result.sourceAssessment.temporalAssessment,
+        facts,
+        targetProceedingIdentity: review.targetProceedingIdentity ?? null,
+        ...applicabilityDimensionsFromRuleOrchestrator({
+          source: orchestratorVerification.source!,
+          ruleMatched: orchestratorVerification.ruleMatched,
+          decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+        }),
+        factualApplicability: {
+          outcome: review.factualApplicability.outcome,
+          rationale: review.factualApplicability.rationale,
+          decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+        },
+        transitionalDiscipline,
+        normRelationship: {
+          outcome: review.normRelationship.outcome,
+          rationale: review.normRelationship.rationale,
+          ...review.normRelationship.competingEvidenceSourceId ? (() => {
+            const competing = results.get(review.normRelationship.competingEvidenceSourceId!);
+            const competingSource = orchestratorVerification.resolvedSources?.find(
+              (source) => source.id === competing?.sourceAssessment?.sourceFamilyId,
+            );
+            const competingProvision = competing
+              ? provision(competing, competing.sourceAssessment?.provisionReference ?? "norma speciale", review.legalAuthorityKind)
+              : null;
+            const competingDimensions = competingSource ? applicabilityDimensionsFromRuleOrchestrator({
+              source: competingSource,
+              ruleMatched: orchestratorVerification.matchedSourceIds?.includes(competingSource.id) ?? false,
+              decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+            }) : null;
+            return {
+              competingProvision,
+              competingTerritorialApplicability: competingDimensions?.territorialApplicability,
+              competingMaterialApplicability: competingDimensions?.materialApplicability,
+            };
+          })() : { competingProvision: null },
+        },
+      });
+      applications.push({
+        applicationId: review.applicationId,
+        resultId: result.resultId,
+        legalIssueSemanticKey: review.legalIssueSemanticKey,
+        status: review.reviewStatus === "AI_PROPOSED"
+          ? "PRELIMINARY_AI_PROPOSED"
+          : assessment.conclusion.outcome === "TO_VERIFY" ? "TO_VERIFY" : "ASSESSED",
+        outcome: assessment.conclusion.outcome,
+        reasonCodes: review.reviewStatus === "AI_PROPOSED"
+          ? [...new Set([...assessment.conclusion.reasonCodes, "PROFESSIONAL_REVIEW_REQUIRED"])].sort()
+          : assessment.conclusion.reasonCodes,
+        assessment,
+        reviewStatus: review.reviewStatus,
+        professionalReviewRequired: true,
+      });
+    }
+    for (const result of mission.results) {
+      const assessmentId = result.sourceAssessment?.assessmentId;
+      if (!assessmentId || reviewedAssessmentIds.has(assessmentId)) continue;
+      applications.push({
+        applicationId: `not-evaluated:${mission.missionId}:${result.resultId}`,
+        resultId: result.resultId,
+        legalIssueSemanticKey: mission.legalIssueSemanticKey ?? mission.researchQuestionSemanticKey ?? "UNASSIGNED",
+        status: "NOT_EVALUATED",
+        outcome: "NOT_EVALUATED",
+        reasonCodes: ["LEGAL_APPLICABILITY_REVIEW_MISSING"],
+        assessment: null,
+        reviewStatus: null,
+        professionalReviewRequired: true,
+      });
+    }
+    for (const issue of mission.legalApplicabilityReviewIssues ?? []) {
+      applications.push({
+        applicationId: `invalid-review:${mission.missionId}:${issue}`,
+        resultId: mission.missionId,
+        legalIssueSemanticKey: mission.legalIssueSemanticKey ?? mission.researchQuestionSemanticKey ?? "UNASSIGNED",
+        status: "TO_VERIFY",
+        outcome: "TO_VERIFY",
+        reasonCodes: [issue],
+        assessment: null,
+        reviewStatus: null,
+        professionalReviewRequired: true,
+      });
+    }
+  }
+  applications.sort((left, right) => left.applicationId.localeCompare(right.applicationId));
+  return {
+    assessmentVersion: "LEGAL_APPLICABILITY_V1",
+    applications,
+    uncertainties: applications.filter((application) => application.status !== "ASSESSED").map((application) => ({
+      applicationId: application.applicationId,
+      reasonCodes: application.reasonCodes,
+      professionalReviewRequired: true as const,
+    })),
+  };
+}
+
 function visibleItems(items: readonly StructuredKnowledgeReadItem[]): readonly StructuredKnowledgeReadItem[] {
   return items.filter((item) => item.status !== "REJECTED").map(normalizedItem).sort(byId);
 }
@@ -255,6 +868,7 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
   const assessment = result.sourceAssessment!;
   return {
     resultId: result.resultId,
+    candidateId: result.candidateId ?? result.resultId,
     title: result.title,
     sourceUrl: result.sourceUrl,
     provider: result.provider,
@@ -262,6 +876,7 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
     sourceChainFingerprint: assessment.chainFingerprint,
     citationAnchors: [...assessment.citationAnchors],
     classificationReviewAuditId: result.classificationReviewAuditId!,
+    relevantPassage: result.relevantPassage ?? null,
     rationale: result.classificationRationale,
   };
 }
@@ -269,6 +884,7 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
 function nonUsableReasons(result: StructuredReportResearchResultInput): readonly string[] {
   const assessment = result.sourceAssessment;
   const reasons = assessment?.blockingReasons ?? [];
+  const relevance = result.officialRelevance;
   return [...new Set([
     ...reasons,
     ...(!assessment?.isCurrent ? ["MISSING_CURRENT_SOURCE_ASSESSMENT"] : []),
@@ -280,11 +896,30 @@ function nonUsableReasons(result: StructuredReportResearchResultInput): readonly
       ? ["CLASSIFICATION_ATTESTATION_REQUIRED"] : []),
     ...(!["SUPPORTS", "OPPOSES"].includes(result.supportDirection) ? ["DIRECTION_NOT_DECISIVE"] : []),
     ...(assessment?.citationAnchors.length ? [] : ["CITATION_ANCHOR_REQUIRED"]),
+    ...(relevance?.status === "NON_PERTINENTE" ? ["NOT_PERTINENT_TO_QUESTION"] : []),
+    ...(relevance?.status === "NON_VERIFICABILE" ? [`OFFICIAL_SOURCE_NOT_VERIFIABLE:${relevance.reason}`] : []),
+    ...(relevance?.status === "PERTINENTE_VERIFICATA" && !["SUPPORTS", "OPPOSES"].includes(result.supportDirection)
+      ? ["PROFESSIONAL_DIRECTION_REVIEW_REQUIRED"] : []),
   ])].sort();
 }
 
+export type NonUsableRelevance =
+  | "PERTINENTE_VERIFICATA_DA_CLASSIFICARE"
+  | "NON_PERTINENTE"
+  | "NON_VERIFICABILE"
+  | "NON_ANCORA_VERIFICATA";
+
+function nonUsableRelevance(result: StructuredReportResearchResultInput): NonUsableRelevance {
+  switch (result.officialRelevance?.status) {
+    case "PERTINENTE_VERIFICATA": return "PERTINENTE_VERIFICATA_DA_CLASSIFICARE";
+    case "NON_PERTINENTE": return "NON_PERTINENTE";
+    case "NON_VERIFICABILE": return "NON_VERIFICABILE";
+    default: return "NON_ANCORA_VERIFICATA";
+  }
+}
+
 function projectQuestion(
-  item: StructuredKnowledgeReadItem,
+  item: Pick<StructuredKnowledgeReadItem, "id" | "semanticKey" | "normalizedText" | "status">,
   missionsByQuestion: ReadonlyMap<string, StructuredReportMissionInput>,
 ): StructuredReportQuestion {
   const mission = missionsByQuestion.get(item.semanticKey) ?? null;
@@ -297,6 +932,11 @@ function projectQuestion(
       direction: result.supportDirection,
       rationale: result.relevantPassage ?? result.classificationRationale,
       reasons: nonUsableReasons(result),
+      relevance: nonUsableRelevance(result),
+      relevanceNote: result.officialRelevance
+        ? OFFICIAL_SOURCE_RELEVANCE_LABELS[result.officialRelevance.reason]
+          + (result.officialRelevance.citation ? ` (${result.officialRelevance.citation})` : "")
+        : null,
     }));
   const gaps = [...new Set([
     ...(mission?.sourceGaps ?? []),
@@ -369,12 +1009,373 @@ function numberSteps(steps: readonly StructuredReportOperationalStep[]): Structu
   return steps.map((step, index) => ({ ...step, title: `${index + 1}. ${step.title.replace(/^\d+\.\s*/, "")}` }));
 }
 
+const APPLICABILITY_CHECK_LABELS = [
+  ["Vigenza temporale", "chronologicalCheck"],
+  ["Autenticità e utilizzabilità della fonte", "sourceVerificationCheck"],
+  ["Ambito territoriale", "territorialCheck"],
+  ["Ambito materiale", "materialCheck"],
+  ["Presupposti fattuali", "factualCheck"],
+  ["Specialità e rapporto tra norme", "specialityCheck"],
+  ["Disciplina transitoria", "transitionalCheck"],
+] as const;
+
+function buildLegalAnalyses(input: {
+  issues: StructuredFascicoloReportPayload["legalIssues"];
+  knowledge: StructuredKnowledgeReadModel;
+  applicability: StructuredFascicoloReportPayload["legalApplicability"];
+  contributions: readonly LegalAnalysisContribution[];
+}): readonly StructuredReportLegalAnalysis[] {
+  const evidenceItems = [
+    ...(input.knowledge.partyPositions ?? []),
+    ...input.knowledge.facts,
+    ...input.knowledge.events,
+    ...input.knowledge.legalActs,
+    ...input.knowledge.measures,
+    ...input.knowledge.contradictions,
+    ...input.knowledge.gaps,
+    ...input.knowledge.deadlineCandidates,
+  ].filter((item) => item.status !== "REJECTED");
+  const itemById = new Map(evidenceItems.map((item) => [item.id, item]));
+
+  return input.issues.map((issue) => {
+    const related = issue.originatingItemIds
+      .map((id) => itemById.get(id))
+      .filter((item): item is StructuredKnowledgeReadItem => item !== undefined);
+    const sources = issue.questions.flatMap((question) => [
+      ...question.favorableAuthorities.map((source) => ({ ...source, direction: "SUPPORTS" as const })),
+      ...question.contraryAuthorities.map((source) => ({ ...source, direction: "OPPOSES" as const })),
+    ]);
+    const uniqueSources = [...new Map(sources.map((source) => [source.resultId, source])).values()];
+    const usableCandidateIds = new Set(uniqueSources.map((source) => source.candidateId));
+    const relatedBasisRefs = new Set(related.flatMap(itemBasisRefs));
+    const questionSemanticKeys = new Set(issue.questions.map((question) => question.semanticKey));
+    const validContributions = input.contributions.filter((contribution) => (
+      contribution.legalIssueSemanticKey === issue.semanticKey
+      && questionSemanticKeys.has(contribution.researchQuestionSemanticKey)
+      && contributionCandidateIds(contribution).every((candidateId) => usableCandidateIds.has(candidateId))
+      && contributionBasisRefs(contribution).every((basisRef) => relatedBasisRefs.has(basisRef))
+    )).sort((left, right) => left.contributionId.localeCompare(right.contributionId));
+    const professionalReasoning = validContributions.length === 1 ? validContributions[0] : null;
+    const applications = (input.applicability?.applications ?? [])
+      .filter((application) => application.legalIssueSemanticKey === issue.semanticKey)
+      .map((application) => {
+        const assessment = application.assessment;
+        return {
+          applicationId: application.applicationId,
+          outcome: application.outcome,
+          checks: assessment ? APPLICABILITY_CHECK_LABELS.map(([criterion, key]) => {
+            const check = assessment[key];
+            return {
+              criterion,
+              outcome: check.outcome,
+              rationale: check.rationale,
+              decisiveFacts: check.decisiveFactClaimIds.map((id) => (
+                itemById.get(id)?.normalizedText ?? id
+              )),
+            };
+          }) : [],
+          conclusion: assessment?.conclusion.rationale
+            ?? "L'applicabilità della fonte non è stata ancora verificata rispetto ai fatti documentati.",
+        };
+      });
+    const supporting = professionalReasoning?.supportingArguments.map((argument) => argument.text) ?? [];
+    const opposing = professionalReasoning?.contraryArguments.map((argument) => argument.text) ?? [];
+    const missingEvidence = [...new Set([
+      ...related.filter((item) => item.kind === "GAP").map((item) => item.normalizedText),
+      ...issue.questions.flatMap((question) => question.gaps),
+      ...applications.flatMap((application) => application.checks
+        .filter((check) => check.outcome === "TO_VERIFY")
+        .map((check) => `${check.criterion}: ${check.rationale}`)),
+    ])];
+    const status: StructuredReportLegalAnalysis["status"] = uniqueSources.length === 0
+      ? "RESEARCH_REQUIRED"
+      : professionalReasoning === null
+        ? "MOTIVATION_REQUIRED"
+        : professionalReasoning.contraryArguments.length > 0
+          ? "CONTESTED"
+          : "ARGUED";
+    const assessment = uniqueSources.length === 0
+      ? "La ricerca non ha ancora prodotto fonti utilizzabili; nessuna conclusione giuridica è formulata."
+      : professionalReasoning?.reasonedConclusion.text
+        ?? "Le fonti sono disponibili, ma non è stata acquisita una motivazione argomentata e integralmente riferita ai fatti e alle fonti verificate.";
+    const recommendedActions = [...new Set([
+      ...(uniqueSources.length === 0
+        ? issue.questions.map((question) => `Completare la ricerca e la verifica delle fonti per il quesito: ${question.text}`)
+        : []),
+      ...(uniqueSources.length > 0 && professionalReasoning === null
+        ? ["Acquisire dall'esecutore autorizzato una motivazione specifica che citi esclusivamente le fonti e i fatti verificati della questione."]
+        : []),
+      ...(professionalReasoning?.strategies.map((strategy) => `${strategy.title}: ${strategy.rationale}`) ?? []),
+    ])];
+
+    return {
+      issueSemanticKey: issue.semanticKey,
+      issueText: issue.text,
+      status,
+      documentedFacts: related
+        .filter((item) => item.kind !== "GAP")
+        .map((item) => ({
+          statement: item.normalizedText,
+          documentReferences: itemBasisRefs(item),
+        })),
+      questions: issue.questions.map((question) => question.text),
+      verifiedSources: uniqueSources.map((source) => ({
+        resultId: source.resultId,
+        title: source.title,
+        sourceUrl: source.sourceUrl,
+        provider: source.provider,
+        direction: source.direction,
+        relevantPassage: source.relevantPassage ?? null,
+        rationale: source.rationale,
+        citationAnchors: source.citationAnchors,
+      })),
+      applications,
+      competingArguments: { supporting, opposing },
+      professionalReasoning,
+      assessment,
+      missingEvidence: [...new Set([
+        ...missingEvidence,
+        ...(professionalReasoning?.evidenceAssessment.missingEvidence ?? []),
+      ])],
+      recommendedActions,
+      professionalReviewRequired: true,
+    };
+  });
+}
+
+const TECHNICAL_VERIFICATION_STATUSES: readonly StructuredReportTechnicalVerificationStatus[] = [
+  "DA_VERIFICARE_SU_FONTE_ORIGINALE",
+  "INDICATIVO_DA_VERIFICARE",
+  "RISPOSTA_VUOTA_NON_PROBATORIA",
+];
+
+const TECHNICAL_REQUIRED_VERIFICATION: Readonly<Record<StructuredReportTechnicalVerificationStatus, string>> = {
+  DA_VERIFICARE_SU_FONTE_ORIGINALE: "Consultare la fonte originale vigente indicata e acquisirne copia o estremi verificabili prima di qualsiasi uso.",
+  INDICATIVO_DA_VERIFICARE: "Esito WMS indicativo: verificare presso l'ente competente o sugli atti di pianificazione ufficiali; non attesta vincoli né conformità.",
+  RISPOSTA_VUOTA_NON_PROBATORIA: "Risposta WMS vuota: non prova l'assenza di vincoli; richiedere verifica presso l'ente competente.",
+};
+
+function projectTechnicalSources(
+  inputs: readonly StructuredReportTechnicalSourceInput[],
+  missions: readonly StructuredReportMissionInput[],
+): readonly StructuredReportTechnicalSource[] {
+  const questionByMission = new Map(missions.map((mission) => [mission.missionId, mission.researchQuestionSemanticKey!]));
+  return inputs
+    .filter((input) => questionByMission.has(input.missionId))
+    .map((input) => {
+      // Unknown statuses fall back to the strictest non-probative category.
+      const verificationStatus = (TECHNICAL_VERIFICATION_STATUSES as readonly string[]).includes(input.verificationStatus)
+        ? input.verificationStatus as StructuredReportTechnicalVerificationStatus
+        : "DA_VERIFICARE_SU_FONTE_ORIGINALE";
+      return {
+        recordId: input.recordId,
+        missionId: input.missionId,
+        questionSemanticKey: questionByMission.get(input.missionId)!,
+        toolName: input.toolName,
+        question: input.questionSnapshot.slice(0, 2000),
+        verificationStatus,
+        probative: false as const,
+        serviceVersion: input.serviceVersion,
+        responseDigest: input.responseDigest,
+        retrievedAt: input.retrievedAt.toISOString(),
+        requiredVerification: TECHNICAL_REQUIRED_VERIFICATION[verificationStatus],
+      };
+    })
+    .sort((left, right) => left.recordId.localeCompare(right.recordId));
+}
+
+function technicalOutstandingEvidence(sources: readonly StructuredReportTechnicalSource[]): string {
+  const empty = sources.filter((source) => source.verificationStatus === "RISPOSTA_VUOTA_NON_PROBATORIA").length;
+  return `Verificare sulle fonti originali gli esiti tecnico-urbanistici acquisiti tramite MCP (${sources.length}, non probatori)`
+    + (empty ? `; ${empty} risposte WMS vuote non provano l'assenza di vincoli` : "")
+    + ".";
+}
+
+function administrativeActDrafts(input: {
+  issueText: string;
+  sourceDocumentRefs: readonly string[];
+  outstandingEvidence: readonly string[];
+  documentedFacts: readonly string[];
+}): readonly StructuredReportAdministrativeActDraft[] {
+  const refs = input.sourceDocumentRefs.length
+    ? input.sourceDocumentRefs.join("; ")
+    : "[RIFERIMENTI DOCUMENTALI DA INSERIRE]";
+  const missing = input.outstandingEvidence.length
+    ? input.outstandingEvidence
+    : ["[DOCUMENTAZIONE MANCANTE DA INDIVIDUARE]"];
+  const common = {
+    competentOffice: "[UFFICIO/AUTORITA COMPETENTE DA VERIFICARE]",
+    legalBasis: "[FONDAMENTO GIURIDICO DA VERIFICARE DALL'UFFICIO]",
+    participationGuarantees: [
+      "Garantire accesso, partecipazione e contraddittorio nella misura applicabile al procedimento verificato.",
+      "Non anticipare decadenza, revoca o sanzioni prima dell'accertamento di presupposti e competenza.",
+    ],
+    subsequentCommunications: [
+      "[DESTINATARI E MODALITA DI COMUNICAZIONE DA VERIFICARE]",
+      "Registrare esito, ricevute e adempimenti successivi senza invio automatico.",
+    ],
+    templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE" as const,
+    adaptationInstructions: "Usare prioritariamente lo schema interno dell'Ente senza modificarne l'originale; applicare queste sezioni in una copia e marcare ogni integrazione proposta. In assenza di schema interno, il presente modello standard richiede verifica dell'ufficio.",
+    automaticExecutionProhibited: true as const,
+  };
+  const caseText = input.issueText.toLowerCase();
+  const facts = input.documentedFacts.length
+    ? input.documentedFacts.map((fact) => `${fact} [fonti: ${refs}]`)
+    : [`Criticita documentata: ${input.issueText}. [fonti: ${refs}]`];
+  const actSpecs = /canoni|pagament|tesoreria|ripiano/.test(caseText) ? [
+    {
+      actType: "ACQUISIZIONE_PARTITARIO_E_ATTESTAZIONE_TESORERIA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire per ciascuna rata importo, scadenza, pagamento, valuta, imputazione, interessi e saldo certificato.",
+      investigation: ["Acquisire partitario ufficiale, quietanze analitiche, reversali e criteri di imputazione.", "Separare pagamenti documentati, importi non imputati e residui ancora da accertare."],
+      operativePart: ["Disporre a [UFFICIO TESORERIA/RAGIONERIA VERIFICATO] di produrre attestazione analitica.", "Allegare una tabella rata-pagamento-imputazione-interessi-saldo e indicare i dati non verificati."],
+    },
+    {
+      actType: "RICHIESTA_DOCUMENTI_CONTABILI_AL_CONCESSIONARIO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire contabili, quietanze, causali e osservazioni sulla proposta di ripiano o compensazione.",
+      investigation: ["Confrontare i documenti della parte con l'attestazione della Tesoreria.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Richiedere a [CONCESSIONARIO] le prove analitiche dei pagamenti e il fondamento dell'eventuale compensazione.", "Assegnare [TERMINE VERIFICATO] senza riconoscere automaticamente ripiano o compensazione."],
+    },
+    {
+      actType: "PROVVEDIMENTO_SU_RIPIANO_O_REGOLARIZZAZIONE",
+      necessity: "OPTIONAL" as const,
+      purpose: "Accogliere, modificare o respingere motivatamente la proposta dopo riconciliazione e contraddittorio.",
+      investigation: ["Valutare saldo certificato, sostenibilita, disciplina applicabile, interessi, garanzie e alternative.", "Dare conto delle deduzioni e delle ragioni di proporzionalita."],
+      operativePart: ["[ACCOGLIERE/MODIFICARE/RESPINGERE] la proposta nei limiti consentiti dalla disciplina verificata.", "Definire rate, scadenze, interessi, decadenza dal beneficio e controlli soltanto se giuridicamente ammessi."],
+    },
+  ] : /portanza|struttural|sicurezza|impianto|mezzi/.test(caseText) ? [
+    {
+      actType: "RICHIESTA_ACCERTAMENTO_SPECIALISTICO_STRUTTURALE_E_IMPIANTISTICO",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Accertare portanza, carichi distribuiti e puntuali, stato delle opere, documentazione delle gru e conformita impiantistica.",
+      investigation: ["Acquisire progetti, collaudi, classificazione delle aree, configurazioni e reazioni degli stabilizzatori.", "Formulare quesiti su fessure, copriferro, carichi ammissibili, I1 e documentazione M1/M2."],
+      operativePart: ["Conferire a [TECNICO/STRUTTURA COMPETENTE] l'accertamento sui quesiti indicati.", "Vietare conclusioni di dissesto o conformita non sostenute da prove specialistiche."],
+    },
+    {
+      actType: "DISPOSIZIONE_E_VERBALE_DI_SOPRALLUOGO_TECNICO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Documentare stato dei luoghi, mezzi, impianti, aree di sicurezza e corrispondenza con titolo e planimetrie.",
+      investigation: ["Identificare partecipanti, strumenti, fotografie originali, misure e documenti esibiti.", ...missing.map((entry) => `Verificare in sopralluogo: ${entry}.`)],
+      operativePart: ["Disporre sopralluogo in data [DATA] con contraddittorio tecnico ove applicabile.", "Redigere verbale con rilievi distinti da valutazioni e raccogliere osservazioni dei presenti."],
+    },
+    {
+      actType: "PRESCRIZIONE_TECNICA_MOTIVATA",
+      necessity: "OPTIONAL" as const,
+      purpose: "Imporre esclusivamente le misure tecniche risultate necessarie e proporzionate dagli accertamenti.",
+      investigation: ["Individuare rischio, competenza, urgenza, misura praticabile e termine tecnicamente congruo.", "Valutare misure meno restrittive e osservazioni della parte."],
+      operativePart: ["Prescrivere [MISURA TECNICA ACCERTATA] entro [TERMINE VERIFICATO].", "Programmare verifica di adempimento senza anticipare ulteriori conseguenze non istruite."],
+    },
+  ] : /terzi|magazzini|subconcess|affidamento/.test(caseText) ? [
+    {
+      actType: "RICHIESTA_DOCUMENTAZIONE_RAPPORTO_CON_OPERATORE_TERZO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire contratto, autorizzazioni, planimetrie, turni, chiavi, custodia, personale e attivita effettivamente svolte.",
+      investigation: ["Distinguere servizio, affidamento di segmento operativo, uso esclusivo di area e possibile subconcessione.", ...missing.map((entry) => `Acquisire o chiarire: ${entry}.`)],
+      operativePart: ["Richiedere a [CONCESSIONARIO E OPERATORE TERZO] i documenti indicati.", "Precisare che il contratto privato non prova da solo la qualificazione pubblicistica."],
+    },
+    {
+      actType: "VERBALE_DI_SOPRALLUOGO_SU_SPAZI_E_OPERAZIONI",
+      necessity: "EVENTUAL" as const,
+      purpose: "Accertare uso dei 180 m2, cartellonistica, accessi, custodia, mezzi, personale e operazioni svolte.",
+      investigation: ["Confrontare M4, zona L, titolo, planimetrie e autorizzazioni.", "Registrare eventuali variazioni temporanee e fatti favorevoli alla parte."],
+      operativePart: ["Eseguire sopralluogo con rilievo planimetrico e fotografico verificabile.", "Acquisire dichiarazioni senza assumerle automaticamente come fatti accertati."],
+    },
+    {
+      actType: "COMUNICAZIONE_DI_AVVIO_E_CONTESTAZIONE_SPECIFICA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Contestare soltanto i fatti accertati, indicare la possibile qualificazione e consentire deduzioni.",
+      investigation: ["Verificare disciplina, competenza, autorizzazioni e concreta organizzazione del servizio.", "Considerare alternative, regolarizzazione consentita e archiviazione."],
+      operativePart: ["Comunicare fatti, prove e possibili qualificazioni a [DESTINATARI VERIFICATI].", "Consentire memorie e documenti entro [TERMINE VERIFICATO] senza anticipare l'esito."],
+    },
+  ] : /ambient|drenaggio|scarico|rifiut/.test(caseText) ? [
+    {
+      actType: "ACQUISIZIONE_TITOLI_E_PARERE_TECNICO_AMBIENTALE",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Verificare progetto I4, separatore, collaudo, titolo allo scarico, registri rifiuti e attendibilita dei campionamenti.",
+      investigation: ["Acquisire progetto approvato, titolo allo scarico, formulari, registri e catena di custodia.", "Non inferire conformita o illecito dal solo campione isolato."],
+      operativePart: ["Richiedere a [UFFICIO/ENTE COMPETENTE] riscontro documentale e tecnico.", "Indicare separatamente documenti mancanti, non rinvenuti e accertati inesistenti."],
+    },
+    {
+      actType: "DISPOSIZIONE_DI_SOPRALLUOGO_E_CAMPIONAMENTO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Verificare opere di drenaggio, punto di scarico, contenitori e condizioni operative con metodo tracciabile.",
+      investigation: ["Definire punti, metodo, catena di custodia, laboratorio e disciplina territoriale applicabile.", ...missing.map((entry) => `Verificare: ${entry}.`)],
+      operativePart: ["Disporre sopralluogo e, se competente e necessario, campionamento tracciato.", "Redigere verbale e attendere esiti verificati prima di qualificare violazioni."],
+    },
+  ] : /traffici|moviment/.test(caseText) ? [
+    {
+      actType: "RELAZIONE_DI_RICONCILIAZIONE_TRAFFICI",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Riconciliare traffici dichiarati, manifesti nave, registri di scalo e trasferimenti interni.",
+      investigation: ["Separare sbarco/imbarco da trasferimenti e ricondizionamenti.", "Verificare cause esterne mediante dati meteo, ordinanze e disponibilita degli ormeggi."],
+      operativePart: ["Predisporre prospetto annuale con fonte, criterio di eleggibilita e scostamento.", "Evidenziare dati certificati, allegazioni e valori non verificati."],
+    },
+    {
+      actType: "RICHIESTA_DEDUZIONI_SU_SCOSTAMENTO_TRAFFICI",
+      necessity: "EVENTUAL" as const,
+      purpose: "Consentire alla concessionaria di documentare cause esterne e criteri di computo.",
+      investigation: ["Acquisire manifesti, registri, ordinanze, orari nave e serie statistiche confrontabili.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Comunicare lo scostamento provvisorio e i criteri utilizzati.", "Richiedere deduzioni entro [TERMINE VERIFICATO] prima di ogni valutazione conclusiva."],
+    },
+  ] : /formazione|efficacia|titolo|presuppost/.test(caseText) ? [
+    {
+      actType: "RELAZIONE_ISTRUTTORIA_SU_FORMAZIONE_ED_EFFICACIA_DEL_TITOLO",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire avviso, offerta, comparazione, aggiudicazione, garanzia, concessione, disciplinare e consegna.",
+      investigation: ["Verificare sequenza, condizioni di efficacia, allegati incorporati e atti modificativi.", "Distinguere titolo, atti presupposti e documenti privati successivi."],
+      operativePart: ["Formare indice cronologico degli atti e delle condizioni adempiute o da verificare.", "Indicare gli effetti giuridici soltanto dopo verifica professionale delle fonti."],
+    },
+    {
+      actType: "ACQUISIZIONE_ATTI_E_VERIFICA_CONDIZIONI_DI_EFFICACIA",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire originali, pubblicazioni, comunicazioni, garanzia e verbale di consegna.",
+      investigation: ["Verificare autenticita, completezza, collegamenti e vigenza degli atti.", ...missing.map((entry) => `Acquisire: ${entry}.`)],
+      operativePart: ["Richiedere agli uffici detentori gli originali e attestare le verifiche compiute.", "Segnalare separatamente ogni documento non valutabile o ambiguo."],
+    },
+  ] : [
+    {
+      actType: "RELAZIONE_ISTRUTTORIA_CONCLUSIVA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire fatti, allegazioni, lacune, disciplina, alternative e proposta motivata.",
+      investigation: ["Acquisire documenti e verificare competenza, termini e contraddittorio.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Proporre [ARCHIVIAZIONE/PRESCRIZIONE/ALTRO PROVVEDIMENTO VERIFICATO].", "Motivare proporzionalita, alternative e conseguenze successive."],
+    },
+  ];
+  return actSpecs.map((spec, index) => ({
+    ...common,
+    actType: spec.actType,
+    necessity: spec.necessity,
+    sequence: index + 1,
+    sections: {
+      heading: "[DENOMINAZIONE ENTE] - [UFFICIO COMPETENTE] - Bozza istruttoria modificabile",
+      subject: `${spec.actType.replaceAll("_", " ")} — ${input.issueText}`,
+      premises: [
+        `Esaminati i documenti ${refs}.`,
+        `Rilevata la necessita di ${spec.purpose.toLowerCase()}`,
+        "Dato atto che allegazioni, valutazioni private e documenti mancanti non sono assunti come fatti accertati.",
+      ],
+      documentedFacts: facts,
+      investigation: spec.investigation,
+      reasoning: [
+        spec.purpose,
+        "La soluzione deve essere necessaria, proporzionata e adottata dall'autorita competente dopo il contraddittorio applicabile.",
+      ],
+      legalReferences: ["[FONDAMENTO SOSTANZIALE, PROCEDIMENTALE E SULLA COMPETENZA DA VERIFICARE]"],
+      operativePart: spec.operativePart,
+      communications: [...common.subsequentCommunications],
+      signature: "[NOME, QUALIFICA E FIRMA DEL SOGGETTO COMPETENTE]",
+    },
+  }));
+}
+
 function buildOperationalPlans(
   issues: StructuredFascicoloReportPayload["legalIssues"],
   knowledge: StructuredKnowledgeReadModel,
   proceduralContext?: StructuredReportProceduralContext,
   portMatter = false,
   detectedPhase?: ActPhaseDetection,
+  technicalSources: readonly StructuredReportTechnicalSource[] = [],
 ): readonly StructuredReportOperationalPlan[] {
   const phase = detectedPhase ?? detectActPhase({
     proceduralContext,
@@ -405,6 +1406,11 @@ function buildOperationalPlans(
     const outstandingEvidence = knowledge.gaps.filter((item) =>
       item.status !== "REJECTED" && originIds.has(item.id))
       .map((item) => item.normalizedText).sort();
+    const issueQuestionKeys = new Set(issue.questions.map((question) => question.semanticKey));
+    const issueTechnical = technicalSources.filter((source) => issueQuestionKeys.has(source.questionSemanticKey));
+    if (issueTechnical.length) {
+      outstandingEvidence.push(technicalOutstandingEvidence(issueTechnical));
+    }
     const sourceReady = issue.questions.length > 0 && issue.questions.every((question) =>
       question.missionStatus === "COMPLETED"
       && question.favorableAuthorities.length + question.contraryAuthorities.length > 0);
@@ -470,10 +1476,14 @@ function buildOperationalPlans(
         activityCode: "PORT:QUALIFICATION",
         necessity: "REQUIRED",
         title: "2. Qualificare le violazioni e valutare i procedimenti conseguenti",
-        action: concernsInstallation
+        action: !sourceReady
+          ? "Verificare sulle fonti vigenti le fattispecie, i presupposti, i poteri tipizzati e le competenze applicabili. Separare ogni possibile procedimento e non presumere decadenza, revoca, ripristino o sanzioni prima della verifica professionale."
+          : concernsInstallation
           ? "Verificare separatamente se ricorrono i presupposti di decadenza ex art. 47 cod. nav. (in particolare lett. f per inadempimento di obblighi, lett. c solo se vi e mutamento sostanziale non autorizzato dello scopo) e di intervento sulle innovazioni abusive ex art. 54 cod. nav. Accertare l'autorità competente, incluse le distinte competenze degli artt. 48 e 54, e la normativa applicabile nel tempo."
           : "Esaminare le ipotesi di decadenza ex art. 47 cod. nav. pertinenti alla violazione, eventuali obblighi di ripristino e altri poteri tipizzati. Separare presupposti, competenze e conseguenze di ogni procedimento; non presupporre che la decadenza sia automatica.",
-        office: "Autorità concedente per l'eventuale decadenza (art. 48 cod. nav.); autorità marittima competente per gli eventuali poteri di cui all'art. 54",
+        office: sourceReady
+          ? "Autorità concedente per l'eventuale decadenza (art. 48 cod. nav.); autorità marittima competente per gli eventuali poteri di cui all'art. 54"
+          : "[UFFICIO O AUTORITA COMPETENTE DA VERIFICARE SULLE FONTI VIGENTI]",
         requiredDocuments: ["Prescrizioni e obblighi del titolo e loro contestazioni", "Testi normativi applicabili alla data dei fatti", "Precedenti amministrativi e fonti giurisprudenziali verificabili", "Documenti idonei a dimostrare gravità, durata e conseguenze della condotta"],
         completionGate: "Distinta qualificazione giuridica dei possibili procedimenti, verificata da un professionista",
       },
@@ -655,7 +1665,7 @@ function buildOperationalPlans(
         riskOrLimit: "La decadenza non è conseguenza automatica di qualsiasi irregolarità; distinguere tipicità, prova, partecipazione e proporzionalità.",
       },
       {
-        title: "Valutare il ripristino o altri interventi",
+        title: "Valutare il ripristino, misure ripristinatorie o altri interventi",
         whenApplicable: "Se i fatti integrano presupposti di occupazione o innovazione abusiva o altra violazione con poteri amministrativi specifici",
         practicalRoute: "Verificare l'autorità competente e le norme applicabili, istruire separatamente il ripristino o le altre misure consentite.",
         riskOrLimit: "Non estendere i poteri dell'ente oltre le competenze stabilite dalla legge.",
@@ -673,22 +1683,49 @@ function buildOperationalPlans(
         riskOrLimit: "L'archiviazione non deve precludere accertamenti futuri su fatti nuovi.",
       },
     ];
+    // Unverified sources keep the issue-specific alternatives, preceded by an explicit instruction gate.
+    const reportAlternatives = sourceReady ? alternatives : [
+      {
+        title: "Completare l'istruttoria prima di scegliere il procedimento",
+        whenApplicable: "Quando prove, competenza, disciplina applicabile o consistenza dell'inadempimento non sono ancora verificate",
+        practicalRoute: "Acquisire originali, riscontri d'ufficio, verbali e valutazioni tecniche; sottoporre le fonti giuridiche a verifica professionale.",
+        riskOrLimit: "L'istruttoria non deve essere presentata come accertamento definitivo ne ritardare termini che l'ufficio abbia previamente verificato.",
+      },
+      ...alternatives,
+    ];
+    const recommendedNextStep = !portMatter
+      ? proceedingConcluded
+        ? "Verificare l'atto finale e l'eventuale riesame senza riavviare automaticamente il procedimento."
+        : "Accertare fatti, documenti, disciplina applicabile e competenza prima di scegliere iniziative."
+      : proceedingConcluded
+      ? `Il procedimento risulta concluso${proceduralContext?.finalAct ? ` con l'atto ${proceduralContext.finalAct.numeroAtto}` : ""}: priorità a tenuta dell'atto, riesame, contenzioso, esecuzione e obblighi residui. Non proporre un nuovo avvio per i medesimi fatti.`
+      : "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.";
+    const administrativeActs = administrativeActDrafts({
+      issueText: issue.text,
+      sourceDocumentRefs,
+      outstandingEvidence,
+      documentedFacts: related.map((item) => item.normalizedText),
+    });
     return {
       issueSemanticKey: issue.semanticKey,
       issueText: issue.text,
+      problem: issue.text,
+      evidence: sourceDocumentRefs,
+      legalQualification: sourceReady
+        ? "Qualificazione preliminare fondata sulle fonti giuridiche verificate allegate; resta necessaria l'approvazione professionale."
+        : "Ipotesi giuridiche da verificare sulle fonti vigenti: nessuna qualificazione definitiva, competenza o conseguenza e presunta.",
       sourceDocumentRefs,
       outstandingEvidence,
       legalSourceStatus: sourceReady ? "VERIFIED_SOURCES_ATTACHED" : "LEGAL_RESEARCH_REQUIRED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
-      recommendedNextStep: !portMatter
-        ? proceedingConcluded
-          ? "Verificare l'atto finale e l'eventuale riesame senza riavviare automaticamente il procedimento."
-          : "Accertare fatti, documenti, disciplina applicabile e competenza prima di scegliere iniziative."
-        : proceedingConcluded
-        ? `Il procedimento risulta concluso${proceduralContext?.finalAct ? ` con l'atto ${proceduralContext.finalAct.numeroAtto}` : ""}: priorità a tenuta dell'atto, riesame, contenzioso, esecuzione e obblighi residui. Non proporre un nuovo avvio per i medesimi fatti.`
-        : "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.",
+      recommendedNextStep,
+      proposedSolution: recommendedNextStep,
+      investigationActivities: steps.map((step) => step.action),
+      actsToForm: administrativeActs.map((act) => act.actType),
+      modelsAvailable: administrativeActs.map((act) => act.actType),
       steps,
-      alternatives,
+      alternatives: reportAlternatives,
+      administrativeActs,
       deadlineReview: "Verificare espressamente scadenze, notifiche e termini applicabili: nessuna data processuale è determinata da questo piano.",
     };
   });
@@ -696,10 +1733,13 @@ function buildOperationalPlans(
   const finalize = (plan: StructuredReportOperationalPlan, steps: readonly StructuredReportOperationalStep[]): StructuredReportOperationalPlan => {
     const numbered = numberSteps(steps);
     const next = numbered.find((step) => step.necessity === "REQUIRED") ?? numbered[0];
+    const nextStep = `Prossimo passo: ${next?.title ?? "verificare i presupposti"}. Le misure successive dipendono dall'esito: nessuna è automatica.`;
     return {
       ...plan,
       steps: numbered,
-      recommendedNextStep: `Prossimo passo: ${next?.title ?? "verificare i presupposti"}. Le misure successive dipendono dall'esito: nessuna è automatica.`,
+      recommendedNextStep: nextStep,
+      ...(plan.proposedSolution !== undefined ? { proposedSolution: nextStep } : {}),
+      ...(plan.investigationActivities !== undefined ? { investigationActivities: numbered.map((step) => step.action) } : {}),
     };
   };
   const profiled = (plan: StructuredReportOperationalPlan) => plan.steps.some((step) => step.activityCode?.startsWith("PROFILE:"));
@@ -775,10 +1815,17 @@ export function buildStructuredFascicoloReport(input: {
   missions: readonly StructuredReportMissionInput[];
   proceduralContext?: StructuredReportProceduralContext;
   documentCoverage?: { corpusFingerprint: string; entries: readonly DocumentCoverageEntry[] };
+  technicalSources?: readonly StructuredReportTechnicalSourceInput[];
+  contractVersion?: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION | typeof STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION;
 }): BuiltStructuredFascicoloReport {
+  const legalCompleteness = assessLegalCompleteness(input.knowledge);
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
-    && mission.knowledgeRevisionId === input.knowledge.revision.id
+    && (
+      mission.knowledgeRevisionId === input.knowledge.revision.id
+      || mission.professionalQuestionVersionId
+    )
     && mission.researchQuestionSemanticKey !== null).sort(byId);
+  const technicalSources = projectTechnicalSources(input.technicalSources ?? [], currentMissions);
   const groupedMissions = new Map<string, StructuredReportMissionInput[]>();
   for (const mission of currentMissions) {
     const current = groupedMissions.get(mission.researchQuestionSemanticKey!) ?? [];
@@ -796,21 +1843,87 @@ export function buildStructuredFascicoloReport(input: {
       status: questionMissions.every((mission) => mission.status === "COMPLETED") ? "COMPLETED" : primary.status,
       sourceGaps: [...new Set(questionMissions.flatMap((mission) => mission.sourceGaps))].sort(),
       results,
+      legalAnalysisContributions: questionMissions.flatMap((mission) => (
+        mission.status === "COMPLETED" ? mission.legalAnalysisContributions ?? [] : []
+      )),
     }];
   }));
-  const questions = visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion));
+  const professionalQuestions = currentMissions
+    .filter((mission) => mission.professionalQuestionVersionId)
+    .map((mission) => projectQuestion({
+      id: mission.professionalQuestionVersionId!,
+      semanticKey: mission.researchQuestionSemanticKey!,
+      normalizedText: mission.question,
+      status: "HUMAN_CONFIRMED",
+    }, new Map([[mission.researchQuestionSemanticKey!, mission]])));
+  const questions = [
+    ...visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion)),
+    ...professionalQuestions,
+  ];
   const questionById = new Map(input.knowledge.researchQuestions.map((item) => [item.id, item]));
-  const legalIssues = input.knowledge.legalIssues.filter((item) => item.status !== "REJECTED").sort(byId).map((issue) => ({
-    knowledgeItemId: issue.id,
-    semanticKey: issue.semanticKey,
-    text: issue.normalizedText,
-    reviewStatus: issue.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
-    originatingItemIds: [...issue.originatingItemIds].sort(),
-    questions: questions.filter((question) => questionById.get(question.knowledgeItemId)?.legalIssueId === issue.id),
-  }));
+  const proceedingAnchors = new Map(
+    [...input.knowledge.legalActs, ...input.knowledge.measures]
+      .map((item) => [item.semanticKey, item] as const),
+  );
+  const legalIssues = input.knowledge.legalIssues
+    .filter((item) => item.status !== "REJECTED")
+    .sort(byId)
+    .map((issue) => {
+      const payload = jsonRecord(issue.payload);
+      const identity = jsonRecord(payload.targetProceedingIdentity);
+      const resolution = jsonRecord(payload.targetProceedingResolution);
+      const anchorSemanticKey = typeof identity.canonicalAnchorSemanticKey === "string"
+        ? identity.canonicalAnchorSemanticKey
+        : null;
+      const anchor = anchorSemanticKey
+        ? proceedingAnchors.get(anchorSemanticKey) ?? null
+        : null;
+      const hasResolution = typeof resolution.status === "string";
+      return {
+        knowledgeItemId: issue.id,
+        semanticKey: issue.semanticKey,
+        text: issue.normalizedText,
+        reviewStatus: issue.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
+        originatingItemIds: [...issue.originatingItemIds].sort(),
+        ...(hasResolution ? {
+          proceedingIdentity: {
+            status: String(resolution.status),
+            action: String(resolution.action ?? ""),
+            reason: typeof resolution.reason === "string" ? resolution.reason : null,
+            linkedAnchor: anchor && (anchor.kind === "LEGAL_ACT" || anchor.kind === "MEASURE")
+              ? {
+                  semanticKey: anchor.semanticKey,
+                  kind: anchor.kind,
+                  text: anchor.normalizedText,
+                }
+              : null,
+            evidenceBasisRefs: stringValues(identity.evidenceBasisRefs),
+            providerClaim: Object.keys(jsonRecord(resolution.providerClaim)).length > 0
+              ? jsonRecord(resolution.providerClaim)
+              : null,
+            candidateAnchorSemanticKeys: stringValues(
+              resolution.candidateAnchorSemanticKeys,
+            ),
+          },
+        } : {}),
+        questions: questions.filter((question) => (
+          questionById.get(question.knowledgeItemId)?.legalIssueId === issue.id
+        )),
+      };
+    });
+  const operationalSubjects = legalIssues.length > 0
+    ? legalIssues
+    : visibleItems(input.knowledge.gaps).map((gap) => ({
+        knowledgeItemId: gap.id,
+        semanticKey: gap.semanticKey,
+        text: gap.normalizedText,
+        reviewStatus: gap.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
+        originatingItemIds: [gap.id],
+        questions: [],
+      }));
   const assignedQuestionIds = new Set(legalIssues.flatMap((issue) => issue.questions.map((question) => question.knowledgeItemId)));
   const knowledgeState = [
-    ...input.knowledge.partyRoles, ...input.knowledge.facts, ...input.knowledge.events,
+    ...input.knowledge.partyRoles, ...(input.knowledge.partyPositions ?? []), ...input.knowledge.facts, ...input.knowledge.events,
     ...input.knowledge.legalActs, ...input.knowledge.measures, ...input.knowledge.contradictions,
     ...input.knowledge.gaps, ...input.knowledge.deadlineCandidates, ...input.knowledge.legalIssues,
     ...input.knowledge.researchQuestions,
@@ -833,9 +1946,10 @@ export function buildStructuredFascicoloReport(input: {
       classificationReviewAuditId: result.classificationReviewAuditId ?? null,
       reviewStatus: result.classificationReviewStatus,
       rationale: result.classificationRationale,
+      ...(result.officialRelevance ? { officialRelevance: result.officialRelevance.status } : {}),
     })),
   }));
-  const sourceState = currentMissions.flatMap((mission) => mission.results.map((result) => ({
+  const sourceAssessmentState = currentMissions.flatMap((mission) => mission.results.map((result) => ({
     resultId: result.resultId,
     assessment: result.sourceAssessment,
   }))).sort(byId);
@@ -865,8 +1979,26 @@ export function buildStructuredFascicoloReport(input: {
       contradictions: input.knowledge.contradictions,
     },
   });
+  const contractVersion = input.contractVersion ?? STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
+  const sourceState = contractVersion === STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION ? {
+    sourceAssessments: sourceAssessmentState,
+    legalApplicabilityReviews: currentMissions.flatMap((mission) => mission.legalApplicabilityReviews ?? [])
+      .map((envelope) => envelope.review)
+      .sort((left, right) => left.reviewId.localeCompare(right.reviewId)),
+  } : sourceAssessmentState;
+  const legalApplicability = contractVersion === STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION
+    ? projectLegalApplicability({ tenantId: input.tenantId, procedimentoId: input.procedimentoId, knowledge: input.knowledge, missions: currentMissions })
+    : undefined;
+  const legalAnalyses = buildLegalAnalyses({
+    issues: legalIssues,
+    knowledge: input.knowledge,
+    applicability: legalApplicability,
+    contributions: [...missionsByQuestion.values()].flatMap((mission) => (
+      mission.legalAnalysisContributions ?? []
+    )),
+  });
   const payload: StructuredFascicoloReportPayload = {
-    contractVersion: STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION,
+    contractVersion,
     ...(questions.some((question) => question.favorableAuthorities.length + question.contraryAuthorities.length > 0)
       ? { sourceReviewPolicy: SOURCE_REVIEW_POLICY } : {}),
     tenantId: input.tenantId,
@@ -875,7 +2007,9 @@ export function buildStructuredFascicoloReport(input: {
     knowledgeContractVersion: input.knowledge.revision.contractVersion,
     corpusFingerprint: input.knowledge.revision.corpusFingerprint,
     knowledgeStateFingerprint: fingerprint(knowledgeState),
-    researchStateFingerprint: fingerprint(researchState),
+    researchStateFingerprint: fingerprint(technicalSources.length
+      ? { missions: researchState, technicalSources }
+      : researchState),
     sourceStateFingerprint: fingerprint(sourceState),
     proceduralContext: input.proceduralContext,
     ...(input.documentCoverage ? {
@@ -884,6 +2018,7 @@ export function buildStructuredFascicoloReport(input: {
     } : {}),
     documentedFramework: {
       partyRoles: visibleItems(input.knowledge.partyRoles),
+      partyPositions: visibleItems(input.knowledge.partyPositions ?? []),
       facts: visibleItems(input.knowledge.facts),
       timeline: visibleItems(input.knowledge.timeline),
       legalActs: visibleItems(input.knowledge.legalActs),
@@ -894,7 +2029,8 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
-    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, input.proceduralContext, portRegime !== null, phase),
+    professionalNarrative: buildProfessionalNarrative(input.knowledge),
+    operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, input.proceduralContext, portRegime !== null, phase, technicalSources),
     regulatoryApplicability: portRegime ? buildRegulatoryApplicability(analysisDate, input.proceduralContext, portRegime.grantDate.date) : [],
     portRegime,
     legalApplication: buildLegalApplication({
@@ -920,10 +2056,22 @@ export function buildStructuredFascicoloReport(input: {
       portRegime,
       documentaryPhase: { concluded: phase.phase === "POST_DECISION", reviewPending: phase.reviewPending },
     }),
+    legalAnalyses,
+    ...(technicalSources.length ? { technicalSources } : {}),
+    legalCompleteness,
+    ...(legalApplicability ? { legalApplicability } : {}),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),
+      ...(legalIssues.length ? [] : ["NO_EXPLICIT_LEGAL_ISSUES_IN_CURRENT_KNOWLEDGE"]),
       ...(questions.length ? [] : ["NO_CURRENT_RESEARCH_QUESTIONS"]),
+      ...(technicalSources.length ? ["TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL"] : []),
+      ...(legalCompleteness.issueCoverage === "DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_ISSUES"
+        ? ["DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_LEGAL_ISSUES"]
+        : []),
+      ...(legalCompleteness.documentNeed === "ADDITIONAL_DOCUMENTS_REQUIRED"
+        ? ["ADDITIONAL_DOCUMENTS_REQUIRED"]
+        : []),
     ])].sort(),
   };
   return { reportFingerprint: fingerprint(payload), payload };

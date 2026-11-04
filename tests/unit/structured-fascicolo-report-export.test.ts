@@ -70,6 +70,7 @@ function snapshot(): StructuredReportSnapshotRecord {
           coverageStatus: "COMPLETE",
           favorableAuthorities: [{
             resultId: "usable",
+            candidateId: "candidate-usable",
             title: "Consiglio di Stato, decisione verificata",
             sourceUrl: "https://example.test/official",
             provider: "MOONLIT",

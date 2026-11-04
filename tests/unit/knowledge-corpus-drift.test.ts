@@ -33,7 +33,7 @@ function corpus(fingerprint: string, documents: Array<{ id: string; name: string
     })),
     excerpts: documents.flatMap((document, index) => document.pages.map(([pageNumber, textSha256]) => ({
       reference: `DOCUMENT_${index + 1}.PAGE_${pageNumber}`, documentoId: document.id, extractionAttemptId: document.attempt,
-      pageNumber, documentVersionId: document.version, artifactSha256: hash("f"), text: "x", textSha256,
+      pageNumber, documentVersionId: document.version, artifactSha256: hash("f"), text: "x", sourceText: "x", textSha256,
       extractionMethod: "PDF_TEXT", ocrConfidence: null,
     }))),
   };

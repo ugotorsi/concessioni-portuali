@@ -67,7 +67,12 @@ export async function requestFascicoloAnalysisRefreshAction(formData: FormData):
         actorEmail: user.email,
         actorRole: role,
       }));
-      await requestDocumentWorkerActivation("DOCUMENT_ANALYSIS", input.procedimentoId);
+      await requestDocumentWorkerActivation({
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: admission.job.id,
+        tenantId: procedimento.enteId,
+        procedimentoId: input.procedimentoId,
+      });
       await auditSuccess({
         ...audit,
         azione: "FASCICOLO_ANALYSIS_REFRESH_REQUESTED",

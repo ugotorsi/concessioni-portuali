@@ -64,6 +64,10 @@ import {
   type ResearchPersistenceClient,
   type ResearchPersistenceContext,
 } from "@/server/legal-research/persistence";
+import {
+  canonicalizeResearchEvidenceBundleInput,
+  researchEvidenceBundleInputSchema,
+} from "@/server/legal-research/mcp-write-contracts";
 
 const actor = { actorId: "user-1", tenantId: "ente-1" } as const;
 const start = new Date("2026-09-17T10:00:00.000Z");
@@ -406,6 +410,50 @@ describe("Block 3B.13B research mission persistence", () => {
     expect(harness.missions.get(mission.missionId)?.payload).toEqual(mission);
   });
 
+  it("allows ChatGPT to claim before submitting required documentary evidence", async () => {
+    const harness = createHarness();
+    const mission = researchMission({
+      requiredOutput: {
+        authorityCandidates: true,
+        citationObservations: true,
+        legalResearchSuggestions: true,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "chatgpt-documentary-execution",
+      executor: { kind: "CHATGPT", claimantId: "chat-session-documentary" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).resolves.toMatchObject({
+      outcome: "CLAIMED",
+      claim: {
+        execution: {
+          id: "chatgpt-documentary-execution",
+          executorKind: "CHATGPT",
+        },
+      },
+    });
+  });
+
+  it("prevents an authorized worker from claiming a ChatGPT connector mission", async () => {
+    const harness = createHarness();
+    const mission = researchMission();
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "wrong-channel-worker",
+      executor: { kind: "AUTHORIZED_WORKER", claimantId: "worker-a" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+    expect(harness.attempts).toHaveLength(0);
+    expect(harness.missions.get(mission.missionId)?.status).toBe("PENDING");
+  });
+
   it("reuses the same mission idempotently", async () => {
     const harness = createHarness();
     const mission = researchMission();
@@ -725,6 +773,174 @@ describe("Block 3B.13B research mission persistence", () => {
     }, harness.context);
     expect(result.outcome).toBe("CREATED");
     expect(result.bundle.completionState).toBe("PARTIAL");
+  });
+
+  it("preserves successful provider sources when Moonlit validation fails and defers the mission", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const source = createAuthorityCandidate({
+      kind: "AUTHORITY_CANDIDATE",
+      executionRecordId: "simpliciter-query-1",
+      toolId: "SIMPLICITER",
+      providerId: "SIMPLICITER",
+      officialIdentifier: "TAR-TEST-2026-1",
+      title: "Synthetic administrative judgment",
+      sourceUrl: "https://official.example.test/TAR-TEST-2026-1",
+      providerDocumentId: "simpliciter:TAR-TEST-2026-1",
+      providerReceivedText: "Synthetic provider text retained for verification.",
+      supportDirection: "QUALIFIES",
+      sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      retrievalMethod: "SEMANTIC_SEARCH",
+      fullTextAvailable: true,
+      verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+    });
+    const bundle: ResearchEvidenceBundle = {
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        ...toolExecution("MOONLIT"),
+        executionRecordId: "moonlit-query-1",
+        researchQuery: mission.researchQuestion,
+        errorState: { code: "INVALID_ARGUMENT", retryable: false },
+      }, {
+        ...toolExecution("SIMPLICITER"),
+        executionRecordId: "simpliciter-query-1",
+        researchQuery: mission.researchQuestion,
+        resultIdentifiersUsed: ["TAR-TEST-2026-1"],
+        resultCount: 1,
+      }],
+      authorityCandidates: [source],
+      evidenceGaps: [{
+        gapId: "moonlit-query-invalid",
+        kind: "OFFICIAL_IDENTITY_NOT_VERIFIED",
+        targetId: source.candidateId,
+      }],
+      unresolvedQuestions: ["Repeat the Moonlit query with a schema-valid string argument."],
+    };
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    const deferred = await releaseOrDeferResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-1",
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+      disposition: "DEFER",
+      reasonCode: "MOONLIT_INVALID_ARGUMENT",
+    }, harness.context);
+
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "MOONLIT", errorState: { code: "INVALID_ARGUMENT", retryable: false } },
+        { toolId: "SIMPLICITER", resultIdentifiersUsed: ["TAR-TEST-2026-1"] },
+      ],
+      authorityCandidates: [{
+        candidateId: source.candidateId,
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-TEST-2026-1",
+        providerReceivedText: "Synthetic provider text retained for verification.",
+      }],
+    });
+    expect(deferred.operational.status).toBe("DEFERRED");
+  });
+
+  it("persists a connector bundle built from the published RESEARCH_BRIDGE_V1 shapes", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const parsed = researchEvidenceBundleInputSchema.parse({
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        role: "LEGAL_RESEARCH_STRATEGIST",
+        operationType: "SEMANTIC_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["GIUSTIZIA_AMMINISTRATIVA"],
+        resultIdentifiersUsed: ["TAR-LIGURIA-TEST-1"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }, {
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        role: "BROAD_DISCOVERY",
+        operationType: "KEYWORD_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["ITALIAN_LEGISLATION"],
+        resultIdentifiersUsed: ["COD-NAV-ART-37"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }],
+      authorityCandidates: [{
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-LIGURIA-TEST-1",
+        title: "Synthetic administrative judgment",
+        sourceUrl: "https://official.example.test/TAR-LIGURIA-TEST-1",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "QUALIFIES",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+        retrievalMethod: "SEMANTIC_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }, {
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        officialIdentifier: "COD-NAV-ART-37",
+        title: "Synthetic navigation-code source",
+        sourceUrl: "https://official.example.test/COD-NAV-ART-37",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "SUPPORT",
+        sourceFamily: "ITALIAN_LEGISLATION",
+        retrievalMethod: "KEYWORD_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      }],
+      unresolvedQuestions: ["Moonlit adverse-authority coverage remains unavailable."],
+      completionState: "PARTIAL",
+    });
+    const bundle = canonicalizeResearchEvidenceBundleInput(parsed);
+    expect(bundle).not.toBeNull();
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle: bundle!,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+
+    expect(submitted.outcome).toBe("CREATED");
+    expect(harness.bundles).toHaveLength(1);
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "SIMPLICITER", role: "LEGAL_RESEARCH_STRATEGIST" },
+        { toolId: "LEGAL_DATA_HUNTER", role: "BROAD_DISCOVERY" },
+      ],
+      authorityCandidates: [
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "TAR-LIGURIA-TEST-1" },
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "COD-NAV-ART-37" },
+      ],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+      }],
+    });
   });
 
   it("reuses an identical bundle idempotently", async () => {
@@ -1332,6 +1548,7 @@ describe("Block 3B.13B research mission persistence", () => {
     async (change) => {
       const harness = createHarness();
       const mission = researchMission({
+        executionChannel: "SERVER_AUTONOMOUS",
         mode: "ADVERSE_SEARCH", missingSourceFamilies: [],
         requiredOutput: { authorityCandidates: true, citationObservations: true, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true },
         executionPlan: { requiredCapabilities: ["FULL_TEXT_RETRIEVAL", "CITATION_NETWORK", "ADVERSE_AUTHORITY_DISCOVERY"] },
@@ -1450,9 +1667,14 @@ describe("Block 3B.13B research mission persistence", () => {
   );
 
   it.each(["complete", "missing", "tampered", "superseded", "invalidated", "lease", "budget", "exact-mismatch", "bundle-mismatch", "http-valid", "http-altered", "http-missing", "http-stale", "negative-valid", "negative-stale", "negative-absent", "negative-unreviewed", "negative-inconclusive", "negative-scope", "negative-forged", "negative-tenant", "negative-missing", "negative-altered"] as const)(
-    "runs the unchanged original mission through real services with synthetic evidence: %s", async (scenario) => {
+    "runs an explicitly autonomous mission through real services with synthetic evidence: %s", async (scenario) => {
       const harness = createHarness();
-      const mission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const acceptanceMission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const { missionId: _missionId, ...acceptanceInput } = acceptanceMission;
+      const mission = createResearchMission({
+        ...acceptanceInput,
+        executionChannel: "SERVER_AUTONOMOUS",
+      });
       const originalMission = structuredClone(mission);
       const negativeSearch = scenario.startsWith("negative-");
       const blockedSearch = negativeSearch && scenario !== "negative-valid" && scenario !== "negative-stale";
@@ -1879,9 +2101,17 @@ describe("Block 3B.13B research mission persistence", () => {
 
   it("rechecks documentary evidence at completion and rejects complete bundles with gaps", async () => {
     const harness = createHarness();
-    const mission = researchMission({ missingSourceFamilies: [], requiredOutput: {
-      authorityCandidates: false, citationObservations: false, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true,
-    } });
+    const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
+      missingSourceFamilies: [],
+      requiredOutput: {
+        authorityCandidates: false,
+        citationObservations: false,
+        legalResearchSuggestions: false,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
     const source = officialSource({ fullText: { available: true, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) } });
     const readDocuments = vi.fn(async () => [{ evidenceSourceId: source.evidenceSourceId, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) }]);
     const documentContext = { ...harness.context, readAssistedDocuments: readDocuments };
@@ -1908,6 +2138,7 @@ describe("Block 3B.13B research mission persistence", () => {
   it("completes exact-source recovery after claimed connector evidence is verified and persisted", async () => {
     const harness = createHarness();
     const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
       mode: "EXACT_SOURCE_RECOVERY",
       missingSourceFamilies: [],
       requiredOutput: {

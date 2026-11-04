@@ -210,6 +210,7 @@ function mission(question: string, overrides: Partial<Parameters<typeof createRe
   return createResearchMission({
     kind: "RESEARCH_MISSION",
     version: RESEARCH_BRIDGE_VERSION,
+    executionChannel: "SERVER_AUTONOMOUS",
     caseReference: { caseId: "case-a" },
     legalIssueIds: ["issue-a"],
     legalPropositionIds: ["proposition-a"],

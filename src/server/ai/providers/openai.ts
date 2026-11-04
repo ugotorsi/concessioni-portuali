@@ -9,17 +9,36 @@ import type {
   FascicoloDocumentAnalysisProvider,
   FascicoloDocumentProviderRequestV1,
 } from "@/server/ai/fascicoloDocumentAnalysis";
-import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import {
+  OpenAiUsageAccountingError,
+  parseOpenAiBillableUsage,
+  type OpenAiBillableUsage,
+} from "@/server/ai/openaiAccounting";
+import { fascicoloDocumentKnowledgeCandidateProposalSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
+export const OPENAI_DEFAULT_REGION = "GLOBAL" as const;
 export const OPENAI_RESPONSES_ENDPOINTS = {
   GLOBAL: "https://api.openai.com/v1/responses",
-  EU: "https://eu.api.openai.com/v1/responses",
 } as const;
+export const OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD = 1_024;
 
 export type OpenAiRegion = keyof typeof OPENAI_RESPONSES_ENDPOINTS;
 export type OpenAiFetch = (input: string | URL, init?: RequestInit) => Promise<Response>;
+export type OpenAiTokenCounter = (serializedRequest: string) => number;
+
+export interface OpenAiProviderTelemetry {
+  onRequestSent?(): void;
+  onUsage?(usage: OpenAiBillableUsage): void;
+}
+
+const openAiTokenizer = getEncoding("o200k_base");
+
+function defaultTokenCounter(serializedRequest: string): number {
+  return openAiTokenizer.encode(serializedRequest).length;
+}
 
 type OpenAiAnalysisProviderRequest =
   | AiAnalysisProviderRequestV1
@@ -130,7 +149,78 @@ function stripGeneratedSchemaMetadata(value: unknown): unknown {
   );
 }
 
-const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = {
+const SERVER_OWNED_DOCUMENT_FIELDS = new Set([
+  "documentInventory",
+  "proceedingIdentityHint",
+  "targetProceedingHint",
+  "referenceDate",
+  "referenceDateBasis",
+]);
+
+function stripServerOwnedDocumentFields(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripServerOwnedDocumentFields);
+  if (!value || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  const stripped = Object.fromEntries(
+    Object.entries(record)
+      .filter(([key]) => !SERVER_OWNED_DOCUMENT_FIELDS.has(key))
+      .map(([key, item]) => [key, stripServerOwnedDocumentFields(item)]),
+  ) as Record<string, unknown>;
+  if (Array.isArray(stripped.required)) {
+    stripped.required = stripped.required.filter((key) => (
+      typeof key !== "string" || !SERVER_OWNED_DOCUMENT_FIELDS.has(key)
+    ));
+  }
+  return stripped;
+}
+
+function makeOpenAiStrictSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(makeOpenAiStrictSchema);
+  if (!value || typeof value !== "object") return value;
+  const entries = Object.entries(value).map(([key, item]) => [
+    key,
+    makeOpenAiStrictSchema(item),
+  ]);
+  const schema = Object.fromEntries(entries) as Record<string, unknown>;
+  if (Array.isArray(schema.oneOf)) {
+    schema.anyOf = schema.oneOf;
+    delete schema.oneOf;
+  }
+  if (schema.type === "object" && schema.properties
+    && typeof schema.properties === "object" && !Array.isArray(schema.properties)) {
+    schema.additionalProperties = false;
+    schema.required = Object.keys(schema.properties);
+  }
+  return schema;
+}
+
+function requireNonEmptySchemaArrays(
+  value: unknown,
+  paths: readonly (readonly string[])[],
+): unknown {
+  const schema = makeOpenAiStrictSchema(value);
+  for (const path of paths) {
+    let current = schema;
+    for (const segment of path) {
+      if (!current || typeof current !== "object" || Array.isArray(current)) {
+        throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+      }
+      const properties = (current as Record<string, unknown>).properties;
+      if (!properties || typeof properties !== "object" || Array.isArray(properties)) {
+        throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+      }
+      current = (properties as Record<string, unknown>)[segment];
+    }
+    if (!current || typeof current !== "object" || Array.isArray(current)
+      || (current as Record<string, unknown>).type !== "array") {
+      throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+    }
+    (current as Record<string, unknown>).minItems = 1;
+  }
+  return schema;
+}
+
+export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = requireNonEmptySchemaArrays({
   ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
   required: [
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.required,
@@ -138,11 +228,16 @@ const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = {
   ],
   properties: {
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.properties,
-    structuredKnowledge: stripGeneratedSchemaMetadata(
-      z.toJSONSchema(fascicoloStructuredKnowledgeSchema, { unrepresentable: "any" }),
+    structuredKnowledge: stripServerOwnedDocumentFields(
+      stripGeneratedSchemaMetadata(
+        z.toJSONSchema(fascicoloDocumentKnowledgeCandidateProposalSchema, { unrepresentable: "any" }),
+      ),
     ),
   },
-} as const;
+}, [
+  ["structuredKnowledge", "items"],
+  ["structuredKnowledge", "evidenceCandidates"],
+]);
 
 class OpenAiProtocolError extends Error {
   constructor() {
@@ -166,6 +261,7 @@ function assertConfig(config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
 }): void {
   if (typeof config.apiKey !== "string" || config.apiKey.trim().length === 0) {
@@ -174,7 +270,8 @@ function assertConfig(config: {
   assertPositiveSafeInteger(config.timeoutMs);
   assertPositiveSafeInteger(config.maxRawResponseBytes);
   assertPositiveSafeInteger(config.maxOutputTokens);
-  if (config.region !== "GLOBAL" && config.region !== "EU") {
+  assertPositiveSafeInteger(config.maxInputTokens);
+  if (config.region !== OPENAI_DEFAULT_REGION) {
     throw configurationError();
   }
 }
@@ -203,9 +300,20 @@ function buildOutboundInput(request: AiOutboundAnalysisProviderRequestV1): strin
 }
 
 function buildDocumentInput(request: FascicoloDocumentProviderRequestV1): string {
+  const providerDocumentData = {
+    ...request.documentData,
+    content: {
+      ...request.documentData.content,
+      evidenceSpans: request.documentData.content.evidenceSpans.map((span) => ({
+        id: span.id,
+        basisRef: span.basisRef,
+        text: span.text,
+      })),
+    },
+  };
   return [
     "BEGIN_UNTRUSTED_DOCUMENT_DATA",
-    JSON.stringify(request.documentData),
+    JSON.stringify(providerDocumentData),
     "END_UNTRUSTED_DOCUMENT_DATA",
   ].join("\n");
 }
@@ -248,10 +356,31 @@ function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputToken
         schema: documentAnalysis
           ? OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA
           : OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
-        strict: !documentAnalysis,
+        strict: true,
       },
     },
   };
+}
+
+export function estimateOpenAiAnalysisRequest(
+  request: OpenAiAnalysisProviderRequest,
+  maxOutputTokens: number,
+  tokenCounter: OpenAiTokenCounter = defaultTokenCounter,
+) {
+  assertPositiveSafeInteger(maxOutputTokens);
+  const serializedRequest = JSON.stringify(buildRequestBody(request, maxOutputTokens));
+  const rawInputTokens = tokenCounter(serializedRequest);
+  const inputTokens = rawInputTokens + OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD;
+  if (!Number.isSafeInteger(rawInputTokens) || rawInputTokens < 0
+    || !Number.isSafeInteger(inputTokens)) {
+    throw configurationError();
+  }
+  return Object.freeze({
+    requestBytes: Buffer.byteLength(serializedRequest, "utf8"),
+    rawInputTokens,
+    inputTokens,
+    accountingOverheadTokens: OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD,
+  });
 }
 
 async function cancelReaderBestEffort(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
@@ -420,12 +549,17 @@ export function createOpenAiAnalysisProvider(config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
+  tokenCounter?: OpenAiTokenCounter;
+  telemetry?: OpenAiProviderTelemetry;
+  authorizeRequest?: () => Promise<void>;
 }): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
   assertConfig(config);
   const endpoint = OPENAI_RESPONSES_ENDPOINTS[config.region];
   const transport = config.transport ?? globalThis.fetch.bind(globalThis);
+  const tokenCounter = config.tokenCounter ?? defaultTokenCounter;
 
   function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
@@ -444,16 +578,32 @@ export function createOpenAiAnalysisProvider(config: {
     }, config.timeoutMs);
 
     try {
+      await config.authorizeRequest?.();
       const requestBody = buildRequestBody(request, config.maxOutputTokens);
+      const serializedRequest = JSON.stringify(requestBody);
+      const inputTokenCount = estimateOpenAiAnalysisRequest(
+        request,
+        config.maxOutputTokens,
+        tokenCounter,
+      ).inputTokens;
+      if (!Number.isSafeInteger(inputTokenCount)
+        || inputTokenCount < 0
+        || inputTokenCount > config.maxInputTokens) {
+        throw new AiProviderAdapterError("CONFIGURATION", {
+          httpStatus: 0,
+          providerCode: "input_token_limit_exceeded",
+        });
+      }
       let response: Response;
       try {
+        config.telemetry?.onRequestSent?.();
         response = await transport(endpoint, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${config.apiKey}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody),
+          body: serializedRequest,
           signal: controller.signal,
           redirect: "error",
         });
@@ -488,7 +638,16 @@ export function createOpenAiAnalysisProvider(config: {
         () => timedOut,
       );
       assertNotTimedOut();
-      const payload = extractStructuredPayload(parseJsonBytes(body));
+      const responseBody = parseJsonBytes(body);
+      if (config.telemetry?.onUsage) {
+        if (!responseBody || typeof responseBody !== "object"
+          || Array.isArray(responseBody)
+          || (responseBody as Record<string, unknown>).model !== OPENAI_ANALYSIS_MODEL) {
+          throw new OpenAiUsageAccountingError("OPENAI_MODEL_MISMATCH");
+        }
+        config.telemetry.onUsage(parseOpenAiBillableUsage(responseBody));
+      }
+      const payload = extractStructuredPayload(responseBody);
       assertNotTimedOut();
       return payload;
     } finally {
