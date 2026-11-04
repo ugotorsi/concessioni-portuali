@@ -27,6 +27,8 @@ import {
 import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-legal-analysis-pipeline";
+import { ensureAuthorizedDocumentExtractionRetryJob } from "@/server/documents/documentExtractionRetryAdmission";
+import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import {
   readProviderCredentialKey,
   storeLegalDataHunterApiKey,
@@ -736,6 +738,76 @@ export async function cancelArchivedDocumentExtraction(formData: FormData): Prom
     });
     throw new Error(`ARCHIVED_DOCUMENT_EXTRACTION_CANCELLATION_${result.outcome}`);
   }
+  revalidatePath("/admin/runtime");
+}
+
+export async function retryFailedDocumentExtraction(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const attemptIdValue = formData.get("attemptId");
+  const reason = formData.get("reason");
+  if (typeof attemptIdValue !== "string" || !attemptIdValue.trim()) throw new Error("INVALID_ATTEMPT_ID");
+  if (typeof reason !== "string" || reason.trim().length < 10) throw new Error("RETRY_REASON_REQUIRED");
+  if (formData.get("confirmation") !== "RETRY_DOCUMENT_EXTRACTION") {
+    throw new Error("RETRY_CONFIRMATION_REQUIRED");
+  }
+  const attempt = await prisma.documentExtractionAttempt.findUnique({
+    where: { id: attemptIdValue.trim() },
+    select: {
+      id: true,
+      outcome: true,
+      failureCode: true,
+      tenantId: true,
+      procedimentoId: true,
+      documentoId: true,
+      documentFileVersionId: true,
+      documento: { select: { statoDocumento: true, currentFileVersionId: true } },
+    },
+  });
+  if (!attempt) throw new Error("EXTRACTION_ATTEMPT_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, attempt.tenantId, { mode: "write", allowWhenEnteMissing: false });
+  const actor = { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role };
+  const refusal = attempt.documento.statoDocumento !== "ATTIVO"
+    ? "DOCUMENT_NOT_ACTIVE"
+    : attempt.documento.currentFileVersionId !== attempt.documentFileVersionId
+      ? "VERSION_NOT_CURRENT"
+      : attempt.outcome !== "FAILED" || !isRetryableDocumentExtractionFailure(attempt.failureCode)
+        ? "ATTEMPT_NOT_RETRYABLE"
+        : null;
+  if (refusal) {
+    await auditFailure({
+      azione: "DOCUMENT_EXTRACTION_RETRY_REQUESTED",
+      entita: "DocumentExtractionAttempt",
+      entitaId: attempt.id,
+      enteId: attempt.tenantId,
+      actor,
+      metadata: { outcome: refusal, procedimentoId: attempt.procedimentoId },
+    });
+    throw new Error(`DOCUMENT_EXTRACTION_RETRY_${refusal}`);
+  }
+  const admission = await ensureAuthorizedDocumentExtractionRetryJob(attempt.id);
+  const activation = await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_EXTRACTION",
+    procedimentoId: attempt.procedimentoId,
+  });
+  await auditSuccess({
+    azione: "DOCUMENT_EXTRACTION_RETRY_REQUESTED",
+    entita: "DocumentExtractionAttempt",
+    entitaId: attempt.id,
+    enteId: attempt.tenantId,
+    actor,
+    metadata: {
+      reason: reason.trim(),
+      procedimentoId: attempt.procedimentoId,
+      documentoId: attempt.documentoId,
+      documentFileVersionId: attempt.documentFileVersionId,
+      previousFailureCode: attempt.failureCode,
+      jobId: admission.job.id,
+      admissionOutcome: admission.outcome,
+      workerActivationOutcome: activation.outcome,
+    },
+  });
   revalidatePath("/admin/runtime");
 }
 

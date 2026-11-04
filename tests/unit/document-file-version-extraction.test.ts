@@ -7,6 +7,7 @@ import {
   DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
   extractDocumentFileVersion,
   extractDocumentFileVersionWithLocalOcr,
+  isRetryableDocumentExtractionFailure,
   type ExtractDocumentFileVersionDependencies,
 } from "@/server/documents/documentExtraction";
 import { DocumentStorageReadCoherenceError } from "@/server/documents/storage/types";
@@ -237,6 +238,17 @@ describe("archived DocumentFileVersion extraction", () => {
       outcome: "FAILED",
       failureCode,
     }));
+  });
+
+  it.each([
+    ["BUCKET_MISMATCH", true],
+    ["PROVIDER_MISMATCH", true],
+    ["STORAGE_READ_FAILURE", true],
+    ["INTEGRITY_SHA256_MISMATCH", false],
+    ["DOCUMENT_NOT_ACTIVE", false],
+    [null, false],
+  ])("classifies %s as permit-retryable: %s", (failureCode, expected) => {
+    expect(isRetryableDocumentExtractionFailure(failureCode)).toBe(expected);
   });
 
   it("reuses an existing version-policy attempt without storage or new persistence", async () => {

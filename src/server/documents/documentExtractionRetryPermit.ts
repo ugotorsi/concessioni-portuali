@@ -11,10 +11,8 @@ import {
 import type { Prisma } from "@/generated/prisma/client";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 
-import {
-  DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-  isRetryableDocumentExtractionFailure,
-} from "./documentExtraction";
+import { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
+import { isRetryableDocumentExtractionFailure } from "./documentExtractionRetryability";
 
 const RETRY_PERMIT_VERSION = "DOCUMENT_EXTRACTION_RETRY_PERMIT_V1";
 const RETRY_PERMIT_ACTION = "DOCUMENT_EXTRACTION_RETRY_AUTHORIZED";

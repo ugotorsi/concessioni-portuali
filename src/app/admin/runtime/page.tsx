@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
 import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
@@ -23,6 +24,7 @@ import {
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
   cancelArchivedDocumentExtraction,
+  retryFailedDocumentExtraction,
   runManualFascicoloAnalysis,
   runManualTenantBatchAnalysis,
   setRenderWorkerState,
@@ -162,6 +164,31 @@ export default async function RuntimeOperationsPage({
       select: { id: true, nome: true, statoDocumento: true },
     })).map((document) => [document.id, document]),
   );
+  const recentExtractionAttempts = await prisma.documentExtractionAttempt.findMany({
+    where: { documento: { statoDocumento: "ATTIVO" } },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    select: {
+      id: true,
+      outcome: true,
+      failureCode: true,
+      failureMessage: true,
+      procedimentoId: true,
+      documentFileVersionId: true,
+      createdAt: true,
+      documento: { select: { nome: true, currentFileVersionId: true } },
+    },
+  });
+  const latestAttemptByVersion = new Map<string, (typeof recentExtractionAttempts)[number]>();
+  for (const attempt of recentExtractionAttempts) {
+    if (!latestAttemptByVersion.has(attempt.documentFileVersionId)) {
+      latestAttemptByVersion.set(attempt.documentFileVersionId, attempt);
+    }
+  }
+  const retryableExtractionFailures = [...latestAttemptByVersion.values()].filter((attempt) =>
+    attempt.outcome === "FAILED"
+    && attempt.documento.currentFileVersionId === attempt.documentFileVersionId
+    && isRetryableDocumentExtractionFailure(attempt.failureCode));
 
   return (
     <AppShell title="Stato dei servizi" subtitle="Controllo delle elaborazioni automatiche e degli eventuali interventi richiesti">
@@ -633,6 +660,42 @@ export default async function RuntimeOperationsPage({
                   </TableRow>
                 );
               })}
+            </TableBody></Table>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Estrazioni documentali non riuscite</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-slate-600">
+              Dopo aver rimosso la causa (ad esempio la configurazione dello storage del worker), un amministratore può
+              autorizzare un nuovo tentativo di estrazione locale del testo, senza provider e senza costi. Il permesso è
+              registrato nell&apos;audit, vale per un solo tentativo e i controlli di coerenza vengono ripetuti.
+            </p>
+            <Table><TableHeader><TableRow><TableHead>Documento</TableHead><TableHead>Fascicolo</TableHead><TableHead>Tentativo</TableHead><TableHead>Errore</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
+              {retryableExtractionFailures.length === 0 ? (
+                <TableRow><TableCell colSpan={5}>Nessuna estrazione non riuscita da ripetere.</TableCell></TableRow>
+              ) : retryableExtractionFailures.map((attempt) => (
+                <TableRow key={attempt.id}>
+                  <TableCell>{attempt.documento.nome}<br /><code className="text-xs">{attempt.documentFileVersionId}</code></TableCell>
+                  <TableCell>{attempt.procedimentoId}</TableCell>
+                  <TableCell><code className="text-xs">{attempt.id}</code> · {formatDateIT(attempt.createdAt)}</TableCell>
+                  <TableCell>{attempt.failureCode}</TableCell>
+                  <TableCell>
+                    <form action={retryFailedDocumentExtraction} className="grid gap-2">
+                      <input type="hidden" name="attemptId" value={attempt.id} />
+                      <input name="reason" required minLength={10} placeholder="Motivazione" className="h-9 rounded-md border border-slate-300 px-2 text-sm" />
+                      <label className="flex items-start gap-2 text-xs text-slate-600">
+                        <input type="checkbox" name="confirmation" value="RETRY_DOCUMENT_EXTRACTION" required />
+                        Autorizzo un nuovo tentativo di estrazione locale
+                      </label>
+                      <Button size="sm" variant="outline" type="submit">Ripeti estrazione</Button>
+                    </form>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody></Table>
           </CardContent>
         </Card>

@@ -31,18 +31,11 @@ export {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
   DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
 } from "./documentExtractionPolicy";
+import { isRetryableDocumentExtractionFailure } from "./documentExtractionRetryability";
+
+export { isRetryableDocumentExtractionFailure };
 
 const identifier = z.string().trim().min(1).max(256);
-const RETRYABLE_DOCUMENT_EXTRACTION_FAILURES = new Set([
-  "STORAGE_READ_FAILURE",
-  "INTERNAL_EXTRACTION_FAILURE",
-]);
-
-export function isRetryableDocumentExtractionFailure(
-  failureCode: string | null | undefined,
-): boolean {
-  return Boolean(failureCode && RETRYABLE_DOCUMENT_EXTRACTION_FAILURES.has(failureCode));
-}
 
 type Actor = {
   userId: string | null;

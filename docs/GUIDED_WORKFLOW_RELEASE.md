@@ -273,3 +273,36 @@ Difetti emersi e corretti:
 
 AUTOMAZIONE resta OFF: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` e
 `SERVER_AUTONOMOUS_RESEARCH_ENABLED` non attivato.
+
+## Storage del worker e ripetizione autorizzata dell'estrazione
+
+- **Causa del `BUCKET_MISMATCH`.** Il worker `srv-daoptbp42hec73fmquo0`
+  lavora sul database Production: il job ammesso da app.noetra.it è stato
+  preso in carico da questo worker. Tuttavia leggeva dal bucket di staging
+  `concessioni-portuali-staging-c1-bdeaa8dd`. I documenti Production sono
+  registrati nel bucket `concessioni-portuali-documents-demo`, che Vercel
+  Production usa da sempre. Il controllo di coerenza ha quindi rifiutato
+  correttamente la lettura.
+- **Configurazione.** Il worker usa ora un token R2 dedicato,
+  `noetra-prod-worker-read-documents-demo`, con permesso *Object Read only*
+  limitato al solo bucket Production: l'estrazione legge il PDF e non scrive
+  nello storage. Endpoint, regione e path-style sono invariati. Il token è
+  stato verificato prima dell'uso:
+  - lettura del PDF canonico consentita, con SHA-256 corrispondente;
+  - accesso a entrambi i bucket di staging negato (`403 AccessDenied`).
+  Le credenziali di Vercel e la configurazione di staging non sono state
+  modificate.
+- **Nuovo tentativo.** I codici `BUCKET_MISMATCH` e `PROVIDER_MISMATCH`
+  diventano ripetibili, ma soltanto tramite il permesso esplicito e
+  registrato nell'audit (`DOCUMENT_EXTRACTION_RETRY_AUTHORIZED`).
+  - Su `/admin/runtime`, la sezione «Estrazioni documentali non riuscite»
+    elenca l'ultimo tentativo fallito della versione corrente di ciascun
+    documento attivo.
+  - Un amministratore con MFA può avviare un solo nuovo job, idempotente per
+    permesso e con un massimo di 1 tentativo; il worker one-off viene
+    attivato solo per l'estrazione.
+  - I controlli di coerenza dello storage vengono ripetuti a ogni tentativo.
+- **Accoppiamento residuo da valutare.** Le variabili Preview di
+  `release/v7-integrated-services` e `staging-operativo` puntano allo stesso
+  worker. Non sono state modificate, perché fanno parte della configurazione
+  di staging.
