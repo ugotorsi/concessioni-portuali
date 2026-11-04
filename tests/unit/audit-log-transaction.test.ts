@@ -25,7 +25,7 @@ function createTransaction(trace: string[]) {
     activityLog: {
       findFirst: vi.fn(async () => {
         trace.push("read");
-        return { currentHash: "previous-hash" };
+        return { currentHash: "previous-hash", createdAt: new Date("2026-08-19T11:59:59.999Z") };
       }),
       create: vi.fn(async ({ data }) => {
         trace.push("create");
@@ -39,6 +39,35 @@ describe("createAuditLogInTransaction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
+  });
+
+  it("uses a strictly increasing timestamp after acquiring the chain lock", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-19T11:59:00.000Z"));
+    const tx = createTransaction([]);
+    tx.$queryRaw.mockImplementation(async () => {
+      vi.setSystemTime(new Date("2026-08-19T12:00:00.000Z"));
+      return [{ acquired: true }];
+    });
+    tx.activityLog.findFirst.mockResolvedValue({
+      currentHash: "previous-hash",
+      createdAt: new Date("2026-08-19T12:00:00.000Z"),
+    });
+
+    await createAuditLogInTransaction(tx as never, {
+      azione: "TEST_ACTION",
+      entita: "TestEntity",
+      esito: "SUCCESS",
+      actor,
+      requestContext,
+    });
+
+    expect(tx.activityLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        previousHash: "previous-hash",
+        createdAt: new Date("2026-08-19T12:00:00.001Z"),
+      }),
+    });
   });
 
   it("locks before reading and preserves hash and metadata behavior", async () => {

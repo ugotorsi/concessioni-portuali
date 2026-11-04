@@ -65,13 +65,14 @@ async function createAuditLogRecord(
   context: AuditRequestContext,
 ) {
   const metadata = sanitizeMetadata(input.metadata);
-  const createdAt = new Date();
   await acquireActivityLogHashChainTransactionLock(tx);
   const previous = await tx.activityLog.findFirst({
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    select: { currentHash: true },
+    select: { currentHash: true, createdAt: true },
   });
 
+  // The chain is read by timestamp; concurrent writes and clock skew must not reorder it.
+  const createdAt = new Date(Math.max(Date.now(), (previous?.createdAt.getTime() ?? -1) + 1));
   const previousHash = previous?.currentHash ?? null;
   const currentHash = computeAuditHash({
     previousHash,

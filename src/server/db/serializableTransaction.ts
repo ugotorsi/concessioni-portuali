@@ -7,6 +7,19 @@ export interface SerializableTransactionRetryOptions {
   isRetryableError?: (error: unknown) => boolean;
 }
 
+function isPrismaSerializationConflict(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (error.code === "P2034") return true;
+  if (error.code !== "P2010") return false;
+  if (error.meta?.code === "40001") return true;
+  const adapterError = error.meta?.driverAdapterError;
+  if (!adapterError || typeof adapterError !== "object") return false;
+  const cause: unknown = Reflect.get(adapterError, "cause");
+  return Boolean(cause && typeof cause === "object"
+    && Reflect.get(cause, "originalCode") === "40001"
+    && Reflect.get(cause, "kind") === "TransactionWriteConflict");
+}
+
 export async function runSerializableTransactionWithRetry<T>(
   callback: (tx: Prisma.TransactionClient) => Promise<T>,
   options: SerializableTransactionRetryOptions = {},
@@ -18,7 +31,7 @@ export async function runSerializableTransactionWithRetry<T>(
       });
     } catch (error) {
       const retryable =
-        (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034")
+        isPrismaSerializationConflict(error)
         || options.isRetryableError?.(error) === true;
       if (!retryable || attempt === MAX_ATTEMPTS) {
         throw error;
