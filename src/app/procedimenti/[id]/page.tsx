@@ -14,8 +14,15 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloActsWorkspace } from "@/components/procedimenti/FascicoloActsWorkspace";
+import { FascicoloGuidedActivities } from "@/components/procedimenti/FascicoloGuidedActivities";
+import { FascicoloProposalPreview } from "@/components/procedimenti/FascicoloProposalPreview";
 import { listActAttachmentOptions, listActDrafts } from "@/server/fascicolo-acts/repository";
 import { buildActTemplateCatalog } from "@/server/fascicolo-acts/templates";
+import { buildActivitySpecs } from "@/server/fascicolo-operational-activities/model";
+import { listOperationalActivities } from "@/server/fascicolo-operational-activities/repository";
+import { generateOperationalProposalCandidates } from "@/server/fascicolo-operational-proposals/generation";
+import { previewOperationalProposalReconciliation } from "@/server/fascicolo-operational-proposals/preview";
+import { listProposalReconciliations } from "@/server/fascicolo-operational-proposals/repository";
 import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
@@ -23,7 +30,7 @@ import {
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
-import { FascicoloReport, OperationalPlans } from "@/components/procedimenti/FascicoloReport";
+import { FascicoloReport } from "@/components/procedimenti/FascicoloReport";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
@@ -88,6 +95,10 @@ interface ProcedimentoDetailPageProps {
     materialId?: string | string[];
     statementPath?: string | string[];
     section?: string | string[];
+    activityError?: string | string[];
+    activity?: string | string[];
+    reconciliationError?: string | string[];
+    reconciliationDone?: string | string[];
   }>;
 }
 
@@ -173,7 +184,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone } = await searchParams;
   const activeSection = resolveFascicoloSection(section);
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
@@ -238,6 +249,95 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     materialId,
     statementPath,
   });
+  const operationalDrafts = detail.canonicalEnteId
+    && ["acts", "proposals"].includes(activeSection)
+    ? await listActDrafts({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id })
+    : [];
+  const attachmentOptions = detail.canonicalEnteId && ["acts", "proposals", "reports"].includes(activeSection)
+    ? await listActAttachmentOptions(detail.procedimento.id)
+    : [];
+  const activitySpecs = ["acts", "proposals"].includes(activeSection) && automaticWorkflow?.structuredReport
+    ? buildActivitySpecs(automaticWorkflow.structuredReport.payload)
+    : [];
+  const operationalActivities = ["acts", "proposals"].includes(activeSection) && detail.canonicalEnteId
+    ? await listOperationalActivities({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+        concessioneId: detail.concessione?.id ?? null,
+      })
+    : [];
+  const guidedSection = activeSection === "proposals" && (automaticWorkflow?.structuredReport || operationalActivities.length > 0) ? (
+    <FascicoloGuidedActivities
+      procedimentoId={detail.procedimento.id}
+      payload={automaticWorkflow?.structuredReport?.payload ?? null}
+      reportFingerprint={automaticWorkflow?.structuredReport?.reportFingerprint ?? null}
+      corpusFingerprint={automaticWorkflow?.analysisUpdate.corpusFingerprint ?? null}
+      specs={activitySpecs}
+      records={operationalActivities}
+      drafts={operationalDrafts}
+      documents={attachmentOptions}
+      proposals={automaticWorkflow?.operationalProposals ?? []}
+      canManage={canReview && hasCanonicalTenant}
+      canReviewLegalSources={(role === "ADMIN" || role === "GIURIDICO") && hasCanonicalTenant}
+      reportArchived={Boolean(automaticWorkflow?.structuredReportSnapshots.some((snapshot) =>
+        snapshot.effectiveStatus === "CURRENT"
+        && snapshot.reportFingerprint === automaticWorkflow.structuredReport?.reportFingerprint))}
+      analysisCurrent={automaticWorkflow?.analysisUpdate.status === "CURRENT"}
+      errorCode={typeof activityError === "string" ? activityError : undefined}
+      focusActivityKey={typeof activity === "string" && /^activity_[a-f0-9]{32}$/.test(activity) ? activity : undefined}
+    />
+  ) : null;
+  const previewReport = activeSection === "proposals" ? automaticWorkflow?.structuredReport : null;
+  const previewReportArchived = Boolean(automaticWorkflow?.structuredReportSnapshots.some((snapshot) =>
+    snapshot.reportFingerprint === previewReport?.reportFingerprint && snapshot.effectiveStatus === "CURRENT"));
+  const reconciliations = activeSection === "proposals" && detail.canonicalEnteId && canReview
+    ? await listProposalReconciliations({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id })
+    : [];
+  const proposalPreview = previewReport && detail.canonicalEnteId ? (
+    <FascicoloProposalPreview
+      procedimentoId={detail.procedimento.id}
+      issueNames={previewReport.payload.legalIssues}
+      analysisCurrent={automaticWorkflow?.analysisUpdate.status === "CURRENT"}
+      reportArchived={previewReportArchived}
+      reportFingerprint={previewReport.reportFingerprint}
+      corpusFingerprint={automaticWorkflow?.analysisUpdate.corpusFingerprint ?? ""}
+      canManage={canReview && hasCanonicalTenant}
+      reconciliations={reconciliations}
+      errorCode={typeof reconciliationError === "string" ? reconciliationError : undefined}
+      done={typeof reconciliationDone === "string" ? reconciliationDone : undefined}
+      preview={previewOperationalProposalReconciliation({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+        reportFingerprint: previewReport.reportFingerprint,
+        candidates: generateOperationalProposalCandidates({
+          tenantId: detail.canonicalEnteId,
+          procedimentoId: detail.procedimento.id,
+          structuredReportId: automaticWorkflow?.structuredReportSnapshots.find((snapshot) =>
+            snapshot.reportFingerprint === previewReport.reportFingerprint)?.snapshotId ?? null,
+          structuredReportFingerprint: previewReport.reportFingerprint,
+          report: previewReport.payload,
+        }),
+        proposals: automaticWorkflow?.operationalProposals ?? [],
+        specs: activitySpecs,
+        activities: operationalActivities,
+        drafts: operationalDrafts,
+      })}
+    />
+  ) : null;
+  const proposalHistory = activeSection === "proposals" ? (
+    <details className="rounded-lg border border-slate-200 bg-white p-4">
+      <summary className="cursor-pointer font-semibold text-slate-900">Altre proposte e storico delle revisioni</summary>
+      <div className="mt-4">
+        <FascicoloProposals
+          proposals={automaticWorkflow?.operationalProposals ?? []}
+          canManage={canReview && hasCanonicalTenant}
+          drafts={operationalDrafts}
+          activitySpecs={activitySpecs}
+          currentReportFingerprint={automaticWorkflow?.structuredReport?.reportFingerprint}
+        />
+      </div>
+    </details>
+  ) : null;
   const actsWorkspace = activeSection === "acts" && detail.canonicalEnteId
     ? {
         catalog: buildActTemplateCatalog({
@@ -248,8 +348,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             unitaOrganizzativa: detail.procedimento.unitaOrganizzativaResponsabile,
           },
         }),
-        drafts: await listActDrafts({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id }),
-        attachmentOptions: await listActAttachmentOptions(detail.procedimento.id),
+        drafts: operationalDrafts,
+        attachmentOptions,
       }
     : null;
   const actsSection = activeSection === "acts" ? (
@@ -259,6 +359,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         catalog={actsWorkspace.catalog}
         drafts={actsWorkspace.drafts}
         attachmentOptions={actsWorkspace.attachmentOptions}
+        activitySpecs={activitySpecs}
+        activities={operationalActivities}
         canManage={canReview}
       />
     ) : (
@@ -355,16 +457,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
           {activeSection === "proposals" ? (
             <section aria-label="Proposte preliminari">
-              <h2 className="mb-3 text-xl font-semibold">Proposte operative preliminari</h2>
-              {automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
-                <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
-              ) : <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
-              <div className="mt-4">
-                <FascicoloProposals
-                  proposals={automaticWorkflow?.operationalProposals ?? []}
-                  canManage={canReview && hasCanonicalTenant}
-                />
-              </div>
+              {guidedSection ?? <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
+              <div className="mt-4">{proposalPreview}</div>
+              <div className="mt-4">{proposalHistory}</div>
               <p className="mt-4 text-sm text-slate-600">Nessun titolo concessorio viene presunto o creato automaticamente. Le proposte richiedono valutazione professionale.</p>
             </section>
           ) : null}
@@ -373,6 +468,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               procedimentoId={detail.procedimento.id}
               showDiagnostics={role === "ADMIN"}
               snapshots={structuredReportSnapshots}
+              documents={attachmentOptions}
             />
           ) : null}
           {activeSection === "concession" ? (
@@ -908,16 +1004,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         </section> : null}
 
-        {activeSection === "proposals" && automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
-          <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
-        ) : null}
-
-        {activeSection === "proposals" ? (
-          <FascicoloProposals
-            proposals={automaticWorkflow?.operationalProposals ?? []}
-            canManage={canReview && hasCanonicalTenant}
-          />
-        ) : null}
+        {guidedSection}
+        {proposalPreview}
+        {proposalHistory}
 
         {actsSection}
 
@@ -1486,6 +1575,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             procedimentoId={detail.procedimento.id}
             showDiagnostics={role === "ADMIN"}
             snapshots={structuredReportSnapshots}
+            documents={attachmentOptions}
           />
         ) : null}
       </div>
