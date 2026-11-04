@@ -79,6 +79,20 @@ async function verifyLive(deploymentId: string, expectedCommit: string): Promise
   log("live-verification", { alias: PRODUCTION_RELEASE.productionDomain, deploymentId, commit: expectedCommit, login: 200 });
 }
 
+function verifyStagedLogin(deploymentId: string): void {
+  if (!/^dpl_[a-z0-9]+$/i.test(deploymentId)) {
+    throw new ProductionReleaseError("VERCEL_COMMAND_FAILED", "invalid deployment identity");
+  }
+  const headers = run("vercel", [
+    "curl", "/login", `--deployment=${deploymentId}`, `--scope=${PRODUCTION_RELEASE.scope}`,
+    "--", "--head", "--silent",
+  ]);
+  const statuses = [...headers.matchAll(/^HTTP\/\S+\s+(\d{3})\b/gim)];
+  const status = statuses.at(-1)?.[1];
+  if (status !== "200") throw new ProductionReleaseError("HEALTHCHECK_FAILED", `staged login: ${status ?? "unknown"}`);
+  log("staged-verification", { deploymentId, login: 200 });
+}
+
 export async function releaseProduction(argv: readonly string[]): Promise<void> {
   const args = parseProductionReleaseArgs(argv);
   verifyProjectConfiguration();
@@ -90,19 +104,39 @@ export async function releaseProduction(argv: readonly string[]): Promise<void> 
     return;
   }
 
+  const beforeCommit = before.meta?.gitCommitSha ?? before.meta?.githubCommitSha;
+  if (!beforeCommit || !/^[a-f0-9]{40}$/.test(beforeCommit)) {
+    throw new ProductionReleaseError("DEPLOYMENT_COMMIT_MISMATCH", "current deployment commit missing");
+  }
+  await verifyLive(before.id, beforeCommit);
   verifyLocalSource(args.expectedCommit);
-  const deployOutput = runCapturing("vercel", ["deploy", "--prod", "--yes", `--scope=${PRODUCTION_RELEASE.scope}`]);
-  // The CLI prints the deployment URL on stdout or, when not attached to a TTY, only in its progress log on stderr.
-  const deploymentUrl = extractDeploymentUrl(`${deployOutput.stdout}\n${deployOutput.stderr}`);
-  if (!deploymentUrl) throw new ProductionReleaseError("VERCEL_COMMAND_FAILED", "deployment URL missing");
-  const deployment = deploymentSnapshot(new URL(deploymentUrl).host);
+  let deployment: VercelDeploymentSnapshot;
+  if (args.resumeDeployment) {
+    deployment = deploymentSnapshot(args.resumeDeployment);
+    if (deployment.id !== args.resumeDeployment) throw new ProductionReleaseError("DEPLOYMENT_ID_MISMATCH");
+  } else {
+    const deployOutput = runCapturing("vercel", [
+      "deploy", "--prod", "--skip-domain", "--yes",
+      `--project=${PRODUCTION_RELEASE.projectId}`, `--scope=${PRODUCTION_RELEASE.scope}`,
+    ]);
+    // The CLI prints the URL on stdout or, without a TTY, in its progress log on stderr.
+    const deploymentUrl = extractDeploymentUrl(`${deployOutput.stdout}\n${deployOutput.stderr}`);
+    if (!deploymentUrl) throw new ProductionReleaseError("VERCEL_COMMAND_FAILED", "deployment URL missing");
+    deployment = deploymentSnapshot(new URL(deploymentUrl).host);
+  }
   assertDeploymentEligibleForProductionDomain(deployment, args.expectedCommit);
   log("deployment", { deploymentId: deployment.id, target: deployment.target, readyState: deployment.readyState });
+  verifyStagedLogin(deployment.id);
 
+  verifyLocalSource(args.expectedCommit);
+  verifyProjectConfiguration();
   const aliased = deploymentSnapshot(PRODUCTION_RELEASE.productionDomain);
-  if (aliased.id !== deployment.id) {
-    run("vercel", ["alias", "set", new URL(deploymentUrl).host, PRODUCTION_RELEASE.productionDomain, `--scope=${PRODUCTION_RELEASE.scope}`]);
+  assertAliasResolvesTo(aliased, before.id, beforeCommit);
+  if (aliased.id === deployment.id) {
+    await verifyLive(deployment.id, args.expectedCommit);
+    return;
   }
+  run("vercel", ["promote", deployment.id, "--yes", `--scope=${PRODUCTION_RELEASE.scope}`]);
   await verifyLive(deployment.id, args.expectedCommit);
 }
 

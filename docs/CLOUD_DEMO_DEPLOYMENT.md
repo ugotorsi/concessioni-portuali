@@ -46,12 +46,19 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
   (`scripts/deploy/release-production.ts`). Lo script blocca il rilascio se: l'albero di lavoro non e pulito,
   HEAD non coincide con il commit atteso o non e presente su `origin`, il dominio `app.noetra.it` e legato a un
   branch Git, a un ambiente personalizzato o a un redirect, mancano variabili Production obbligatorie, il deployment
-  non ha target `production`, non e `READY`, ha commit diverso o sorgente sporca. Dopo il rilascio verifica che
-  l'alias risolva allo stesso deployment e che `/login` risponda 200.
+  non appartiene al progetto atteso, non ha target `production`, non e `READY`, ha commit diverso o sorgente sporca.
+  Il deployment e creato con `--skip-domain`: prima della promozione lo script controlla l'identita, il commit e
+  `/login` sul deployment protetto, ricontrolla configurazione e sorgente e verifica che l'alias non sia cambiato.
+  Solo dopo esegue `vercel promote`, quindi verifica nuovamente alias, target, commit e `/login`.
 - Verifica in sola lettura dello stato corrente: `npm run deploy:production -- --expected-commit <SHA> --verify-only`.
-- Se il deploy è stato creato ma lo script si è interrotto prima della verifica finale, non ripetere il deploy: controllare con `--verify-only` e lo SHA rilasciato che alias, target e commit coincidano.
+- Se il deployment e gia stato creato ma non promosso, recuperare il suo identificativo esatto e riprendere senza
+  crearne un altro con `npm run deploy:production -- --expected-commit <SHA> --resume-deployment <dpl_ID>`.
+  Se risulta gia promosso, usare `--verify-only` con lo SHA rilasciato.
 - Vietato `vercel alias set` manuale verso URL Preview. In ogni caso il middleware risponde 421 a qualsiasi
-  richiesta su `app.noetra.it` servita da un deployment con `VERCEL_ENV` diverso da `production`.
+  richiesta su `app.noetra.it` servita da un deployment che include la guardia e ha `VERCEL_ENV` diverso da
+  `production`. Lo script e il middleware non impediscono a un amministratore esterno di cambiare manualmente
+  l'associazione su Vercel o di usare un deployment privo della guardia: i permessi sulla configurazione restano
+  una protezione distinta da verificare.
 - Causa dell'incidente del 03/11/2026: `app.noetra.it` era configurato come dominio di branch Git
   (`staging-operativo`), quindi assegnabile a deployment Preview. Il legame e stato rimosso; lo script ne impedisce
   la reintroduzione silenziosa.
@@ -132,4 +139,3 @@ Mitigazione per questa fase:
 - mantenere sempre un fallback (PDF/screenshot/video/local demo).
 
 Evoluzione consigliata (fase successiva): object storage dedicato (S3, Supabase Storage o Vercel Blob) con persistenza stabile.
-

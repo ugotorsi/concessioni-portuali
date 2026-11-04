@@ -21,10 +21,12 @@ export type ProductionReleaseErrorCode =
   | "EXPECTED_COMMIT_REQUIRED"
   | "EXPECTED_COMMIT_INVALID"
   | "UNSUPPORTED_ARGUMENT"
+  | "RESUME_DEPLOYMENT_INVALID"
   | "WORKTREE_DIRTY"
   | "GIT_HEAD_MISMATCH"
   | "COMMIT_NOT_ON_REMOTE"
   | "VERCEL_IDENTITY_MISMATCH"
+  | "PRODUCTION_DOMAIN_MISMATCH"
   | "DOMAIN_BOUND_TO_GIT_BRANCH"
   | "DOMAIN_BOUND_TO_CUSTOM_ENVIRONMENT"
   | "DOMAIN_REDIRECT_FORBIDDEN"
@@ -32,6 +34,7 @@ export type ProductionReleaseErrorCode =
   | "DEPLOYMENT_NOT_PRODUCTION_TARGET"
   | "DEPLOYMENT_NOT_READY"
   | "DEPLOYMENT_PROJECT_MISMATCH"
+  | "DEPLOYMENT_ID_MISMATCH"
   | "DEPLOYMENT_COMMIT_MISMATCH"
   | "DEPLOYMENT_DIRTY_SOURCE"
   | "ALIAS_MISMATCH"
@@ -48,11 +51,13 @@ export class ProductionReleaseError extends Error {
 export interface ProductionReleaseArgs {
   readonly expectedCommit: string;
   readonly verifyOnly: boolean;
+  readonly resumeDeployment?: string;
 }
 
 export function parseProductionReleaseArgs(argv: readonly string[]): ProductionReleaseArgs {
   let expectedCommit: string | undefined;
   let verifyOnly = false;
+  let resumeDeployment: string | undefined;
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--expected-commit") {
@@ -68,11 +73,21 @@ export function parseProductionReleaseArgs(argv: readonly string[]): ProductionR
       verifyOnly = true;
       continue;
     }
+    if (argument === "--resume-deployment") {
+      const value = argv[index + 1];
+      if (!value || !/^dpl_[a-z0-9]+$/i.test(value) || resumeDeployment !== undefined) {
+        throw new ProductionReleaseError("RESUME_DEPLOYMENT_INVALID");
+      }
+      resumeDeployment = value;
+      index += 1;
+      continue;
+    }
     throw new ProductionReleaseError("UNSUPPORTED_ARGUMENT", argument);
   }
   if (!expectedCommit) throw new ProductionReleaseError("EXPECTED_COMMIT_REQUIRED");
   if (!/^[a-f0-9]{40}$/.test(expectedCommit)) throw new ProductionReleaseError("EXPECTED_COMMIT_INVALID");
-  return { expectedCommit, verifyOnly };
+  if (verifyOnly && resumeDeployment) throw new ProductionReleaseError("UNSUPPORTED_ARGUMENT", "--resume-deployment");
+  return resumeDeployment ? { expectedCommit, verifyOnly, resumeDeployment } : { expectedCommit, verifyOnly };
 }
 
 export interface VercelDomainConfig {
@@ -88,6 +103,9 @@ export interface VercelDomainConfig {
  * unbound so that only production-target deployments can receive it.
  */
 export function assertProductionDomainConfig(domain: VercelDomainConfig): void {
+  if (domain.name !== PRODUCTION_RELEASE.productionDomain) {
+    throw new ProductionReleaseError("PRODUCTION_DOMAIN_MISMATCH", domain.name);
+  }
   if (domain.gitBranch) throw new ProductionReleaseError("DOMAIN_BOUND_TO_GIT_BRANCH", domain.gitBranch);
   if (domain.customEnvironmentId) {
     throw new ProductionReleaseError("DOMAIN_BOUND_TO_CUSTOM_ENVIRONMENT", domain.customEnvironmentId);
@@ -129,8 +147,8 @@ export function assertDeploymentEligibleForProductionDomain(
   deployment: VercelDeploymentSnapshot,
   expectedCommit: string,
 ): void {
-  if (deployment.projectId && deployment.projectId !== PRODUCTION_RELEASE.projectId) {
-    throw new ProductionReleaseError("DEPLOYMENT_PROJECT_MISMATCH", deployment.projectId);
+  if (deployment.projectId !== PRODUCTION_RELEASE.projectId) {
+    throw new ProductionReleaseError("DEPLOYMENT_PROJECT_MISMATCH", deployment.projectId ?? "missing");
   }
   if (deployment.target !== "production") {
     throw new ProductionReleaseError("DEPLOYMENT_NOT_PRODUCTION_TARGET", String(deployment.target ?? "preview"));
@@ -142,7 +160,10 @@ export function assertDeploymentEligibleForProductionDomain(
   if (sha !== expectedCommit) {
     throw new ProductionReleaseError("DEPLOYMENT_COMMIT_MISMATCH", String(sha));
   }
-  if (deployment.meta?.gitDirty === "1") throw new ProductionReleaseError("DEPLOYMENT_DIRTY_SOURCE");
+  const gitDirty = deployment.meta?.gitDirty;
+  if (gitDirty !== undefined && (typeof gitDirty !== "string" || !["0", "false"].includes(gitDirty.toLowerCase()))) {
+    throw new ProductionReleaseError("DEPLOYMENT_DIRTY_SOURCE", String(gitDirty));
+  }
 }
 
 export function assertAliasResolvesTo(

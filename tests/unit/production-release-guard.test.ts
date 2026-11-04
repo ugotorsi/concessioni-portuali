@@ -89,9 +89,17 @@ describe("production release policy", () => {
     expect(code(() => parseProductionReleaseArgs([]))).toBe("EXPECTED_COMMIT_REQUIRED");
     expect(code(() => parseProductionReleaseArgs(["--expected-commit", "8ee3d99"]))).toBe("EXPECTED_COMMIT_INVALID");
     expect(code(() => parseProductionReleaseArgs(["--expected-commit", SHA, "--target", "preview"]))).toBe("UNSUPPORTED_ARGUMENT");
+    expect(parseProductionReleaseArgs(["--expected-commit", SHA, "--resume-deployment", "dpl_abc123"]))
+      .toEqual({ expectedCommit: SHA, verifyOnly: false, resumeDeployment: "dpl_abc123" });
+    expect(code(() => parseProductionReleaseArgs(["--expected-commit", SHA, "--resume-deployment", "invalid"])))
+      .toBe("RESUME_DEPLOYMENT_INVALID");
+    expect(code(() => parseProductionReleaseArgs(["--expected-commit", SHA, "--verify-only", "--resume-deployment", "dpl_abc123"])))
+      .toBe("UNSUPPORTED_ARGUMENT");
   });
 
   it("blocks a production domain bound to a Git branch (the cause of the preview incident)", () => {
+    expect(code(() => assertProductionDomainConfig({ name: "other.example.test", gitBranch: null })))
+      .toBe("PRODUCTION_DOMAIN_MISMATCH");
     expect(code(() => assertProductionDomainConfig({ name: "app.noetra.it", gitBranch: "staging-operativo" })))
       .toBe("DOMAIN_BOUND_TO_GIT_BRANCH");
     expect(code(() => assertProductionDomainConfig({ name: "app.noetra.it", customEnvironmentId: "env_x" })))
@@ -112,7 +120,21 @@ describe("production release policy", () => {
     expect(code(() => assertDeploymentEligibleForProductionDomain(
       { ...productionDeployment, meta: { gitCommitSha: SHA, gitDirty: "1" } }, SHA,
     ))).toBe("DEPLOYMENT_DIRTY_SOURCE");
+    expect(code(() => assertDeploymentEligibleForProductionDomain(
+      { ...productionDeployment, meta: { gitCommitSha: SHA, gitDirty: "true" } }, SHA,
+    ))).toBe("DEPLOYMENT_DIRTY_SOURCE");
+    expect(code(() => assertDeploymentEligibleForProductionDomain(
+      { ...productionDeployment, meta: { gitCommitSha: SHA, gitDirty: "unknown" } }, SHA,
+    ))).toBe("DEPLOYMENT_DIRTY_SOURCE");
+    expect(code(() => assertDeploymentEligibleForProductionDomain(
+      { ...productionDeployment, meta: { gitCommitSha: SHA, gitDirty: "false" } }, SHA,
+    ))).toBeUndefined();
+    expect(code(() => assertDeploymentEligibleForProductionDomain(
+      { ...productionDeployment, meta: { gitCommitSha: SHA } }, SHA,
+    ))).toBeUndefined();
     expect(code(() => assertDeploymentEligibleForProductionDomain({ ...productionDeployment, projectId: "prj_other" }, SHA)))
+      .toBe("DEPLOYMENT_PROJECT_MISMATCH");
+    expect(code(() => assertDeploymentEligibleForProductionDomain({ ...productionDeployment, projectId: undefined }, SHA)))
       .toBe("DEPLOYMENT_PROJECT_MISMATCH");
   });
 
