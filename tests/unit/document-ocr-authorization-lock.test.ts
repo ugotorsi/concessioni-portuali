@@ -18,4 +18,19 @@ describe("document OCR authorization transaction lock", () => {
     expect(source).not.toContain("SELECT pg_advisory_xact_lock");
     expect(source).toContain("DOCUMENT_OCR_AUTHORIZATION_LOCK_FAILED");
   });
+
+  it("uses the same supported lock shape for extraction retry permits", async () => {
+    const source = await readFile(
+      path.join(
+        process.cwd(),
+        "src/server/documents/documentExtractionRetryPermit.ts",
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain('SELECT TRUE AS "acquired"');
+    expect(source).toContain("FROM pg_advisory_xact_lock");
+    expect(source).not.toContain("SELECT pg_advisory_xact_lock");
+    expect(source).toContain("DOCUMENT_EXTRACTION_RETRY_PERMIT_LOCK_FAILED");
+  });
 });
