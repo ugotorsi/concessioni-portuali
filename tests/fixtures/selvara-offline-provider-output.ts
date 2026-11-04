@@ -19,8 +19,13 @@ function records(value: unknown): Record<string, unknown>[] {
   return value.map(record);
 }
 
+/**
+ * `evidenceSpans` lets an isolated run ground the simulated output on the span catalog that the
+ * real extraction produced, instead of the offline pdfjs text.
+ */
 export function buildSelvaraOfflineProviderOutput(
   documentVersionId = "attempt-selvara-offline",
+  evidenceSpans?: readonly Readonly<{ id: string; basisRef: string }>[],
 ): Record<string, unknown> {
   const knowledge = record(structuredClone(selvaraOfflineStructuredKnowledge));
   const sourceQuotes = records(knowledge.sourceQuotes);
@@ -44,7 +49,7 @@ export function buildSelvaraOfflineProviderOutput(
     delete next.referenceDateBasis;
     return next;
   });
-  const spans = buildFascicoloEvidenceSpanCatalog(selvaraOfflinePages.map((page) => ({
+  const spans = evidenceSpans ?? buildFascicoloEvidenceSpanCatalog(selvaraOfflinePages.map((page) => ({
     reference: `DOCUMENT_1.PAGE_${page.pageNumber}`,
     pageNumber: page.pageNumber,
     documentVersionId,

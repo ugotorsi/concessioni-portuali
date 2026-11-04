@@ -51,6 +51,41 @@ function payloadFingerprint(value: JsonValue): string {
   return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
 }
 
+/**
+ * A mission already executed on the current revision and deferred as incomplete is not re-queued:
+ * the same question, date and corpus would repeat the same paid calls. Its wave slot passes to the
+ * next question held back only by the wave limit. A new revision re-enables execution.
+ */
+async function effectiveExecutions(
+  tx: ResearchMissionLifecycleSqlExecutor,
+  input: { tenantId: string; procedimentoId: string; knowledgeRevisionId: string },
+  plans: readonly KnowledgeResearchMissionPlan[],
+): Promise<Map<string, KnowledgeResearchMissionPlan["execution"]>> {
+  const exhausted = new Set((await tx.query<{ missionFingerprint: string }>(`
+    SELECT m."missionFingerprint"
+    FROM "ResearchMissionRecord" m
+    JOIN "FascicoloKnowledgeRevision" r ON r."id" = $3
+    WHERE m."tenantId" = $1 AND m."caseId" = $2
+      AND m."lifecycleStatus" = 'CURRENT' AND m."status" = 'DEFERRED'
+      AND m."missionFingerprint" = ANY($4::text[])
+      AND EXISTS (
+        SELECT 1 FROM "ResearchExecutionAttempt" a
+        WHERE a."missionId" = m."id" AND a."completionState" = 'DEFERRED'
+          AND a."startedAt" >= COALESCE(r."completedAt", r."createdAt")
+      )
+  `, [input.tenantId, input.procedimentoId, input.knowledgeRevisionId, plans.map((plan) => plan.missionFingerprint)]))
+    .rows.map((row) => row.missionFingerprint));
+  let freedSlots = plans.filter((plan) => plan.execution === "ADMITTED" && exhausted.has(plan.missionFingerprint)).length;
+  return new Map(plans.map((plan) => {
+    if (exhausted.has(plan.missionFingerprint)) return [plan.missionFingerprint, "DEFERRED_BY_POLICY"];
+    if (plan.execution === "DEFERRED_BY_POLICY" && plan.blockReason === "EXECUTION_WAVE_LIMIT" && freedSlots > 0) {
+      freedSlots -= 1;
+      return [plan.missionFingerprint, "ADMITTED"];
+    }
+    return [plan.missionFingerprint, plan.execution];
+  }));
+}
+
 export async function reconcileKnowledgeResearchMissions(input: {
   tenantId: string;
   procedimentoId: string;
@@ -75,6 +110,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
     if (revision.rows.length !== 1) throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
     const executablePlans = input.plans.filter((plan) => plan.mission !== null
       && (plan.execution === "ADMITTED" || plan.execution === "DEFERRED_BY_POLICY"));
+    const execution = await effectiveExecutions(tx, input, executablePlans);
     const results: KnowledgeMissionLifecycleResult[] = [];
     const currentMissionIds: string[] = [];
     for (const plan of executablePlans) {
@@ -125,14 +161,14 @@ export async function reconcileKnowledgeResearchMissions(input: {
           RETURNING "status", "assignedActorId"
         `, [missionId, input.tenantId, input.procedimentoId, input.knowledgeRevisionId,
           plan.legalIssueSemanticKey, plan.questionSemanticKey, JSON.stringify(plan.referenceDateBasis),
-          planAssignee, plan.execution]);
+          planAssignee, execution.get(plan.missionFingerprint)]);
         operationalStatus = updated.rows[0].status;
         assignedActorId = updated.rows[0].assignedActorId;
       } else {
         missionId = mission.missionId;
         outcome = "CREATED";
         assignedActorId = planAssignee;
-        operationalStatus = assignedActorId === null || plan.execution === "DEFERRED_BY_POLICY"
+        operationalStatus = assignedActorId === null || execution.get(plan.missionFingerprint) === "DEFERRED_BY_POLICY"
           ? "DEFERRED"
           : "PENDING";
         await tx.query(`

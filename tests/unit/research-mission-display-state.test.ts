@@ -74,4 +74,18 @@ describe("research mission display state", () => {
     expect(state({ status: "BUDGET_EXHAUSTED" }).state).toBe("BLOCKED");
     expect(state({ status: "REJECTED" }).state).toBe("FAILED");
   });
+
+  it("reports an executed but incomplete research as an outcome, not as a policy refusal", () => {
+    const withSources = state({
+      status: "DEFERRED",
+      job: job({ status: "SUCCEEDED" }),
+      results: [{ classificationReviewStatus: "AI_PROPOSED" }, { classificationReviewStatus: "AI_PROPOSED" }],
+    });
+    expect(withSources.state).toBe("COMPLETED_SOURCES_TO_VERIFY");
+    expect(withSources.detail).toContain("Ricerca eseguita ma incompleta: 2 risultati");
+    const empty = state({ status: "DEFERRED", job: job({ status: "SUCCEEDED" }) });
+    expect(empty.state).toBe("COMPLETED_NO_RESULTS");
+    expect(empty.detail).toContain("nessuna conclusione giuridica");
+    expect(state({ status: "DEFERRED" }).detail).toContain("Non ancora eseguita");
+  });
 });

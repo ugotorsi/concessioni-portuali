@@ -208,6 +208,56 @@ Selvara non vengono modificate.
   - terza richiesta: rifiutata con `ANALYSIS_ACTIVATION_DISABLED`, come
     previsto senza provider AI.
 
+### Collaudo isolato dell'intera catena giuridica
+
+Script: `scripts/runtime/verify-legal-chain-isolated.ts`, solo su database
+isolato (`noetra_legal_chain`, utente `noetra_test`) con il PDF canonico
+Selvara. Il comando richiede il flag `--execute-isolated-legal-chain`. I
+flag AUTOMATIC_* restano spenti e ogni host non simulato viene rifiutato.
+
+Componenti simulati:
+- OpenAI: risposta offline ancorata agli span realmente estratti;
+- Moonlit: elenco fisso con L. 84/1994 e una decisione fittizia;
+- Normattiva: ricerca, sessione e AKN dell'art. 18 L. 84/1994.
+
+Il resto è codice applicativo reale: pipeline manuale, worker, Knowledge,
+missioni, verifica ufficiale delle fonti, rapporto, proposte, attività e
+atti.
+
+Esito (run-09):
+- documento ed estrazione: 40/40 pagine, 47.374 caratteri;
+- Knowledge: 60 elementi, 144 collegamenti alle evidenze, 0 citazioni non
+  valide;
+- conferma professionale di 3 date di riferimento, con audit;
+- 6 quesiti di ricerca, ciascuno eseguito una sola volta. La verifica sul
+  testo ufficiale distingue articoli pertinenti, non pertinenti e fonti non
+  verificabili, e solo le fonti verificate risultano utilizzabili;
+- rapporto: 7 questioni e 7 percorsi operativi;
+- 43 proposte;
+- un'attività approvata con verifica dell'approvazione, presa in carico e
+  bozza dell'atto da modello. Una seconda creazione riusa la stessa bozza;
+- costi registrati e chiusi (`SETTLED`) per l'analisi e per ogni ricerca.
+
+Difetti emersi e corretti:
+- **Riesecuzione a pagamento.** Ogni nuova richiesta manuale rimetteva in
+  coda le missioni già eseguite sulla stessa revisione e chiuse come
+  incomplete (`RESEARCH_INCOMPLETE`). Si ripetevano così le stesse chiamate,
+  e il sesto quesito, trattenuto dal limite del ciclo, non veniva mai
+  eseguito.
+
+  `reconcileKnowledgeResearchMissions` ora non rimette in coda una missione
+  con un tentativo `DEFERRED` successivo al completamento della revisione
+  corrente. Il posto liberato va al quesito trattenuto dal limite del ciclo.
+  Una nuova revisione della Knowledge riabilita l'esecuzione.
+
+  Collaudo sulle richieste successive:
+  - seconda richiesta: 1 solo job, il sesto quesito;
+  - terza richiesta: `NO_RESEARCH_TO_RUN`, 0 job.
+- **Etichetta fuorviante.** Una missione eseguita ma incompleta appariva
+  «non ammessa dalla policy». Ora appare come ricerca eseguita e incompleta,
+  con fonti da verificare oppure senza fonti utilizzabili. Una missione non
+  ancora eseguita appare in attesa di ammissione.
+
 ### Operazioni Production ancora da autorizzare
 
 1. Decidere se archiviare `NOETRA_V7_COLLAUDO_INTEGRATO_DEMO.pdf` da Selvara

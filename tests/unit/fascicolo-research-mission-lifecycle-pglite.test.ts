@@ -53,7 +53,8 @@ async function database() {
   await db.exec(`
     CREATE TYPE "ResearchMissionStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'BUDGET_EXHAUSTED', 'DEFERRED', 'REJECTED');
     CREATE TABLE "FascicoloKnowledgeRevision" (
-      "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
+      "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, "completedAt" TIMESTAMPTZ
     );
     CREATE TABLE "User" (
       "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "ruolo" TEXT NOT NULL
@@ -91,6 +92,9 @@ async function database() {
     );
     CREATE TABLE "ResearchEvidenceBundleRecord" (
       "id" TEXT PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "payload" JSONB NOT NULL
+    );
+    CREATE TABLE "ResearchExecutionAttempt" (
+      "id" TEXT PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "startedAt" TIMESTAMPTZ NOT NULL, "completionState" TEXT
     );
   `);
   await db.exec(migration);
@@ -206,6 +210,47 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       [professionalMission.missionId],
     );
     expect(rows.rows[0]?.lifecycleStatus).toBe("CURRENT");
+  });
+
+  it("does not re-queue research already executed on the same revision and frees its wave slot", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-wave-1");
+    await db.query('UPDATE "FascicoloKnowledgeRevision" SET "createdAt" = now() - interval \'3 hours\', "completedAt" = now() - interval \'2 hours\' WHERE "id" = $1', ["revision-wave-1"]);
+    const executed = plan("a".repeat(64), "a".repeat(64));
+    const waiting: KnowledgeResearchMissionPlan = {
+      ...plan("c".repeat(64), "c".repeat(64)),
+      execution: "DEFERRED_BY_POLICY",
+      blockReason: "EXECUTION_WAVE_LIMIT",
+    };
+    const reconcile = (knowledgeRevisionId: string) => reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId,
+      assignedActorId: "actor-1",
+      plans: [executed, waiting],
+    }, ctx);
+
+    const first = await reconcile("revision-wave-1");
+    expect(first.map((row) => row.operationalStatus)).toEqual(["PENDING", "DEFERRED"]);
+    await db.query(
+      'UPDATE "ResearchMissionRecord" SET "status" = \'DEFERRED\', "deferredAt" = now() WHERE "id" = $1',
+      [first[0].missionId],
+    );
+    await db.query(
+      'INSERT INTO "ResearchExecutionAttempt" ("id", "missionId", "startedAt", "completionState") VALUES ($1, $2, now() - interval \'1 hour\', \'DEFERRED\')',
+      ["attempt-1", first[0].missionId],
+    );
+
+    const repeated = await reconcile("revision-wave-1");
+    expect(repeated.map((row) => [row.missionId, row.operationalStatus])).toEqual([
+      [first[0].missionId, "DEFERRED"],
+      [first[1].missionId, "PENDING"],
+    ]);
+
+    await setCurrent(db, "revision-wave-2");
+    const nextRevision = await reconcile("revision-wave-2");
+    expect(nextRevision.find((row) => row.missionId === first[0].missionId)?.operationalStatus).toBe("PENDING");
   });
 
   it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {

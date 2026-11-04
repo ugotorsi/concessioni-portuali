@@ -94,7 +94,16 @@ export function researchMissionDisplayState(input: ResearchMissionDisplayInput):
     return display("COMPLETED_NO_RESULTS", "La ricerca è terminata senza fonti utilizzabili: nessuna conclusione giuridica è stata desunta.");
   }
   if (input.status === "REJECTED") return display("FAILED", "Missione respinta.");
-  if (input.status === "DEFERRED") return display("BLOCKED", "Missione non ammessa dalla policy corrente.");
+  if (input.status === "DEFERRED") {
+    if (input.job?.status === "SUCCEEDED") {
+      // Executed but closed as incomplete: the outcome is a research limit, not a policy refusal.
+      return reviewable > 0
+        ? display("COMPLETED_SOURCES_TO_VERIFY", `Ricerca eseguita ma incompleta: ${reviewable} risultat${reviewable === 1 ? "o" : "i"} da sottoporre a verifica professionale; mancano fonti sufficienti per concludere.`)
+        : display("COMPLETED_NO_RESULTS", "Ricerca eseguita ma incompleta: nessuna fonte utilizzabile, nessuna conclusione giuridica è stata desunta.");
+    }
+    if (!input.job) return display("BLOCKED", "Non ancora eseguita: in attesa di ammissione per il limite del ciclo di ricerca o per la policy corrente.");
+    return display("BLOCKED", "Missione non ammessa dalla policy corrente.");
+  }
   if (input.status === "BUDGET_EXHAUSTED") return display("BLOCKED", "Budget della missione esaurito senza risultati.");
 
   const job = input.job;
