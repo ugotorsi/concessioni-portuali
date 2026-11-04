@@ -15,7 +15,14 @@ import {
   type ActDraft,
 } from "@/server/fascicolo-acts/model";
 import { ACT_PHASE_LABELS, type ActTemplateCatalog } from "@/server/fascicolo-acts/templates";
+import { groupActDraftsForReview, type ActDraftGroupMember } from "@/server/fascicolo-acts/reconciliation";
 import type { ActivityRecord, ActivitySpec } from "@/server/fascicolo-operational-activities/model";
+
+const RECONCILIATION_LABELS: Record<ActDraftGroupMember["reconciliation"], string> = {
+  KEEP_AS_REFERENCE: "Bozza di riferimento",
+  IDENTICAL_DUPLICATE: "Copia identica: archiviabile previa autorizzazione",
+  DIVERGENT_CONTENT: "Contenuto diverso: confrontare",
+};
 
 const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-600 focus:outline-none";
 
@@ -205,6 +212,19 @@ export function FascicoloActsWorkspace({
   activities: readonly ActivityRecord[];
 }) {
   const templates = [...catalog.recommended, ...catalog.others];
+  const templateFor = (draft: ActDraft) => {
+    const matches = templates.filter((candidate) => actDraftMatchesTemplate(draft, {
+      templateKey: candidate.templateKey,
+      issueSemanticKey: candidate.issueSemanticKey,
+      legacyTemplateKeys: candidate.legacyTemplateKeys,
+    }));
+    return matches.length === 1 ? matches[0] : undefined;
+  };
+  const issueTextFor = (draft: ActDraft) => (templateFor(draft) ?? templates.find((candidate) =>
+    candidate.issueSemanticKey !== null && candidate.issueSemanticKey === draft.current.issueSemanticKey))?.issueText ?? null;
+  const draftByKey = new Map(drafts.map((draft) => [draft.draftKey, draft]));
+  const linkedDraftKeys = new Set(activities.flatMap((activity) => activity.current.drafts.map((link) => link.draftKey)));
+  const groups = groupActDraftsForReview(drafts, linkedDraftKeys);
   return (
     <section className="space-y-6" aria-label="Atti del procedimento">
       <div>
@@ -238,36 +258,71 @@ export function FascicoloActsWorkspace({
 
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-slate-900">Bozze in lavorazione ({drafts.length})</h3>
+        <p className="text-sm text-slate-600">Le bozze sono raggruppate per problematica e tipo di documento. Per ciascun gruppo è indicata l&apos;attività di riferimento.</p>
         {drafts.length === 0 ? (
           <p className="text-sm text-slate-600">Nessuna bozza ancora creata.</p>
-        ) : drafts.map((draft) => {
-          const matches = templates.filter((candidate) => actDraftMatchesTemplate(draft, {
-            templateKey: candidate.templateKey,
-            issueSemanticKey: candidate.issueSemanticKey,
-            legacyTemplateKeys: candidate.legacyTemplateKeys,
-          }));
-          const template = matches.length === 1 ? matches[0] : undefined;
-          const issueTemplate = template ?? templates.find((candidate) =>
-            candidate.issueSemanticKey !== null && candidate.issueSemanticKey === draft.current.issueSemanticKey);
-          const linkedActivities = activities.filter((activity) =>
-            activity.current.drafts.some((link) => link.draftKey === draft.draftKey));
-          const exactSpecs = activitySpecs.filter((spec) => spec.issueSemanticKey === draft.current.issueSemanticKey
-            && spec.documents.some((document) => document.templateKey === draft.current.templateKey));
-          const linkedKey = linkedActivities.length === 1 ? linkedActivities[0].activityKey
-            : linkedActivities.length === 0 && exactSpecs.length === 1 ? exactSpecs[0].activityKey : null;
-          const activityKey = activitySpecs.some((spec) => spec.activityKey === linkedKey) ? linkedKey : null;
+        ) : groups.map((group) => {
+          const groupDrafts = group.members.map((member) => draftByKey.get(member.draftKey)!);
+          const first = groupDrafts[0]!;
+          const template = templateFor(first);
           return (
-            <DraftCard
-              key={draft.draftKey}
-              draft={draft}
-              drafts={drafts}
-              procedimentoId={procedimentoId}
-              canManage={canManage}
-              attachmentOptions={attachmentOptions}
-              issueLabel={issueTemplate?.issueText ?? null}
-              activityLabel={template?.activityTitle ?? null}
-              activityKey={activityKey}
-            />
+            <section key={`${group.issueSemanticKey ?? ""}:${group.templateKey}`} className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3"
+              aria-label={`Gruppo ${first.current.title}`}>
+              <h4 className="text-sm font-semibold text-slate-900">
+                {template?.activityTitle ?? first.current.title}
+                <span className="font-normal text-slate-600"> · {issueTextFor(first) ?? "problematica da verificare"} · {group.members.length} {group.members.length === 1 ? "bozza" : "bozze"}</span>
+              </h4>
+              {group.duplicated ? (
+                <div role="note" className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  <p className="font-medium">Possibili duplicati storici</p>
+                  <p className="mt-1">{group.reconciliationNote}</p>
+                  <table className="mt-2 w-full text-left text-xs">
+                    <thead>
+                      <tr className="text-amber-950">
+                        <th className="py-1 pr-2 font-medium">Bozza</th>
+                        <th className="py-1 pr-2 font-medium">Destinatario</th>
+                        <th className="py-1 pr-2 font-medium">Contenuto</th>
+                        <th className="py-1 pr-2 font-medium">Stato</th>
+                        <th className="py-1 font-medium">Proposta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.members.map((member, index) => (
+                        <tr key={member.draftKey} className="border-t border-amber-200 align-top">
+                          <td className="py-1 pr-2"><a className="underline" href={`#draft-${member.draftKey}`}>n. {index + 1}</a> · {formatDateIT(member.lastSavedAt)}</td>
+                          <td className="py-1 pr-2">{member.recipient ?? "non indicato nel testo"}</td>
+                          <td className="py-1 pr-2 font-mono">{member.bodySha256.slice(0, 8)}</td>
+                          <td className="py-1 pr-2">{ACT_DRAFT_STATUS_LABELS[member.status]} · v{member.version}{member.linkedToActivity ? " · collegata all'attività" : ""}</td>
+                          <td className="py-1">{RECONCILIATION_LABELS[member.reconciliation]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
+              {groupDrafts.map((draft) => {
+                const linkedActivities = activities.filter((activity) =>
+                  activity.current.drafts.some((link) => link.draftKey === draft.draftKey));
+                const exactSpecs = activitySpecs.filter((spec) => spec.issueSemanticKey === draft.current.issueSemanticKey
+                  && spec.documents.some((document) => document.templateKey === draft.current.templateKey));
+                const linkedKey = linkedActivities.length === 1 ? linkedActivities[0].activityKey
+                  : linkedActivities.length === 0 && exactSpecs.length === 1 ? exactSpecs[0].activityKey : null;
+                const activityKey = activitySpecs.some((spec) => spec.activityKey === linkedKey) ? linkedKey : null;
+                return (
+                  <DraftCard
+                    key={draft.draftKey}
+                    draft={draft}
+                    drafts={drafts}
+                    procedimentoId={procedimentoId}
+                    canManage={canManage}
+                    attachmentOptions={attachmentOptions}
+                    issueLabel={issueTextFor(draft)}
+                    activityLabel={templateFor(draft)?.activityTitle ?? null}
+                    activityKey={activityKey}
+                  />
+                );
+              })}
+            </section>
           );
         })}
       </div>

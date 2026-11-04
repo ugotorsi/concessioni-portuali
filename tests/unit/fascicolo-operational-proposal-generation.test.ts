@@ -273,4 +273,27 @@ describe("Lotto 7 operational proposal generation", () => {
     expect(activities.find((candidate) => candidate.title === "Valutare una soluzione alternativa")?.proposedPayload)
       .toMatchObject({ dependencies: [], necessity: "CONDITIONAL" });
   });
+
+  it("does not propose initiatives judged not justified and prioritises the first required step", () => {
+    const value = report();
+    const step = (activityCode: string, necessity: "REQUIRED" | "CONDITIONAL" | "NOT_JUSTIFIED") => ({
+      activityCode, necessity, title: activityCode, action: "Azione.", office: "Ufficio", requiredDocuments: [], completionGate: "Esito",
+    });
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Questione",
+      sourceDocumentRefs: [],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Verificare",
+      steps: [step("OPTIONAL_CHECK", "CONDITIONAL"), step("VERIFY", "REQUIRED"), step("REVOCATION", "NOT_JUSTIFIED")],
+      alternatives: [],
+      deadlineReview: "Non presumere scadenze.",
+    }];
+    const activities = generate(value).filter((candidate) => candidate.proposalType === "ACTIVITY");
+    expect(activities.map((candidate) => candidate.title)).toEqual(["OPTIONAL_CHECK", "VERIFY"]);
+    expect(activities.find((candidate) => candidate.title === "VERIFY")?.proposedPayload).toMatchObject({ priority: "HIGH" });
+    expect(activities.find((candidate) => candidate.title === "OPTIONAL_CHECK")?.proposedPayload).toMatchObject({ priority: "MEDIUM" });
+  });
 });

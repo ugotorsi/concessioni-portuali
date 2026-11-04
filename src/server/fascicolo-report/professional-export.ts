@@ -1,12 +1,14 @@
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
 
 import {
+  documentCoverageSummaries,
   documentNamesByReference,
   humanizeProfessionalText,
   isInternalProfessionalDiagnostic,
   professionalGapSummaries,
 } from "@/lib/professional-text";
 import { projectProfessionalResearch } from "@/lib/professional-research-sources";
+import { commonLegalContent, legalIssueNarrative, legalRuleKey } from "@/lib/legal-report-presentation";
 
 import type { StructuredReportSnapshotRecord } from "./repository";
 
@@ -123,19 +125,28 @@ export function buildProfessionalReportDocument(
     },
     {
       title: "Analisi giuridica: applicazione delle norme ai fatti",
-      paragraphs: unique(research.applications.flatMap((item) => [
-        `Questione: ${item.issueText}`,
-        `Date rilevanti: ${item.relevantDates.map((date) => `${date.label} ${date.date.split("-").reverse().join("/")}`).join("; ")}.`,
-        ...item.facts.map((fact) => `Fatto${fact.humanConfirmed ? "" : " (da confermare)"}: ${fact.text}${fact.pages.length ? ` (pag. ${fact.pages.join(", ")})` : ""}`),
-        ...(item.elementAnalysis?.elements ?? []).map((element) =>
-          `Elemento — ${element.requirement} (${element.legalBasis}): ${ELEMENT_STATUS_TEXT[element.status]}. ${element.reasoning}`),
-        ...item.rules.map((rule) =>
-          `${rule.citation} — ${rule.subject}. Vigenza: ${rule.temporalReasoning} Applicazione: ${rule.applicationToFacts} Testo ufficiale: ${rule.officialUrl}`),
-        ...item.favorableArguments.map((argument) => `Argomento a sostegno — ${argument}`),
-        ...item.contraryArguments.map((argument) => `Argomento contrario — ${argument}`),
-        `Conclusione: ${item.conclusion}`,
-        ...item.consequences.map((consequence) => `Conseguenza: ${consequence}`),
-      ])),
+      paragraphs: (() => {
+        const common = commonLegalContent(research.applications);
+        const first = research.applications[0];
+        const commonParagraphs = first ? [
+          ...first.rules.filter((rule) => common.ruleKeys.has(legalRuleKey(rule))).map((rule) =>
+            `Norma comune a tutte le questioni — ${rule.citation} — ${rule.subject}. Vigenza: ${rule.temporalReasoning} Applicazione: ${rule.applicationToFacts} Testo ufficiale: ${rule.officialUrl}`),
+          ...[...common.arguments].map((argument) => `Avvertenza comune — ${argument}`),
+          ...[...common.consequences].map((consequence) => `Conseguenza comune — ${consequence}`),
+        ] : [];
+        return unique([...commonParagraphs, ...research.applications.flatMap((item) => [
+          `Questione: ${item.issueText}`,
+          ...legalIssueNarrative(item),
+          `Date rilevanti: ${item.relevantDates.map((date) => `${date.label} ${date.date.split("-").reverse().join("/")}`).join("; ")}.`,
+          ...(item.elementAnalysis?.elements ?? []).map((element) =>
+            `Elemento — ${element.requirement} (${element.legalBasis}): ${ELEMENT_STATUS_TEXT[element.status]}. ${element.reasoning}`),
+          ...item.rules.filter((rule) => !common.ruleKeys.has(legalRuleKey(rule))).map((rule) =>
+            `${rule.citation} — ${rule.subject}. Vigenza: ${rule.temporalReasoning} Applicazione: ${rule.applicationToFacts} Testo ufficiale: ${rule.officialUrl}`),
+          ...item.favorableArguments.map((argument) => `Argomento a sostegno — ${argument}`),
+          ...item.contraryArguments.filter((argument) => !common.arguments.has(argument)).map((argument) => `Argomento contrario — ${argument}`),
+          ...item.consequences.filter((consequence) => !common.consequences.has(consequence)).map((consequence) => `Conseguenza: ${consequence}`),
+        ])]);
+      })(),
     },
     {
       title: "Applicabilità temporale e adempimenti",
@@ -146,8 +157,12 @@ export function buildProfessionalReportDocument(
       title: "Valutazione delle criticità",
       paragraphs: unique([
         ...payload.documentedFramework.contradictions.map((item) => item.normalizedText),
-        ...professionalGapSummaries(payload.gaps, documentNames),
+        ...professionalGapSummaries(payload.gaps, documentNames, payload.documentCoverage ?? []),
       ]),
+    },
+    {
+      title: "Copertura documentale",
+      paragraphs: documentCoverageSummaries(payload.documentCoverage ?? []),
     },
     {
       title: "Seguito operativo",

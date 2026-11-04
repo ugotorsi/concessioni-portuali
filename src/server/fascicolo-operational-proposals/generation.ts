@@ -340,7 +340,11 @@ function sourceGapCandidates(input: GenerationInput): OperationalProposalCandida
 }
 
 function activityCandidates(input: GenerationInput): OperationalProposalCandidate[] {
-  return (input.report.operationalPlans ?? []).flatMap((plan) => plan.steps.map((step, index) => buildCandidate({
+  // Initiatives judged not justified stay visible in the guided path but are not proposed for approval.
+  return (input.report.operationalPlans ?? []).flatMap((plan) => {
+    const actionable = plan.steps.filter((step) => step.necessity !== "NOT_JUSTIFIED");
+    const firstRequired = actionable.find((step) => (step.necessity ?? "CONDITIONAL") === "REQUIRED") ?? actionable[0];
+    return actionable.map((step) => buildCandidate({
     ...input,
     knowledgeRevisionId: input.report.knowledgeRevisionId,
     proposalType: "ACTIVITY",
@@ -351,7 +355,7 @@ function activityCandidates(input: GenerationInput): OperationalProposalCandidat
       classification: "PROFESSIONAL_RECOMMENDATION",
       activityCode: step.activityCode ?? null,
       necessity: step.necessity ?? "CONDITIONAL",
-      priority: index === 0 ? "HIGH" : "MEDIUM",
+      priority: step === firstRequired ? "HIGH" : "MEDIUM",
       responsibleOffice: step.office,
       dueDate: null,
       dependencies: [],
@@ -378,7 +382,8 @@ function activityCandidates(input: GenerationInput): OperationalProposalCandidat
     originatingIssueSemanticKeys: [plan.issueSemanticKey],
     rationale: "Attività derivata dal percorso operativo phase-aware del rapporto strutturato corrente.",
     warningCodes: ["MANUAL_ACTION_REQUIRED", "PROFESSIONAL_REVIEW_REQUIRED"],
-  })));
+    }));
+  });
 }
 
 function exactDate(value: JsonValue | undefined): string | null {

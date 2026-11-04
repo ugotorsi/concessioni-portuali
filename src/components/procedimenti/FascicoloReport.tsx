@@ -2,8 +2,10 @@ import Link from "next/link";
 import { AlertTriangle, BookOpen, Download, ExternalLink } from "lucide-react";
 
 import { formatDateIT } from "@/lib/utils";
+import { commonLegalContent, legalIssueNarrative, legalRuleKey } from "@/lib/legal-report-presentation";
 import { projectProfessionalResearch } from "@/lib/professional-research-sources";
 import {
+  documentCoverageSummaries,
   documentNamesByReference,
   humanizeProfessionalText,
   isInternalProfessionalDiagnostic,
@@ -178,7 +180,7 @@ const ELEMENT_STATUS_LABELS: Readonly<Record<NonNullable<StructuredReportLegalAp
 };
 
 const PORT_REGIME_STATUS_LABELS: Readonly<Record<PortRegimeCoordination["sources"][number]["status"], string>> = {
-  FULLY_APPLICABLE: "Applicabile integralmente",
+  FULLY_APPLICABLE: "Applicabile al titolo, per singolo istituto e data",
   PARTIALLY_APPLICABLE: "Applicabile in parte",
   PREVIOUS_TEXT_APPLICABLE: "Testo previgente",
   NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",
@@ -223,23 +225,68 @@ export function PortRegimeSection({ regime }: { regime: PortRegimeCoordination }
   );
 }
 
+function RuleDetails({ rule }: { rule: StructuredReportLegalApplication["rules"][number] }) {
+  return (
+    <details className="rounded-md border border-slate-200 bg-slate-50">
+      <summary className="cursor-pointer px-3 py-2">
+        <span className="font-medium text-slate-950">{professionalContent(rule.citation)}</span>
+        <span className="ml-2 text-xs font-semibold text-slate-600">{TEMPORAL_STATUS_LABELS[rule.temporalStatus]}</span>
+      </summary>
+      <div className="space-y-1 border-t border-slate-200 px-3 py-2">
+        <p><strong>Oggetto:</strong> {professionalContent(rule.subject)}</p>
+        <p><strong>Vigenza:</strong> {professionalContent(rule.temporalReasoning)}</p>
+        <p><strong>Applicazione ai fatti:</strong> {professionalContent(rule.applicationToFacts)}</p>
+        <a href={rule.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
+          Testo ufficiale{rule.referenceDate ? " nella versione alla data rilevante" : ""} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+    </details>
+  );
+}
+
 export function LegalApplicationSection({ items }: { items: readonly StructuredReportLegalApplication[] }) {
   if (items.length === 0) return null;
+  const common = commonLegalContent(items);
+  const commonRules = items[0]!.rules.filter((rule) => common.ruleKeys.has(legalRuleKey(rule)));
+  const hasCommon = commonRules.length > 0 || common.arguments.size > 0 || common.consequences.size > 0;
   return (
     <ContentSection title="Analisi giuridica: applicazione delle norme ai fatti">
       <div className="space-y-3">
-        {items.map((item) => (
-          <details key={item.issueSemanticKey} className="rounded-md border border-slate-200 bg-white" aria-label={`Analisi: ${professionalContent(item.issueText) || "questione da verificare"}`}>
-            <summary className="cursor-pointer p-3">
+        {hasCommon ? (
+          <details className="rounded-md border border-slate-200 bg-white" aria-label="Profili comuni a tutte le questioni">
+            <summary className="cursor-pointer p-3 font-medium text-slate-950">Norme e avvertenze comuni a tutte le questioni</summary>
+            <div className="space-y-3 border-t border-slate-200 p-4 text-sm leading-6 text-slate-700">
+              {commonRules.length ? <div className="space-y-2">{commonRules.map((rule) => <RuleDetails key={rule.ruleId} rule={rule} />)}</div> : null}
+              {common.arguments.size ? (
+                <ul className="list-disc space-y-1 pl-5">{[...common.arguments].filter(professionalContent).map((argument) => <li key={argument}>{professionalContent(argument)}</li>)}</ul>
+              ) : null}
+              {common.consequences.size ? (
+                <ul className="list-disc space-y-1 pl-5">{[...common.consequences].filter(professionalContent).map((consequence) => <li key={consequence}>{professionalContent(consequence)}</li>)}</ul>
+              ) : null}
+            </div>
+          </details>
+        ) : null}
+        {items.map((item) => {
+          const rules = item.rules.filter((rule) => !common.ruleKeys.has(legalRuleKey(rule)));
+          const contraryArguments = item.contraryArguments.filter((argument) => !common.arguments.has(argument));
+          const consequences = item.consequences.filter((consequence) => !common.consequences.has(consequence));
+          return (
+          <article key={item.issueSemanticKey} className="rounded-md border border-slate-200 bg-white" aria-label={`Analisi: ${professionalContent(item.issueText) || "questione da verificare"}`}>
+            <div className="space-y-2 p-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-                <p className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(item.issueText) || "Questione da verificare"}</p>
+                <h4 className="min-w-0 font-medium text-slate-950 [overflow-wrap:anywhere]">{professionalContent(item.issueText) || "Questione da verificare"}</h4>
                 <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">
                   {item.conclusionStatus === "GROUNDED_ON_VERIFIED_AUTHORITIES" ? "Con fonti verificate e classificate"
                     : item.rules.some((rule) => ["APPLICABLE", "APPLICABLE_PREVIOUS_VERSION"].includes(rule.temporalStatus))
                       ? "Preliminare: solo dato normativo" : "Fonti da verificare"}
                 </span>
               </div>
-            </summary>
+              <div className="space-y-2 text-sm leading-6 text-slate-800" aria-label="Esposizione giuridica">
+                {legalIssueNarrative(item).map((paragraph) => <p key={paragraph}>{professionalContent(paragraph)}</p>)}
+              </div>
+            </div>
+            <details>
+              <summary className="cursor-pointer border-t border-slate-200 px-3 py-2 text-sm font-medium text-slate-800">Dettaglio: date, fatti, norme, presupposti e argomenti</summary>
             <div className="space-y-4 border-t border-slate-200 p-4 text-sm leading-6 text-slate-700">
               <section>
                 <h5 className="font-semibold text-slate-950">Date rilevanti</h5>
@@ -262,26 +309,11 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                   </ul>
                 </section>
               ) : null}
-              {item.rules.length > 0 ? (
+              {rules.length > 0 ? (
                 <section>
                   <h5 className="font-semibold text-slate-950">Normativa applicabile nel tempo</h5>
                   <div className="mt-2 space-y-2">
-                    {item.rules.map((rule) => (
-                      <details key={rule.ruleId} className="rounded-md border border-slate-200 bg-slate-50">
-                        <summary className="cursor-pointer px-3 py-2">
-                          <span className="font-medium text-slate-950">{professionalContent(rule.citation)}</span>
-                          <span className="ml-2 text-xs font-semibold text-slate-600">{TEMPORAL_STATUS_LABELS[rule.temporalStatus]}</span>
-                        </summary>
-                        <div className="space-y-1 border-t border-slate-200 px-3 py-2">
-                          <p><strong>Oggetto:</strong> {professionalContent(rule.subject)}</p>
-                          <p><strong>Vigenza:</strong> {professionalContent(rule.temporalReasoning)}</p>
-                          <p><strong>Applicazione ai fatti:</strong> {professionalContent(rule.applicationToFacts)}</p>
-                          <a href={rule.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-[#075985] underline underline-offset-4">
-                            Testo ufficiale{rule.referenceDate ? " nella versione alla data rilevante" : ""} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                          </a>
-                        </div>
-                      </details>
-                    ))}
+                    {rules.map((rule) => <RuleDetails key={rule.ruleId} rule={rule} />)}
                   </div>
                 </section>
               ) : null}
@@ -292,7 +324,7 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                 </section>
                 <section>
                   <h5 className="font-semibold text-slate-950">Argomenti contrari e rischi</h5>
-                  <ul className="mt-1 list-disc space-y-1 pl-5">{item.contraryArguments.filter(professionalContent).map((argument) => <li key={argument}>{professionalContent(argument)}</li>)}</ul>
+                  <ul className="mt-1 list-disc space-y-1 pl-5">{contraryArguments.filter(professionalContent).map((argument) => <li key={argument}>{professionalContent(argument)}</li>)}</ul>
                 </section>
               </div>
               {item.elementAnalysis ? (
@@ -313,16 +345,14 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
                 </section>
               ) : null}
               <section>
-                <h5 className="font-semibold text-slate-950">Conclusione motivata</h5>
-                <p className="mt-1">{professionalContent(item.conclusion)}</p>
-              </section>
-              <section>
                 <h5 className="font-semibold text-slate-950">Conseguenze operative e processuali</h5>
-                <ul className="mt-1 list-disc space-y-1 pl-5">{item.consequences.filter(professionalContent).map((consequence) => <li key={consequence}>{professionalContent(consequence)}</li>)}</ul>
+                <ul className="mt-1 list-disc space-y-1 pl-5">{consequences.filter(professionalContent).map((consequence) => <li key={consequence}>{professionalContent(consequence)}</li>)}</ul>
               </section>
             </div>
-          </details>
-        ))}
+            </details>
+          </article>
+          );
+        })}
       </div>
     </ContentSection>
   );
@@ -388,7 +418,8 @@ function ReportContent({
     ...payload.deadlineCandidates,
     ...Object.values(framework).flat(),
   ], documents);
-  const professionalGaps = professionalGapSummaries(payload.gaps, documentNames);
+  const professionalGaps = professionalGapSummaries(payload.gaps, documentNames, payload.documentCoverage ?? []);
+  const coverageSummaries = documentCoverageSummaries(payload.documentCoverage ?? []);
 
   return (
     <div className="space-y-5">
@@ -465,6 +496,16 @@ function ReportContent({
             {limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}
           </ul>
         </ContentSection>
+      ) : null}
+
+      {coverageSummaries.length > 0 ? (
+        <details className="rounded-md border border-slate-200 bg-white px-4 py-3">
+          <summary className="cursor-pointer text-sm font-semibold text-slate-900">Copertura documentale</summary>
+          <p className="mt-2 text-xs text-slate-600">Pagine effettivamente lette per ciascun documento. Le pagine prive di testo e quelle assenti dal file originale sono indicate separatamente.</p>
+          <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+            {coverageSummaries.map((line) => <li key={line}>{line}</li>)}
+          </ul>
+        </details>
       ) : null}
     </div>
   );

@@ -99,6 +99,7 @@ interface ProcedimentoDetailPageProps {
     activity?: string | string[];
     reconciliationError?: string | string[];
     reconciliationDone?: string | string[];
+    analysisRefresh?: string | string[];
   }>;
 }
 
@@ -184,7 +185,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh } = await searchParams;
   const activeSection = resolveFascicoloSection(section);
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
@@ -283,6 +284,15 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         snapshot.effectiveStatus === "CURRENT"
         && snapshot.reportFingerprint === automaticWorkflow.structuredReport?.reportFingerprint))}
       analysisCurrent={automaticWorkflow?.analysisUpdate.status === "CURRENT"}
+      analysisStatus={automaticWorkflow?.analysisUpdate.status}
+      analysisDrift={automaticWorkflow?.analysisUpdate.drift ?? null}
+      analysisRefreshNotice={analysisRefresh === "requested"
+        ? "Aggiornamento dell'analisi richiesto e registrato."
+        : analysisRefresh === "current"
+          ? "L'analisi risultava già allineata ai documenti."
+          : analysisRefresh === "error"
+            ? "Aggiornamento non avviato: i documenti sono cambiati nel frattempo o il profilo non è abilitato. Ricaricare la pagina e riprovare."
+            : undefined}
       errorCode={typeof activityError === "string" ? activityError : undefined}
       focusActivityKey={typeof activity === "string" && /^activity_[a-f0-9]{32}$/.test(activity) ? activity : undefined}
     />

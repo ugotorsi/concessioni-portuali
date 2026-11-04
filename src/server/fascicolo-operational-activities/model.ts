@@ -323,21 +323,33 @@ export function activityProgress(
   completed: number;
   pending: number;
   excluded: number;
+  /** Conditional activities not yet started: they become pending only when someone takes them up. */
+  optional: number;
   percentage: number | null;
 } {
   let completed = 0;
   let excluded = 0;
+  let applicable = 0;
+  let optional = 0;
   for (const spec of specs) {
     const record = activityForKey(records, spec.activityKey);
-    if (!record || activityNeedsReview(record, allSpecs, corpus)) continue;
-    if (isVerifiedComplete(record, records, allSpecs, corpus)) completed += 1;
-    if (record.current.status === "EXCLUDED") excluded += 1;
+    if (!record) {
+      if (spec.necessity === "REQUIRED") applicable += 1;
+      else if (spec.necessity === "CONDITIONAL") optional += 1;
+      continue;
+    }
+    if (record.current.status === "EXCLUDED" && !activityNeedsReview(record, allSpecs, corpus)) {
+      excluded += 1;
+      continue;
+    }
+    applicable += 1;
+    if (!activityNeedsReview(record, allSpecs, corpus) && isVerifiedComplete(record, records, allSpecs, corpus)) completed += 1;
   }
-  const applicable = specs.length - excluded;
   return {
     completed,
     pending: applicable - completed,
     excluded,
+    optional,
     percentage: applicable > 0 ? Math.round((completed / applicable) * 100) : null,
   };
 }

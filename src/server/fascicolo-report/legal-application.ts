@@ -69,6 +69,8 @@ export interface LegalApplicationContext {
   contestazioneFormaleInviata?: boolean;
   memorieRicevute?: boolean;
   controdeduzioniValutate?: boolean;
+  /** UFFICIO | ISTANZA_PARTE | ALTRO: art. 10-bis L. 241/1990 concerns only procedures started on a party's request. */
+  origineProcedimento?: string;
 }
 
 export interface LegalApplicationIssueInput {
@@ -102,6 +104,17 @@ interface CatalogRule {
   application: string;
   favorable: string;
   contrary: string;
+  /** Additional presupposition beyond the lexical trigger (e.g. procedure started on a party's request). */
+  requires?: (input: { context?: LegalApplicationContext; caseText: string }) => boolean;
+}
+
+const PARTY_REQUEST = /istanz\w*\s+(?:di|per|del concessionario per)\s+(?:il\s+|la\s+)?(?:concession|rilascio|rinnovo|proroga|autorizzazion|subingresso|variazion|estension|anticipat\w* occupazion)/i;
+
+/** Art. 10-bis L. 241/1990 concerns only procedures started on a party's request that may end with a rejection. */
+export function partyInitiatedProcedure(context: { origineProcedimento?: string } | undefined, caseText: string): boolean {
+  if (context?.origineProcedimento === "ISTANZA_PARTE") return true;
+  if (context?.origineProcedimento === "UFFICIO") return false;
+  return PARTY_REQUEST.test(caseText);
 }
 
 const NORMATTIVA = "https://www.normattiva.it/uri-res/N2Ls?";
@@ -203,8 +216,8 @@ const CATALOG: readonly CatalogRule[] = [
   },
   {
     id: "L241_PARTECIPAZIONE",
-    citation: "Artt. 7, 10 e 10-bis L. 7 agosto 1990, n. 241",
-    subject: "Comunicazione di avvio, partecipazione e preavviso di rigetto",
+    citation: "Artt. 7 e 10 L. 7 agosto 1990, n. 241",
+    subject: "Comunicazione di avvio e partecipazione al procedimento",
     scope: "GENERAL",
     anchor: "ACT",
     trigger: /contestazion|avvio del procedimento|contraddittorio|deduzion|memori|audizion|controdeduzion/i,
@@ -214,6 +227,22 @@ const CATALOG: readonly CatalogRule[] = [
     application: "Le garanzie partecipative si applicano secondo la disciplina vigente alla data di ciascun atto procedimentale (tempus regit actum); occorre provare comunicazione, termine e valutazione espressa delle deduzioni.",
     favorable: "Un contraddittorio documentato, con valutazione puntuale delle memorie, rafforza la tenuta del provvedimento.",
     contrary: "L'omessa o generica valutazione delle deduzioni è un vizio frequentemente dedotto in giudizio; l'art. 21-octies, comma 2, opera solo nei limiti di legge.",
+  },
+  {
+    id: "L241_PREAVVISO_RIGETTO",
+    citation: "Art. 10-bis L. 7 agosto 1990, n. 241",
+    subject: "Comunicazione dei motivi ostativi all'accoglimento dell'istanza",
+    scope: "GENERAL",
+    anchor: "ACT",
+    trigger: /istanz|domand|richiest\w* di (?:concession|rilascio|rinnovo|proroga|autorizzazion)/i,
+    requires: ({ context, caseText }) => partyInitiatedProcedure(context, caseText),
+    effectiveFrom: null,
+    effectiveFromYear: 2005,
+    versions: [{ from: "2020-09-15", label: "testo modificato dal D.L. 76/2020 (sospensione anziché interruzione dei termini; divieto di motivi nuovi non derivanti dalle osservazioni)" }],
+    normattivaUrn: "urn:nir:stato:legge:1990-08-07;241~art10bis",
+    application: "Il procedimento risulta avviato su istanza di parte: prima di un provvedimento negativo comunicare i motivi ostativi all'accoglimento, assegnare dieci giorni per le osservazioni e motivare sul loro mancato accoglimento. La garanzia non riguarda i procedimenti avviati d'ufficio, come contestazioni e decadenze, che seguono gli artt. 7 e 10.",
+    favorable: "La comunicazione puntuale dei motivi ostativi e la valutazione delle osservazioni rafforzano la tenuta del diniego.",
+    contrary: "Il rigetto fondato su motivi non preannunciati e non derivanti dalle osservazioni è esposto ad annullamento.",
   },
   {
     id: "L241_ART21_NONIES",
@@ -241,7 +270,7 @@ const CATALOG: readonly CatalogRule[] = [
     effectiveFromYear: 2023,
     preExistingGrantReason: "Per il titolo anteriore l'art. 10, comma 1, esclude le disposizioni sul rilascio ma mantiene applicabili gli artt. 6, 7, 8 e 9; il comma 2 disciplina la rivalutazione del canone. Verificare la data e i presupposti del singolo adempimento successivo.",
     normattivaUrn: "urn:nir:ministero.infrastrutture.e.trasporti:decreto:2022-12-28;202",
-    application: "Il regolamento disciplina rilascio, durata, canoni ed estensione delle concessioni ex art. 18. Per i titoli rilasciati dal 15/01/2023 si applica integralmente; per quelli anteriori l'art. 10, comma 1, rende applicabili soltanto gli artt. 6 (modifica del contenuto ed estensione della durata fino a cinque anni), 7 (vicende soggettive), 8 (avvicendamento) e 9 (verifiche annuali), con rivalutazione ISTAT dei canoni (art. 10, comma 2).",
+    application: "Il regolamento disciplina rilascio, durata, canoni ed estensione delle concessioni ex art. 18. Per i titoli rilasciati dal 15/01/2023 non opera l'esclusione transitoria dell'art. 10, comma 1, ma ogni istituto va applicato secondo il proprio oggetto e la data dell'atto o della condotta: le regole di rilascio agli atti della procedura, gli artt. 6-9 alle vicende successive, il regolamento dell'Autorità di sistema portuale solo dopo l'adeguamento previsto dall'art. 10, comma 3. Per i titoli anteriori l'art. 10, comma 1, rende applicabili soltanto gli artt. 6 (modifica del contenuto ed estensione della durata fino a cinque anni), 7 (vicende soggettive), 8 (avvicendamento) e 9 (verifiche annuali), con rivalutazione ISTAT dei canoni (art. 10, comma 2). Per quanto non disciplinato restano gli artt. 36-49 e 54 cod. nav. (art. 10, comma 4).",
     favorable: "Per titoli successivi al 15/01/2023 il regolamento fissa criteri di trasparenza, valutazione del PEF e durata vincolanti; gli artt. 6-9 si applicano comunque a modifiche, vicende soggettive e verifiche successive.",
     contrary: "Per i titoli anteriori al 15/01/2023 le regole di rilascio, durata e canone del regolamento non si applicano (art. 10, comma 1).",
   },
@@ -473,7 +502,8 @@ export function buildLegalApplication(input: {
     const profileRuleIds = new Set(elementAnalysis?.ruleIds ?? []);
     const rules = CATALOG.filter((rule) =>
       (rule.scope === "GENERAL" || (rule.scope === "MARITIME" && maritimeMatter) || (rule.scope === "PORT" && portMatter))
-      && (profileRuleIds.has(rule.id) || rule.trigger.test(caseText))).map((rule) => {
+      && (profileRuleIds.has(rule.id) || rule.trigger.test(caseText))
+      && (!rule.requires || rule.requires({ context: input.context, caseText }))).map((rule) => {
       const referenceDate = rule.anchor === "CONDUCT" ? conductDate
         : rule.anchor === "GRANT" ? grantDate
           : rule.anchor === "ACT" ? actDate
@@ -520,9 +550,19 @@ export function buildLegalApplication(input: {
     const undetermined = rules.filter((rule) => rule.temporalStatus === "DATE_TO_VERIFY");
     const scopeToVerify = rules.filter((rule) => rule.temporalStatus === "APPLICABILITY_TO_VERIFY");
     const missingCore = elementAnalysis?.elements.filter((element) => element.core && element.status === "NOT_PROVEN") ?? [];
+    const lowerFirst = (value: string) => value.charAt(0).toLowerCase() + value.slice(1);
+    const substantiveElements = elementAnalysis?.elements.filter((element) => element.elementId !== "contraddittorio") ?? [];
+    const satisfied = substantiveElements.filter((element) => element.status === "PROVEN" || element.status === "INDICATED");
+    const unproven = substantiveElements.filter((element) => element.status === "NOT_PROVEN");
+    const contraryElements = substantiveElements.filter((element) => element.status === "CONTRARY_EVIDENCE");
     const conclusion = [
-      elementAnalysis ? `Qualificazione: ${elementAnalysis.qualification}` : "",
-      missingCore.length ? `Requisiti ancora privi di prova: ${missingCore.map((element) => element.requirement.charAt(0).toLowerCase() + element.requirement.slice(1)).join("; ")}.` : "",
+      elementAnalysis ? `Qualificazione proposta: ${elementAnalysis.qualification}` : "",
+      satisfied.length ? `Condizioni che risultano dai documenti: ${satisfied.map((element) => `${lowerFirst(element.requirement)}${element.status === "INDICATED" ? " (indicata, da confermare)" : ""}`).join("; ")}.` : "",
+      unproven.length ? `Condizioni non dimostrate (l'assenza di un documento nel fascicolo non prova che il fatto o l'atto non esista): ${unproven.map((element) => lowerFirst(element.requirement)).join("; ")}.` : "",
+      contraryElements.length ? `Elementi contrari da valutare: ${contraryElements.map((element) => lowerFirst(element.requirement)).join("; ")}.` : "",
+      missingCore.length || contraryElements.some((element) => element.core)
+        ? `Determinanti per la decisione: ${[...missingCore, ...contraryElements.filter((element) => element.core)].map((element) => lowerFirst(element.requirement)).join("; ")}; finché non sono accertati non è possibile adottare misure fondate su questa fattispecie.`
+        : elementAnalysis ? "I requisiti essenziali risultano dai documenti: restano da verificare competenza, garanzie partecipative e proporzionalità della misura." : "",
       operative.length
         ? `La questione va decisa alla luce di ${operative.map((rule) => rule.citation).join("; ")}, nella versione vigente alla data rilevante per ciascuna disposizione.`
         : "Dai documenti non emerge una disposizione del catalogo verificato sicuramente applicabile: la qualificazione richiede l'individuazione professionale della norma.",
@@ -532,7 +572,7 @@ export function buildLegalApplication(input: {
       grounded
         ? `L'orientamento è confrontato con ${issue.favorableAuthorities.length ? "fonti verificate e classificate dal professionista come favorevoli" : "nessuna fonte favorevole verificata e classificata"} e ${issue.contraryAuthorities.length ? "fonti verificate e classificate dal professionista come contrarie" : "nessuna fonte contraria verificata e classificata"}: la conclusione resta subordinata alla verifica professionale.`
         : operative.length
-          ? "Non risultano ancora pronunce verificate pertinenti: la conclusione è preliminare e fondata sul solo dato normativo."
+          ? "Non risultano ancora pronunce verificate pertinenti: la qualificazione non è consolidata, resta un'ipotesi istruttoria fondata sul solo dato normativo e va confrontata con la giurisprudenza prima della decisione."
           : "Non risultano ancora pronunce verificate pertinenti: individuare e verificare le fonti normative e giurisprudenziali prima di concludere.",
     ].filter(Boolean).join(" ");
     const consequences = !portMatter ? [

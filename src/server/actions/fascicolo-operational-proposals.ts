@@ -192,6 +192,13 @@ export async function reviewOperationalProposalAction(formData: FormData): Promi
   const scope = await authorizedScope(input.procedimentoId);
   try {
     const proposal = await requireProposal(scope, input.proposalId);
+    if (input.action !== "REJECT") {
+      const model = await getFascicoloAutomaticWorkflowReadModel(input.procedimentoId);
+      if (!model || model.analysisUpdate.status !== "CURRENT"
+        || (model.structuredReport && proposal.structuredReportFingerprint !== model.structuredReport.reportFingerprint)) {
+        throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+      }
+    }
     const approvedPayload = input.action === "AMEND_AND_APPROVE"
       ? JSON.parse(input.approvedPayload ?? "") as unknown
       : undefined;

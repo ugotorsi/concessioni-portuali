@@ -147,6 +147,18 @@ const configuration = {
 };
 
 describe("audited operational activity state machine", () => {
+  it("counts only necessary or started activities as pending; conditional ones stay optional", () => {
+    const required = spec("REQ");
+    const conditional = { ...spec("COND"), necessity: "CONDITIONAL" as const };
+    const unjustified = { ...spec("NJ"), necessity: "NOT_JUSTIFIED" as const };
+    const all = [required, conditional, unjustified];
+    expect(activityProgress(all, [], all)).toMatchObject({ completed: 0, pending: 1, optional: 1, excluded: 0, percentage: 0 });
+    const done = complete(required, all);
+    expect(activityProgress(all, [done], all)).toMatchObject({ completed: 1, pending: 0, optional: 1, percentage: 100 });
+    const started = runCommand({ spec: conditional, specs: all, command: { kind: "APPROVE", note: proposalNote, confirmed: true } });
+    expect(activityProgress(all, [done, started], all)).toMatchObject({ completed: 1, pending: 1, optional: 0, percentage: 50 });
+  });
+
   it("uses a stable identity scoped to procedure, issue and activity", () => {
     expect(stableActivityKey(procedure, "issue-a", "A")).toBe(stableActivityKey(procedure, "issue-a", "A"));
     expect(new Set([

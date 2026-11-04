@@ -12,6 +12,8 @@ export interface LegalElementEvidence {
   text: string;
   pages: readonly number[];
   humanConfirmed: boolean;
+  /** True when the item was not linked to the issue by extraction but found among related fascicolo facts. */
+  linkedByTopic?: boolean;
 }
 
 export interface LegalElementAssessment {
@@ -30,6 +32,8 @@ export interface LegalIssueProfileAssessment {
   elements: readonly LegalElementAssessment[];
   qualification: string;
   ruleIds: readonly string[];
+  /** Documented deadline (dd/mm/yyyy) not yet expired at the analysis date, when it excludes any breach. */
+  pendingDeadline?: string | null;
 }
 
 export type IssueProfileId = "THIRD_PARTY_USE" | "INVESTMENT_DEFAULT" | "UNAUTHORIZED_OCCUPATION" | "FEE_PAYMENT";
@@ -72,7 +76,7 @@ const NEGATED_FACT_ASSERTION = /\bnon\s+(?:(?:si|vi)\s+)?(?:risultan\w*|emerg\w*
 const CONTRADDITTORIO: ElementSpec = {
   id: "contraddittorio",
   requirement: "Contestazione specifica e termine per le deduzioni prima di qualsiasi misura",
-  legalBasis: "Art. 47, ultimo comma, cod. nav.; artt. 7, 10 e 10-bis L. 241/1990; art. 18, comma 11, L. 84/1994",
+  legalBasis: "Art. 47, ultimo comma, cod. nav.; artt. 7 e 10 L. 241/1990; art. 18, comma 11, L. 84/1994",
   core: false,
   procedural: true,
   missing: "Predisporre la contestazione degli addebiti con termine per le deduzioni.",
@@ -129,7 +133,7 @@ const PROFILES: readonly ProfileSpec[] = [
       }
       return [
         `Uso da parte di terzi e assenza di autorizzazione emergono in forma ${strength(status, ["third-party-use", "no-authorization"])}; la qualificazione del rapporto richiede la verifica del contratto, del titolo e dell'attività effettiva.`,
-        "Distinguere l'affidamento di attività dall'effettiva sostituzione nel godimento: quest'ultima non deriva automaticamente da ogni incarico al terzo ed è il presupposto dell'art. 47, lett. e), cod. nav. Verificare anche la disciplina speciale portuale e le pattuizioni applicabili alle rispettive date.",
+        "Gli istituti vanno distinti: l'art. 45-bis cod. nav. riguarda l'affidamento ad altri soggetti, previa autorizzazione, della gestione delle attività oggetto della concessione o di attività secondarie, senza che il concessionario perda la titolarità; l'art. 46 riguarda la sostituzione di altri nel godimento della concessione (subingresso), anch'essa soggetta ad autorizzazione; l'art. 47, lett. e), sanziona con la decadenza soltanto l'abusiva sostituzione nel godimento. Un incarico o un contratto con un terzo non integra di per sé la sostituzione: occorre accertare chi abbia la disponibilità del bene, chi sopporti gli obblighi del titolo e chi eserciti l'attività. Verificare anche la disciplina speciale portuale e le pattuizioni applicabili alle rispettive date.",
         met("activity-nature")
           ? "La natura dell'attività indicata va confrontata con il titolo e con i presupposti dell'eventuale autorizzazione, inclusa la disciplina speciale per le imprese portuali."
           : "Accertare l'attività effettivamente affidata, il suo rapporto con il titolo e la durata, prima di valutare eventuali rimedi.",
@@ -398,14 +402,34 @@ function assessRateThreshold(
   };
 }
 
-function evidenceFor(items: readonly StructuredKnowledgeReadItem[], pattern: RegExp, accept: (sentence: string) => boolean): LegalElementEvidence[] {
+function evidenceFor(items: readonly StructuredKnowledgeReadItem[], pattern: RegExp, accept: (sentence: string) => boolean, linkedByTopic = false): LegalElementEvidence[] {
   const found = new Map<string, LegalElementEvidence>();
   for (const item of items) {
     if (sentences(item.normalizedText).some((sentence) => pattern.test(sentence) && accept(sentence))) {
-      found.set(item.normalizedText, { text: item.normalizedText, pages: pagesOf(item), humanConfirmed: item.status === "HUMAN_CONFIRMED" });
+      found.set(item.normalizedText, {
+        text: item.normalizedText,
+        pages: pagesOf(item),
+        humanConfirmed: item.status === "HUMAN_CONFIRMED",
+        ...(linkedByTopic ? { linkedByTopic: true } : {}),
+      });
     }
   }
   return [...found.values()];
+}
+
+const ITALIAN_MONTHS = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+
+function deadlinesIn(text: string): string[] {
+  const numeric = [...text.matchAll(/\bentro (?:il |la data del )?(\d{1,2})[/.](\d{1,2})[/.](\d{4})/gi)]
+    .map(([, day, month, year]) => `${year}-${month!.padStart(2, "0")}-${day!.padStart(2, "0")}`);
+  const written = [...text.matchAll(/\bentro (?:il |la data del )?(\d{1,2})(?:°|º)? (gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre) (\d{4})/gi)]
+    .map(([, day, month, year]) => `${year}-${String(ITALIAN_MONTHS.indexOf(month!.toLowerCase()) + 1).padStart(2, "0")}-${day!.padStart(2, "0")}`);
+  return [...numeric, ...written];
+}
+
+/** Distinctive identifiers (I1, M4, C1, lotto 3…) shared by the issue and a fact are a stronger topical link than keywords. */
+function distinctiveCodes(text: string): Set<string> {
+  return new Set([...text.matchAll(/\b([A-Z]{1,3}\d{1,3})\b/g)].map((match) => match[1]!));
 }
 
 export function selectIssueProfile(issueText: string, caseText: string): ProfileSpec | null {
@@ -417,6 +441,11 @@ export function selectIssueProfile(issueText: string, caseText: string): Profile
 export function assessIssueProfile(input: {
   issueText: string;
   relatedItems: readonly StructuredKnowledgeReadItem[];
+  /**
+   * Other Knowledge items of the same fascicolo. They are consulted only when the items linked to the issue
+   * do not document an element, and only if topically related; the resulting evidence is never treated as confirmed.
+   */
+  fascicoloItems?: readonly StructuredKnowledgeReadItem[];
   procedural: ProfileProceduralState | null;
   /** ISO date of the analysis; obligations whose documented deadline is later cannot be breached yet. */
   analysisDate?: string;
@@ -424,6 +453,16 @@ export function assessIssueProfile(input: {
   const caseText = input.relatedItems.map((item) => item.normalizedText).join(" \n ");
   const profile = selectIssueProfile(input.issueText, caseText);
   if (!profile) return null;
+  const relatedIds = new Set(input.relatedItems.map((item) => item.id));
+  const issueCodes = distinctiveCodes([input.issueText, caseText].join(" "));
+  const topicalItems = (input.fascicoloItems ?? []).filter((item) => {
+    if (relatedIds.has(item.id)) return false;
+    const codes = distinctiveCodes(item.normalizedText);
+    const sharesCode = [...codes].some((code) => issueCodes.has(code));
+    // Items naming other specific objects (e.g. another warehouse) are not evidence for this issue.
+    const namesOtherObjects = codes.size > 0 && !sharesCode && issueCodes.size > 0;
+    return !namesOtherObjects && (sharesCode || profile.trigger.test(item.normalizedText));
+  });
   const elements = profile.elements.map((spec): LegalElementAssessment => {
     if (spec.procedural) {
       const contested = input.procedural?.contestazioneFormaleInviata ?? false;
@@ -442,21 +481,29 @@ export function assessIssueProfile(input: {
     if (profile.id === "FEE_PAYMENT" && spec.id === "rate-threshold") {
       return assessRateThreshold(spec, input.relatedItems, input.analysisDate);
     }
-    const contrary = spec.contrary
-      ? evidenceFor(input.relatedItems, spec.contrary, (sentence) => spec.contraryInNegatedSentences !== false || !NEGATION.test(sentence))
-      : [];
-    const supporting = spec.supports
-      ? evidenceFor(input.relatedItems, spec.supports, (sentence) =>
-        !NEGATED_FACT_ASSERTION.test(sentence)
-        && (!spec.rejectNegatedSupport || !NEGATED_POSITIVE_SUPPORT.test(sentence))
-        && (!spec.rejectSupport || !spec.rejectSupport.test(sentence)))
-      : [];
+    const acceptContrary = (sentence: string) => spec.contraryInNegatedSentences !== false || !NEGATION.test(sentence);
+    const acceptSupport = (sentence: string) =>
+      !NEGATED_FACT_ASSERTION.test(sentence)
+      && (!spec.rejectNegatedSupport || !NEGATED_POSITIVE_SUPPORT.test(sentence))
+      && (!spec.rejectSupport || !spec.rejectSupport.test(sentence));
+    const linkedContrary = spec.contrary ? evidenceFor(input.relatedItems, spec.contrary, acceptContrary) : [];
+    // Contrary or justifying elements anywhere in the related facts must not be ignored.
+    const contrary = linkedContrary.length || !spec.contrary
+      ? linkedContrary
+      : evidenceFor(topicalItems, spec.contrary, acceptContrary, true);
+    const linkedSupport = spec.supports ? evidenceFor(input.relatedItems, spec.supports, acceptSupport) : [];
+    const supporting = linkedSupport.length || !spec.supports
+      ? linkedSupport
+      : evidenceFor(topicalItems, spec.supports, acceptSupport, true);
     const status: LegalElementStatus = contrary.length
       ? "CONTRARY_EVIDENCE"
       : supporting.length
-        ? supporting.some((evidence) => evidence.humanConfirmed) ? "PROVEN" : "INDICATED"
+        ? supporting.some((evidence) => evidence.humanConfirmed && !evidence.linkedByTopic) ? "PROVEN" : "INDICATED"
         : "NOT_PROVEN";
     const evidence = status === "CONTRARY_EVIDENCE" ? contrary : supporting;
+    const topicNote = evidence.some((entry) => entry.linkedByTopic)
+      ? " Il dato proviene da un altro passo del fascicolo che l'estrazione non aveva collegato a questa questione: il collegamento va confermato."
+      : "";
     const where = (list: readonly LegalElementEvidence[]) => {
       const pages = [...new Set(list.flatMap((entry) => entry.pages))].sort((left, right) => left - right);
       return pages.length ? ` (pag. ${pages.join(", ")})` : "";
@@ -468,21 +515,19 @@ export function assessIssueProfile(input: {
       core: spec.core,
       status,
       evidence,
-      reasoning: status === "PROVEN"
+      reasoning: (status === "PROVEN"
         ? `Elemento documentato e confermato dal professionista${where(evidence)}.`
         : status === "INDICATED"
           ? `Elemento risultante dai documenti${where(evidence)}, non ancora confermato dal professionista.`
           : status === "CONTRARY_EVIDENCE"
             ? `I documenti contengono elementi contrari o giustificativi${where(evidence)} da valutare prima di ritenere integrato il requisito.`
-            : `Nessun riscontro documentale. ${spec.missing}`,
+            : `Nessun riscontro documentale. ${spec.missing}`) + topicNote,
     };
   });
   const byId = new Map(elements.map((element) => [element.elementId, element]));
   let pendingDeadline: string | null = null;
   if (profile.id === "INVESTMENT_DEFAULT" && input.analysisDate) {
-    const deadlines = (byId.get("obligation")?.evidence ?? []).flatMap((entry) =>
-      [...entry.text.matchAll(/\bentro (?:il |la data del )?(\d{1,2})\/(\d{1,2})\/(\d{4})/gi)]
-        .map(([, day, month, year]) => `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`));
+    const deadlines = (byId.get("obligation")?.evidence ?? []).flatMap((entry) => deadlinesIn(entry.text));
     const performance = byId.get("non-performance");
     if (deadlines.length > 0 && deadlines.every((deadline) => deadline > input.analysisDate!) && performance) {
       pendingDeadline = deadlines.sort().at(-1)!.split("-").reverse().join("/");
@@ -505,6 +550,7 @@ export function assessIssueProfile(input: {
       ? `L'obbligo di investimento è documentato con termine al ${pendingDeadline}, non ancora scaduto: nessun inadempimento è allo stato configurabile e non sono pertinenti diffide, penali o decadenza. Resta la vigilanza tramite verifica annuale dello stato di avanzamento (art. 18, comma 10, L. 84/1994; art. 9 D.I. 202/2022) e, per i titoli soggetti alla delibera ART 242/2025, il monitoraggio della misura 3.18.`
       : profile.qualify(met, status),
     ruleIds: profile.ruleIds,
+    ...(pendingDeadline ? { pendingDeadline } : {}),
   };
 }
 

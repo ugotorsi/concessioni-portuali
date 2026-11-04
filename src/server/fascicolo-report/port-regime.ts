@@ -236,12 +236,20 @@ export function buildPortRegimeCoordination(input: {
         sourceId: "DI_202_2022",
         citation: "D.I. 28 dicembre 2022, n. 202 (regolamento concessioni aree e banchine portuali)",
         status: "FULLY_APPLICABLE",
-        reasoning: `Titolo rilasciato il ${italianDate(grant)}, dopo l'entrata in vigore del regolamento (15/01/2023): il regolamento si applica integralmente (art. 10, comma 1, a contrario).`,
+        reasoning: [
+          `Titolo rilasciato il ${italianDate(grant)}, dopo l'entrata in vigore del regolamento (15/01/2023): non opera l'esclusione transitoria dell'art. 10, comma 1, che riguarda i soli titoli anteriori.`,
+          start && start < PORT_REGIME_DATES.DI_202_2022
+            ? `La procedura di rilascio risulta avviata il ${italianDate(start)}, prima del 15/01/2023: per gli atti della procedura compiuti prima di tale data verificare la disciplina allora vigente; il regolamento non si applica retroattivamente a quegli atti.`
+            : "Per il rilascio vanno verificati gli atti della procedura rispetto agli artt. 2-5 del regolamento alla data di ciascun atto.",
+          "Per le vicende successive (modifiche ex art. 6, vicende soggettive ex art. 7, avvicendamento ex art. 8, verifiche annuali ex art. 9) si applica il testo vigente alla data della singola vicenda; le condotte del concessionario si valutano alla data in cui sono poste in essere, anche alla luce del titolo e del regolamento dell'Autorità di sistema portuale, da adeguare entro dodici mesi (art. 10, comma 3).",
+          "Per quanto non disciplinato si applicano gli artt. 36-49 e 54 cod. nav. (art. 10, comma 4).",
+        ].join(" "),
         operativeConsequences: [
-          "Durata, PEF, garanzie e canoni del titolo vanno verificati rispetto al regolamento.",
+          "Verificare rispetto al regolamento durata, PEF, garanzie e canoni stabiliti nel titolo, distinguendo gli atti della procedura di rilascio per data.",
           "Art. 6: variazioni dell'area, delle opere o delle modalità di esercizio (art. 24 reg. nav. mar.) ed estensione della durata non superiore a cinque anni per il recupero di investimenti.",
           "Art. 7: autorizzazione preventiva per trasferimenti di quote che modificano il controllo (art. 2359 c.c.).",
           "Art. 9: verifica annuale dei requisiti e dell'attuazione del programma di investimenti, con comunicazione al Ministero.",
+          "Verificare se e quando il regolamento dell'Autorità di sistema portuale è stato adeguato (art. 10, comma 3) prima di applicarne le clausole alle condotte contestate.",
         ],
         officialUrl: `${DI_202_URL}!vig=${grant}`,
       }
@@ -357,7 +365,7 @@ export function buildPortRegimeCoordination(input: {
 }
 
 export const STATUS_LABELS: Readonly<Record<PortRegimeSourceStatus, string>> = {
-  FULLY_APPLICABLE: "Applicabile integralmente",
+  FULLY_APPLICABLE: "Applicabile al titolo, per singolo istituto e data",
   PARTIALLY_APPLICABLE: "Applicabile in parte",
   PREVIOUS_TEXT_APPLICABLE: "Testo previgente",
   NOT_APPLICABLE_RATIONE_TEMPORIS: "Non applicabile ratione temporis",

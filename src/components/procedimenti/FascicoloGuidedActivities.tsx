@@ -6,6 +6,8 @@ import { formatDateIT } from "@/lib/utils";
 import { associateLegacyActDraftAction, createActDraftAction } from "@/server/actions/fascicolo-acts";
 import { updateOperationalActivityAction } from "@/server/actions/fascicolo-operational-activities";
 import { reviewOperationalProposalAction } from "@/server/actions/fascicolo-operational-proposals";
+import { requestFascicoloAnalysisRefreshAction } from "@/server/actions/fascicolo-analysis-refresh";
+import type { KnowledgeCorpusDrift } from "@/server/queries/knowledge-corpus-drift";
 import { archiveStructuredFascicoloReportAction } from "@/server/actions/structured-fascicolo-report";
 import { ACT_DRAFT_STATUS_LABELS, actDraftMatchesTemplate, type ActDraft } from "@/server/fascicolo-acts/model";
 import { reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
@@ -74,6 +76,12 @@ interface FormContext {
   corpusFingerprint: string;
   spec: ActivitySpec;
   record: ActivityRecord | undefined;
+}
+
+/** First sentence of a long analysis, so the issue header stays scannable; the full text remains expandable. */
+function leadSentence(text: string): string {
+  const match = /^[\s\S]{40,}?[.;](?=\s+[A-ZÀ-Ú«])/.exec(text);
+  return match ? match[0] : text;
 }
 
 function HiddenFields({ context, kind }: { context: FormContext; kind: ActivityCommand["kind"] }) {
@@ -508,6 +516,11 @@ function ActivityCard({
         && record.current.completionCorpusFingerprint === corpusFingerprint)) ? (
           <p className="text-xs font-semibold text-amber-900">Il quadro è cambiato: il professionista deve riesaminare questa attività.</p>
         ) : null}
+      {!record && proposal?.status === "PROPOSED" && (!proposalCurrent || !analysisCurrent) ? (
+        <p className="text-xs font-semibold text-amber-900">
+          Valutazione superata: formulata su {proposalCurrent ? "un'analisi non più allineata ai documenti" : "un rapporto precedente"}. Va riconsiderata sull&apos;analisi aggiornata prima di poter essere approvata.
+        </p>
+      ) : null}
       {record?.current.blockedReason ? <p className="text-xs text-amber-900">Blocco: {record.current.blockedReason}</p> : null}
       {openDependencies.length ? (
         <p className="text-xs text-amber-900">
@@ -649,7 +662,7 @@ function ActivityCard({
 }
 
 export function FascicoloGuidedActivities({
-  procedimentoId, payload, reportFingerprint, corpusFingerprint, specs, records, drafts, documents, proposals, canManage, canReviewLegalSources = false, reportArchived, analysisCurrent, errorCode, focusActivityKey,
+  procedimentoId, payload, reportFingerprint, corpusFingerprint, specs, records, drafts, documents, proposals, canManage, canReviewLegalSources = false,   reportArchived, analysisCurrent, analysisStatus, analysisDrift, analysisRefreshNotice, errorCode, focusActivityKey,
 }: {
   procedimentoId: string;
   payload: StructuredFascicoloReportPayload | null;
@@ -664,6 +677,9 @@ export function FascicoloGuidedActivities({
   canReviewLegalSources?: boolean;
   reportArchived: boolean;
   analysisCurrent: boolean;
+  analysisStatus?: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
+  analysisDrift?: KnowledgeCorpusDrift | null;
+  analysisRefreshNotice?: string;
   errorCode?: string;
   focusActivityKey?: string;
 }) {
@@ -694,9 +710,37 @@ export function FascicoloGuidedActivities({
         </div>
       ) : null}
       {!analysisCurrent ? (
-        <p role="note" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          L&apos;analisi non è aggiornata rispetto ai documenti. Le approvazioni richiedono un aggiornamento; il completamento richiede una verifica manuale esplicita dell&apos;intero fascicolo e non aggiorna il rapporto.
-        </p>
+        <div id="analysis-update" role="note" className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <p>
+            L&apos;analisi non è aggiornata rispetto ai documenti. Le valutazioni esistenti restano consultabili ma sono superate: non possono essere approvate finché non siano riconsiderate su un&apos;analisi aggiornata. Il completamento di un&apos;attività richiede nel frattempo una verifica manuale esplicita dell&apos;intero fascicolo. Decisioni, attività e bozze già registrate sono conservate.
+          </p>
+          {analysisDrift && analysisDrift.entries.length > 0 ? (
+            <details>
+              <summary className="cursor-pointer font-medium">Che cosa è cambiato ({analysisDrift.entries.length})</summary>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                {analysisDrift.entries.map((entry, index) => <li key={`${entry.kind}-${entry.documentoId}-${index}`}>{entry.explanation}</li>)}
+              </ul>
+              {analysisDrift.affectedKnowledgeItemCount > 0 ? (
+                <p className="mt-1">Elementi dell&apos;analisi fondati su pagine cambiate: {analysisDrift.affectedKnowledgeItemCount}.</p>
+              ) : null}
+            </details>
+          ) : null}
+          {analysisRefreshNotice ? <p className="font-medium">{analysisRefreshNotice}</p> : null}
+          {canReviewLegalSources && corpusFingerprint && analysisStatus !== "UPDATING" && analysisStatus !== "WAITING_AUTHORIZATION" ? (
+            <form action={requestFascicoloAnalysisRefreshAction} className="flex flex-wrap items-center gap-2">
+              <input type="hidden" name="procedimentoId" value={procedimentoId} />
+              <input type="hidden" name="expectedCorpusFingerprint" value={corpusFingerprint} />
+              <label className="flex items-center gap-1 text-xs">
+                <input type="checkbox" name="confirmed" value="true" required /> Confermo l&apos;aggiornamento controllato dell&apos;analisi
+              </label>
+              <Button type="submit" size="sm" variant="outline">Richiedi aggiornamento dell&apos;analisi</Button>
+            </form>
+          ) : analysisStatus === "UPDATING" ? (
+            <p>Aggiornamento dell&apos;analisi in corso.</p>
+          ) : analysisStatus === "WAITING_AUTHORIZATION" ? (
+            <p>Aggiornamento richiesto: in attesa dell&apos;abilitazione dell&apos;esecuzione delle analisi.</p>
+          ) : null}
+        </div>
       ) : null}
       {plans.map((plan) => {
         const issueSpecs = specs.filter((spec) => spec.issueSemanticKey === plan.issueSemanticKey);
@@ -717,23 +761,49 @@ export function FascicoloGuidedActivities({
         });
         const next = issueSpecs.find((spec) => {
           const record = activityForKey(records, spec.activityKey);
+          return spec.necessity === "REQUIRED" && (!record || (!["COMPLETED", "EXCLUDED"].includes(record.current.status)
+            && !record.current.blockedReason && openActivityDependencies(record, records, specs, corpus).length === 0));
+        }) ?? issueSpecs.find((spec) => {
+          const record = activityForKey(records, spec.activityKey);
           return spec.necessity !== "NOT_JUSTIFIED" && (!record || (!["COMPLETED", "EXCLUDED"].includes(record.current.status)
             && !record.current.blockedReason && openActivityDependencies(record, records, specs, corpus).length === 0));
         });
+        const nextDocument = next?.documents[0] ?? null;
+        const doneSpecs = issueSpecs.filter((spec) => activityForKey(records, spec.activityKey)?.current.status === "COMPLETED");
+        const sharedRefs = plan.sharedActivityRefs ?? [];
         return (
           <details key={plan.issueSemanticKey} open={issueSpecs.some((spec) => spec.activityKey === focusActivityKey) || undefined} className="rounded-lg border border-slate-200 bg-white">
             <summary className="cursor-pointer p-4">
               <span className="block font-semibold text-slate-950">{plan.issueText}</span>
-              <span className="mt-1 block text-sm text-slate-700">{issueSpecs[0]?.legalSummary ?? "Analisi da verificare."}</span>
-              <span className="mt-2 block text-xs text-slate-600">
-                Prossimo passo: {next?.title ?? (progress.pending ? "riesaminare le attività bloccate o superate" : "nessuna attività pendente")}
-                {" · "}{(analysisCurrent || hasManualCompletion) && progress.percentage !== null
+              <span className="mt-1 block text-sm font-medium text-slate-900">
+                Prossimo passo: {next?.title ?? (progress.pending ? "riesaminare le attività bloccate o superate" : "nessuna attività necessaria pendente")}
+                {nextDocument ? <>{" · "}Atto: {nextDocument.title}</> : null}
+              </span>
+              <span className="mt-1 block text-xs text-slate-600">
+                {(analysisCurrent || hasManualCompletion) && progress.percentage !== null
                   ? `${progress.percentage}% verificato${!analysisCurrent ? " con valutazione manuale" : ""}`
                   : "avanzamento da verificare"}
-                {" · "}{progress.completed} completate, {progress.pending} pendenti, {progress.excluded} escluse
+                {" · "}{progress.completed} completate, {progress.pending} pendenti{progress.optional ? `, ${progress.optional} eventuali` : ""}, {progress.excluded} escluse
               </span>
+              <span className="mt-1 block text-sm text-slate-700">{leadSentence(issueSpecs[0]?.legalSummary ?? "Analisi da verificare.")}</span>
             </summary>
             <div className="space-y-3 border-t border-slate-200 p-4">
+              {issueSpecs[0]?.legalSummary && leadSentence(issueSpecs[0].legalSummary) !== issueSpecs[0].legalSummary ? (
+                <details className="text-sm text-slate-700">
+                  <summary className="cursor-pointer font-medium text-slate-900">Sintesi completa dell&apos;analisi</summary>
+                  <p className="mt-1">{issueSpecs[0].legalSummary}</p>
+                </details>
+              ) : null}
+              {doneSpecs.length ? (
+                <p className="text-xs text-emerald-900">Attività completate: {doneSpecs.map((spec) => spec.title).join("; ")}</p>
+              ) : null}
+              {sharedRefs.length ? (
+                <ul className="space-y-1 text-xs text-slate-700">
+                  {sharedRefs.map((ref) => (
+                    <li key={ref.activityCode}>Attività comune gestita nella problematica «{ref.hostIssueText}»: {ref.title.replace(/^\d+\.\s*/, "")}</li>
+                  ))}
+                </ul>
+              ) : null}
               <p className="text-xs text-amber-900">
                 {plan.legalSourceStatus === "LEGAL_RESEARCH_REQUIRED"
                   ? "Le fonti e la giurisprudenza richiedono ulteriori verifiche."

@@ -150,6 +150,45 @@ describe("buildPortRegimeCoordination", () => {
 describe("assessIssueProfile", () => {
   const procedural = { contestazioneFormaleInviata: false, memorieRicevute: false, controdeduzioniValutate: false };
 
+  it("uses documented obligations not linked to the issue by extraction, flagging the link for confirmation", () => {
+    const issue = "Ritardo negli investimenti I1, I4 e gru M2";
+    const linked = [item("late", "Al sopralluogo la gru M2 non è stata consegnata e le opere I4 risultano eseguite al 55%.", [30])];
+    const obligation = item("program", "Programma investimenti vincolante: (I1) sistema elettrico euro 180.000, da collaudare entro il 30 settembre 2024; (I4) separatore prima pioggia euro 220.000, da ultimare entro il 31 dicembre 2025.", [9], "HUMAN_CONFIRMED");
+    const otherWarehouse = item("m7", "Il magazzino M7 è affidato senza autorizzazione.", [3]);
+    const unrelated = item("pay", "Il canone 2025 risulta versato in data 10/02/2025.", [20]);
+
+    const without = assessIssueProfile({ issueText: issue, relatedItems: linked, procedural, analysisDate: "2026-11-03" });
+    expect(without?.elements.find((element) => element.elementId === "obligation")?.status).toBe("NOT_PROVEN");
+
+    const result = assessIssueProfile({
+      issueText: issue,
+      relatedItems: linked,
+      fascicoloItems: [...linked, obligation, otherWarehouse, unrelated],
+      procedural,
+      analysisDate: "2026-11-03",
+    });
+    const element = result?.elements.find((entry) => entry.elementId === "obligation");
+    expect(element?.status).toBe("INDICATED");
+    expect(element?.evidence.map((entry) => entry.text)).toEqual([obligation.normalizedText]);
+    expect(element?.evidence[0]?.linkedByTopic).toBe(true);
+    expect(element?.reasoning).toContain("il collegamento va confermato");
+    expect(result?.qualification).not.toContain("non è documentato");
+  });
+
+  it("does not treat written-out future deadlines as breached", () => {
+    const result = assessIssueProfile({
+      issueText: "Ritardo negli investimenti del programma",
+      relatedItems: [
+        item("o", "Programma investimenti: gru M2 da porre in servizio entro il 31 dicembre 2026.", [9]),
+        item("p", "La gru M2 non è stata ancora consegnata.", [12]),
+      ],
+      procedural,
+      analysisDate: "2026-11-03",
+    });
+    expect(result?.elements.find((element) => element.elementId === "non-performance")?.status).toBe("NOT_PROVEN");
+    expect(result?.elements.find((element) => element.elementId === "non-performance")?.reasoning).toContain("31/12/2026");
+  });
+
   it("qualifies third-party use only when use and lack of authorization are both documented", () => {
     const result = assessIssueProfile({
       issueText: "Uso da parte di terzi di parte dell'area in concessione",

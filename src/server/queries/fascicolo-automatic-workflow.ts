@@ -32,6 +32,8 @@ import {
   type StructuredKnowledgeReadModel,
 } from "@/server/queries/fascicolo-knowledge";
 import { getFascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
+import { diagnoseKnowledgeCorpusDrift, type KnowledgeCorpusDrift } from "@/server/queries/knowledge-corpus-drift";
+import { buildDocumentCoverage } from "@/lib/document-coverage";
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 
@@ -69,6 +71,7 @@ export interface FascicoloAutomaticWorkflowReadModel {
     status: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
     corpusFingerprint: string;
     currentRevisionFingerprint: string | null;
+    drift: KnowledgeCorpusDrift;
   };
   knowledge: StructuredKnowledgeReadModel | null;
   structuredReport: BuiltStructuredFascicoloReport | null;
@@ -506,6 +509,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       status: analysisUpdateStatus,
       corpusFingerprint: documentCorpus.corpusFingerprint,
       currentRevisionFingerprint: knowledge?.revision.corpusFingerprint ?? null,
+      drift: diagnoseKnowledgeCorpusDrift(knowledge, documentCorpus),
     },
     knowledge,
     operationalProposals: operationalProposals.map((proposal) => ({
@@ -717,6 +721,10 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     tenantId,
     procedimentoId,
     knowledge,
+    documentCoverage: {
+      corpusFingerprint: documentCorpus.corpusFingerprint,
+      entries: buildDocumentCoverage(documentCorpus),
+    },
     proceduralContext: {
       stato: owner.stato,
       tipologia: owner.tipologia,

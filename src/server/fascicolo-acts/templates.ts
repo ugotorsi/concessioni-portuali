@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { partyInitiatedProcedure } from "@/server/fascicolo-report/legal-application";
 import type {
   StructuredFascicoloReportPayload,
   StructuredReportOperationalStep,
@@ -459,11 +460,14 @@ export function buildActTemplateCatalog(input: {
     || Boolean(input.payload?.portRegime)
     || applications.some((entry) => /demani\w* marittim|concession\w*[^.]{0,40}(?:marittim|portual|porto)|area portual|banchin\w* portual|cod(?:ice)?\.?\s+(?:della\s+)?nav/i.test(entry.issueText))
     || documentaryEvidence(input.payload).some((text) => /concession\w* demanial|demanio marittim|area demanial/i.test(text));
+  const partyInitiated = partyInitiatedProcedure(input.payload?.proceduralContext ?? undefined,
+    [...applications.map((entry) => entry.issueText), ...documentaryEvidence(input.payload)].join(" \n "));
   const pertinent = (template: ActTemplate) =>
     template.phases.includes(phase)
     && concessionMatter
     && !alreadyPerformed(template, input.payload?.proceduralContext)
     && (template.templateKey !== "CATALOG:CONTESTAZIONE_DECADENZA" || decadenceContestable)
+    && (template.templateKey !== "CATALOG:PREAVVISO_RIGETTO" || partyInitiated)
     && (!template.requires || requirementMet(template.requires));
   const fromPlans = planTemplates(input.payload, phase).map(fill);
   const catalog = concessionMatter ? CATALOG

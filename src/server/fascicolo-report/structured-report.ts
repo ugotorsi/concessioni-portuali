@@ -7,11 +7,13 @@ import {
   UNREVIEWED_SOURCE_NOTICE,
 } from "@/lib/professional-research-sources";
 import { stableStringify } from "@/server/audit/hash";
+import type { DocumentCoverageEntry } from "@/lib/document-coverage";
 import { detectActPhase, type ActPhaseDetection } from "@/server/fascicolo-acts/templates";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
 
+import { buildIssuePath, sharedAdminActsStep, type IssuePath, type SharedActivityNeed } from "./issue-paths";
 import { buildLegalApplication, extractIsoDates, type StructuredReportLegalApplication } from "./legal-application";
-import { assessIssueProfile, LEGAL_ELEMENT_STATUS_LABELS, type LegalIssueProfileAssessment } from "./legal-issue-profiles";
+import { assessIssueProfile, type LegalIssueProfileAssessment } from "./legal-issue-profiles";
 import { buildPortRegimeCoordination, isPortConcessionMatter, type PortRegimeCoordination } from "./port-regime";
 
 export type { StructuredReportLegalApplication } from "./legal-application";
@@ -108,6 +110,15 @@ export interface StructuredReportOperationalStep {
   draftTitle?: string;
   draftTemplate?: string;
   additionalDrafts?: readonly { documentCode: string; title: string; template: string }[];
+  /** Issues served by a single shared activity hosted in this plan. */
+  sharedIssueSemanticKeys?: readonly string[];
+}
+
+export interface StructuredReportSharedActivityRef {
+  activityCode: string;
+  hostIssueSemanticKey: string;
+  hostIssueText: string;
+  title: string;
 }
 
 export interface StructuredReportOperationalAlternative {
@@ -126,6 +137,8 @@ export interface StructuredReportOperationalPlan {
   professionalStatus: "PRELIMINARY_NOT_APPROVED";
   recommendedNextStep: string;
   steps: readonly StructuredReportOperationalStep[];
+  /** Shared activities that concern this issue but are tracked in another issue's plan. */
+  sharedActivityRefs?: readonly StructuredReportSharedActivityRef[];
   alternatives: readonly StructuredReportOperationalAlternative[];
   deadlineReview: string;
 }
@@ -179,6 +192,10 @@ export interface StructuredFascicoloReportPayload {
   sourceStateFingerprint: string;
   /** Authoritative metadata used when the immutable report version was generated. */
   proceduralContext?: StructuredReportProceduralContext;
+  /** Page-level reading coverage of the corpus; absent in older snapshots. */
+  documentCoverage?: readonly DocumentCoverageEntry[];
+  /** Corpus the coverage refers to; differs from corpusFingerprint when the analysis is not current. */
+  documentCoverageCorpusFingerprint?: string;
   documentedFramework: {
     partyRoles: readonly StructuredKnowledgeReadItem[];
     facts: readonly StructuredKnowledgeReadItem[];
@@ -331,90 +348,25 @@ function decisionDraft(issueText: string): string {
   ].join("\n\n");
 }
 
-function profileOperationalSteps(
-  issueText: string,
+function profileIssuePath(
+  issue: { semanticKey: string; text: string },
   profile: LegalIssueProfileAssessment,
-): StructuredReportOperationalStep[] {
-  const subject = issueText.length > 90 ? `${issueText.slice(0, 87).trimEnd()}…` : issueText;
-  const substantive = profile.elements.filter((element) => element.elementId !== "contraddittorio");
+  caseTexts: readonly string[],
+): IssuePath {
   const contraddittorio = profile.elements.find((element) => element.elementId === "contraddittorio");
-  const open = substantive.filter((element) => element.status !== "PROVEN");
-  const coreMet = substantive.filter((element) => element.core)
-    .every((element) => element.status === "PROVEN" || element.status === "INDICATED");
-  const contrary = substantive.filter((element) => element.status === "CONTRARY_EVIDENCE");
-  const bases = [...new Set(substantive.flatMap((element) => element.legalBasis.split(/;\s*/)).map((basis) => basis.trim()).filter(Boolean))];
-  const contested = contraddittorio?.status === "PROVEN";
-  const decisionOptions = PROFILE_DECISION_OPTIONS[profile.profileId] ?? DEFAULT_DECISION_OPTIONS;
-  return [
-    {
-      activityCode: `PROFILE:${profile.profileId}:EVIDENCE`,
-      necessity: "REQUIRED",
-      title: `1. ${subject}: completare la prova dei requisiti`,
-      action: open.length
-        ? `Requisiti ancora da provare o confermare: ${open.map((element) =>
-          `${element.requirement} (${element.legalBasis}) — ${LEGAL_ELEMENT_STATUS_LABELS[element.status].toLowerCase()}: ${element.reasoning}`).join(" ")}`
-        : "Tutti i requisiti della fattispecie risultano provati e confermati dal professionista: verificare soltanto che le prove siano aggiornate alla data della decisione.",
-      office: "Responsabile del procedimento e ufficio demanio dell'ente concedente, con ufficio tecnico per sopralluoghi e verifiche",
-      requiredDocuments: open.length
-        ? open.map((element) => `${element.requirement}: ${element.status === "NOT_PROVEN" ? element.reasoning.replace(/^Nessun riscontro documentale\.\s*/, "") : "conferma professionale delle evidenze indicate"}`)
-        : ["Evidenze già confermate, aggiornate alla data della decisione"],
-      completionGate: `Ogni requisito essenziale (${substantive.filter((element) => element.core).map((element) => element.requirement.toLowerCase()).join("; ")}) è provato oppure motivatamente escluso`,
-    },
-    {
-      activityCode: `PROFILE:${profile.profileId}:QUALIFICATION`,
-      necessity: "REQUIRED",
-      title: `2. ${subject}: qualificazione giuridica`,
-      action: profile.qualification,
-      office: "Ufficio legale o concessioni dell'ente concedente; il professionista valida la qualificazione",
-      requiredDocuments: [...bases.map((basis) => `Testo vigente alla data dei fatti: ${basis}`), "Titolo concessorio e programma di attività con prescrizioni pertinenti"],
-      completionGate: contrary.length
-        ? `Gli elementi contrari o giustificativi (${contrary.map((element) => element.requirement.toLowerCase()).join("; ")}) sono stati valutati espressamente`
-        : "Qualificazione motivata e validata dal professionista",
-    },
-    {
-      activityCode: `PROFILE:${profile.profileId}:${contested ? "ASSESS_DEFENSE" : "CONTESTATION"}`,
-      necessity: contested ? "REQUIRED" : coreMet ? "CONDITIONAL" : "NOT_JUSTIFIED",
-      title: `3. ${subject}: ${contested ? "valutare le deduzioni del concessionario" : "contestazione degli addebiti"}`,
-      action: contested
-        ? `Contestazione già registrata. ${contraddittorio?.reasoning ?? ""} Valutare ogni deduzione rispetto ai singoli requisiti prima di qualsiasi misura.`
-        : coreMet
-          ? `Predisporre la contestazione degli addebiti indicando per ciascuno fatti e pagine di riscontro, norme violate (${bases.join("; ")}) e termine per le deduzioni ai sensi dell'art. 47, ultimo comma, cod. nav. e degli artt. 7 e 10 L. 241/1990.`
-          : "Non avviare la contestazione finché i requisiti essenziali indicati al punto 1 non sono documentati: una contestazione priva di prova espone l'atto ad annullamento per difetto di istruttoria.",
-      office: "Responsabile del procedimento dell'autorità concedente competente",
-      requiredDocuments: ["Relazione istruttoria con le prove del punto 1", "Bozza di contestazione dalla sezione Atti", "Prova della notificazione e del termine assegnato"],
-      completionGate: contested
-        ? "Ogni deduzione ha ricevuto una valutazione espressa"
-        : "Contestazione notificata con termine per le deduzioni, oppure motivata decisione di non procedere",
-      ...(contested || !coreMet ? {} : {
-        documentCode: "CONTESTAZIONE_ADDEBITI",
-        draftTitle: "Contestazione degli addebiti",
-        draftTemplate: [
-          `Oggetto: contestazione degli addebiti — ${subject}.`,
-          `Elementi risultanti dal fascicolo (da confermare prima della notifica):\n${substantive
-            .filter((element) => element.status === "PROVEN" || element.status === "INDICATED")
-            .map((element) => `- ${element.requirement} (${element.legalBasis}): ${element.reasoning}`)
-            .join("\n")}`,
-          `Qualificazione proposta: ${profile.qualification}`,
-          `Norme: ${bases.join("; ")}, nel testo vigente alla data delle condotte.`,
-          "Termine per le deduzioni e per chiedere l'audizione: [TERMINE DA VERIFICARE] giorni (art. 47, ultimo comma, cod. nav.; artt. 7 e 10 L. 241/1990).",
-          "Organo competente: [ORGANO DA VERIFICARE]. Responsabile del procedimento: [RESPONSABILE].",
-          "Bozza soggetta ad approvazione umana; nessuna notifica automatica.",
-        ].join("\n\n"),
-      }),
-    },
-    {
-      activityCode: `PROFILE:${profile.profileId}:DECISION`,
-      necessity: "REQUIRED",
-      title: `4. ${subject}: decisione motivata e proporzionata`,
-      action: `${decisionOptions} Motivare su ciascun requisito, sulle deduzioni e sulla proporzionalità rispetto a gravità e durata della condotta.`,
-      office: "Organo dell'ente concedente competente per il provvedimento",
-      requiredDocuments: ["Esito motivato per ciascun requisito", "Valutazione delle deduzioni", "Schema di provvedimento e piano di verifica degli adempimenti"],
-      completionGate: "Autorizzazione umana all'adozione dopo verifica di competenza, motivazione e garanzie",
-      documentCode: "SCHEMA_DECISIONE",
-      draftTitle: "Schema di decisione motivata",
-      draftTemplate: decisionDraft(issueText),
-    },
-  ];
+  return buildIssuePath({
+    issueSemanticKey: issue.semanticKey,
+    issueText: issue.text,
+    profile,
+    caseTexts,
+    contested: contraddittorio?.status === "PROVEN",
+    decisionOptions: PROFILE_DECISION_OPTIONS[profile.profileId] ?? DEFAULT_DECISION_OPTIONS,
+    decisionDraft: decisionDraft(issue.text),
+  });
+}
+
+function numberSteps(steps: readonly StructuredReportOperationalStep[]): StructuredReportOperationalStep[] {
+  return steps.map((step, index) => ({ ...step, title: `${index + 1}. ${step.title.replace(/^\d+\.\s*/, "")}` }));
 }
 
 function buildOperationalPlans(
@@ -439,7 +391,11 @@ function buildOperationalPlans(
     ...knowledge.facts, ...knowledge.legalActs, ...knowledge.measures,
     ...knowledge.events, ...knowledge.gaps, ...knowledge.deadlineCandidates,
   ].filter((item) => item.status !== "REJECTED");
-  return issues.map((issue) => {
+  const gapIds = new Set(knowledge.gaps.map((item) => item.id));
+  // Substantive facts usable as evidence for any issue; gap notices are not facts.
+  const fascicoloFacts = evidenceItems.filter((item) => !gapIds.has(item.id));
+  const sharedNeeds: SharedActivityNeed[] = [];
+  const plans = issues.map((issue): StructuredReportOperationalPlan => {
     const originIds = new Set(issue.originatingItemIds);
     const related = evidenceItems.filter((item) => originIds.has(item.id));
     const sourceDocumentRefs = [...new Set(related.flatMap((item) =>
@@ -634,6 +590,7 @@ function buildOperationalPlans(
     const profile = !portMatter || proceedingConcluded ? null : assessIssueProfile({
       issueText: issue.text,
       relatedItems: related,
+      fascicoloItems: fascicoloFacts,
       analysisDate: new Date(knowledge.revision.createdAt).toISOString().slice(0, 10),
       procedural: proceduralContext ? {
         contestazioneFormaleInviata: proceduralContext.contestazioneFormaleInviata ?? false,
@@ -641,9 +598,11 @@ function buildOperationalPlans(
         controdeduzioniValutate: proceduralContext.controdeduzioniValutate ?? false,
       } : null,
     });
+    const issuePath = profile ? profileIssuePath(issue, profile, [issue.text, ...related.map((item) => item.normalizedText)]) : null;
+    if (issuePath && !proceedingConcluded) sharedNeeds.push(...issuePath.sharedNeeds);
     const steps = proceedingConcluded
       ? portMatter ? postDecisionSteps : genericPostDecisionSteps
-      : portMatter ? profile ? profileOperationalSteps(issue.text, profile) : preDecisionSteps : genericPreDecisionSteps;
+      : portMatter ? issuePath ? issuePath.steps : preDecisionSteps : genericPreDecisionSteps;
     const alternatives: StructuredReportOperationalAlternative[] = !portMatter ? [
       {
         title: "Valutare le opzioni consentite dalla disciplina applicabile",
@@ -733,6 +692,40 @@ function buildOperationalPlans(
       deadlineReview: "Verificare espressamente scadenze, notifiche e termini applicabili: nessuna data processuale è determinata da questo piano.",
     };
   });
+  const shared = sharedAdminActsStep(sharedNeeds);
+  const finalize = (plan: StructuredReportOperationalPlan, steps: readonly StructuredReportOperationalStep[]): StructuredReportOperationalPlan => {
+    const numbered = numberSteps(steps);
+    const next = numbered.find((step) => step.necessity === "REQUIRED") ?? numbered[0];
+    return {
+      ...plan,
+      steps: numbered,
+      recommendedNextStep: `Prossimo passo: ${next?.title ?? "verificare i presupposti"}. Le misure successive dipendono dall'esito: nessuna è automatica.`,
+    };
+  };
+  const profiled = (plan: StructuredReportOperationalPlan) => plan.steps.some((step) => step.activityCode?.startsWith("PROFILE:"));
+  if (!shared) return plans.map((plan) => profiled(plan) ? finalize(plan, plan.steps) : plan);
+  const host = plans.find((plan) => plan.issueSemanticKey === shared.hostIssueSemanticKey)!;
+  const served = new Set(shared.step.sharedIssueSemanticKeys);
+  return plans.map((plan) => {
+    if (!profiled(plan)) return plan;
+    if (plan === host) {
+      const steps = [...plan.steps];
+      const firstRequiredVerification = steps.findIndex((step) => step.activityCode?.endsWith(":EVIDENCE") || step.activityCode?.endsWith(":MONITORING"));
+      steps.splice(firstRequiredVerification >= 0 ? firstRequiredVerification + 1 : 0, 0, shared.step);
+      return finalize(plan, steps);
+    }
+    return {
+      ...finalize(plan, plan.steps),
+      ...(served.has(plan.issueSemanticKey) ? {
+        sharedActivityRefs: [{
+          activityCode: shared.step.activityCode!,
+          hostIssueSemanticKey: host.issueSemanticKey,
+          hostIssueText: host.issueText,
+          title: shared.step.title,
+        }],
+      } : {}),
+    };
+  });
 }
 
 const ART_242_SOURCE_URL = "https://www.autorita-trasporti.it/wp-content/uploads/2025/12/All.-A-delibera-n.-242_2025_signed.pdf";
@@ -781,6 +774,7 @@ export function buildStructuredFascicoloReport(input: {
   knowledge: StructuredKnowledgeReadModel;
   missions: readonly StructuredReportMissionInput[];
   proceduralContext?: StructuredReportProceduralContext;
+  documentCoverage?: { corpusFingerprint: string; entries: readonly DocumentCoverageEntry[] };
 }): BuiltStructuredFascicoloReport {
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
     && mission.knowledgeRevisionId === input.knowledge.revision.id
@@ -884,6 +878,10 @@ export function buildStructuredFascicoloReport(input: {
     researchStateFingerprint: fingerprint(researchState),
     sourceStateFingerprint: fingerprint(sourceState),
     proceduralContext: input.proceduralContext,
+    ...(input.documentCoverage ? {
+      documentCoverage: input.documentCoverage.entries,
+      documentCoverageCorpusFingerprint: input.documentCoverage.corpusFingerprint,
+    } : {}),
     documentedFramework: {
       partyRoles: visibleItems(input.knowledge.partyRoles),
       facts: visibleItems(input.knowledge.facts),

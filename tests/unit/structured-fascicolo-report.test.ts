@@ -363,63 +363,144 @@ describe("deterministic structured fascicolo report", () => {
 });
 
 describe("profile-specific operational plans", () => {
-  it("derives distinct, evidence-driven steps per issue instead of generic art. 47 steps", () => {
+  const step = (plan: { steps: readonly { activityCode?: string }[] } | undefined, code: string) =>
+    plan?.steps.find((candidate) => candidate.activityCode === code) as NonNullable<NonNullable<ReturnType<typeof buildStructuredFascicoloReport>["payload"]["operationalPlans"]>[number]["steps"][number]> | undefined;
+  const build = (procedimentoId: string, facts: ReturnType<typeof item>[], issues: ReturnType<typeof item>[], extra: Partial<ReturnType<typeof knowledge>> = {}) => {
     const base = knowledge();
+    return buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId,
+      knowledge: {
+        ...base,
+        facts,
+        legalActs: [{ ...item(`${procedimentoId}-title`, "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale." }],
+        gaps: [],
+        legalIssues: issues.map((issue) => ({ originatingItemIds: [], ...issue })),
+        researchQuestions: [],
+        ...extra,
+      },
+      missions: [],
+    }).payload;
+  };
+
+  it("derives distinct, evidence-driven paths per issue instead of a fixed four-step template", () => {
     const use = { ...item("fact-use", "FACT", "AI_PROPOSED"), normalizedText: "Il contratto con Magazzini Levante attribuisce stabilmente a tale società 180 m² di M4, con proprio personale; non è allegato un assenso espresso dell'ente concedente." };
     const invest = { ...item("fact-inv", "FACT", "AI_PROPOSED"), normalizedText: "Il programma di attività prevede l'intervento I4 entro il 30/06/2026." };
     const thirdParty = { ...item("issue-third", "LEGAL_ISSUE"), normalizedText: "Uso di M4 da parte di terzo operatore", originatingItemIds: [use.id] };
     const investment = { ...item("issue-inv", "LEGAL_ISSUE"), normalizedText: "Inadempimento o rimedio concessorio per investimenti", originatingItemIds: [invest.id] };
-    const report = buildStructuredFascicoloReport({
-      tenantId: "tenant-1",
-      procedimentoId: "procedure-profile",
-      knowledge: {
-        ...base,
-        facts: [use, invest],
-        legalActs: [{ ...item("port-title", "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale." }],
-        gaps: [],
-        legalIssues: [thirdParty, investment],
-        researchQuestions: [],
-      },
-      missions: [],
-    });
-    const plans = report.payload.operationalPlans ?? [];
+    const payload = build("procedure-profile", [use, invest], [thirdParty, investment]);
+    const plans = payload.operationalPlans ?? [];
     const third = plans.find((plan) => plan.issueText.startsWith("Uso di M4"))!;
     const inv = plans.find((plan) => plan.issueText.startsWith("Inadempimento"))!;
-    expect(third.steps[0].title).toBe("1. Uso di M4 da parte di terzo operatore: completare la prova dei requisiti");
-    expect(third.steps[1].action).toContain("il solo mancato reperimento del documento non dimostra");
-    expect(third.steps[1].requiredDocuments.join(" ")).toMatch(/art\. 18, comma 9/);
-    expect(third.steps[2].necessity).toBe("NOT_JUSTIFIED");
-    expect(third.steps[2].action).toContain("Non avviare la contestazione");
-    expect(third.steps[2].draftTitle).toBeUndefined();
-    expect(inv.steps[0].action).toMatch(/Mancata, ritardata o incompleta esecuzione/);
-    expect(inv.steps[2].action).toMatch(/Non avviare la contestazione/);
-    expect(inv.steps[2].draftTemplate).toBeUndefined();
-    expect(new Set(plans.flatMap((plan) => plan.steps.map((step) => step.title))).size).toBe(8);
+
+    expect(third.steps[0].activityCode).toBe("PROFILE:THIRD_PARTY_USE:EVIDENCE");
+    expect(third.steps[0].title).toBe("1. Uso di M4 da parte di terzo operatore: accertare la natura del rapporto con il terzo");
+    expect(third.steps[0].action).toMatch(/art\. 45-bis cod\. nav\.; art\. 18, comma 9/);
+    expect(third.steps[0].action).toMatch(/art\. 46 cod\. nav\./);
+    expect(third.steps[0].documentCode).toBe("RICHIESTA_DOCUMENTI_RAPPORTO_TERZO");
+    expect(third.steps[0].draftTemplate).toContain("non costituisce contestazione");
+    expect(third.steps[0].draftTemplate).toContain("[TERMINE DA VERIFICARE]");
+    const qualification = step(third, "PROFILE:THIRD_PARTY_USE:QUALIFICATION")!;
+    expect(qualification.action).toContain("il solo mancato reperimento del documento non dimostra");
+    expect(qualification.requiredDocuments.join(" ")).toMatch(/art\. 18, comma 9/);
+    const contestation = step(third, "PROFILE:THIRD_PARTY_USE:CONTESTATION")!;
+    expect(contestation.necessity).toBe("NOT_JUSTIFIED");
+    expect(contestation.action).toContain("Non avviare la contestazione");
+    expect(contestation.draftTitle).toBeUndefined();
+    expect(step(third, "PROFILE:THIRD_PARTY_USE:DECISION")!.necessity).toBe("CONDITIONAL");
+
+    expect(inv.steps[0].activityCode).toBe("PROFILE:INVESTMENT_DEFAULT:EVIDENCE");
+    expect(inv.steps[0].title).toMatch(/ricostruire per ciascun intervento \(I4\) termine, esecuzione e verbali/);
+    expect(inv.steps[0].documentCode).toBe("RICHIESTA_STATO_INTERVENTI");
+    expect(step(inv, "PROFILE:INVESTMENT_DEFAULT:CONTESTATION")!.draftTemplate).toBeUndefined();
+    expect(step(inv, "PROFILE:INVESTMENT_DEFAULT:REMEDY")!.necessity).toBe("NOT_JUSTIFIED");
+    expect(third.steps[0].title.replace(/^\d+\.\s*/, "")).not.toBe(inv.steps[0].title.replace(/^\d+\.\s*/, ""));
+    expect(plans.flatMap((plan) => plan.steps.map((candidate) => candidate.title)).some((title) => /completare la prova dei requisiti/.test(title))).toBe(false);
+
+    // One shared verification of the administrative acts, hosted once and referenced elsewhere.
+    const shared = plans.flatMap((plan) => plan.steps.filter((candidate) => candidate.activityCode === "SHARED:ADMIN_ACTS_CHECK"));
+    expect(shared).toHaveLength(1);
+    expect(shared[0].sharedIssueSemanticKeys).toHaveLength(2);
+    expect(shared[0].action).toContain("L'assenza di un atto dal fascicolo non prova che non sia stato rilasciato");
+    const referencing = plans.filter((plan) => plan.sharedActivityRefs?.length);
+    expect(referencing).toHaveLength(1);
+    expect(referencing[0].steps.some((candidate) => candidate.activityCode === "SHARED:ADMIN_ACTS_CHECK")).toBe(false);
+    for (const plan of plans) {
+      expect(plan.steps.map((candidate) => Number(candidate.title.split(".")[0]))).toEqual(plan.steps.map((_, index) => index + 1));
+      expect(plan.recommendedNextStep).toMatch(/^Prossimo passo: 1\./);
+    }
 
     const supportedUse = {
       ...use,
       normalizedText: "Il contratto attribuisce stabilmente a Magazzini Levante 180 m² di M4 con proprio personale. La gestione è stata affidata senza autorizzazione dell'ente concedente.",
     };
-    const supported = buildStructuredFascicoloReport({
-      tenantId: "tenant-1",
-      procedimentoId: "procedure-profile-supported",
-      knowledge: {
-        ...base,
-        facts: [supportedUse],
-        legalActs: [{ ...item("port-title-supported", "LEGAL_ACT"), normalizedText: "Concessione demaniale portuale." }],
-        gaps: [],
-        legalIssues: [thirdParty],
-        researchQuestions: [],
-      },
-      missions: [],
-    }).payload.operationalPlans?.[0];
-    expect(supported?.steps[1].action).toMatch(/art\. 47, lett\. e/);
-    expect(supported?.steps[1].requiredDocuments.join(" ")).toContain("solo se ricorre sostituzione nel godimento");
-    expect(supported?.steps[3].action).toContain("autorizzazione preventiva per l'affidamento futuro");
-    expect(supported?.steps[3].action).toContain("Non presumere che l'autorizzazione sani automaticamente la condotta pregressa");
-    expect(supported?.steps[3].action).toContain("richiede sostituzione abusiva nel godimento");
-    expect(supported?.steps[2].necessity).toBe("CONDITIONAL");
-    expect(supported?.steps[2].draftTitle).toBe("Contestazione degli addebiti");
-    expect(supported?.steps[2].draftTemplate).toContain("[TERMINE DA VERIFICARE]");
+    const supported = build("procedure-profile-supported", [supportedUse], [thirdParty]).operationalPlans?.[0];
+    const supportedQualification = step(supported, "PROFILE:THIRD_PARTY_USE:QUALIFICATION")!;
+    expect(supportedQualification.action).toMatch(/art\. 47, lett\. e/);
+    expect(supportedQualification.requiredDocuments.join(" ")).toContain("solo se ricorre sostituzione nel godimento");
+    const decision = step(supported, "PROFILE:THIRD_PARTY_USE:DECISION")!;
+    expect(decision.necessity).toBe("REQUIRED");
+    expect(decision.action).toContain("autorizzazione preventiva per l'affidamento futuro");
+    expect(decision.action).toContain("Non presumere che l'autorizzazione sani automaticamente la condotta pregressa");
+    expect(decision.action).toContain("richiede sostituzione abusiva nel godimento");
+    const supportedContestation = step(supported, "PROFILE:THIRD_PARTY_USE:CONTESTATION")!;
+    expect(supportedContestation.necessity).toBe("CONDITIONAL");
+    expect(supportedContestation.draftTitle).toBe("Contestazione degli addebiti");
+    expect(supportedContestation.draftTemplate).toContain("[TERMINE DA VERIFICARE]");
+    expect(supportedContestation.draftTemplate).not.toContain("10-bis");
+  });
+
+  it("separates the documented interventions and keeps the remedies alternative", () => {
+    const facts = [
+      { ...item("inv-1", "FACT", "AI_PROPOSED"), normalizedText: "Il programma di attività obbliga il concessionario a completare gli interventi I1, I4 e M2 entro il 31/03/2026." },
+      { ...item("inv-2", "FACT", "AI_PROPOSED"), normalizedText: "Alla verifica del 18/02/2026 l'intervento I1 risulta eseguito con 16 dei 18 punti luce installati. Il separatore dell'intervento I4 non risulta installato e manca il collaudo. Il mezzo M2 è stato ordinato ma non consegnato." },
+    ];
+    const issue = { ...item("issue-investments", "LEGAL_ISSUE"), normalizedText: "Ritardo negli investimenti del programma", originatingItemIds: facts.map((fact) => fact.id) };
+    const plan = build("procedure-investments", facts, [issue]).operationalPlans?.[0];
+    const evidence = step(plan, "PROFILE:INVESTMENT_DEFAULT:EVIDENCE");
+    const remedy = step(plan, "PROFILE:INVESTMENT_DEFAULT:REMEDY")!;
+    expect(plan?.steps[0].activityCode).toMatch(/^PROFILE:INVESTMENT_DEFAULT:(EVIDENCE|JUSTIFICATION)$/);
+    expect(`${evidence?.title ?? ""} ${evidence?.action ?? ""} ${remedy.draftTemplate ?? ""}`).toMatch(/I1/);
+    expect(`${evidence?.title ?? ""} ${remedy.draftTemplate ?? ""}`).toMatch(/I4/);
+    expect(`${evidence?.title ?? ""} ${remedy.draftTemplate ?? ""}`).toMatch(/M2/);
+    expect(remedy.action).toMatch(/non sono cumulative|non è ancora individuabile/);
+  });
+
+  it("does not propose an injunction for occupations that have ceased", () => {
+    const facts = [
+      { ...item("occ-1", "FACT", "AI_PROPOSED"), normalizedText: "Nel 2025 il concessionario ha occupato senza titolo un'area di 120 m² esterna alla concessione con container e materiali." },
+      { ...item("occ-2", "FACT", "AI_PROPOSED"), normalizedText: "Al sopralluogo del 10/09/2026 i container sono stati rimossi e l'area è stata liberata." },
+    ];
+    const issue = { ...item("issue-occupation", "LEGAL_ISSUE"), normalizedText: "Occupazione di aree esterne al perimetro concessorio", originatingItemIds: facts.map((fact) => fact.id) };
+    const plan = build("procedure-occupation", facts, [issue]).operationalPlans?.[0];
+    const restoration = step(plan, "PROFILE:UNAUTHORIZED_OCCUPATION:RESTORATION")!;
+    expect(restoration.necessity).toBe("NOT_JUSTIFIED");
+    expect(restoration.documentCode).toBeUndefined();
+    expect(restoration.action).toMatch(/cessate|non pertinente/i);
+  });
+
+  it("reconstructs fee balances before recovery or decadence", () => {
+    const facts = [{ ...item("fee-1", "FACT", "AI_PROPOSED"), normalizedText: "Il canone annuo è dovuto in due rate semestrali; risultano versamenti parziali della rata di luglio 2026." }];
+    const issue = { ...item("issue-fees", "LEGAL_ISSUE"), normalizedText: "Mancato pagamento dei canoni demaniali", originatingItemIds: facts.map((fact) => fact.id) };
+    const plan = build("procedure-fees", facts, [issue]).operationalPlans?.[0];
+    expect(plan?.steps[0].activityCode).toBe("PROFILE:FEE_PAYMENT:EVIDENCE");
+    expect(plan?.steps[0].title).toMatch(/ricostruire rate, importi, pagamenti, imputazioni e saldo/);
+    expect(plan?.steps[0].documentCode).toBe("PROSPETTO_RICONCILIAZIONE_CANONI");
+    expect(step(plan, "PROFILE:FEE_PAYMENT:CONTESTATION")!.necessity).toBe("NOT_JUSTIFIED");
+    expect(plan?.steps.findIndex((candidate) => candidate.activityCode === "PROFILE:FEE_PAYMENT:RECOVERY"))
+      .toBeGreaterThan(plan?.steps.findIndex((candidate) => candidate.activityCode === "PROFILE:FEE_PAYMENT:EVIDENCE") ?? 99);
+  });
+
+  it("cites art. 10-bis only for procedures started on a party's request", () => {
+    const facts = [{ ...item("party-fact", "FACT", "AI_PROPOSED"), normalizedText: "È stata inviata la contestazione degli addebiti con termine per le deduzioni." }];
+    const issue = { ...item("party-issue", "LEGAL_ISSUE"), normalizedText: "Contestazione degli addebiti al concessionario", originatingItemIds: facts.map((fact) => fact.id) };
+    const ex = build("procedure-office", facts, [issue]);
+    const office = ex.legalApplication?.flatMap((entry) => entry.rules.map((rule) => rule.citation)) ?? [];
+    expect(office.some((citation) => /10-bis/.test(citation))).toBe(false);
+
+    const requestFacts = [{ ...item("request-fact", "FACT", "AI_PROPOSED"), normalizedText: "Il concessionario ha presentato istanza di rinnovo della concessione; l'ufficio ritiene di non poterla accogliere." }];
+    const requestIssue = { ...item("request-issue", "LEGAL_ISSUE"), normalizedText: "Esito dell'istanza di rinnovo", originatingItemIds: requestFacts.map((fact) => fact.id) };
+    const request = build("procedure-request", requestFacts, [requestIssue]);
+    expect(request.legalApplication?.flatMap((entry) => entry.rules.map((rule) => rule.ruleId))).toContain("L241_PREAVVISO_RIGETTO");
   });
 });

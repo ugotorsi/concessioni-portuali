@@ -68,6 +68,7 @@ const proposal = {
   proposalType: "DEADLINE",
   procedimentoId: "procedure-1",
   reviewVersion: 0,
+  structuredReportFingerprint: "a".repeat(64),
 };
 const generation = {
   procedimentoId: "procedure-1",
@@ -125,6 +126,19 @@ describe("Lotto 7 operational proposal server actions", () => {
       actor: { actorId: "user-1", actorEmail: "user@example.test", actorRole: "ADMIN" },
     }));
     expect(mocks.materialize).not.toHaveBeenCalled();
+  });
+
+  it("blocks approval of a proposal generated from a superseded report or a stale analysis", async () => {
+    mocks.list.mockResolvedValue([{ ...proposal, structuredReportFingerprint: "e".repeat(64) }]);
+    await expect(reviewOperationalProposalAction(form({
+      procedimentoId: "procedure-1", proposalId: "proposal-1", action: "APPROVE", reviewVersion: "0",
+    }))).rejects.toThrow(/CURRENT_INPUT_REQUIRED/);
+    mocks.list.mockResolvedValue([proposal]);
+    mocks.getWorkflow.mockResolvedValue({ structuredReport: null, analysisUpdate: { status: "STALE" } });
+    await expect(reviewOperationalProposalAction(form({
+      procedimentoId: "procedure-1", proposalId: "proposal-1", action: "APPROVE", reviewVersion: "0",
+    }))).rejects.toThrow(/CURRENT_INPUT_REQUIRED/);
+    expect(mocks.review).not.toHaveBeenCalled();
   });
 
   it("materializes only through its separate action", async () => {
