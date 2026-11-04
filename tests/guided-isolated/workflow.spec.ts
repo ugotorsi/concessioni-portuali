@@ -15,6 +15,12 @@ async function login(page: Page) {
   await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 }
 
+/** Optional evidence of the real screens, written only when an absolute directory is configured. */
+async function capture(page: Page, name: string) {
+  const directory = process.env.NOETRA_GUIDED_E2E_SCREENSHOT_DIR;
+  if (directory) await page.screenshot({ path: `${directory}/${runId}-${name}.png`, fullPage: true });
+}
+
 async function openIssue(page: Page, title: string): Promise<Locator> {
   const summary = page.locator("summary").filter({ hasText: title }).first();
   await expect(summary).toBeVisible();
@@ -108,8 +114,13 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
   await submit(preview.getByRole("button", { name: "Genera proposte operative" }));
   await expect(preview.getByRole("status")).toContainText("Riconciliazione registrata");
   const issue = await openIssue(page, "Occupazione oltre il perimetro di Porto Aurora");
-  const first = activity(issue, /^1\..*completare la prova dei requisiti/);
-  const decision = activity(issue, /^4\..*decisione motivata/);
+  const first = activity(issue, /^1\..*accertare con sopralluogo quali occupazioni/);
+  const decision = activity(issue, /^6\..*decisione motivata/);
+  for (const unjustified of [/^4\..*sgombero e rimessa in pristino/, /^5\..*contestazione degli addebiti/]) {
+    await expect(activity(issue, unjustified).getByRole("button", { name: "Approva proposta", exact: true })).toHaveCount(0);
+  }
+  await expect(issue.locator("summary").first()).toContainText("Prossimo passo: 1. Occupazione oltre il perimetro di Porto Aurora: accertare con sopralluogo");
+  await capture(page, "porto-aurora-proposte");
   await approveAndTake(first, true);
   await approveAndTake(decision, true);
 
@@ -134,6 +145,23 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
   await expect(decision).toContainText("Responsabile: Ufficio sintetico");
   await expect(decision).toContainText("Termine verificato: 2026-12-01");
 
+  await expect(first.getByRole("button", { name: "Registra esecuzione o comunicazione" })).toHaveCount(0);
+  await expect(first.locator("summary").filter({ hasText: "Registra esecuzione o comunicazione" })).toHaveCount(0);
+  await submit(first.getByRole("button", { name: "Apri o crea bozza" }));
+  await expect(page).toHaveURL(/section=acts/);
+  const verbale = page.locator("article").filter({ has: page.getByRole("heading", { name: "Verbale di sopralluogo e accertamento" }) });
+  await expect(verbale).toHaveCount(1);
+  await verbale.locator("summary").filter({ hasText: "Modifica e versiona" }).click();
+  await expect(verbale.getByLabel("Testo dell'atto")).toHaveValue(/\[DATA\]/);
+  await verbale.getByRole("combobox", { name: "Stato", exact: true }).selectOption("APPROVATA_INTERNAMENTE");
+  await verbale.getByLabel("Nota di modifica").fill("Verbale completato con i rilievi del sopralluogo simulato.");
+  await submit(verbale.getByRole("button", { name: "Salva nuova versione" }));
+  await expect(verbale.locator("header")).toContainText("versione 2");
+  await verbale.getByRole("link", { name: "Torna all'attività" }).click();
+  await first.getByPlaceholder("Nota sul collegamento").fill("Verbale collegato all'accertamento.");
+  await submit(first.getByRole("button", { name: "Collega versione" }));
+  await first.getByPlaceholder("Motivo della validazione").fill("Verbale verificato.");
+  await submit(first.getByRole("button", { name: "Valida versione corrente" }));
   await recordEvidence(first, "execution", `${porto}-b-execution`);
   await recordEvidence(first, "outcome", `${porto}-c-outcome`);
   await command(first, "Verifica e completa", "Esecuzione e riscontro verificati nel collaudo.");
@@ -143,7 +171,7 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
 
   const otherPage = await page.context().newPage();
   await otherPage.goto(`/procedimenti/${porto}?section=proposals&activity=${decisionKey}`);
-  const otherDecision = activity(await openIssue(otherPage, "Occupazione oltre il perimetro di Porto Aurora"), /^4\..*decisione motivata/);
+  const otherDecision = activity(await openIssue(otherPage, "Occupazione oltre il perimetro di Porto Aurora"), /^6\..*decisione motivata/);
   await Promise.all([
     submit(decision.getByRole("button", { name: "Apri o crea bozza" })),
     submit(otherDecision.getByRole("button", { name: "Apri o crea bozza" })),
@@ -175,6 +203,7 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
   await draft.getByLabel("Nota di modifica").fill("Approvazione interna simulata.");
   await submit(draft.getByRole("button", { name: "Salva nuova versione" }));
   await expect(draft.locator("header")).toContainText("versione 3");
+  await capture(page, "porto-aurora-atti");
   await draft.getByRole("link", { name: "Torna all'attività" }).click();
   await expect(decision).not.toContainText("Completamento verificato dal professionista");
 
@@ -194,17 +223,20 @@ test("Porto Aurora: dalla proposta approvata al completamento documentato e pers
   await page.getByRole("button", { name: "Logout", exact: true }).click();
   await login(page);
   await page.goto(`/procedimenti/${porto}?section=proposals&activity=${decisionKey}`);
-  const restored = activity(await openIssue(page, "Occupazione oltre il perimetro di Porto Aurora"), /^4\..*decisione motivata/);
+  const restored = activity(await openIssue(page, "Occupazione oltre il perimetro di Porto Aurora"), /^6\..*decisione motivata/);
   await expect(restored).toContainText("Completamento verificato dal professionista");
   await expect(restored).toContainText("Riscontro simulato esaminato e motivato");
   await restored.locator("summary").filter({ hasText: "Cronologia completa" }).click();
   await expect(restored).toContainText("Versione corrente collegata");
   await expect(restored).toContainText("Termine indicato nel documento sintetico");
   await expect(restored).toContainText(`alternativa: ${selectedAlternative}`);
+  await capture(page, "porto-aurora-attivita-completata");
 
   await page.goto(`/procedimenti/${porto}?section=reports`);
   const report = page.getByTestId("fascicolo-report");
   await expect(report).toContainText("Coordinamento del regime concessorio portuale nel tempo");
+  await expect(report.getByLabel("Esposizione giuridica").first()).toContainText("Dai documenti del fascicolo risulta");
+  await capture(page, "porto-aurora-rapporto");
   await expect(report).toContainText("Manca la planimetria aggiornata del perimetro.");
   await expect(report).toContainText("Effetto indicato, da verificare: Il confronto del perimetro resta incerto.");
   const law = report.locator("summary").filter({ hasText: "Art. 18 L." }).first();
@@ -253,6 +285,8 @@ test("Caso non portuale: documenti distinti e riesame dopo un nuovo allegato", a
   await page.goto(`/procedimenti/${nonPort}?section=acts`);
   await expect(page.getByRole("heading", { name: "Schema di comunicazione istruttoria" })).toHaveCount(1);
   await expect(page.getByRole("heading", { name: "Schema di decisione motivata" })).toHaveCount(1);
+  await expect(page.locator("main")).not.toContainText(/cod\. nav\.|L\. 84\/1994|demanio marittimo/);
+  await capture(page, "non-portuale-atti");
   await page.goto(`/procedimenti/${nonPort}?section=documents`);
   await page.getByRole("button", { name: "Allega documento" }).click();
   await page.locator('input[type="file"]').setInputFiles({

@@ -81,3 +81,54 @@ utilizza `scripts/deploy/release-production.ts`. Lo script verifica identità
 del progetto, configurazione del dominio, variabili richieste, worktree pulito,
 presenza del commit sul remoto, target `production`, `readyState`, login sul
 deployment staged e alias finale. Rifiuta inoltre i deployment Preview.
+
+## Correzioni dopo il collaudo Production del 4 novembre 2026
+
+Interventi applicativi validi per tutti i fascicoli. Non introducono schema,
+migrazioni o scritture sui dati esistenti.
+
+- **Analisi non aggiornata.** Il quadro è `CURRENT` solo se l'impronta del
+  corpus della Knowledge coincide con quella dei documenti. La sezione Proposte
+  indica quali documenti sono cambiati e offre un aggiornamento esplicito e
+  auditato, disponibile solo con l'esecuzione provider abilitata.
+  L'approvazione di proposte generate da un rapporto superato o da un'analisi
+  non aggiornata è bloccata lato server. Attività, approvazioni e bozze restano
+  nello storico.
+- **Pagine e lacune.** Il rapporto distingue le pagine lette, le pagine del
+  file prive di testo e le pagine dell'originale mancanti secondo la
+  numerazione interna. Le pagine lette non sono più segnalate come lacune. La
+  sezione «Copertura documentale» è presente nell'interfaccia, nel PDF e
+  nell'RTF.
+- **Catena documento → conclusione.** Se gli elementi collegati alla questione
+  non contengono una prova, l'analisi cerca nella Knowledge del fascicolo gli
+  elementi con lo stesso codice (I1, M4…) o con lo stesso presupposto.
+  - Questi elementi restano «indicati» e non «provati».
+  - La motivazione chiede di confermare il collegamento.
+  - I termini come «entro il 30 settembre 2024» vengono riconosciuti.
+- **Percorsi specifici.** Ogni profilo ha passaggi propri, ad esempio M4,
+  investimenti, occupazioni e canoni. Le verifiche comuni degli atti di
+  assenso sono condivise. Le iniziative non giustificate non diventano
+  proposte approvabili e possono essere solo escluse con motivazione.
+- **Norme.**
+  - L'art. 10-bis L. 241/1990 è proposto solo nei procedimenti a istanza di
+    parte.
+  - Il D.I. 202/2022 è distinto per istituto e data.
+  - Le misure ART sono valutate una per una.
+  - Gli artt. 45-bis, 46 e 47 cod. nav. sono distinti.
+  - L'assenza di un atto dal fascicolo non è trattata come prova della sua
+    inesistenza.
+- **Bozze.** La sezione Atti raggruppa le bozze per problematica e tipo di
+  documento. Per i duplicati storici indica la bozza di riferimento, il
+  confronto dei contenuti e un'ipotesi di riconciliazione non distruttiva.
+  Nessuna bozza viene modificata.
+- **Leggibilità.**
+  - Il rapporto espone ogni questione in forma discorsiva: fatti, presupposti
+    soddisfatti, non dimostrati e determinanti, conclusione senza ripetizioni.
+  - Norme e avvertenze comuni compaiono una sola volta; il dettaglio resta
+    espandibile.
+  - In Proposte l'intestazione mostra prima il prossimo passo e l'atto
+    corrispondente.
+
+Dopo il rilascio i rapporti vanno rigenerati, cioè archiviati di nuovo, perché
+l'impronta del contenuto cambia. Le cinque bozze M4 e la coda delle proposte
+Selvara non vengono modificate.
