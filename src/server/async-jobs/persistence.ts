@@ -787,6 +787,148 @@ export async function cancelObsoleteFascicoloAnalysisJob(
   });
 }
 
+const archivedDocumentExtractionCancellationSchema = z.object({
+  jobId,
+  tenantId: identifier,
+  procedimentoId: identifier,
+  reason: z.string().trim().min(10).max(1_000),
+  actor: z.object({
+    userId: z.string().trim().min(1).max(256).nullable(),
+    userEmail: z.string().trim().email().max(320).nullable(),
+    userRole: z.string().trim().min(1).max(128),
+  }).strict(),
+}).strict();
+
+type ArchivedDocumentExtractionCancellationInput = z.input<
+  typeof archivedDocumentExtractionCancellationSchema
+>;
+
+type ArchivedDocumentState = {
+  id: string;
+  enteId: string | null;
+  procedimentoId: string | null;
+  statoDocumento: string;
+};
+
+function evaluateArchivedDocumentExtractionJob(
+  current: AsyncJob | null,
+  document: ArchivedDocumentState | null,
+  input: z.output<typeof archivedDocumentExtractionCancellationSchema>,
+) {
+  if (!current) return { outcome: "NOT_FOUND" as const };
+  if (
+    current.tenantId !== input.tenantId
+    || current.procedimentoId !== input.procedimentoId
+    || current.operation !== "DOCUMENT_EXTRACTION_V1"
+  ) {
+    return { outcome: "SCOPE_MISMATCH" as const, job: current };
+  }
+  const reference = referenceRecord(current.inputReference);
+  const metadata = referenceRecord(reference?.metadata as Prisma.JsonValue);
+  const documentoId = typeof metadata?.documentoId === "string" ? metadata.documentoId : null;
+  if (
+    reference?.referenceType !== "DOCUMENT_FILE_VERSION"
+    || typeof reference.referenceId !== "string"
+    || !documentoId
+    || metadata?.procedimentoId !== input.procedimentoId
+  ) {
+    return { outcome: "REFERENCE_MISMATCH" as const, job: current };
+  }
+  if (
+    !document
+    || document.id !== documentoId
+    || document.enteId !== input.tenantId
+    || document.procedimentoId !== input.procedimentoId
+  ) {
+    return { outcome: "REFERENCE_MISMATCH" as const, job: current };
+  }
+  if (document.statoDocumento !== "ARCHIVIATO") {
+    return { outcome: "DOCUMENT_STILL_ACTIVE" as const, job: current };
+  }
+  if (current.status === "CANCELLED") {
+    return { outcome: "ALREADY_CANCELLED" as const, job: current };
+  }
+  if (["SUCCEEDED", "TERMINAL_FAILED"].includes(current.status)) {
+    return { outcome: "TERMINAL" as const, job: current };
+  }
+  if (!["QUEUED", "RETRY_WAIT"].includes(current.status) || current.attemptCount !== 0) {
+    return { outcome: "NOT_SAFE_TO_CANCEL" as const, job: current };
+  }
+  return {
+    outcome: "READY" as const,
+    job: current,
+    documentoId,
+    documentFileVersionId: reference.referenceId,
+  };
+}
+
+function documentIdFromExtractionJob(job: AsyncJob | null): string | null {
+  if (!job) return null;
+  const metadata = referenceRecord(
+    referenceRecord(job.inputReference)?.metadata as Prisma.JsonValue,
+  );
+  return typeof metadata?.documentoId === "string" ? metadata.documentoId : null;
+}
+
+/**
+ * Closes, without executing it, a never-attempted extraction job whose document has
+ * been logically archived (excluded from the active corpus). Audited and scope-bound.
+ */
+export async function cancelArchivedDocumentExtractionJob(
+  rawInput: ArchivedDocumentExtractionCancellationInput,
+) {
+  const input = archivedDocumentExtractionCancellationSchema.parse(rawInput);
+  return runSerializableTransactionWithRetry(async (tx) => {
+    const current = await tx.asyncJob.findUnique({ where: { id: input.jobId } });
+    const documentoId = documentIdFromExtractionJob(current);
+    const document = documentoId
+      ? await tx.documento.findUnique({
+          where: { id: documentoId },
+          select: { id: true, enteId: true, procedimentoId: true, statoDocumento: true },
+        })
+      : null;
+    const evaluation = evaluateArchivedDocumentExtractionJob(current, document, input);
+    if (evaluation.outcome !== "READY") return evaluation;
+
+    const transition = await tx.$executeRaw(Prisma.sql`
+      UPDATE "AsyncJob"
+      SET "status" = 'CANCELLED', "cancellationRequestedAt" = CURRENT_TIMESTAMP,
+          "completedAt" = CURRENT_TIMESTAMP, "failureCategory" = NULL, "failureCode" = NULL,
+          "stateVersion" = "stateVersion" + 1, "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = ${input.jobId}
+        AND "tenantId" = ${input.tenantId}
+        AND "procedimentoId" = ${input.procedimentoId}
+        AND "operation" = 'DOCUMENT_EXTRACTION_V1'
+        AND "status" IN ('QUEUED', 'RETRY_WAIT')
+        AND "attemptCount" = 0
+        AND "stateVersion" = ${evaluation.job.stateVersion}
+        AND "inputReference"->>'referenceType' = 'DOCUMENT_FILE_VERSION'
+        AND "inputReference"#>>'{metadata,documentoId}' = ${evaluation.documentoId}
+    `);
+    requireTransition(transition);
+    await createAuditLogInTransaction(tx, {
+      azione: "ASYNC_JOB_ARCHIVED_DOCUMENT_EXTRACTION_CANCELLED",
+      entita: "AsyncJob",
+      entitaId: evaluation.job.id,
+      enteId: input.tenantId,
+      esito: "SUCCESS",
+      actor: input.actor,
+      metadata: {
+        operation: evaluation.job.operation,
+        procedimentoId: input.procedimentoId,
+        documentoId: evaluation.documentoId,
+        documentFileVersionId: evaluation.documentFileVersionId,
+        reason: input.reason,
+        previousStatus: evaluation.job.status,
+        previousStateVersion: evaluation.job.stateVersion,
+        executed: false,
+      },
+    });
+    const job = await tx.asyncJob.findUniqueOrThrow({ where: { id: input.jobId } });
+    return { outcome: "CANCELLED" as const, job };
+  });
+}
+
 export async function finalizeAsyncJobCancellation(input: LeaseInput) {
   const lease = parseLease(input);
   const count = await prisma.$executeRaw(Prisma.sql`

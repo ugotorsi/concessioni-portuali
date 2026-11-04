@@ -16,7 +16,10 @@ import {
   documentWorkerKindForOperation,
   requestDocumentWorkerActivation,
 } from "@/server/async-jobs/documentWorkerActivation";
-import { retryTerminalAsyncJob } from "@/server/async-jobs/persistence";
+import {
+  cancelArchivedDocumentExtractionJob,
+  retryTerminalAsyncJob,
+} from "@/server/async-jobs/persistence";
 import {
   provisionDefaultProcedimentoBudgetPolicy,
   readDefaultProcedimentoBudgetAuthorization,
@@ -692,6 +695,47 @@ export async function configureLegalDataHunterCredential(formData: FormData): Pr
       renderServiceId,
     },
   });
+  revalidatePath("/admin/runtime");
+}
+
+export async function cancelArchivedDocumentExtraction(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const jobIdValue = formData.get("jobId");
+  const reason = formData.get("reason");
+  if (typeof jobIdValue !== "string" || !jobIdValue.trim()) throw new Error("INVALID_JOB_ID");
+  if (typeof reason !== "string" || reason.trim().length < 10) {
+    throw new Error("CANCELLATION_REASON_REQUIRED");
+  }
+  if (formData.get("confirmation") !== "CANCEL_ARCHIVED_DOCUMENT_EXTRACTION") {
+    throw new Error("CANCELLATION_CONFIRMATION_REQUIRED");
+  }
+  const job = await prisma.asyncJob.findUnique({
+    where: { id: jobIdValue.trim() },
+    select: { id: true, tenantId: true, procedimentoId: true },
+  });
+  if (!job?.tenantId || !job.procedimentoId) throw new Error("JOB_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, job.tenantId, { mode: "write", allowWhenEnteMissing: false });
+
+  const result = await cancelArchivedDocumentExtractionJob({
+    jobId: job.id,
+    tenantId: job.tenantId,
+    procedimentoId: job.procedimentoId,
+    reason: reason.trim(),
+    actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+  });
+  if (result.outcome !== "CANCELLED" && result.outcome !== "ALREADY_CANCELLED") {
+    await auditFailure({
+      azione: "ASYNC_JOB_ARCHIVED_DOCUMENT_EXTRACTION_CANCELLED",
+      entita: "AsyncJob",
+      entitaId: job.id,
+      enteId: job.tenantId,
+      actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+      metadata: { outcome: result.outcome, procedimentoId: job.procedimentoId },
+    });
+    throw new Error(`ARCHIVED_DOCUMENT_EXTRACTION_CANCELLATION_${result.outcome}`);
+  }
   revalidatePath("/admin/runtime");
 }
 

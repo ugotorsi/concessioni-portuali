@@ -10,6 +10,7 @@ const harness = vi.hoisted(() => ({
   },
   tx: {
     asyncJob: { findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findFirst: vi.fn(), create: vi.fn(), updateMany: vi.fn() },
+    documento: { findUnique: vi.fn() },
     $executeRaw: vi.fn(),
     $queryRaw: vi.fn(),
   },
@@ -37,6 +38,7 @@ import {
   claimAsyncJobById,
   claimNextAsyncJob,
   cancelObsoleteFascicoloAnalysisJob,
+  cancelArchivedDocumentExtractionJob,
   failAsyncJob,
   heartbeatAsyncJob,
   reconcileAsyncJobCancellationAfterLeaseConflict,
@@ -610,6 +612,77 @@ describe("B2C9 generic async job persistence", () => {
     await expect(cancelObsoleteFascicoloAnalysisJob(base)).resolves.toMatchObject({ outcome: "REFERENCE_MISMATCH" });
     await expect(cancelObsoleteFascicoloAnalysisJob(base)).resolves.toMatchObject({ outcome: "NOT_SAFE_TO_CANCEL" });
     expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+  });
+
+  describe("archived document extraction cancellation", () => {
+    const extractionJob = (overrides: Record<string, unknown> = {}) => running({
+      id: "extraction-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      operation: "DOCUMENT_EXTRACTION_V1",
+      status: "QUEUED",
+      attemptCount: 0,
+      inputReference: {
+        referenceType: "DOCUMENT_FILE_VERSION",
+        referenceId: "version-1",
+        metadata: { documentoId: "document-1", procedimentoId: "procedure-1" },
+      },
+      ...overrides,
+    });
+    const document = (statoDocumento: string) => ({
+      id: "document-1", enteId: "tenant-1", procedimentoId: "procedure-1", statoDocumento,
+    });
+    const input = {
+      jobId: "extraction-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      reason: "Documento dimostrativo escluso dal corpus",
+      actor: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    };
+
+    it("closes a never-attempted job of an archived document without executing it and audits it", async () => {
+      const queued = extractionJob();
+      harness.tx.asyncJob.findUnique.mockResolvedValue(queued);
+      harness.tx.documento.findUnique.mockResolvedValue(document("ARCHIVIATO"));
+      harness.tx.$executeRaw.mockResolvedValue(1);
+      harness.tx.asyncJob.findUniqueOrThrow.mockResolvedValue({ ...queued, status: "CANCELLED" });
+
+      await expect(cancelArchivedDocumentExtractionJob(input)).resolves.toMatchObject({ outcome: "CANCELLED" });
+      expect(harness.createAuditLogInTransaction).toHaveBeenCalledWith(harness.tx, expect.objectContaining({
+        azione: "ASYNC_JOB_ARCHIVED_DOCUMENT_EXTRACTION_CANCELLED",
+        entitaId: "extraction-job",
+        enteId: "tenant-1",
+        metadata: expect.objectContaining({
+          documentoId: "document-1",
+          documentFileVersionId: "version-1",
+          executed: false,
+        }),
+      }));
+    });
+
+    it("refuses while the document is still active", async () => {
+      harness.tx.asyncJob.findUnique.mockResolvedValue(extractionJob());
+      harness.tx.documento.findUnique.mockResolvedValue(document("ATTIVO"));
+      await expect(cancelArchivedDocumentExtractionJob(input))
+        .resolves.toMatchObject({ outcome: "DOCUMENT_STILL_ACTIVE" });
+      expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+      expect(harness.createAuditLogInTransaction).not.toHaveBeenCalled();
+    });
+
+    it("refuses other operations, other scopes, attempted jobs, and foreign documents", async () => {
+      harness.tx.documento.findUnique.mockResolvedValue(document("ARCHIVIATO"));
+      harness.tx.asyncJob.findUnique
+        .mockResolvedValueOnce(extractionJob({ operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1" }))
+        .mockResolvedValueOnce(extractionJob({ procedimentoId: "procedure-2" }))
+        .mockResolvedValueOnce(extractionJob({ status: "RETRY_WAIT", attemptCount: 1 }))
+        .mockResolvedValueOnce(extractionJob());
+      await expect(cancelArchivedDocumentExtractionJob(input)).resolves.toMatchObject({ outcome: "SCOPE_MISMATCH" });
+      await expect(cancelArchivedDocumentExtractionJob(input)).resolves.toMatchObject({ outcome: "SCOPE_MISMATCH" });
+      await expect(cancelArchivedDocumentExtractionJob(input)).resolves.toMatchObject({ outcome: "NOT_SAFE_TO_CANCEL" });
+      harness.tx.documento.findUnique.mockResolvedValueOnce({ ...document("ARCHIVIATO"), procedimentoId: "procedure-2" });
+      await expect(cancelArchivedDocumentExtractionJob(input)).resolves.toMatchObject({ outcome: "REFERENCE_MISMATCH" });
+      expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    });
   });
 
   it.each([

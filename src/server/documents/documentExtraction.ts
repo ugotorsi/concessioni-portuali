@@ -68,6 +68,8 @@ type LoadedDocument = {
   enteId: string | null;
   procedimentoId: string | null;
   currentFileVersionId: string | null;
+  /** Omitted only by legacy loaders; the production loader always selects it. */
+  statoDocumento?: string;
   procedimento: { enteId: string } | null;
   currentFileVersion: {
     id: string;
@@ -132,7 +134,8 @@ export class DocumentExtractionAuthorityError extends Error {
       | "VERSION_MANIFEST_MISMATCH"
       | "EXECUTION_IDENTITY_MISMATCH"
       | "RETRY_AUTHORIZATION_MISMATCH"
-      | "OCR_AUTHORIZATION_REQUIRED",
+      | "OCR_AUTHORIZATION_REQUIRED"
+      | "DOCUMENT_NOT_ACTIVE",
   ) {
     super(code);
     this.name = "DocumentExtractionAuthorityError";
@@ -192,6 +195,10 @@ function sourceManifest(
 ): DocumentExtractionSourceManifest {
   if (document.enteId !== input.tenantId) {
     throw new DocumentExtractionAuthorityError("TENANT_MISMATCH");
+  }
+  // An archived document is outside the active corpus: queued jobs must not extract it.
+  if (document.statoDocumento !== undefined && document.statoDocumento !== "ATTIVO") {
+    throw new DocumentExtractionAuthorityError("DOCUMENT_NOT_ACTIVE");
   }
   if (
     !document.procedimentoId
@@ -467,6 +474,7 @@ function defaultDependencies(
       enteId: true,
       procedimentoId: true,
       currentFileVersionId: true,
+      statoDocumento: true,
       procedimento: { select: { enteId: true } },
       currentFileVersion: {
         select: {

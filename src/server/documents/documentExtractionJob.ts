@@ -14,6 +14,7 @@ import { AsyncJobExecutionError, drainAsyncJobById } from "@/server/async-jobs/w
 
 import {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  DocumentExtractionAuthorityError,
   extractDocumentFileVersion,
   type DocumentExtractionRetryAuthorization,
 } from "./documentExtraction";
@@ -212,6 +213,15 @@ export function createDocumentExtractionHandler(
           userEmail: job.actorEmail,
           userRole: job.actorRole,
         },
+      }).catch((error: unknown) => {
+        if (error instanceof DocumentExtractionAuthorityError) {
+          throw new AsyncJobExecutionError(
+            "AUTHORIZATION",
+            `DOCUMENT_EXTRACTION_${error.code}`,
+            false,
+          );
+        }
+        throw error;
       });
       if (result.attempt.outcome !== "SUCCEEDED") {
         throw new AsyncJobExecutionError(

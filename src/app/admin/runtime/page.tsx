@@ -22,6 +22,7 @@ import {
   confirmResearchReferenceDate,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  cancelArchivedDocumentExtraction,
   runManualFascicoloAnalysis,
   runManualTenantBatchAnalysis,
   setRenderWorkerState,
@@ -86,7 +87,7 @@ export default async function RuntimeOperationsPage({
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const [automationControl, aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts, activeProcedimenti] = await Promise.all([
+  const [automationControl, aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, pendingExtractionJobs, policies, costs, cost30Days, cost7Days, reservedCosts, activeProcedimenti] = await Promise.all([
     getAutomationControlState(),
     getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
@@ -97,6 +98,11 @@ export default async function RuntimeOperationsPage({
       where: { status: "TERMINAL_FAILED" },
       select: { id: true, operation: true, tenantId: true, procedimentoId: true, attemptCount: true, failureCode: true, completedAt: true },
       orderBy: { completedAt: "desc" }, take: 25,
+    }),
+    prisma.asyncJob.findMany({
+      where: { operation: "DOCUMENT_EXTRACTION_V1", status: { in: ["QUEUED", "RETRY_WAIT"] } },
+      select: { id: true, procedimentoId: true, attemptCount: true, status: true, createdAt: true, inputReference: true },
+      orderBy: { createdAt: "asc" }, take: 25,
     }),
     prisma.runtimeBudgetPolicy.findMany({ where: { enabled: true }, orderBy: [{ scope: "asc" }, { effectiveFrom: "desc" }] }),
     prisma.runtimeCostReservation.findMany({ orderBy: { createdAt: "desc" }, take: 25 }),
@@ -145,6 +151,16 @@ export default async function RuntimeOperationsPage({
   });
   const renderApplicationWorkerConfigured = Boolean(
     process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
+  );
+  const pendingExtractionDocumentIds = pendingExtractionJobs.map((job) => {
+    const reference = job.inputReference as { metadata?: { documentoId?: unknown } } | null;
+    return typeof reference?.metadata?.documentoId === "string" ? reference.metadata.documentoId : null;
+  });
+  const pendingExtractionDocuments = new Map(
+    (await prisma.documento.findMany({
+      where: { id: { in: pendingExtractionDocumentIds.filter((id): id is string => Boolean(id)) } },
+      select: { id: true, nome: true, statoDocumento: true },
+    })).map((document) => [document.id, document]),
   );
 
   return (
@@ -574,6 +590,51 @@ export default async function RuntimeOperationsPage({
           <CardContent><Table><TableHeader><TableRow><TableHead>Operazione</TableHead><TableHead>Ambito</TableHead><TableHead>Tentativi</TableHead><TableHead>Codice</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
             {failedJobs.map((job) => <TableRow key={job.id}><TableCell>{job.operation}</TableCell><TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell><TableCell>{job.attemptCount}</TableCell><TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell><TableCell><form action={retryRuntimeJob}><input type="hidden" name="jobId" value={job.id} /><Button size="sm" variant="outline" type="submit">Riprova</Button></form></TableCell></TableRow>)}
           </TableBody></Table></CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Estrazioni documentali in attesa</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-slate-600">
+              Un&apos;estrazione mai tentata può essere chiusa senza esecuzione soltanto se il documento è stato archiviato
+              (escluso dal corpus attivo). Documento, versioni e audit restano conservati.
+            </p>
+            <Table><TableHeader><TableRow><TableHead>Documento</TableHead><TableHead>Stato documento</TableHead><TableHead>Fascicolo</TableHead><TableHead>Job</TableHead><TableHead>In coda dal</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
+              {pendingExtractionJobs.length === 0 ? (
+                <TableRow><TableCell colSpan={6}>Nessuna estrazione in attesa.</TableCell></TableRow>
+              ) : pendingExtractionJobs.map((job, index) => {
+                const documentoId = pendingExtractionDocumentIds[index];
+                const document = documentoId ? pendingExtractionDocuments.get(documentoId) : undefined;
+                const closable = document?.statoDocumento === "ARCHIVIATO" && job.attemptCount === 0;
+                return (
+                  <TableRow key={job.id}>
+                    <TableCell>{document?.nome ?? documentoId ?? "Non identificato"}</TableCell>
+                    <TableCell>{document?.statoDocumento ?? "Non trovato"}</TableCell>
+                    <TableCell>{job.procedimentoId ?? "—"}</TableCell>
+                    <TableCell><code className="text-xs">{job.id}</code> · {job.status} · tentativi {job.attemptCount}</TableCell>
+                    <TableCell>{formatDateIT(job.createdAt)}</TableCell>
+                    <TableCell>
+                      {closable ? (
+                        <form action={cancelArchivedDocumentExtraction} className="grid gap-2">
+                          <input type="hidden" name="jobId" value={job.id} />
+                          <input name="reason" required minLength={10} placeholder="Motivazione" className="h-9 rounded-md border border-slate-300 px-2 text-sm" />
+                          <label className="flex items-start gap-2 text-xs text-slate-600">
+                            <input type="checkbox" name="confirmation" value="CANCEL_ARCHIVED_DOCUMENT_EXTRACTION" required />
+                            Chiudi senza eseguire
+                          </label>
+                          <Button size="sm" variant="outline" type="submit">Chiudi estrazione</Button>
+                        </form>
+                      ) : (
+                        <span className="text-xs text-slate-500">Documento attivo: l&apos;estrazione resta in coda.</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody></Table>
+          </CardContent>
         </Card>
       </section>
 
