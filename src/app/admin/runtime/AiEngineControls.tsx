@@ -11,7 +11,7 @@ interface AiEngineView {
   credentialValid: boolean;
   modelAvailable: boolean;
   modelTechnicallyQualified: boolean;
-  lastVerifiedAt: string | null;
+  lastVerifiedAtLabel: string | null;
   realDataAuthorized: boolean;
   manualEnabled: boolean;
   manualEligible: boolean;
@@ -78,7 +78,7 @@ export function AiEngineControls(props: {
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Limite preventivo</dt><dd className="font-medium">{engine.estimatedCostLimitEur === null ? "Non configurato" : `€ ${engine.estimatedCostLimitEur.toFixed(6)}`}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Fatturazione</dt><dd className="font-medium">{engine.billingApproval === "INTERNAL_LIMIT_CONFIGURED" ? "Limite interno configurato" : "Non approvata"}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Automazione generale</dt><dd className="font-medium">{engine.generalAutomationEnabled ? "ON" : "OFF"}</dd></div>
-            <div className="flex justify-between gap-3"><dt className="text-slate-500">Ultima verifica</dt><dd className="text-right font-medium">{engine.lastVerifiedAt ? new Date(engine.lastVerifiedAt).toLocaleString("it-IT") : "Mai"}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">Ultima verifica</dt><dd className="text-right font-medium">{engine.lastVerifiedAtLabel ?? "Mai"}</dd></div>
           </dl>
 
           {engine.error ? (

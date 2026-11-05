@@ -45,6 +45,7 @@ import { GlobalAiControlForm } from "./GlobalAiControlForm";
 import { AutomationControlForm } from "./AutomationControlForm";
 import { ManualAnalysisControls } from "./ManualAnalysisControls";
 import { AiEngineControls } from "./AiEngineControls";
+import { formatAdminRuntimeDateTime } from "./formatAdminRuntimeDateTime";
 import { LegalWorkbenchSection } from "./LegalWorkbenchSection";
 import {
   AI_MODEL_CATALOG,
@@ -398,9 +399,11 @@ export default async function RuntimeOperationsPage({
               alcuna automazione o trasferimento di dati.
             </p>
             <AiEngineControls
-              engines={aiEngines.map((engine) => ({
+              engines={aiEngines.map(({ lastVerifiedAt, ...engine }) => ({
                 ...engine,
-                lastVerifiedAt: engine.lastVerifiedAt?.toISOString() ?? null,
+                lastVerifiedAtLabel: lastVerifiedAt
+                  ? formatAdminRuntimeDateTime(lastVerifiedAt)
+                  : null,
               }))}
               updateManualAction={updateAiProviderManualControl}
               selectAutomaticAction={selectAutomaticAiProvider}
