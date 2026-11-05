@@ -289,7 +289,7 @@ export function deriveResearchQuestionCoverage(input: {
   gaps: readonly ResearchCoverageGap[];
 } {
   const state = executionState(input.missionStatus);
-  if (["DEFERRED", "PENDING", "IN_PROGRESS"].includes(state)) {
+  if (input.results.length === 0 && ["DEFERRED", "PENDING", "IN_PROGRESS"].includes(state)) {
     return { executionState: state, status: "NOT_RESEARCHED", conflicting: false, coveredElementKeys: [], gaps: [] };
   }
   if (input.results.length === 0) {

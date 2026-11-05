@@ -180,7 +180,8 @@ describe("structured fascicolo professional export", () => {
     expect(text).toContain("Art. 47 cod. nav. — Decadenza. Vigenza: Vigente alla data della condotta.");
     expect(text).toContain("Conclusione: Conclusione preliminare motivata.");
     expect(text).toContain("(pag. 3)");
-    expect(text).not.toContain("Foreign draft law");
+    expect(text).toContain("Fonti candidate da verificare");
+    expect(text).toContain("Foreign draft law");
     expect(text).not.toContain("MOONLIT");
     expect(text).not.toContain("INTERNAL_CODE");
     expect(text).not.toContain("DOCUMENT_1");
@@ -197,7 +198,7 @@ describe("structured fascicolo professional export", () => {
     expect(rtf).toMatch(/^\{\\rtf1/);
     expect(rtf).toContain("\\{riserva\\}");
     expect(rtf).toContain("Effetto indicato, da verificare: Il confronto del perimetro resta incerto.");
-    expect(rtf).not.toContain("Foreign draft law");
+    expect(rtf).toContain("Foreign draft law");
     expect(rtf).not.toMatch(/DOCUMENT_INVENTORY|COMPILATION|DOCUMENT_\d+|INTERNAL_CODE/);
   });
 

@@ -325,7 +325,7 @@ export interface StructuredReportRegulatoryApplicability {
 export interface StructuredReportLegalAnalysis {
   issueSemanticKey: string;
   issueText: string;
-  status: "RESEARCH_REQUIRED" | "MOTIVATION_REQUIRED" | "ARGUED" | "CONTESTED";
+  status: "RESEARCH_REQUIRED" | "SOURCE_VERIFICATION_REQUIRED" | "MOTIVATION_REQUIRED" | "ARGUED" | "CONTESTED";
   documentedFacts: readonly {
     statement: string;
     documentReferences: readonly string[];
@@ -341,6 +341,8 @@ export interface StructuredReportLegalAnalysis {
     rationale: string | null;
     citationAnchors: readonly JsonRecord[];
   }[];
+  /** Candidate sources acquired but not professionally usable; absent from archived reports. */
+  candidateSources?: StructuredReportQuestion["nonUsableResults"];
   applications: readonly {
     applicationId: string;
     outcome: "APPLICABLE" | "NOT_APPLICABLE" | "TO_VERIFY" | "NOT_EVALUATED";
@@ -442,6 +444,17 @@ export interface StructuredFascicoloReportPayload {
     };
     questions: readonly StructuredReportQuestion[];
   }[];
+  /** Report-only continuity check; does not create Knowledge items, missions or proposals. */
+  continuityIssues?: readonly {
+    profileId: "UNAUTHORIZED_OCCUPATION";
+    title: string;
+    question: string;
+    documentedFacts: readonly {
+      statement: string;
+      documentReferences: readonly string[];
+    }[];
+    status: "CONTINUITY_REVIEW_REQUIRED";
+  }[];
   unassignedQuestions: readonly StructuredReportQuestion[];
   gaps: readonly StructuredKnowledgeReadItem[];
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
@@ -510,6 +523,36 @@ function itemBasisRefs(item: StructuredKnowledgeReadItem): readonly string[] {
   return [...new Set(item.evidence.flatMap((evidence) => (
     evidence.basisRef ? [evidence.basisRef] : []
   )))].sort();
+}
+
+const UNAUTHORIZED_OCCUPATION_CONTINUITY_PATTERN =
+  /\b(?:ostruzion\w*|varc\w*|vie?\s+di\s+esodo|antincendio|oltre\s+il\s+perimetro|fuori\s+perimetro|are[ae]\s+estern[ae]|container)\b/i;
+
+function buildContinuityIssues(
+  knowledge: StructuredKnowledgeReadModel,
+): NonNullable<StructuredFascicoloReportPayload["continuityIssues"]> {
+  const evidenceItems = [
+    ...knowledge.facts,
+    ...knowledge.events,
+    ...knowledge.contradictions,
+  ].filter((item) => item.status !== "REJECTED" && UNAUTHORIZED_OCCUPATION_CONTINUITY_PATTERN.test(item.normalizedText));
+  if (evidenceItems.length === 0) return [];
+
+  const represented = knowledge.legalIssues.some((issue) => (
+    UNAUTHORIZED_OCCUPATION_CONTINUITY_PATTERN.test(issue.normalizedText)
+  ));
+  if (represented) return [];
+
+  return [{
+    profileId: "UNAUTHORIZED_OCCUPATION",
+    title: "Occupazioni temporanee di varchi di sicurezza e aree esterne al perimetro",
+    question: "Quali conseguenze concessorie possono seguire a occupazioni temporanee di vie di esodo, varchi antincendio o aree esterne al perimetro, e quale rilievo assume la spontanea rimozione?",
+    documentedFacts: evidenceItems.map((item) => ({
+      statement: item.normalizedText,
+      documentReferences: itemBasisRefs(item),
+    })),
+    status: "CONTINUITY_REVIEW_REQUIRED",
+  }];
 }
 
 function narrativeLine(item: StructuredKnowledgeReadItem): string {
@@ -1046,6 +1089,10 @@ function buildLegalAnalyses(input: {
       ...question.contraryAuthorities.map((source) => ({ ...source, direction: "OPPOSES" as const })),
     ]);
     const uniqueSources = [...new Map(sources.map((source) => [source.resultId, source])).values()];
+    const candidateSources = [...new Map(issue.questions
+      .flatMap((question) => question.nonUsableResults)
+      .filter((source) => !source.reasons.includes("CLASSIFICATION_REJECTED"))
+      .map((source) => [source.resultId, source])).values()];
     const usableCandidateIds = new Set(uniqueSources.map((source) => source.candidateId));
     const relatedBasisRefs = new Set(related.flatMap(itemBasisRefs));
     const questionSemanticKeys = new Set(issue.questions.map((question) => question.semanticKey));
@@ -1088,19 +1135,26 @@ function buildLegalAnalyses(input: {
         .map((check) => `${check.criterion}: ${check.rationale}`)),
     ])];
     const status: StructuredReportLegalAnalysis["status"] = uniqueSources.length === 0
-      ? "RESEARCH_REQUIRED"
+      ? candidateSources.length > 0
+        ? "SOURCE_VERIFICATION_REQUIRED"
+        : "RESEARCH_REQUIRED"
       : professionalReasoning === null
         ? "MOTIVATION_REQUIRED"
         : professionalReasoning.contraryArguments.length > 0
           ? "CONTESTED"
           : "ARGUED";
     const assessment = uniqueSources.length === 0
-      ? "La ricerca non ha ancora prodotto fonti utilizzabili; nessuna conclusione giuridica è formulata."
+      ? candidateSources.length > 0
+        ? `La ricerca è stata eseguita e ha individuato ${candidateSources.length} fonti candidate. Identità, contenuto, vigenza, applicabilità temporale e classificazione professionale devono ancora essere verificati; nessuna conclusione giuridica è formulata.`
+        : "La ricerca non è stata eseguita o non ha prodotto risultati; nessuna conclusione giuridica è formulata."
       : professionalReasoning?.reasonedConclusion.text
         ?? "Le fonti sono disponibili, ma non è stata acquisita una motivazione argomentata e integralmente riferita ai fatti e alle fonti verificate.";
     const recommendedActions = [...new Set([
-      ...(uniqueSources.length === 0
+      ...(uniqueSources.length === 0 && candidateSources.length === 0
         ? issue.questions.map((question) => `Completare la ricerca e la verifica delle fonti per il quesito: ${question.text}`)
+        : []),
+      ...(candidateSources.length > 0
+        ? ["Verificare sulle fonti originali identità, testo integrale, vigenza alla data rilevante, applicabilità e orientamento favorevole o contrario delle fonti candidate già acquisite."]
         : []),
       ...(uniqueSources.length > 0 && professionalReasoning === null
         ? ["Acquisire dall'esecutore autorizzato una motivazione specifica che citi esclusivamente le fonti e i fatti verificati della questione."]
@@ -1129,6 +1183,7 @@ function buildLegalAnalyses(input: {
         rationale: source.rationale,
         citationAnchors: source.citationAnchors,
       })),
+      candidateSources,
       applications,
       competingArguments: { supporting, opposing },
       professionalReasoning,
@@ -2026,6 +2081,7 @@ export function buildStructuredFascicoloReport(input: {
       contradictions: input.knowledge.contradictions.filter((item) => item.status !== "REJECTED").sort(byId),
     },
     legalIssues,
+    continuityIssues: buildContinuityIssues(input.knowledge),
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),

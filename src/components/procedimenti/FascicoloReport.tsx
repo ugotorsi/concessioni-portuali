@@ -472,6 +472,7 @@ export function LegalApplicationSection({ items }: { items: readonly StructuredR
 
 const LEGAL_ANALYSIS_STATUS_LABELS = {
   RESEARCH_REQUIRED: "Ricerca giuridica necessaria",
+  SOURCE_VERIFICATION_REQUIRED: "Ricerca eseguita: fonti da verificare",
   MOTIVATION_REQUIRED: "Motivazione argomentata da acquisire",
   ARGUED: "Motivazione argomentata disponibile",
   CONTESTED: "Tesi controverse",
@@ -724,7 +725,7 @@ function ReportContent({
 
       {framework.facts.length > 0 ? <ContentSection title="Fatti rilevanti"><TextList items={framework.facts} /></ContentSection> : null}
 
-      {payload.legalIssues.length > 0 || payload.unassignedQuestions.length > 0 ? (
+      {payload.legalIssues.length > 0 || payload.unassignedQuestions.length > 0 || (payload.continuityIssues?.length ?? 0) > 0 ? (
         <ContentSection title="Questioni giuridiche">
           <div className="space-y-4">
             {payload.legalIssues.map((issue) => (
@@ -746,6 +747,15 @@ function ReportContent({
                 <p>{professionalContent(question.text)}</p>
               </article>
             ))}
+            {(payload.continuityIssues ?? []).map((issue) => (
+              <article key={issue.profileId} className="border-l-2 border-amber-400 pl-4">
+                <h4 className="font-medium text-slate-950">{issue.title}</h4>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{issue.question}</p>
+                <p className="mt-2 text-xs leading-5 text-amber-900">
+                  Problematica conservata per continuità con le versioni precedenti del rapporto; richiede verifica professionale e non genera automaticamente attività o missioni.
+                </p>
+              </article>
+            ))}
           </div>
         </ContentSection>
       ) : null}
@@ -755,6 +765,19 @@ function ReportContent({
           <div className="grid gap-4 lg:grid-cols-2">
             <AuthorityGroup title="Elementi favorevoli" authorities={favorable} />
             <AuthorityGroup title="Elementi contrari" authorities={contrary} />
+          </div>
+        </ContentSection>
+      ) : null}
+
+      {questions.some((question) => question.nonUsableResults.some((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"))) ? (
+        <ContentSection title="Fonti candidate da verificare">
+          <div className="space-y-5">
+            {questions.filter((question) => question.nonUsableResults.some((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"))).map((question) => (
+              <article key={question.semanticKey}>
+                <h4 className="font-medium text-slate-950">{professionalContent(question.text)}</h4>
+                <UnverifiedCandidateSources question={question} />
+              </article>
+            ))}
           </div>
         </ContentSection>
       ) : null}
@@ -834,7 +857,10 @@ function PreviousVersions({ snapshots, documents }: { snapshots: readonly Fascic
 }
 
 function ReportDiagnostics({ payload }: { payload: StructuredFascicoloReportPayload }) {
-  const questions = allQuestions(payload).filter((question) => question.nonUsableResults.length > 0);
+  const questions = allQuestions(payload).map((question) => ({
+    ...question,
+    rejected: question.nonUsableResults.filter((candidate) => candidate.reasons.includes("CLASSIFICATION_REJECTED")),
+  })).filter((question) => question.rejected.length > 0);
   if (questions.length === 0) return null;
   return (
     <details className="rounded-md border border-slate-300 bg-slate-50 p-4">
@@ -845,7 +871,13 @@ function ReportDiagnostics({ payload }: { payload: StructuredFascicoloReportPayl
         {questions.map((question) => (
           <article key={question.semanticKey}>
             <p className="text-sm font-medium text-slate-900">{professionalContent(question.text)}</p>
-            <UnverifiedCandidateSources question={question} />
+            <ul className="mt-2 space-y-2 text-sm text-slate-700">
+              {question.rejected.map((candidate) => (
+                <li key={candidate.resultId}>
+                  {professionalContent(candidate.title) || "Fonte esclusa"} — {candidate.reasons.join(", ")}
+                </li>
+              ))}
+            </ul>
           </article>
         ))}
       </div>
@@ -909,7 +941,7 @@ export function FascicoloReport({
               </div>
             ) : null}
             <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-200 pt-3 text-sm">
-              <a href={`/api/procedimenti/${report.payload.procedimentoId}/reports/${report.id}/export?format=pdf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta PDF strutturato</a>
+              <a href={`/api/procedimenti/${report.payload.procedimentoId}/reports/${report.id}/export?format=pdf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta PDF professionale</a>
               <a href={`/api/procedimenti/${report.payload.procedimentoId}/reports/${report.id}/export?format=rtf`} className="font-semibold text-[#075985] underline underline-offset-4">Esporta RTF modificabile</a>
             </div>
           </section>

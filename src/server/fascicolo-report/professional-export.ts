@@ -38,8 +38,10 @@ function unique(values: readonly string[]): string[] {
 }
 
 function professionalNotes(values: readonly string[]): string[] {
-  return unique(values.filter((value) => !isInternalProfessionalDiagnostic(value)))
-    .filter((value) => !/\b[A-Z][A-Z0-9]{4,}\b/.test(value));
+  return unique(values.filter((value) => (
+    !isInternalProfessionalDiagnostic(value)
+    && !/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/.test(value)
+  )));
 }
 
 const ELEMENT_STATUS_TEXT = {
@@ -50,10 +52,20 @@ const ELEMENT_STATUS_TEXT = {
 } as const;
 
 export function buildProfessionalReportDocument(
-  snapshot: StructuredReportSnapshotRecord,
+  snapshot: Pick<StructuredReportSnapshotRecord, "payload" | "generatedAt">,
   documents: ReadonlyArray<{ id: string; nome: string }> = [],
 ): ProfessionalReportDocument {
   const payload = snapshot.payload;
+  const frameworkItems = [
+    payload.documentedFramework.partyRoles,
+    payload.documentedFramework.partyPositions ?? [],
+    payload.documentedFramework.facts,
+    payload.documentedFramework.timeline,
+    payload.documentedFramework.legalActs,
+    payload.documentedFramework.measures,
+    payload.documentedFramework.contradictions,
+  ].flat();
+  const frameworkItemById = new Map(frameworkItems.map((item) => [item.id, item]));
   const documentNames = documentNamesByReference([
     ...payload.gaps,
     ...payload.deadlineCandidates,
@@ -70,6 +82,22 @@ export function buildProfessionalReportDocument(
     ...question.contraryAuthorities.map((authority) =>
       `${authority.title}${authority.rationale ? ` — ${authority.rationale}` : ""}`),
   ])) : [];
+  const candidateSources = questions.flatMap((question) => {
+    const candidates = question.nonUsableResults.filter((candidate) => (
+      !candidate.reasons.includes("CLASSIFICATION_REJECTED")
+    ));
+    if (candidates.length === 0) return [];
+    return [
+      `Quesito: ${question.text}`,
+      `Stato della ricerca: eseguita con ${candidates.length} ${candidates.length === 1 ? "fonte candidata" : "fonti candidate"}; verifica professionale ancora necessaria.`,
+      "Verifiche residue: identità delle fonti, testi integrali, vigenza alla data rilevante, applicabilità sostanziale e orientamento favorevole o contrario.",
+      ...candidates.map((candidate) => [
+        candidate.title,
+        candidate.rationale ? `Rilevanza preliminare: ${candidate.rationale}` : "",
+        candidate.sourceUrl ? `Documento: ${candidate.sourceUrl}` : "",
+      ].filter(Boolean).join(" — ")),
+    ];
+  });
   const limitations = professionalNotes([
     ...(research.legacyWarning ? [research.legacyWarning] : []),
     ...payload.limitations,
@@ -95,6 +123,10 @@ export function buildProfessionalReportDocument(
       ]),
     },
     {
+      title: "Posizioni e difese delle parti",
+      paragraphs: unique((payload.documentedFramework.partyPositions ?? []).map((item) => item.normalizedText)),
+    },
+    {
       title: "Cronologia",
       paragraphs: unique(payload.documentedFramework.timeline.map((item) => item.normalizedText)),
     },
@@ -102,15 +134,37 @@ export function buildProfessionalReportDocument(
       title: "Questioni giuridiche",
       paragraphs: unique([
         ...payload.legalIssues.flatMap((issue) => [
-          issue.text,
-          ...issue.questions.map((question) => question.text),
+          `Questione: ${issue.text}`,
+          ...issue.originatingItemIds.map((id) => frameworkItemById.get(id)).filter((item) => item !== undefined).map((item) => {
+            const references = [...new Set(item.evidence.map((entry) => entry.basisRef).filter((entry): entry is string => Boolean(entry)))];
+            return `Fatto documentato: ${item.normalizedText}${references.length ? ` — Riscontri: ${references.join(", ")}` : ""}`;
+          }),
+          ...issue.questions.flatMap((question) => [
+            `Quesito: ${question.text}`,
+            ...(question.nonUsableResults.some((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"))
+              ? ["Stato: ricerca eseguita; fonti candidate da verificare professionalmente."]
+              : question.favorableAuthorities.length + question.contraryAuthorities.length > 0
+                ? ["Stato: sono presenti fonti professionalmente verificate."]
+                : ["Stato: ricerca non eseguita o priva di risultati registrati."]),
+          ]),
         ]),
-        ...payload.unassignedQuestions.map((question) => question.text),
+        ...payload.unassignedQuestions.map((question) => `Quesito non assegnato: ${question.text}`),
+        ...(payload.continuityIssues ?? []).flatMap((issue) => [
+          issue.title,
+          issue.question,
+          ...issue.documentedFacts.map((fact) =>
+            `${fact.statement}${fact.documentReferences.length ? ` — Riscontri: ${fact.documentReferences.join(", ")}` : ""}`),
+          "La problematica è conservata per continuità con le versioni precedenti del rapporto; richiede verifica professionale prima di ogni qualificazione o iniziativa.",
+        ]),
       ]),
     },
     {
       title: "Normativa e giurisprudenza pertinente",
       paragraphs: authorities,
+    },
+    {
+      title: "Fonti candidate da verificare",
+      paragraphs: unique(candidateSources),
     },
     {
       title: "Coordinamento del regime concessorio portuale",
@@ -162,7 +216,16 @@ export function buildProfessionalReportDocument(
     },
     {
       title: "Copertura documentale",
-      paragraphs: documentCoverageSummaries(payload.documentCoverage ?? []),
+      paragraphs: unique([
+        ...(payload.documentCoverage ?? []).map((entry) =>
+          `${entry.name}: ${entry.pageCount} pagine fisiche acquisite; ${entry.textPages.length} con testo estraibile; ${entry.pagesWithoutText.length} senza testo estraibile.`),
+        ...(payload.documentCoverage ?? []).flatMap((entry) => (
+          entry.internalNumberingEvidence && entry.missingOriginalPages.length > 0
+            ? [`${entry.name}: ${entry.internalNumberingEvidence}; le pagine interne ${entry.missingOriginalPages.join(", ")} non sono presenti nel file acquisito.`]
+            : []
+        )),
+        ...documentCoverageSummaries(payload.documentCoverage ?? []),
+      ]),
     },
     {
       title: "Seguito operativo",

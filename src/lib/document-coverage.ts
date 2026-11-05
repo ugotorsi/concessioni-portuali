@@ -48,8 +48,8 @@ function missingFromNumbering(pairs: ReadonlyArray<{ filePage: number; internal:
   const evidence: string[] = [];
   const first = pairs[0]!;
   if (offsets[0]! > 0 && offsets[1] === offsets[0]) {
-    missing.push(...range(1, offsets[0]!));
-    evidence.push(`la pagina ${first.filePage} del file reca la numerazione interna ${first.internal}`);
+    missing.push(...range(1, first.internal - 1));
+    evidence.push(`la serie numerata interna inizia da ${first.internal} alla pagina ${first.filePage} del file`);
   }
   for (let index = 1; index < pairs.length; index += 1) {
     const jump = offsets[index]! - offsets[index - 1]!;

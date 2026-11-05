@@ -54,7 +54,8 @@ export function documentReferenceLabel(basisRef: string): string {
 }
 
 export function isInternalProfessionalDiagnostic(text: string): boolean {
-  return /\b(?:COMPILATION|DOCUMENT_INVENTORY|PROCEEDING_IDENTITY)\b/i.test(text);
+  return /\b(?:COMPILATION|DOCUMENT_INVENTORY|PROCEEDING_IDENTITY)\b/i.test(text)
+    || /\b(?:qresult_|structured_report_|research-mission:|authority-candidate:)[a-z0-9:_-]+\b/i.test(text);
 }
 
 export function documentNamesByReference(
@@ -229,6 +230,7 @@ export function humanizeProfessionalText(text: string): string {
   return text
     .replace(/\bDOCUMENT_(\d+)\.PAGE_(\d+)\b/gi, "documento $1, pag. $2")
     .replace(/\bDOCUMENT_(\d+)\b/gi, "documento $1")
+    .replace(/\b(?:qresult_|structured_report_|research-mission:|authority-candidate:)[a-z0-9:_-]+\b/gi, "")
     .replace(/\bGap fonti:/g, "Limiti delle fonti:")
     .replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g, (code) => sourceLimitLabel(code));
 }

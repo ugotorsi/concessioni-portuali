@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { listActAttachmentOptions } from "@/server/fascicolo-acts/repository";
 import {
   renderStructuredReportPdf,
   renderStructuredReportRtf,
@@ -53,6 +54,7 @@ export async function GET(
     status: snapshot.status,
     generatedAt: snapshot.generatedAt,
     payload: snapshot.payload as unknown as StructuredFascicoloReportPayload,
+    documents: await listActAttachmentOptions(id),
   };
   const body = format === "pdf"
     ? await renderStructuredReportPdf(exportInput)

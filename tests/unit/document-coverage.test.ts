@@ -19,7 +19,28 @@ describe("document coverage", () => {
     expect(entry!.missingOriginalPages).toEqual([1, 2, 3, 4, 5, 6]);
     expect(entry!.pagesWithoutText).toEqual([12]);
     expect(entry!.textPages).toHaveLength(33);
-    expect(entry!.internalNumberingEvidence).toContain("numerazione interna 7");
+    expect(entry!.internalNumberingEvidence).toContain("serie numerata interna inizia da 7");
+  });
+
+  it("does not count an unnumbered cover as the first page of the internal series", () => {
+    const excerpts = [
+      page("doc-1", 1, "Copertina del fascicolo senza numerazione interna."),
+      ...Array.from({ length: 39 }, (_, index) => {
+        const filePage = index + 2;
+        return page("doc-1", filePage, `PAG. ${filePage + 5}\nTesto acquisito.`);
+      }),
+    ];
+    const [entry] = buildDocumentCoverage({
+      documents: [{ reference: "DOCUMENT_1", documentoId: "doc-1", name: "selvara.pdf", status: "AVAILABLE", pageCount: 40 }],
+      excerpts,
+    });
+
+    expect(entry!.textPages).toHaveLength(40);
+    expect(entry!.pagesWithoutText).toEqual([]);
+    expect(entry!.missingOriginalPages).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(documentCoverageSummaries([entry!])).toEqual([
+      "selvara.pdf: 40 pagine nel file, 40 con testo letto; pagine dell'originale assenti dal file: 1-6.",
+    ]);
   });
 
   it("does not infer missing pages from page references inside the body", () => {

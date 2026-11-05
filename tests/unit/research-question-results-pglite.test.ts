@@ -212,6 +212,14 @@ describe("Lotto 4 research question results", () => {
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("SUPPORTS", { candidate: { fullTextAvailable: true }, elements: ["competenza"] })] }).status).toBe("COVERED");
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("SUPPORTS", { candidate: { fullTextAvailable: true } }), base("OPPOSES", { candidate: { fullTextAvailable: true } })] }).status).toBe("CONFLICTING");
     expect(deriveResearchQuestionCoverage({ missionStatus: "DEFERRED", results: [] }).status).toBe("NOT_RESEARCHED");
+    expect(deriveResearchQuestionCoverage({ missionStatus: "DEFERRED", results: [base("UNASSESSED")] })).toMatchObject({
+      executionState: "DEFERRED",
+      status: "RESULTS_UNASSESSED",
+    });
+    expect(deriveResearchQuestionCoverage({
+      missionStatus: "DEFERRED",
+      results: [base("SUPPORTS", { candidate: { fullTextAvailable: true }, elements: ["competenza"] })],
+    })).toMatchObject({ executionState: "DEFERRED", status: "COVERED" });
     expect(deriveResearchQuestionCoverage({ missionStatus: "PENDING", results: [] }).executionState).toBe("PENDING");
   });
 

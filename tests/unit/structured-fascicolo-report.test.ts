@@ -295,6 +295,65 @@ describe("deterministic structured fascicolo report", () => {
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
   });
 
+  it("represents deferred research with candidates as verification work, not research to restart", () => {
+    const blocked = mission().results[2]!;
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({ status: "DEFERRED", results: [blocked] })],
+    });
+
+    expect(report.payload.legalIssues[0]!.questions[0]!.coverageStatus).not.toBe("NOT_RESEARCHED");
+    expect(report.payload.legalAnalyses).toMatchObject([{
+      status: "SOURCE_VERIFICATION_REQUIRED",
+      candidateSources: [{ resultId: "blocked-result" }],
+    }]);
+    expect(report.payload.legalAnalyses![0]!.verifiedSources).toEqual([]);
+    expect(report.payload.legalAnalyses![0]!.assessment).toContain("ricerca è stata eseguita");
+    expect(report.payload.legalAnalyses![0]!.recommendedActions.join(" ")).not.toContain("Completare la ricerca");
+  });
+
+  it("preserves the perimeter and safety issue once when facts remain but the current issue projection dropped it", () => {
+    const baseWithoutIssue = knowledge();
+    const occupancyFact = {
+      ...baseWithoutIssue.facts[1]!,
+      normalizedText: "Il 5 dicembre risultano ostruzioni dei varchi antincendio e un container oltre il perimetro, poi rimossi.",
+    };
+    const withoutIssue = {
+      ...baseWithoutIssue,
+      facts: baseWithoutIssue.facts.map((fact, index) => index === 1 ? occupancyFact : fact),
+    };
+    const continuity = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: withoutIssue,
+      missions: [],
+    });
+    expect(continuity.payload.continuityIssues).toHaveLength(1);
+    expect(continuity.payload.continuityIssues![0]).toMatchObject({
+      profileId: "UNAUTHORIZED_OCCUPATION",
+      status: "CONTINUITY_REVIEW_REQUIRED",
+    });
+
+    const representedBase = knowledge();
+    const represented = {
+      ...representedBase,
+      facts: representedBase.facts.map((fact, index) => index === 1 ? occupancyFact : fact),
+      legalIssues: representedBase.legalIssues.map((issue, index) => index === 0 ? {
+        ...issue,
+        normalizedText: "Occupazione oltre il perimetro e ostruzione dei varchi di sicurezza",
+      } : issue),
+    };
+    const noDuplicate = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: represented,
+      missions: [],
+    });
+    expect(noDuplicate.payload.continuityIssues).toEqual([]);
+  });
+
   it("requires a motivated, audited human classification in addition to the current technical source gates", () => {
       const confirmed = mission().results[0];
       const assessment = confirmed.sourceAssessment!;

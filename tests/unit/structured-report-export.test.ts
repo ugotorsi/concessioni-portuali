@@ -59,7 +59,7 @@ function payload(): StructuredFascicoloReportPayload {
 }
 
 describe("structured report editable export", () => {
-  it("includes version, verification state, sources and limitations in RTF", () => {
+  it("uses the professional projection without technical identifiers or raw reason codes", () => {
     const output = renderStructuredReportRtf({
       snapshotId: "snapshot-1",
       status: "CURRENT",
@@ -67,10 +67,14 @@ describe("structured report editable export", () => {
       payload: payload(),
     }).toString("utf8");
 
-    expect(output).toContain("Versione: snapshot-1");
-    expect(output).toContain("Regolamento (UE) 2017/352");
-    expect(output).toContain("MISSING_FULL_TEXT");
+    expect(output).toContain("Fonti candidate da verificare");
+    expect(output).toContain("Decisione da verificare");
     expect(output).toContain("Verifica professionale richiesta");
     expect(output).toContain("Rapporto preliminare");
+    expect(output).not.toContain("snapshot-1");
+    expect(output).not.toContain("MISSING_FULL_TEXT");
+    expect(output).not.toContain("professional-version-1");
+    expect(output).not.toContain("mission-1");
+    expect(output).not.toContain("result-2");
   });
 });
