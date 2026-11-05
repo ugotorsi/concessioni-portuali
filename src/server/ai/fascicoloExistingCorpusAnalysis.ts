@@ -62,7 +62,7 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
     purpose: controlledV7
       ? FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE
       : FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
-    maxAttempts: controlledV7 ? 1 : 3,
+    maxAttempts: 1,
     ...(controlledV7
       ? {
           inputReference: {

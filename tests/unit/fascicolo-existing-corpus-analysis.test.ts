@@ -126,7 +126,7 @@ describe("existing fascicolo corpus analysis", () => {
     expect(deps.admitJob).toHaveBeenCalledWith(expect.objectContaining({
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
       purpose: "FASCICOLO_MANUAL_ANALYSIS",
-      maxAttempts: 3,
+      maxAttempts: 1,
       procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
       inputReference: {
         referenceType: "FASCICOLO_DOCUMENT_CORPUS",
@@ -222,7 +222,7 @@ describe("existing fascicolo corpus analysis", () => {
 
     expect(manualOne.idempotencyKey).toBe(manualTwo.idempotencyKey);
     expect(manualOne.requestFingerprint).toBe(manualTwo.requestFingerprint);
-    expect(manualOne.maxAttempts).toBe(3);
+    expect(manualOne.maxAttempts).toBe(1);
     expect(changedPreflight.idempotencyKey).not.toBe(manualOne.idempotencyKey);
     expect(changedPreflight.requestFingerprint).not.toBe(manualOne.requestFingerprint);
     expect(manualOne.idempotencyKey).not.toBe(automatic.idempotencyKey);
