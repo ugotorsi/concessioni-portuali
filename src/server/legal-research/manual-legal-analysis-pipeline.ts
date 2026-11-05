@@ -15,14 +15,19 @@ const TERMINAL_JOB_STATUSES = new Set(["SUCCEEDED", "TERMINAL_FAILED", "CANCELLE
 
 export type ManualLegalAnalysisOutcome =
   | "DOCUMENT_EXTRACTION_STARTED"
-  | "ANALYSIS_AND_RESEARCH_STARTED"
+  | "ANALYSIS_QUEUED"
   | "ANALYSIS_IN_PROGRESS"
+  | "ANALYSIS_ALREADY_COMPLETED"
+  | "ANALYSIS_NOT_ADMITTED"
   | "RESEARCH_STARTED"
   | "NO_RESEARCH_TO_RUN";
 
 export type ManualLegalAnalysisResult = Readonly<{
   outcome: ManualLegalAnalysisOutcome;
+  executionId: string;
   analysisJobId: string | null;
+  analysisJobStatus: string | null;
+  analysisAdmissionOutcome: "CREATED" | "REUSED" | null;
   documentExtractionAdmissions: number;
   researchAdmissions: number;
   researchNotAuthorized: readonly string[];
@@ -67,6 +72,7 @@ const defaultDependencies: ManualLegalAnalysisDependencies = {
 export async function runManualLegalAnalysisPipeline(input: Readonly<{
   tenantId: string;
   procedimentoId: string;
+  executionId: string;
   actor: Readonly<{ id: string; email: string; role: "ADMIN" }>;
 }>, overrides: Partial<ManualLegalAnalysisDependencies> = {}): Promise<ManualLegalAnalysisResult> {
   const dependencies = { ...defaultDependencies, ...overrides };
@@ -91,7 +97,7 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
         documentoId: document.documentoId,
         documentFileVersionId: document.documentFileVersionId,
         procedimentoId: input.procedimentoId,
-        correlationId: `manual-legal-analysis:${input.procedimentoId}:${input.actor.id}:extraction`,
+        correlationId: `manual-legal-analysis:${input.procedimentoId}:${input.executionId}:extraction`,
         authority: {
           admissionType: "AUTHENTICATED_USER",
           tenantId: input.tenantId,
@@ -115,7 +121,10 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     });
     return {
       outcome: "DOCUMENT_EXTRACTION_STARTED",
+      executionId: input.executionId,
       analysisJobId: null,
+      analysisJobStatus: null,
+      analysisAdmissionOutcome: null,
       documentExtractionAdmissions: pendingExtraction.length - alreadyAdmitted,
       researchAdmissions: 0,
       researchNotAuthorized: [],
@@ -135,7 +144,7 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
       actorId: input.actor.id,
-      correlationId: `manual-legal-analysis:${input.procedimentoId}:${input.actor.id}`,
+      correlationId: `manual-legal-analysis:${input.procedimentoId}:${input.executionId}`,
     });
     const queuedResearchJobs = await dependencies.countQueuedResearchJobs(input);
     const activation = queuedResearchJobs > 0
@@ -143,7 +152,10 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
       : { outcome: "NOT_REQUIRED" as const };
     return {
       outcome: queuedResearchJobs > 0 ? "RESEARCH_STARTED" as const : "NO_RESEARCH_TO_RUN" as const,
+      executionId: input.executionId,
       analysisJobId,
+      analysisJobStatus: null,
+      analysisAdmissionOutcome: null,
       documentExtractionAdmissions: 0,
       researchAdmissions: admissions.filter((entry) => entry.outcome === "ADMITTED").length,
       researchNotAuthorized: [...new Set(admissions
@@ -159,6 +171,7 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     analysis = await dependencies.requestAnalysis({
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
+      executionId: input.executionId,
       actor: input.actor,
       withLegalResearch: true,
     });
@@ -175,10 +188,12 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     return runCurrentRevisionResearch(null);
   }
   if (!TERMINAL_JOB_STATUSES.has(analysis.admission.job.status)) {
-    // A new or running analysis drains its research missions in the same worker run.
     return {
-      outcome: analysis.admission.outcome === "CREATED" ? "ANALYSIS_AND_RESEARCH_STARTED" : "ANALYSIS_IN_PROGRESS",
+      outcome: analysis.admission.outcome === "CREATED" ? "ANALYSIS_QUEUED" : "ANALYSIS_IN_PROGRESS",
+      executionId: input.executionId,
       analysisJobId: analysis.admission.job.id,
+      analysisJobStatus: analysis.admission.job.status,
+      analysisAdmissionOutcome: analysis.admission.outcome,
       documentExtractionAdmissions: 0,
       researchAdmissions: 0,
       researchNotAuthorized: [],
@@ -186,5 +201,18 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
       workerActivationOutcome: analysis.activation.outcome,
     };
   }
-  return runCurrentRevisionResearch(analysis.admission.job.id);
+  return {
+    outcome: analysis.admission.job.status === "SUCCEEDED"
+      ? "ANALYSIS_ALREADY_COMPLETED"
+      : "ANALYSIS_NOT_ADMITTED",
+    executionId: input.executionId,
+    analysisJobId: analysis.admission.job.id,
+    analysisJobStatus: analysis.admission.job.status,
+    analysisAdmissionOutcome: analysis.admission.outcome,
+    documentExtractionAdmissions: 0,
+    researchAdmissions: 0,
+    researchNotAuthorized: [],
+    queuedResearchJobs: 0,
+    workerActivationOutcome: analysis.activation.outcome,
+  };
 }

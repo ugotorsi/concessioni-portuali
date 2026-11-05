@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -184,6 +186,7 @@ export function FascicoloAutomaticWorkflowPanel({
         {existingCorpusAnalysis ? (
           <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
             <form action={requestExistingCorpusAnalysisAction}>
+              <input type="hidden" name="executionId" value={randomUUID()} />
               <input
                 type="hidden"
                 name="procedimentoId"

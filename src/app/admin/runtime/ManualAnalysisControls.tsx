@@ -15,6 +15,8 @@ interface TenantOption {
 export function ManualAnalysisControls(props: {
   procedimenti: readonly ProcedimentoOption[];
   tenants: readonly TenantOption[];
+  singleExecutionId: string;
+  batchExecutionId: string;
   singleAction: (formData: FormData) => Promise<void>;
   batchAction: (formData: FormData) => Promise<void>;
 }) {
@@ -31,6 +33,7 @@ export function ManualAnalysisControls(props: {
       >
         <h3 className="font-semibold text-slate-900">Singolo fascicolo</h3>
         <input type="hidden" name="confirmation" value="RUN_MANUAL_FASCICOLO_ANALYSIS" />
+        <input type="hidden" name="executionId" value={props.singleExecutionId} />
         <label className="grid gap-1 text-sm font-medium text-slate-700">
           Fascicolo attivo
           <select
@@ -62,6 +65,7 @@ export function ManualAnalysisControls(props: {
       >
         <h3 className="font-semibold text-slate-900">Tutti i fascicoli di un ente</h3>
         <input type="hidden" name="confirmation" value="RUN_ALL_ACTIVE_FASCICOLI" />
+        <input type="hidden" name="executionId" value={props.batchExecutionId} />
         <label className="grid gap-1 text-sm font-medium text-slate-700">
           Ente
           <select

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import Link from "next/link";
 
 import { Badge, type BadgeVariant } from "@/components/ui/Badge";
@@ -153,12 +155,13 @@ export function LegalWorkbenchSection({
               </form>
               <form action={startLegalAnalysisAction} className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
+                <input type="hidden" name="executionId" value={randomUUID()} />
                 <p className="text-sm font-semibold text-slate-900">Avvia analisi giuridica completa</p>
                 <p className="text-xs text-slate-700">
                   Se alcuni documenti non sono ancora stati estratti, avvia prima la sola estrazione locale del testo
-                  (senza provider e senza costi): al termine occorre richiedere nuovamente l&apos;analisi. Poi analisi AI (solo se
-                  i documenti sono cambiati), ricerche giuridiche sul worker autorizzato e nuova versione del rapporto.
-                  Elaborazioni già eseguite non vengono ripetute; si applicano i limiti di spesa.
+                  (senza provider e senza costi): al termine occorre autorizzare nuovamente l&apos;analisi. Ogni nuova
+                  autorizzazione avvia un&apos;esecuzione distinta anche a corpus invariato; il doppio invio della stessa
+                  autorizzazione non crea duplicati. Restano applicati tutti i limiti di spesa.
                 </p>
                 <p className="text-xs text-slate-700">
                   Ricerca su richiesta:{" "}

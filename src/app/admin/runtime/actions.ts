@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -41,6 +42,7 @@ import {
 
 const RENDER_SERVICE_ID_PATTERN = /^srv-[a-z0-9]+$/;
 const RUNTIME_BUDGET_AMOUNT_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{1,6})?$/;
+const manualAnalysisExecutionIdSchema = z.string().uuid().transform((value) => value.toLowerCase());
 const MAX_RUNTIME_BUDGET_WINDOW_SECONDS = 31 * 24 * 60 * 60;
 const ACTIVE_PROCEDIMENTO_STATES = ["DA_AVVIARE", "IN_CORSO"] as const;
 const MAX_MANUAL_BATCH_SIZE = 100;
@@ -122,6 +124,7 @@ export async function updateAutomationControl(formData: FormData): Promise<void>
 export async function runManualFascicoloAnalysis(formData: FormData): Promise<void> {
   const currentUser = await requireAdminWithMfa();
   const procedimentoId = formData.get("procedimentoId");
+  const executionId = manualAnalysisExecutionIdSchema.parse(formData.get("executionId"));
   if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
     throw new Error("INVALID_PROCEDIMENTO_ID");
   }
@@ -143,6 +146,7 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
   const result = await requestExistingCorpusAnalysis({
     tenantId: procedimento.enteId,
     procedimentoId: procedimento.id,
+    executionId,
     actor: {
       id: currentUser.id,
       email: currentUser.email,
@@ -161,6 +165,7 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
     },
     metadata: {
       jobId: result.admission.job.id,
+      executionId,
       admissionOutcome: result.admission.outcome,
       workerActivationOutcome: result.activation.outcome,
       automationRequired: false,
@@ -173,6 +178,7 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
 export async function runManualTenantBatchAnalysis(formData: FormData): Promise<void> {
   const currentUser = await requireAdminWithMfa();
   const tenantId = formData.get("tenantId");
+  const executionId = manualAnalysisExecutionIdSchema.parse(formData.get("executionId"));
   if (typeof tenantId !== "string" || !tenantId.trim()) {
     throw new Error("INVALID_TENANT_ID");
   }
@@ -205,6 +211,7 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
       const result = await requestExistingCorpusAnalysis({
         tenantId: procedimento.enteId,
         procedimentoId: procedimento.id,
+        executionId,
         actor: {
           id: currentUser.id,
           email: currentUser.email,
@@ -225,6 +232,7 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
         userRole: currentUser.role,
       },
       metadata: {
+        executionId,
         requestedCount: procedimenti.length,
         admittedCount: admittedJobIds.length,
         admittedJobIds,
@@ -244,6 +252,7 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
       userRole: currentUser.role,
     },
     metadata: {
+      executionId,
       requestedCount: procedimenti.length,
       admittedJobIds,
       automationRequired: false,
@@ -814,6 +823,7 @@ export async function retryFailedDocumentExtraction(formData: FormData): Promise
 export async function startLegalAnalysisPipeline(formData: FormData): Promise<void> {
   const currentUser = await requireAdminWithMfa();
   const procedimentoId = formData.get("procedimentoId");
+  const executionId = manualAnalysisExecutionIdSchema.parse(formData.get("executionId"));
   if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
     throw new Error("INVALID_PROCEDIMENTO_ID");
   }
@@ -835,6 +845,7 @@ export async function startLegalAnalysisPipeline(formData: FormData): Promise<vo
   const result = await runManualLegalAnalysisPipeline({
     tenantId: procedimento.enteId,
     procedimentoId: procedimento.id,
+    executionId,
     actor: { id: currentUser.id, email: currentUser.email, role: "ADMIN" },
   });
   await auditSuccess({

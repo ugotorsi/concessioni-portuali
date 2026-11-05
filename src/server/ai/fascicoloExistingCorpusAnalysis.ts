@@ -1,6 +1,7 @@
 import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
 import { admitAsyncJob } from "@/server/async-jobs/persistence";
 import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
+import { z } from "zod";
 import {
   buildFascicoloDocumentCorpusUpdateAdmission,
   FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE,
@@ -20,16 +21,26 @@ import {
 export const FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE =
   "FASCICOLO_MANUAL_ANALYSIS" as const;
 
+const TERMINAL_ANALYSIS_JOB_STATUSES = new Set([
+  "SUCCEEDED",
+  "TERMINAL_FAILED",
+  "CANCELLED",
+]);
+const manualAnalysisExecutionIdSchema = z.string().uuid().transform((value) => value.toLowerCase());
+
 function manualLogicalOperationId(input: {
   tenantId: string;
   procedimentoId: string;
   corpusFingerprint: string;
+  executionId: string;
 }): string {
+  const executionId = manualAnalysisExecutionIdSchema.parse(input.executionId);
   return [
     FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
     input.tenantId,
     input.procedimentoId,
     input.corpusFingerprint,
+    executionId,
   ].join(":");
 }
 
@@ -37,6 +48,7 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
   tenantId: string;
   procedimentoId: string;
   corpusFingerprint: string;
+  executionId: string;
   preflightFingerprint?: string;
   initiatingUserId: string;
   actorEmail: string;
@@ -137,6 +149,7 @@ const defaultDependencies: ExistingCorpusAnalysisDependencies = {
 export async function requestExistingCorpusAnalysis(input: {
   tenantId: string;
   procedimentoId: string;
+  executionId: string;
   actor: {
     id: string;
     email: string;
@@ -189,16 +202,19 @@ export async function requestExistingCorpusAnalysis(input: {
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
       corpusFingerprint: corpus.corpusFingerprint,
+      executionId: input.executionId,
       initiatingUserId: input.actor.id,
       actorEmail: input.actor.email,
     }),
   );
-  const activation = await dependencies.activateWorker({
-    kind: "DOCUMENT_ANALYSIS",
-    applicationJobId: admission.job.id,
-    tenantId: input.tenantId,
-    procedimentoId: input.procedimentoId,
-    ...(input.withLegalResearch ? { withLegalResearch: true } : {}),
-  });
+  const activation = TERMINAL_ANALYSIS_JOB_STATUSES.has(admission.job.status)
+    ? { outcome: "NOT_REQUIRED" as const }
+    : await dependencies.activateWorker({
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: admission.job.id,
+        tenantId: input.tenantId,
+        procedimentoId: input.procedimentoId,
+        ...(input.withLegalResearch ? { withLegalResearch: true } : {}),
+      });
   return { admission, activation, budgetCompatibility };
 }

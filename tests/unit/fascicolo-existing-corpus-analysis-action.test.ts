@@ -33,6 +33,7 @@ import {
 function formData() {
   const value = new FormData();
   value.set("procedimentoId", "procedure-a");
+  value.set("executionId", "11111111-1111-4111-8111-111111111111");
   return value;
 }
 
@@ -82,6 +83,7 @@ describe("existing corpus analysis action", () => {
     expect(mocks.requestExistingCorpusAnalysis).toHaveBeenCalledWith({
       tenantId: "tenant-a",
       procedimentoId: "procedure-a",
+      executionId: "11111111-1111-4111-8111-111111111111",
       actor: {
         id: "admin-a",
         email: "admin-a@example.test",

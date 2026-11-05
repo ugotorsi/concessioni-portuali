@@ -31,6 +31,7 @@ import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-l
 const input = {
   tenantId: "tenant-1",
   procedimentoId: "procedure-1",
+  executionId: "11111111-1111-4111-8111-111111111111",
   actor: { id: "admin-1", email: "admin@example.test", role: "ADMIN" as const },
 };
 
@@ -49,16 +50,22 @@ describe("manual legal analysis pipeline", () => {
     await expect(runManualLegalAnalysisPipeline(input, {
       requestAnalysis, admitResearch, activateWorker,
     })).resolves.toMatchObject({
-      outcome: "ANALYSIS_AND_RESEARCH_STARTED",
+      outcome: "ANALYSIS_QUEUED",
+      executionId: input.executionId,
       analysisJobId: "analysis-job-1",
+      analysisJobStatus: "QUEUED",
+      analysisAdmissionOutcome: "CREATED",
       workerActivationOutcome: "REQUESTED",
     });
-    expect(requestAnalysis).toHaveBeenCalledWith(expect.objectContaining({ withLegalResearch: true }));
+    expect(requestAnalysis).toHaveBeenCalledWith(expect.objectContaining({
+      executionId: input.executionId,
+      withLegalResearch: true,
+    }));
     expect(admitResearch).not.toHaveBeenCalled();
     expect(activateWorker).not.toHaveBeenCalled();
   });
 
-  it("runs only the pending autonomous research when the analysis is already current", async () => {
+  it("reports the same execution as already completed without starting research again", async () => {
     const recoverMissions = vi.fn(async () => ({}) as never);
     const admitResearch = vi.fn(async () => [
       { outcome: "ADMITTED" },
@@ -72,28 +79,37 @@ describe("manual legal analysis pipeline", () => {
       countQueuedResearchJobs: vi.fn(async () => 1),
       activateWorker,
     })).resolves.toEqual({
-      outcome: "RESEARCH_STARTED",
+      outcome: "ANALYSIS_ALREADY_COMPLETED",
+      executionId: input.executionId,
       analysisJobId: "analysis-job-1",
+      analysisJobStatus: "SUCCEEDED",
+      analysisAdmissionOutcome: "REUSED",
       documentExtractionAdmissions: 0,
-      researchAdmissions: 1,
-      researchNotAuthorized: ["AUTOMATIC_RESEARCH_PROVIDER_NOT_CONFIGURED"],
-      queuedResearchJobs: 1,
-      workerActivationOutcome: "REQUESTED",
+      researchAdmissions: 0,
+      researchNotAuthorized: [],
+      queuedResearchJobs: 0,
+      workerActivationOutcome: "NOT_REQUIRED",
     });
-    expect(recoverMissions).toHaveBeenCalledWith(expect.objectContaining({ candidateActorId: "admin-1" }));
-    expect(admitResearch).toHaveBeenCalledWith(expect.objectContaining({ actorId: "admin-1" }));
-    expect(activateWorker).toHaveBeenCalledWith({ kind: "LEGAL_RESEARCH", procedimentoId: "procedure-1" });
+    expect(recoverMissions).not.toHaveBeenCalled();
+    expect(admitResearch).not.toHaveBeenCalled();
+    expect(activateWorker).not.toHaveBeenCalled();
   });
 
-  it("does not start a worker when no research is queued", async () => {
+  it("reports a cancelled execution as not admitted without masking it as empty research", async () => {
     const activateWorker = vi.fn();
     await expect(runManualLegalAnalysisPipeline(input, {
-      requestAnalysis: analysis("REUSED", "SUCCEEDED"),
+      requestAnalysis: analysis("REUSED", "CANCELLED"),
       recoverMissions: vi.fn(async () => ({}) as never),
       admitResearch: vi.fn(async () => []) as never,
       countQueuedResearchJobs: vi.fn(async () => 0),
       activateWorker,
-    })).resolves.toMatchObject({ outcome: "NO_RESEARCH_TO_RUN", workerActivationOutcome: "NOT_REQUIRED" });
+    })).resolves.toMatchObject({
+      outcome: "ANALYSIS_NOT_ADMITTED",
+      executionId: input.executionId,
+      analysisJobStatus: "CANCELLED",
+      analysisAdmissionOutcome: "REUSED",
+      workerActivationOutcome: "NOT_REQUIRED",
+    });
     expect(activateWorker).not.toHaveBeenCalled();
   });
 
@@ -112,6 +128,7 @@ describe("manual legal analysis pipeline", () => {
       activateWorker,
     })).resolves.toMatchObject({
       outcome: "RESEARCH_STARTED",
+      executionId: input.executionId,
       analysisJobId: null,
       researchAdmissions: 1,
       queuedResearchJobs: 1,
@@ -140,7 +157,10 @@ describe("manual legal analysis pipeline", () => {
       loadCorpus, admitExtraction, requestAnalysis, admitResearch, activateWorker,
     })).resolves.toEqual({
       outcome: "DOCUMENT_EXTRACTION_STARTED",
+      executionId: input.executionId,
       analysisJobId: null,
+      analysisJobStatus: null,
+      analysisAdmissionOutcome: null,
       documentExtractionAdmissions: 1,
       researchAdmissions: 0,
       researchNotAuthorized: [],

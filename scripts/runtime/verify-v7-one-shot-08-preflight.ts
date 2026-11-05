@@ -93,6 +93,7 @@ async function main(): Promise<void> {
     tenantId: corpus.tenantId,
     procedimentoId: corpus.procedimentoId,
     corpusFingerprint: corpus.corpusFingerprint,
+    executionId: "00000000-0000-4000-8000-000000000008",
     preflightFingerprint: preflight.preflightFingerprint,
     initiatingUserId: "preflight-only-admin",
     actorEmail: "preflight-only@example.invalid",

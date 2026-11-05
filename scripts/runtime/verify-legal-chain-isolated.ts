@@ -382,7 +382,7 @@ async function main() {
     throw new Error("Worker drain did not converge.");
   };
   const pipeline = () => runManualLegalAnalysisPipeline(
-    { tenantId, procedimentoId, actor },
+    { tenantId, procedimentoId, executionId: randomUUID(), actor },
     { activateWorker: async () => ({ outcome: "ISOLATED_WORKER" }) as never },
   );
 

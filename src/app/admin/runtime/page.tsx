@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -378,6 +380,8 @@ export default async function RuntimeOperationsPage({
               autorizzazione tenant, corpus pronto e budget compatibili.
             </p>
             <ManualAnalysisControls
+              singleExecutionId={randomUUID()}
+              batchExecutionId={randomUUID()}
               procedimenti={activeProcedimenti.map((procedimento) => ({
                 id: procedimento.id,
                 label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,

@@ -9,10 +9,12 @@ import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth"
 import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorpusAnalysis";
 
 const procedimentoIdSchema = z.string().trim().min(1).max(256);
+const executionIdSchema = z.string().uuid().transform((value) => value.toLowerCase());
 
 export async function requestExistingCorpusAnalysisAction(formData: FormData): Promise<void> {
   const actor = await requireAdminWithMfa();
   const procedimentoId = procedimentoIdSchema.parse(formData.get("procedimentoId"));
+  const executionId = executionIdSchema.parse(formData.get("executionId"));
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
     select: { enteId: true },
@@ -27,6 +29,7 @@ export async function requestExistingCorpusAnalysisAction(formData: FormData): P
   await requestExistingCorpusAnalysis({
     tenantId: procedimento.enteId,
     procedimentoId,
+    executionId,
     actor: {
       id: actor.id,
       email: actor.email,

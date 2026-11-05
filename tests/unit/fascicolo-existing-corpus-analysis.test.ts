@@ -31,6 +31,7 @@ const enabledEnvironment = {
   AI_OPENAI_USD_TO_EUR_RATE_SOURCE: "ECB reference rate",
   ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "1.00",
 };
+const executionId = "11111111-1111-4111-8111-111111111111";
 
 const corpus = {
   tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
@@ -70,7 +71,7 @@ function dependencies() {
     }),
     admitJob: vi.fn().mockResolvedValue({
       outcome: "CREATED",
-      job: { id: "analysis-job-a" },
+      job: { id: "analysis-job-a", status: "QUEUED" },
     }),
     activateWorker: vi.fn().mockResolvedValue({
       outcome: "REQUESTED",
@@ -82,6 +83,7 @@ function dependencies() {
 const request = {
   tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
   procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+  executionId,
   actor: {
     id: "admin-a",
     email: "admin-a@example.test",
@@ -146,6 +148,23 @@ describe("existing fascicolo corpus analysis", () => {
     });
   });
 
+  it("does not reactivate a terminal job reused by the same execution", async () => {
+    const deps = dependencies();
+    deps.admitJob.mockResolvedValue({
+      outcome: "REUSED",
+      job: { id: "analysis-job-cancelled", status: "CANCELLED" },
+    });
+
+    await expect(requestExistingCorpusAnalysis(request, deps)).resolves.toMatchObject({
+      admission: {
+        outcome: "REUSED",
+        job: { id: "analysis-job-cancelled", status: "CANCELLED" },
+      },
+      activation: { outcome: "NOT_REQUIRED" },
+    });
+    expect(deps.activateWorker).not.toHaveBeenCalled();
+  });
+
   it("does not hard-code a single pilot tenant or fascicolo", async () => {
     const deps = dependencies();
     deps.loadCorpus.mockResolvedValue({
@@ -179,7 +198,7 @@ describe("existing fascicolo corpus analysis", () => {
     expect(deps.admitJob).not.toHaveBeenCalled();
   });
 
-  it("uses a stable key distinct from the exhausted automatic corpus job", () => {
+  it("separates corpus identity from the authorized execution identity", () => {
     const input = {
       tenantId: "tenant-a",
       procedimentoId: "procedure-a",
@@ -188,6 +207,7 @@ describe("existing fascicolo corpus analysis", () => {
     const manualOne = normalizeAsyncJobAdmission(
       buildFascicoloExistingCorpusAnalysisAdmission({
         ...input,
+        executionId,
         initiatingUserId: "admin-a",
         actorEmail: "admin-a@example.test",
       }),
@@ -195,6 +215,7 @@ describe("existing fascicolo corpus analysis", () => {
     const manualTwo = normalizeAsyncJobAdmission(
       buildFascicoloExistingCorpusAnalysisAdmission({
         ...input,
+        executionId,
         initiatingUserId: "admin-a",
         actorEmail: "admin-a@example.test",
       }),
@@ -203,6 +224,7 @@ describe("existing fascicolo corpus analysis", () => {
       buildFascicoloExistingCorpusAnalysisAdmission({
         ...input,
         corpusFingerprint: "q".repeat(64),
+        executionId,
         initiatingUserId: "admin-a",
         actorEmail: "admin-a@example.test",
       }),
@@ -219,12 +241,57 @@ describe("existing fascicolo corpus analysis", () => {
         actorRole: "ADMIN",
       }),
     );
+    const newlyAuthorized = normalizeAsyncJobAdmission(
+      buildFascicoloExistingCorpusAnalysisAdmission({
+        ...input,
+        executionId: "22222222-2222-4222-8222-222222222222",
+        initiatingUserId: "admin-a",
+        actorEmail: "admin-a@example.test",
+      }),
+    );
 
     expect(manualOne.idempotencyKey).toBe(manualTwo.idempotencyKey);
     expect(manualOne.requestFingerprint).toBe(manualTwo.requestFingerprint);
     expect(manualOne.maxAttempts).toBe(1);
+    expect(newlyAuthorized.inputReference.referenceId).toBe(input.corpusFingerprint);
+    expect(newlyAuthorized.idempotencyKey).not.toBe(manualOne.idempotencyKey);
+    expect(newlyAuthorized.requestFingerprint).not.toBe(manualOne.requestFingerprint);
     expect(changedPreflight.idempotencyKey).not.toBe(manualOne.idempotencyKey);
     expect(changedPreflight.requestFingerprint).not.toBe(manualOne.requestFingerprint);
     expect(manualOne.idempotencyKey).not.toBe(automatic.idempotencyKey);
+  });
+
+  it("deduplicates simultaneous submissions for one execution", async () => {
+    const normalizedAdmissions = new Map<string, {
+      id: string;
+      status: string;
+      requestFingerprint: string;
+    }>();
+    const deps = dependencies();
+    deps.admitJob.mockImplementation(async (rawAdmission) => {
+      const admission = normalizeAsyncJobAdmission(rawAdmission);
+      const existing = normalizedAdmissions.get(admission.idempotencyKey);
+      if (existing) {
+        expect(existing.requestFingerprint).toBe(admission.requestFingerprint);
+        return { outcome: "REUSED", job: existing };
+      }
+      const job = {
+        id: "analysis-job-concurrent",
+        status: "QUEUED",
+        requestFingerprint: admission.requestFingerprint,
+      };
+      normalizedAdmissions.set(admission.idempotencyKey, job);
+      return { outcome: "CREATED", job };
+    });
+
+    const [first, second] = await Promise.all([
+      requestExistingCorpusAnalysis(request, deps),
+      requestExistingCorpusAnalysis(request, deps),
+    ]);
+
+    expect(new Set([first.admission.job.id, second.admission.job.id])).toEqual(
+      new Set(["analysis-job-concurrent"]),
+    );
+    expect(normalizedAdmissions).toHaveLength(1);
   });
 });
