@@ -182,7 +182,29 @@ describe("manual AI provider selection action", () => {
         userRole: "ADMIN",
       },
     });
+    expect(verifyAiProviderConnection).not.toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith("/admin/runtime");
+  });
+
+  it("allows a blocked provider to be disabled without any provider call", async () => {
+    const formData = new FormData();
+    formData.set("provider", "ANTHROPIC");
+    formData.set("enabled", "false");
+    formData.set("confirmation", "UPDATE_AI_PROVIDER_MANUAL_CONTROL");
+
+    await updateAiProviderManualControl(formData);
+
+    expect(getAiProviderReadiness).not.toHaveBeenCalled();
+    expect(setAiProviderManualEnabled).toHaveBeenCalledWith({
+      provider: "ANTHROPIC",
+      enabled: false,
+      actor: {
+        userId: "admin-1",
+        userEmail: "admin@example.test",
+        userRole: "ADMIN",
+      },
+    });
+    expect(verifyAiProviderConnection).not.toHaveBeenCalled();
   });
 
   it("blocks automatic selection when the provider is not eligible", async () => {
@@ -200,6 +222,28 @@ describe("manual AI provider selection action", () => {
     await expect(selectAutomaticAiProvider(formData))
       .rejects.toThrow("AI_PROVIDER_AUTOMATIC_ENABLEMENT_BLOCKED");
     expect(setAutomaticAiProvider).not.toHaveBeenCalled();
+  });
+
+  it("persists one eligible automatic selection without contacting a provider", async () => {
+    const formData = new FormData();
+    formData.set("selection", "OPENAI:gpt-5.6-terra");
+    formData.set("confirmation", "SELECT_AUTOMATIC_AI_PROVIDER");
+
+    await selectAutomaticAiProvider(formData);
+
+    expect(setAutomaticAiProvider).toHaveBeenCalledWith({
+      selection: {
+        provider: "OPENAI",
+        model: "gpt-5.6-terra",
+        selectionVersion: "AI_MODEL_SELECTION_V1",
+      },
+      actor: {
+        userId: "admin-1",
+        userEmail: "admin@example.test",
+        userRole: "ADMIN",
+      },
+    });
+    expect(verifyAiProviderConnection).not.toHaveBeenCalled();
   });
 
   it("runs explicit connection verification without enabling the provider", async () => {

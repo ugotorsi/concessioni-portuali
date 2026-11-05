@@ -16,6 +16,7 @@ vi.mock("@/server/ai/providerControl", async (importOriginal) => ({
 }));
 
 import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
+import { aiProviderConfigurationFingerprint } from "@/server/ai/providerConfiguration";
 
 const control = {
   workflow: "FASCICOLO.AUTOMATIC_ANALYSIS_V1" as const,
@@ -33,12 +34,19 @@ const control = {
 };
 
 const openAiEnvironment = {
+  NEXTAUTH_SECRET: "test-fingerprint-secret-at-least-32-characters",
   AI_OPENAI_API_KEY: "configured-not-exposed",
   ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.5",
   AI_REAL_DATA_ENABLED: "true",
   AI_REAL_DATA_APPROVAL_ID: "approval-1",
   AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
 };
+const openAiFingerprint = aiProviderConfigurationFingerprint({
+  provider: "OPENAI",
+  model: "gpt-5.6-terra",
+  apiKey: openAiEnvironment.AI_OPENAI_API_KEY,
+  fingerprintSecret: openAiEnvironment.NEXTAUTH_SECRET,
+});
 
 describe("AI provider readiness", () => {
   beforeEach(() => {
@@ -59,6 +67,9 @@ describe("AI provider readiness", () => {
     expect(openAi).toMatchObject({
       credentialConfigured: true,
       connectionStatus: "NOT_VERIFIED",
+      credentialValid: false,
+      modelAvailable: false,
+      modelTechnicallyQualified: true,
       realDataAuthorized: true,
       manualEnabled: true,
       manualEligible: true,
@@ -97,7 +108,14 @@ describe("AI provider readiness", () => {
     mocks.findMany.mockResolvedValue([{
       entitaId: "OPENAI",
       esito: "FAILURE",
-      metadata: { verified: false, code: "AI_PROVIDER_CREDENTIAL_REJECTED" },
+      metadata: {
+        verified: false,
+        credentialValid: false,
+        modelAvailable: false,
+        model: "gpt-5.6-terra",
+        configurationFingerprint: openAiFingerprint,
+        code: "AI_PROVIDER_CREDENTIAL_REJECTED",
+      },
       createdAt: new Date("2026-11-05T12:00:00Z"),
     }]);
 
@@ -112,6 +130,37 @@ describe("AI provider readiness", () => {
       connectionStatus: "FAILED",
       status: "ATTENTION",
       error: "L'ultima verifica di connessione non è riuscita.",
+    });
+  });
+
+  it("invalidates verification after the credential or model configuration changes", async () => {
+    mocks.findMany.mockResolvedValue([{
+      entitaId: "OPENAI",
+      esito: "SUCCESS",
+      metadata: {
+        verified: true,
+        credentialValid: true,
+        modelAvailable: true,
+        model: "gpt-5.6-terra",
+        configurationFingerprint: openAiFingerprint,
+      },
+      createdAt: new Date("2026-11-05T12:00:00Z"),
+    }]);
+
+    const readiness = await getAiProviderReadiness({
+      globalAiEnabled: true,
+      generalAutomationEnabled: true,
+      environment: {
+        ...openAiEnvironment,
+        AI_OPENAI_API_KEY: "rotated-credential",
+      },
+      control,
+    });
+
+    expect(readiness.find((provider) => provider.provider === "OPENAI")).toMatchObject({
+      connectionStatus: "STALE",
+      credentialValid: false,
+      modelAvailable: false,
     });
   });
 

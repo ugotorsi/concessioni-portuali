@@ -7,7 +7,10 @@ interface AiEngineView {
   label: string;
   model: string;
   credentialConfigured: boolean;
-  connectionStatus: "VERIFIED" | "FAILED" | "NOT_VERIFIED";
+  connectionStatus: "VERIFIED" | "FAILED" | "STALE" | "NOT_VERIFIED";
+  credentialValid: boolean;
+  modelAvailable: boolean;
+  modelTechnicallyQualified: boolean;
   lastVerifiedAt: string | null;
   realDataAuthorized: boolean;
   manualEnabled: boolean;
@@ -30,6 +33,7 @@ function yesNo(value: boolean): string {
 function connectionLabel(status: AiEngineView["connectionStatus"]): string {
   if (status === "VERIFIED") return "Verificata";
   if (status === "FAILED") return "Verifica fallita";
+  if (status === "STALE") return "Da ripetere sulla configurazione corrente";
   return "Non verificata";
 }
 
@@ -62,7 +66,10 @@ export function AiEngineControls(props: {
 
           <dl className="grid gap-2 text-sm">
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Credenziale API</dt><dd className="font-medium">{engine.credentialConfigured ? "Configurata" : "Assente"}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">Credenziale valida</dt><dd className="font-medium">{yesNo(engine.credentialValid)}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Connessione</dt><dd className="font-medium">{connectionLabel(engine.connectionStatus)}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">Modello disponibile</dt><dd className="font-medium">{yesNo(engine.modelAvailable)}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">Modello qualificato</dt><dd className="font-medium">{yesNo(engine.modelTechnicallyQualified)}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Dati reali</dt><dd className="font-medium">{engine.realDataAuthorized ? "Autorizzati" : "Non autorizzati"}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Manuale</dt><dd className="font-medium">{engine.manualEnabled ? "ON" : "OFF"}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Automatico</dt><dd className="font-medium">{engine.automaticSelected ? "ON · principale" : "OFF"}</dd></div>

@@ -21,6 +21,7 @@ export interface AiModelCapabilities {
   readonly jsonObject: boolean;
   readonly usageReporting: boolean;
   readonly promptCaching: boolean;
+  readonly technicalQualificationApproved: boolean;
   readonly realDataApproved: boolean;
   readonly automaticExecutionApproved: boolean;
 }
@@ -46,6 +47,7 @@ const entries = [
       jsonObject: true,
       usageReporting: true,
       promptCaching: true,
+      technicalQualificationApproved: true,
       realDataApproved: true,
       automaticExecutionApproved: true,
     },
@@ -64,6 +66,7 @@ const entries = [
       jsonObject: true,
       usageReporting: true,
       promptCaching: true,
+      technicalQualificationApproved: false,
       realDataApproved: false,
       automaticExecutionApproved: false,
     },
@@ -82,6 +85,7 @@ const entries = [
       jsonObject: true,
       usageReporting: true,
       promptCaching: true,
+      technicalQualificationApproved: false,
       realDataApproved: false,
       automaticExecutionApproved: false,
     },

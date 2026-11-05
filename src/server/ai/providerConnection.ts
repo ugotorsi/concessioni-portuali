@@ -1,42 +1,26 @@
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { z } from "zod";
 import {
   AI_MODEL_CATALOG,
   getAiModelCatalogEntry,
   type AiProviderId,
 } from "@/server/ai/providerCatalog";
 import {
+  AI_PROVIDER_ENVIRONMENT,
+  aiProviderConfigurationFingerprint,
+} from "@/server/ai/providerConfiguration";
+import {
   AI_PROVIDER_CONNECTION_ENTITY,
   AI_PROVIDER_CONNECTION_VERIFICATION_ACTION,
 } from "@/server/ai/providerReadiness";
 
-const connectionConfig = {
-  OPENAI: {
-    credentialName: "AI_OPENAI_API_KEY",
-    url: "https://api.openai.com/v1/models",
-    headers: (apiKey: string) => ({
-      Authorization: "Bearer " + apiKey,
-    }),
-  },
-  ANTHROPIC: {
-    credentialName: "AI_ANTHROPIC_API_KEY",
-    url: "https://api.anthropic.com/v1/models",
-    headers: (apiKey: string) => ({
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    }),
-  },
-  DEEPSEEK: {
-    credentialName: "AI_DEEPSEEK_API_KEY",
-    url: "https://api.deepseek.com/models",
-    headers: (apiKey: string) => ({
-      Authorization: "Bearer " + apiKey,
-    }),
-  },
-} as const satisfies Record<AiProviderId, {
-  credentialName: string;
-  url: string;
-  headers(apiKey: string): Record<string, string>;
-}>;
+const providerModelsResponseSchema = z.object({
+  data: z.array(z.object({
+    id: z.string().trim().min(1).max(256),
+  }).passthrough()).max(10_000),
+}).passthrough();
+
+const MAX_MODELS_RESPONSE_BYTES = 1_000_000;
 
 interface ProviderConnectionActor {
   readonly userId: string;
@@ -52,23 +36,30 @@ export async function verifyAiProviderConnection(input: {
 }): Promise<{
   readonly provider: AiProviderId;
   readonly verified: boolean;
+  readonly credentialValid: boolean;
+  readonly modelAvailable: boolean;
+  readonly modelTechnicallyQualified: boolean;
   readonly httpStatus: number | null;
   readonly code: string;
   readonly generationRequested: false;
   readonly expectedGenerationCostEur: 0;
 }> {
   const environment = input.environment ?? process.env;
-  const config = connectionConfig[input.provider];
+  const config = AI_PROVIDER_ENVIRONMENT[input.provider];
   const selection = AI_MODEL_CATALOG.find(
     (candidate) => candidate.selection.provider === input.provider,
   )?.selection;
   if (!selection) throw new Error("AI_MODEL_NOT_REGISTERED");
   const entry = getAiModelCatalogEntry(selection);
   const apiKey = environment[config.credentialName]?.trim();
+  const fingerprintSecret = environment.NEXTAUTH_SECRET?.trim();
   if (!apiKey || apiKey === "[SENSITIVE]") {
     const result = {
       provider: input.provider,
       verified: false,
+      credentialValid: false,
+      modelAvailable: false,
+      modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
       httpStatus: null,
       code: "AI_PROVIDER_CREDENTIAL_MISSING",
       generationRequested: false as const,
@@ -88,11 +79,43 @@ export async function verifyAiProviderConnection(input: {
     });
     return result;
   }
+  if (!fingerprintSecret) {
+    const result = {
+      provider: input.provider,
+      verified: false,
+      credentialValid: false,
+      modelAvailable: false,
+      modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
+      httpStatus: null,
+      code: "AI_PROVIDER_VERIFICATION_SECRET_MISSING",
+      generationRequested: false as const,
+      expectedGenerationCostEur: 0 as const,
+    };
+    await auditFailure({
+      azione: AI_PROVIDER_CONNECTION_VERIFICATION_ACTION,
+      entita: AI_PROVIDER_CONNECTION_ENTITY,
+      entitaId: input.provider,
+      actor: input.actor,
+      metadata: {
+        ...result,
+        model: entry.selection.model,
+        credentialEnvironmentName: config.credentialName,
+        credentialValueLogged: false,
+      },
+    });
+    return result;
+  }
+  const configurationFingerprint = aiProviderConfigurationFingerprint({
+    provider: input.provider,
+    model: entry.selection.model,
+    apiKey,
+    fingerprintSecret,
+  });
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
   let response: Response;
   try {
-    response = await (input.fetch ?? globalThis.fetch.bind(globalThis))(config.url, {
+    response = await (input.fetch ?? globalThis.fetch.bind(globalThis))(config.modelsUrl, {
       method: "GET",
       headers: config.headers(apiKey),
       signal: controller.signal,
@@ -106,6 +129,9 @@ export async function verifyAiProviderConnection(input: {
     const result = {
       provider: input.provider,
       verified: false,
+      credentialValid: false,
+      modelAvailable: false,
+      modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
       httpStatus: null,
       code,
       generationRequested: false as const,
@@ -121,6 +147,7 @@ export async function verifyAiProviderConnection(input: {
         model: entry.selection.model,
         credentialEnvironmentName: config.credentialName,
         credentialValueLogged: false,
+        configurationFingerprint,
         failureKind: error instanceof Error ? error.name : "UNKNOWN",
       },
     });
@@ -128,15 +155,44 @@ export async function verifyAiProviderConnection(input: {
   } finally {
     clearTimeout(timeout);
   }
-  const verified = response.ok;
-  const code = verified
-    ? "AI_PROVIDER_CONNECTION_VERIFIED"
-    : response.status === 401 || response.status === 403
+  const credentialValid = response.ok;
+  let modelAvailable = false;
+  let modelResponseValid = false;
+  if (credentialValid) {
+    const contentLength = Number(response.headers.get("content-length"));
+    if (!Number.isFinite(contentLength) || contentLength <= MAX_MODELS_RESPONSE_BYTES) {
+      const body = await response.text();
+      if (Buffer.byteLength(body, "utf8") <= MAX_MODELS_RESPONSE_BYTES) {
+        try {
+          const parsed = providerModelsResponseSchema.safeParse(JSON.parse(body));
+          if (parsed.success) {
+            modelResponseValid = true;
+            modelAvailable = parsed.data.data.some(
+              (model) => model.id === entry.selection.model,
+            );
+          }
+        } catch {
+          modelResponseValid = false;
+        }
+      }
+    }
+  }
+  const verified = credentialValid && modelResponseValid && modelAvailable;
+  const code = !credentialValid
+    ? response.status === 401 || response.status === 403
       ? "AI_PROVIDER_CREDENTIAL_REJECTED"
-      : `AI_PROVIDER_CONNECTION_HTTP_${response.status}`;
+      : `AI_PROVIDER_CONNECTION_HTTP_${response.status}`
+    : !modelResponseValid
+      ? "AI_PROVIDER_MODELS_RESPONSE_INVALID"
+      : !modelAvailable
+        ? "AI_PROVIDER_MODEL_UNAVAILABLE"
+        : "AI_PROVIDER_CONNECTION_VERIFIED";
   const result = {
     provider: input.provider,
     verified,
+    credentialValid,
+    modelAvailable,
+    modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
     httpStatus: response.status,
     code,
     generationRequested: false as const,
@@ -153,6 +209,7 @@ export async function verifyAiProviderConnection(input: {
       model: entry.selection.model,
       credentialEnvironmentName: config.credentialName,
       credentialValueLogged: false,
+      configurationFingerprint,
     },
   });
   return result;

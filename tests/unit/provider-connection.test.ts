@@ -17,6 +17,9 @@ const actor = {
   userEmail: "admin@example.test",
   userRole: "ADMIN" as const,
 };
+const fingerprintEnvironment = {
+  NEXTAUTH_SECRET: "test-fingerprint-secret-at-least-32-characters",
+};
 
 describe("AI provider connection verification", () => {
   beforeEach(() => {
@@ -44,11 +47,16 @@ describe("AI provider connection verification", () => {
   });
 
   it("uses only the provider model-list endpoint with GET and records zero generation cost", async () => {
-    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      data: [{ id: "deepseek-v4-pro" }],
+    }), { status: 200 }));
     const result = await verifyAiProviderConnection({
       provider: "DEEPSEEK",
       actor,
-      environment: { AI_DEEPSEEK_API_KEY: "secret-value" },
+      environment: {
+        ...fingerprintEnvironment,
+        AI_DEEPSEEK_API_KEY: "secret-value",
+      },
       fetch,
     });
 
@@ -59,15 +67,43 @@ describe("AI provider connection verification", () => {
     expect(fetch.mock.calls[0]?.[1]).not.toHaveProperty("body");
     expect(result).toMatchObject({
       verified: true,
+      credentialValid: true,
+      modelAvailable: true,
+      modelTechnicallyQualified: false,
       generationRequested: false,
       expectedGenerationCostEur: 0,
     });
     const auditInput = mocks.auditSuccess.mock.calls[0]?.[0];
     expect(JSON.stringify(auditInput)).not.toContain("secret-value");
+    expect(JSON.stringify(auditInput)).not.toContain(fingerprintEnvironment.NEXTAUTH_SECRET);
     expect(auditInput.metadata).toMatchObject({
       credentialValueLogged: false,
       expectedGenerationCostEur: 0,
+      modelAvailable: true,
     });
+  });
+
+  it("rejects a valid credential when the configured model is not listed", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      data: [{ id: "different-model" }],
+    }), { status: 200 }));
+    const result = await verifyAiProviderConnection({
+      provider: "ANTHROPIC",
+      actor,
+      environment: {
+        ...fingerprintEnvironment,
+        AI_ANTHROPIC_API_KEY: "secret-value",
+      },
+      fetch,
+    });
+
+    expect(result).toMatchObject({
+      verified: false,
+      credentialValid: true,
+      modelAvailable: false,
+      code: "AI_PROVIDER_MODEL_UNAVAILABLE",
+    });
+    expect(mocks.auditFailure).toHaveBeenCalledOnce();
   });
 
   it("classifies rejected credentials without reading or persisting a response body", async () => {
@@ -75,7 +111,10 @@ describe("AI provider connection verification", () => {
     const result = await verifyAiProviderConnection({
       provider: "OPENAI",
       actor,
-      environment: { AI_OPENAI_API_KEY: "secret-value" },
+      environment: {
+        ...fingerprintEnvironment,
+        AI_OPENAI_API_KEY: "secret-value",
+      },
       fetch,
     });
 
@@ -89,7 +128,10 @@ describe("AI provider connection verification", () => {
     const result = await verifyAiProviderConnection({
       provider: "ANTHROPIC",
       actor,
-      environment: { AI_ANTHROPIC_API_KEY: "secret-value" },
+      environment: {
+        ...fingerprintEnvironment,
+        AI_ANTHROPIC_API_KEY: "secret-value",
+      },
       fetch,
     });
 
@@ -111,7 +153,10 @@ describe("AI provider connection verification", () => {
       const verification = verifyAiProviderConnection({
         provider: "OPENAI",
         actor,
-        environment: { AI_OPENAI_API_KEY: "secret-value" },
+        environment: {
+          ...fingerprintEnvironment,
+          AI_OPENAI_API_KEY: "secret-value",
+        },
         fetch: fetch as typeof globalThis.fetch,
       });
 
