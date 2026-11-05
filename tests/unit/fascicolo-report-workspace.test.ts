@@ -107,21 +107,22 @@ describe("Fascicolo report workspace", () => {
     expect(stale).toContain("Il fascicolo contiene modifiche successive alla generazione di questo rapporto.");
   });
 
-  it("keeps unverified candidates out of the professional report and exposes separate admin diagnostics", () => {
+  it("shows unverified candidates separately without promoting them to usable authorities", () => {
     const html = render([snapshot("CURRENT")]);
     expect(html).toContain("Fonti utilizzabili");
     expect(html).toContain("Elementi favorevoli");
     expect(html).toContain("Elementi contrari");
     expect(html).toContain("Consiglio di Stato, sentenza favorevole");
     expect(html).toContain("TAR, sentenza contraria");
-    expect(html).not.toContain("Fonte non verificata");
-    expect(html).not.toContain("https://example.test/candidate");
+    expect(html).toContain("Fonti candidate da verificare");
+    expect(html).toContain("Fonte non verificata");
+    expect(html).toContain("Principio provvisorio da verificare");
+    expect(html).toContain("https://example.test/candidate");
+    expect(html).toContain("non sono ancora fonti utilizzabili per conclusioni professionali");
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noreferrer"');
     const adminHtml = render([snapshot("CURRENT")], true);
-    expect(adminHtml).toContain("Diagnostica amministratore");
-    expect(adminHtml).toContain("Fonte non verificata");
-    expect(adminHtml).toContain("Principio provvisorio da verificare");
+    expect(adminHtml).not.toContain("Diagnostica amministratore");
     expect(adminHtml).not.toMatch(/COMPILATION|DOCUMENT_INVENTORY|PROCEEDING_IDENTITY|DOCUMENT_\d+\.PAGE/);
   });
 
