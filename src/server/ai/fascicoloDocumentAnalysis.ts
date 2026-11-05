@@ -4,6 +4,7 @@ import {
   AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
   fascicoloDocumentProposalPayloadV1Schema,
   fascicoloDocumentAnalysisPayloadV1Schema,
+  type FascicoloDocumentProposalPayloadV1,
   type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
@@ -299,6 +300,24 @@ export function summarizeFascicoloDocumentValidationIssues(
   }));
 }
 
+function hasOnlySuppliedBasisRefs(
+  proposal: FascicoloDocumentProposalPayloadV1,
+  suppliedBasisRefs: ReadonlySet<string>,
+): boolean {
+  const statements = [
+    proposal.summary,
+    ...proposal.timeline,
+    ...proposal.recordedState,
+    ...proposal.signals,
+    ...proposal.investigativeQuestions,
+    ...proposal.suggestedActivities,
+    ...proposal.legalResearchQuestions,
+  ];
+  return statements.every((statement) => (
+    statement.basisRefs.every((basisRef) => suppliedBasisRefs.has(basisRef))
+  ));
+}
+
 export function createFascicoloDocumentAnalysisService(config: {
   readonly provider: FascicoloDocumentAnalysisProvider;
   readonly maxInputBytes: number;
@@ -328,6 +347,15 @@ export function createFascicoloDocumentAnalysisService(config: {
           event: "fascicolo_document_analysis_invalid_provider_output",
           outputKind: output === null ? "null" : Array.isArray(output) ? "array" : typeof output,
           issues: summarizeFascicoloDocumentValidationIssues(proposal.error.issues),
+        });
+        throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      }
+      if (!hasOnlySuppliedBasisRefs(
+        proposal.data,
+        new Set(request.documentData.content.excerpts.map((excerpt) => excerpt.reference)),
+      )) {
+        console.error({
+          event: "fascicolo_document_analysis_unknown_basis_ref",
         });
         throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
       }

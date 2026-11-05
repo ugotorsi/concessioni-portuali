@@ -193,9 +193,11 @@ describe("simulated Anthropic and DeepSeek adapters", () => {
     expect(transport).toHaveBeenCalledOnce();
     expect(transport.mock.calls[0]?.[0]).toBe(endpoint);
     expect(onUsage).toHaveBeenCalledWith(expect.objectContaining({
-      inputTokens: 120,
       outputTokens: 30,
       cachedInputTokens: 20,
+    }));
+    expect(onUsage).toHaveBeenCalledWith(expect.objectContaining({
+      inputTokens: endpoint.includes("anthropic") ? 150 : 120,
     }));
     const request = JSON.parse(String(transport.mock.calls[0]?.[1]?.body)) as Record<string, unknown>;
     expect(JSON.stringify(request)).toContain("BEGIN_UNTRUSTED_DOCUMENT_DATA");

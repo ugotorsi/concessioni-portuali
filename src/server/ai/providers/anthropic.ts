@@ -45,8 +45,12 @@ function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
   if (![inputTokens, outputTokens, cachedInputTokens, cacheWriteInputTokens].every(
     (value) => typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
   )) return null;
+  const totalInputTokens = (inputTokens as number)
+    + (cachedInputTokens as number)
+    + (cacheWriteInputTokens as number);
+  if (!Number.isSafeInteger(totalInputTokens)) return null;
   return {
-    inputTokens: inputTokens as number,
+    inputTokens: totalInputTokens,
     cachedInputTokens: cachedInputTokens as number,
     cacheWriteInputTokens: cacheWriteInputTokens as number,
     outputTokens: outputTokens as number,
