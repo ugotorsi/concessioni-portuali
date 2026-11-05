@@ -16,6 +16,8 @@ import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
 import { getRuntimeServiceDiagnostics } from "@/server/runtime/serviceDiagnostics";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { getAutomationControlState } from "@/server/automation/automationControl";
+import { getAiProviderControlSnapshot } from "@/server/ai/providerControl";
+import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
 import { getLegalWorkbenchSnapshot } from "@/server/runtime/legalWorkbench";
 
 import {
@@ -33,12 +35,16 @@ import {
   startLegalAnalysisPipeline,
   upsertRuntimeBudgetPolicy,
   updateAutomationControl,
+  updateAiProviderManualControl,
   updateGlobalAiControl,
+  selectAutomaticAiProvider,
+  verifyAiProviderConnectionAction,
   verifyRuntimeService,
 } from "./actions";
 import { GlobalAiControlForm } from "./GlobalAiControlForm";
 import { AutomationControlForm } from "./AutomationControlForm";
 import { ManualAnalysisControls } from "./ManualAnalysisControls";
+import { AiEngineControls } from "./AiEngineControls";
 import { LegalWorkbenchSection } from "./LegalWorkbenchSection";
 import {
   AI_MODEL_CATALOG,
@@ -147,6 +153,12 @@ export default async function RuntimeOperationsPage({
     procedimento.ente.id,
     { id: procedimento.ente.id, label: procedimento.ente.nome },
   ])).values());
+  const providerControl = await getAiProviderControlSnapshot();
+  const aiEngines = await getAiProviderReadiness({
+    globalAiEnabled: aiControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    control: providerControl,
+  });
   const serviceCenter = buildServiceCenterSnapshot({
     health,
     databaseIdentity,
@@ -374,6 +386,30 @@ export default async function RuntimeOperationsPage({
         </Card>
       </section>
 
+      <section className="mt-6" aria-labelledby="ai-engines-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="ai-engines-title">Motori AI</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              OpenAI resta il motore principale. L&apos;abilitazione manuale e la selezione
+              automatica sono indipendenti dal comando generale AI e non attivano da sole
+              alcuna automazione o trasferimento di dati.
+            </p>
+            <AiEngineControls
+              engines={aiEngines.map((engine) => ({
+                ...engine,
+                lastVerifiedAt: engine.lastVerifiedAt?.toISOString() ?? null,
+              }))}
+              updateManualAction={updateAiProviderManualControl}
+              selectAutomaticAction={selectAutomaticAiProvider}
+              verifyConnectionAction={verifyAiProviderConnectionAction}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="mt-6" aria-labelledby="manual-analysis-title">
         <Card>
           <CardHeader>
@@ -391,7 +427,14 @@ export default async function RuntimeOperationsPage({
               aiModels={AI_MODEL_CATALOG.map((entry) => ({
                 code: aiModelSelectionCode(entry.selection),
                 label: entry.label,
-                enabled: entry.capabilities.realDataApproved && entry.pricingVersion !== null,
+                enabled: Boolean(
+                  aiEngines.find(
+                    (engine) => engine.provider === entry.selection.provider,
+                  )?.manualEnabled
+                  && aiEngines.find(
+                    (engine) => engine.provider === entry.selection.provider,
+                  )?.manualEligible,
+                ),
               }))}
               procedimenti={activeProcedimenti.map((procedimento) => ({
                 id: procedimento.id,

@@ -40,8 +40,10 @@ import {
 import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
 import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
 import {
+  aiSelectionMetadata,
   aiSelectionFromMetadata,
   DEFAULT_AI_MODEL_SELECTION,
+  type AiModelSelection,
 } from "@/server/ai/providerCatalog";
 import {
   AiProviderRuntimeConfigurationError,
@@ -52,6 +54,8 @@ import {
   withRuntimeCostGate,
 } from "@/server/runtime/cost";
 import { isAutomationEnabled } from "@/server/automation/automationControl";
+import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
+import { getAutomaticAiSelectionForAdmission } from "@/server/ai/providerReadiness";
 import {
   FascicoloV7PreflightError,
   revalidateFascicoloV7EconomicPreflight,
@@ -153,8 +157,32 @@ const neutralIntakeReferenceSchema = z.object({
     procedimentoId: z.string().trim().min(1).max(256),
     neutralIntakeId: z.string().trim().min(1).max(256),
     extractionAttemptId: z.string().trim().min(1).max(256),
+    providerKind: z.enum(["OPENAI", "ANTHROPIC", "DEEPSEEK"]).optional(),
+    modelCode: z.string().trim().min(1).max(128).optional(),
+    selectionVersion: z.literal("AI_MODEL_SELECTION_V1").optional(),
+    approvalRef: z.string().trim().min(1).max(512).optional(),
+    approvalVersion: z.literal("AI_PROVIDER_AUTHORIZATION_V1").optional(),
+    handlingPolicyVersion: z.literal("AI_PROVIDER_DATA_POLICY_V1").optional(),
+    pricingVersion: z.string().trim().min(1).max(512).optional(),
   }).strict(),
-}).strict();
+}).strict().superRefine((reference, context) => {
+  const selectionValues = [
+    reference.metadata.providerKind,
+    reference.metadata.modelCode,
+    reference.metadata.selectionVersion,
+    reference.metadata.approvalRef,
+    reference.metadata.approvalVersion,
+    reference.metadata.handlingPolicyVersion,
+  ];
+  if (selectionValues.some((value) => value !== undefined)
+    && selectionValues.some((value) => value === undefined)) {
+    context.addIssue({
+      code: "custom",
+      path: ["metadata"],
+      message: "AI provider selection metadata must be complete.",
+    });
+  }
+});
 const documentCorpusReferenceSchema = z.object({
   referenceType: z.literal("FASCICOLO_DOCUMENT_CORPUS"),
   referenceId: z.string().regex(/^[0-9a-f]{64}$/),
@@ -1804,6 +1832,8 @@ export function buildFascicoloAutomaticAnalysisAdmission(input: {
   actorId: string;
   actorEmail: string | null;
   actorRole: string;
+  selection?: AiModelSelection;
+  authorizationRef?: string;
 }): AsyncJobAdmissionInput {
   const admission = input.admissionType === "AUTHENTICATED_USER"
     ? {
@@ -1842,6 +1872,9 @@ export function buildFascicoloAutomaticAnalysisAdmission(input: {
         procedimentoId: input.procedimentoId,
         neutralIntakeId: input.neutralIntakeId,
         extractionAttemptId: input.extractionAttemptId,
+        ...(input.selection && input.authorizationRef
+          ? aiSelectionMetadata(input.selection, input.authorizationRef)
+          : {}),
       },
     },
     maxAttempts: 3,
@@ -1861,6 +1894,8 @@ export function buildFascicoloDocumentCorpusUpdateAdmission(input: {
   actorId: string;
   actorEmail: string | null;
   actorRole: string;
+  selection?: AiModelSelection;
+  authorizationRef?: string;
 }): AsyncJobAdmissionInput {
   const admission = input.admissionType === "AUTHENTICATED_USER"
     ? {
@@ -1898,6 +1933,9 @@ export function buildFascicoloDocumentCorpusUpdateAdmission(input: {
       metadata: {
         procedimentoId: input.procedimentoId,
         corpusHash: input.corpusFingerprint,
+        ...(input.selection && input.authorizationRef
+          ? aiSelectionMetadata(input.selection, input.authorizationRef)
+          : {}),
       },
     },
     maxAttempts: 3,
@@ -1911,6 +1949,17 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
 ) {
   if (!(await isAutomationEnabled())) {
     return { outcome: "AUTOMATION_OFF" as const, job: null };
+  }
+  const aiControl = await getGlobalAiControlState();
+  if (!aiControl.effectiveEnabled) {
+    return { outcome: "AI_OFF" as const, job: null };
+  }
+  const providerAdmission = await getAutomaticAiSelectionForAdmission({
+    globalAiEnabled: true,
+    generalAutomationEnabled: true,
+  });
+  if (!providerAdmission) {
+    return { outcome: "AI_PROVIDER_BLOCKED" as const, job: null };
   }
   const sourceJob = await prisma.asyncJob.findUnique({
     where: { id: input.sourceJobId },
@@ -1975,6 +2024,8 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
     actorId: sourceJob.actorId,
     actorEmail: sourceJob.actorEmail,
     actorRole: sourceJob.actorRole,
+    selection: providerAdmission.selection,
+    authorizationRef: providerAdmission.authorizationRef,
   }));
   await requestDocumentWorkerActivation({
     kind: "DOCUMENT_ANALYSIS",
@@ -1988,6 +2039,17 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
 export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutomaticAnalysisSource) {
   if (!(await isAutomationEnabled())) {
     return { outcome: "AUTOMATION_OFF" as const, job: null };
+  }
+  const aiControl = await getGlobalAiControlState();
+  if (!aiControl.effectiveEnabled) {
+    return { outcome: "AI_OFF" as const, job: null };
+  }
+  const providerAdmission = await getAutomaticAiSelectionForAdmission({
+    globalAiEnabled: true,
+    generalAutomationEnabled: true,
+  });
+  if (!providerAdmission) {
+    return { outcome: "AI_PROVIDER_BLOCKED" as const, job: null };
   }
   const [sourceJob, intake] = await Promise.all([
     prisma.asyncJob.findUnique({
@@ -2044,6 +2106,8 @@ export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutoma
     actorId: sourceJob.actorId,
     actorEmail: sourceJob.actorEmail,
     actorRole: sourceJob.actorRole,
+    selection: providerAdmission.selection,
+    authorizationRef: providerAdmission.authorizationRef,
   }));
   await requestDocumentWorkerActivation({
     kind: "DOCUMENT_ANALYSIS",

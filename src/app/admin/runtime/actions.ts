@@ -7,16 +7,28 @@ import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
-import { setGlobalAiControlState } from "@/server/ai/globalAiControl";
 import {
+  getGlobalAiControlState,
+  setGlobalAiControlState,
+} from "@/server/ai/globalAiControl";
+import {
+  getAutomationControlState,
   setAutomationControlState,
   type AutomationMode,
 } from "@/server/automation/automationControl";
 import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import {
   getAiModelCatalogEntry,
+  aiProviderIdSchema,
   resolveAiModelSelectionCode,
 } from "@/server/ai/providerCatalog";
+import {
+  getAiProviderControlSnapshot,
+  setAiProviderManualEnabled,
+  setAutomaticAiProvider,
+} from "@/server/ai/providerControl";
+import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
+import { verifyAiProviderConnection } from "@/server/ai/providerConnection";
 import {
   documentWorkerKindForOperation,
   requestDocumentWorkerActivation,
@@ -590,6 +602,94 @@ export async function updateGlobalAiControl(formData: FormData): Promise<void> {
       userRole: "ADMIN",
     },
     reason: normalizedReason,
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function updateAiProviderManualControl(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const provider = aiProviderIdSchema.parse(formData.get("provider"));
+  const enabled = formData.get("enabled");
+  if (enabled !== "true" && enabled !== "false") {
+    throw new Error("INVALID_AI_PROVIDER_MANUAL_STATE");
+  }
+  if (formData.get("confirmation") !== "UPDATE_AI_PROVIDER_MANUAL_CONTROL") {
+    throw new Error("AI_PROVIDER_MANUAL_CONFIRMATION_REQUIRED");
+  }
+  if (enabled === "true") {
+    const [globalControl, automationControl, providerControl] = await Promise.all([
+      getGlobalAiControlState(),
+      getAutomationControlState(),
+      getAiProviderControlSnapshot(),
+    ]);
+    const readiness = await getAiProviderReadiness({
+      globalAiEnabled: globalControl.effectiveEnabled,
+      generalAutomationEnabled: automationControl.effectiveEnabled,
+      control: providerControl,
+    });
+    const selected = readiness.find((candidate) => candidate.provider === provider);
+    if (!selected?.manualEligible || !globalControl.effectiveEnabled) {
+      throw new Error("AI_PROVIDER_MANUAL_ENABLEMENT_BLOCKED");
+    }
+  }
+  await setAiProviderManualEnabled({
+    provider,
+    enabled: enabled === "true",
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function selectAutomaticAiProvider(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  if (formData.get("confirmation") !== "SELECT_AUTOMATIC_AI_PROVIDER") {
+    throw new Error("AI_PROVIDER_AUTOMATIC_CONFIRMATION_REQUIRED");
+  }
+  const selection = resolveAiModelSelectionCode(formData.get("selection"));
+  const [globalControl, automationControl, providerControl] = await Promise.all([
+    getGlobalAiControlState(),
+    getAutomationControlState(),
+    getAiProviderControlSnapshot(),
+  ]);
+  const readiness = await getAiProviderReadiness({
+    globalAiEnabled: globalControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    control: providerControl,
+  });
+  const selected = readiness.find(
+    (candidate) => candidate.provider === selection.provider,
+  );
+  if (!selected?.automaticEligible || !globalControl.effectiveEnabled) {
+    throw new Error("AI_PROVIDER_AUTOMATIC_ENABLEMENT_BLOCKED");
+  }
+  await setAutomaticAiProvider({
+    selection,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function verifyAiProviderConnectionAction(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const provider = aiProviderIdSchema.parse(formData.get("provider"));
+  if (formData.get("confirmation") !== "VERIFY_AI_PROVIDER_CONNECTION") {
+    throw new Error("AI_PROVIDER_CONNECTION_CONFIRMATION_REQUIRED");
+  }
+  await verifyAiProviderConnection({
+    provider,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
   });
   revalidatePath("/admin/runtime");
 }

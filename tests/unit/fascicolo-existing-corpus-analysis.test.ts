@@ -69,6 +69,18 @@ function dependencies() {
   return {
     loadCorpus: vi.fn().mockResolvedValue(corpus),
     loadGlobalAiControl: vi.fn().mockResolvedValue({ effectiveEnabled: true }),
+    loadProviderControl: vi.fn().mockResolvedValue({
+      workflow: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      automaticSelection: DEFAULT_AI_MODEL_SELECTION,
+      automaticUpdatedAt: null,
+      providers: AI_MODEL_CATALOG.map((entry) => ({
+        provider: entry.selection.provider,
+        manualEnabled: entry.selection.provider === "OPENAI",
+        manualUpdatedAt: null,
+        manualUpdatedBy: null,
+        automaticSelected: entry.selection.provider === "OPENAI",
+      })),
+    }),
     inspectBudgetCompatibility: vi.fn().mockResolvedValue({
       compatible: true,
       scopes: [],
@@ -315,6 +327,28 @@ describe("existing fascicolo corpus analysis", () => {
     expect(deps.loadCorpus).not.toHaveBeenCalled();
     expect(deps.admitJob).not.toHaveBeenCalled();
     expect(deps.activateWorker).not.toHaveBeenCalled();
+  });
+
+  it("blocks a manually disabled provider before corpus loading or admission", async () => {
+    const deps = dependencies();
+    deps.loadProviderControl.mockResolvedValue({
+      workflow: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      automaticSelection: DEFAULT_AI_MODEL_SELECTION,
+      automaticUpdatedAt: null,
+      providers: AI_MODEL_CATALOG.map((entry) => ({
+        provider: entry.selection.provider,
+        manualEnabled: false,
+        manualUpdatedAt: null,
+        manualUpdatedBy: null,
+        automaticSelected: entry.selection.provider === "OPENAI",
+      })),
+    });
+
+    await expect(requestExistingCorpusAnalysis(request, deps)).rejects.toEqual(
+      new ExistingCorpusAnalysisRequestError("AI_PROVIDER_MANUAL_DISABLED"),
+    );
+    expect(deps.loadCorpus).not.toHaveBeenCalled();
+    expect(deps.admitJob).not.toHaveBeenCalled();
   });
 
   it("deduplicates simultaneous submissions for one execution", async () => {

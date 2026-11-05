@@ -604,12 +604,23 @@ describe("automatic fascicolo analysis job", () => {
       actorId: "receipt-actor",
       actorEmail: "user@example.test",
       actorRole: "GIURIDICO",
+      selection: {
+        provider: "OPENAI" as const,
+        model: "gpt-5.6-terra" as const,
+        selectionVersion: "AI_MODEL_SELECTION_V1" as const,
+      },
+      authorizationRef: "automatic-real-data-approval",
     };
     const first = normalizeAsyncJobAdmission(buildFascicoloAutomaticAnalysisAdmission(input));
     const second = normalizeAsyncJobAdmission(buildFascicoloAutomaticAnalysisAdmission(input));
     expect(first.idempotencyKey).toBe(second.idempotencyKey);
     expect(first.admission.tenantId).toBe("tenant-1");
     expect(first.inputReference.metadata.extractionAttemptId).toBe("attempt-1");
+    expect(first.inputReference.metadata).toMatchObject({
+      providerKind: "OPENAI",
+      modelCode: "gpt-5.6-terra",
+      approvalRef: "automatic-real-data-approval",
+    });
   });
 
   it("deduplicates each corpus version while keeping ten fascicoli independent", () => {

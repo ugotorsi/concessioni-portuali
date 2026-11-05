@@ -23,6 +23,7 @@ import {
   aiModelEstimatedAmountEur,
   isAiModelReadyForRealData,
 } from "@/server/ai/providerRuntime";
+import { getAiProviderControlSnapshot } from "@/server/ai/providerControl";
 import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 import {
   getFascicoloDocumentCorpusForTenant,
@@ -134,7 +135,8 @@ export class ExistingCorpusAnalysisRequestError extends Error {
     | "CORPUS_NOT_READY"
     | "ECONOMIC_PREFLIGHT_FAILED"
     | "AI_GLOBALLY_DISABLED"
-    | "AI_PROVIDER_NOT_APPROVED") {
+    | "AI_PROVIDER_NOT_APPROVED"
+    | "AI_PROVIDER_MANUAL_DISABLED") {
     super(code);
     this.name = "ExistingCorpusAnalysisRequestError";
   }
@@ -177,6 +179,7 @@ export function isExistingCorpusAnalysisRequestEnabled(
 interface ExistingCorpusAnalysisDependencies {
   loadCorpus: typeof getFascicoloDocumentCorpusForTenant;
   loadGlobalAiControl: typeof getGlobalAiControlState;
+  loadProviderControl: typeof getAiProviderControlSnapshot;
   inspectBudgetCompatibility: typeof inspectFascicoloV7BudgetCompatibility;
   admitJob: typeof admitAsyncJob;
   activateWorker: typeof requestDocumentWorkerActivation;
@@ -185,6 +188,7 @@ interface ExistingCorpusAnalysisDependencies {
 const defaultDependencies: ExistingCorpusAnalysisDependencies = {
   loadCorpus: getFascicoloDocumentCorpusForTenant,
   loadGlobalAiControl: getGlobalAiControlState,
+  loadProviderControl: getAiProviderControlSnapshot,
   inspectBudgetCompatibility: inspectFascicoloV7BudgetCompatibility,
   admitJob: admitAsyncJob,
   activateWorker: requestDocumentWorkerActivation,
@@ -215,6 +219,13 @@ export async function requestExistingCorpusAnalysis(input: {
   const aiControl = await dependencies.loadGlobalAiControl(environment);
   if (!aiControl.effectiveEnabled) {
     throw new ExistingCorpusAnalysisRequestError("AI_GLOBALLY_DISABLED");
+  }
+  const providerControl = await dependencies.loadProviderControl();
+  const selectedControl = providerControl.providers.find(
+    (provider) => provider.provider === selection.provider,
+  );
+  if (!selectedControl?.manualEnabled) {
+    throw new ExistingCorpusAnalysisRequestError("AI_PROVIDER_MANUAL_DISABLED");
   }
   const corpus = await dependencies.loadCorpus({
     tenantId: input.tenantId,
