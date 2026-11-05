@@ -14,6 +14,10 @@ import {
 } from "@/server/automation/automationControl";
 import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import {
+  getAiModelCatalogEntry,
+  resolveAiModelSelectionCode,
+} from "@/server/ai/providerCatalog";
+import {
   documentWorkerKindForOperation,
   requestDocumentWorkerActivation,
 } from "@/server/async-jobs/documentWorkerActivation";
@@ -125,6 +129,8 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
   const currentUser = await requireAdminWithMfa();
   const procedimentoId = formData.get("procedimentoId");
   const executionId = manualAnalysisExecutionIdSchema.parse(formData.get("executionId"));
+  const selection = resolveAiModelSelectionCode(formData.get("aiModelSelection"));
+  const modelEntry = getAiModelCatalogEntry(selection);
   if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
     throw new Error("INVALID_PROCEDIMENTO_ID");
   }
@@ -147,6 +153,7 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
     tenantId: procedimento.enteId,
     procedimentoId: procedimento.id,
     executionId,
+    selection,
     actor: {
       id: currentUser.id,
       email: currentUser.email,
@@ -169,6 +176,13 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
       admissionOutcome: result.admission.outcome,
       workerActivationOutcome: result.activation.outcome,
       automationRequired: false,
+      provider: selection.provider,
+      model: selection.model,
+      selectionVersion: selection.selectionVersion,
+      authorizationRef: result.authorizationRef,
+      pricingVersion: modelEntry.pricingVersion,
+      dataPolicyVersion: modelEntry.dataPolicyVersion,
+      result: "ADMITTED",
     },
   });
   revalidatePath("/admin/runtime");
@@ -179,6 +193,8 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
   const currentUser = await requireAdminWithMfa();
   const tenantId = formData.get("tenantId");
   const executionId = manualAnalysisExecutionIdSchema.parse(formData.get("executionId"));
+  const selection = resolveAiModelSelectionCode(formData.get("aiModelSelection"));
+  const modelEntry = getAiModelCatalogEntry(selection);
   if (typeof tenantId !== "string" || !tenantId.trim()) {
     throw new Error("INVALID_TENANT_ID");
   }
@@ -212,6 +228,7 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
         tenantId: procedimento.enteId,
         procedimentoId: procedimento.id,
         executionId,
+        selection,
         actor: {
           id: currentUser.id,
           email: currentUser.email,
@@ -237,6 +254,12 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
         admittedCount: admittedJobIds.length,
         admittedJobIds,
         reason: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        provider: selection.provider,
+        model: selection.model,
+        selectionVersion: selection.selectionVersion,
+        pricingVersion: modelEntry.pricingVersion,
+        dataPolicyVersion: modelEntry.dataPolicyVersion,
+        result: "FAILED",
       },
     });
     throw error;
@@ -256,6 +279,13 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
       requestedCount: procedimenti.length,
       admittedJobIds,
       automationRequired: false,
+      provider: selection.provider,
+      model: selection.model,
+      selectionVersion: selection.selectionVersion,
+      authorizationRef: process.env.AI_REAL_DATA_APPROVAL_ID?.trim() ?? null,
+      pricingVersion: modelEntry.pricingVersion,
+      dataPolicyVersion: modelEntry.dataPolicyVersion,
+      result: "ADMITTED",
     },
   });
   revalidatePath("/admin/runtime");

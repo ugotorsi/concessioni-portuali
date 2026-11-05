@@ -13,6 +13,16 @@ import {
 import { FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fascicoloDocumentAnalysis";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
+import {
+  aiSelectionMetadata,
+  DEFAULT_AI_MODEL_SELECTION,
+  getAiModelCatalogEntry,
+  type AiModelSelection,
+} from "@/server/ai/providerCatalog";
+import {
+  aiModelEstimatedAmountEur,
+  isAiModelReadyForRealData,
+} from "@/server/ai/providerRuntime";
 import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 import {
   getFascicoloDocumentCorpusForTenant,
@@ -52,24 +62,37 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
   preflightFingerprint?: string;
   initiatingUserId: string;
   actorEmail: string;
+  selection?: AiModelSelection;
+  authorizationRef?: string;
 }): AsyncJobAdmissionInput {
   const controlledV7 = Boolean(input.preflightFingerprint);
+  const selection = input.selection ?? DEFAULT_AI_MODEL_SELECTION;
+  if (controlledV7 && (
+    selection.provider !== DEFAULT_AI_MODEL_SELECTION.provider
+    || selection.model !== DEFAULT_AI_MODEL_SELECTION.model
+  )) {
+    throw new ExistingCorpusAnalysisRequestError("AI_PROVIDER_NOT_APPROVED");
+  }
+  const authorizationRef = input.authorizationRef ?? SELVARA_PILOT_AUTHORIZATION.approvalId;
+  const baseAdmission = buildFascicoloDocumentCorpusUpdateAdmission({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    corpusFingerprint: input.corpusFingerprint,
+    correlationId: controlledV7
+      ? buildFascicoloV7ControlledLogicalOperationId(input)
+      : manualLogicalOperationId(input),
+    policyDecisionRef: null,
+    admissionType: "AUTHENTICATED_USER",
+    initiatingUserId: input.initiatingUserId,
+    actorId: input.initiatingUserId,
+    actorEmail: input.actorEmail,
+    actorRole: "ADMIN",
+  });
   const logicalOperationId = controlledV7
     ? buildFascicoloV7ControlledLogicalOperationId(input)
     : manualLogicalOperationId(input);
   return {
-    ...buildFascicoloDocumentCorpusUpdateAdmission({
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-      corpusFingerprint: input.corpusFingerprint,
-      correlationId: logicalOperationId,
-      policyDecisionRef: null,
-      admissionType: "AUTHENTICATED_USER",
-      initiatingUserId: input.initiatingUserId,
-      actorId: input.initiatingUserId,
-      actorEmail: input.actorEmail,
-      actorRole: "ADMIN",
-    }),
+    ...baseAdmission,
     logicalOperationId,
     purpose: controlledV7
       ? FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE
@@ -90,7 +113,18 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
             },
           },
         }
-      : {}),
+      : {
+          inputReference: {
+            referenceType: "FASCICOLO_DOCUMENT_CORPUS" as const,
+            referenceId: input.corpusFingerprint,
+            referenceVersion: "V1" as const,
+            metadata: {
+              procedimentoId: input.procedimentoId,
+              corpusHash: input.corpusFingerprint,
+              ...aiSelectionMetadata(selection, authorizationRef),
+            },
+          },
+        }),
   };
 }
 
@@ -99,7 +133,8 @@ export class ExistingCorpusAnalysisRequestError extends Error {
     | "ANALYSIS_ACTIVATION_DISABLED"
     | "CORPUS_NOT_READY"
     | "ECONOMIC_PREFLIGHT_FAILED"
-    | "AI_GLOBALLY_DISABLED") {
+    | "AI_GLOBALLY_DISABLED"
+    | "AI_PROVIDER_NOT_APPROVED") {
     super(code);
     this.name = "ExistingCorpusAnalysisRequestError";
   }
@@ -107,7 +142,16 @@ export class ExistingCorpusAnalysisRequestError extends Error {
 
 export function isExistingCorpusAnalysisRequestEnabled(
   environment: Readonly<Record<string, string | undefined>> = process.env,
+  selection: AiModelSelection = DEFAULT_AI_MODEL_SELECTION,
 ): boolean {
+  try {
+    getAiModelCatalogEntry(selection);
+    if (!isAiModelReadyForRealData(selection) || selection.provider !== "OPENAI") {
+      return false;
+    }
+  } catch {
+    return false;
+  }
   const runtimeValuesPresent = [
     "AI_OPENAI_API_KEY",
     "AI_OPENAI_MAX_INPUT_TOKENS",
@@ -157,9 +201,15 @@ export async function requestExistingCorpusAnalysis(input: {
   };
   environment?: Readonly<Record<string, string | undefined>>;
   withLegalResearch?: boolean;
+  selection?: AiModelSelection;
 }, dependencies: ExistingCorpusAnalysisDependencies = defaultDependencies) {
   const environment = input.environment ?? process.env;
-  if (!isExistingCorpusAnalysisRequestEnabled(environment)) {
+  const selection = input.selection ?? DEFAULT_AI_MODEL_SELECTION;
+  getAiModelCatalogEntry(selection);
+  if (!isAiModelReadyForRealData(selection)) {
+    throw new ExistingCorpusAnalysisRequestError("AI_PROVIDER_NOT_APPROVED");
+  }
+  if (!isExistingCorpusAnalysisRequestEnabled(environment, selection)) {
     throw new ExistingCorpusAnalysisRequestError("ANALYSIS_ACTIVATION_DISABLED");
   }
   const aiControl = await dependencies.loadGlobalAiControl(environment);
@@ -179,8 +229,10 @@ export async function requestExistingCorpusAnalysis(input: {
   ) {
     throw new ExistingCorpusAnalysisRequestError("CORPUS_NOT_READY");
   }
-  const estimatedCostEur = Number(environment.ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR);
-  if (!Number.isFinite(estimatedCostEur) || estimatedCostEur <= 0) {
+  let estimatedCostEur: number;
+  try {
+    estimatedCostEur = aiModelEstimatedAmountEur(selection, environment);
+  } catch {
     throw new ExistingCorpusAnalysisRequestError("ECONOMIC_PREFLIGHT_FAILED");
   }
   let budgetCompatibility: Awaited<ReturnType<typeof inspectFascicoloV7BudgetCompatibility>>;
@@ -205,6 +257,9 @@ export async function requestExistingCorpusAnalysis(input: {
       executionId: input.executionId,
       initiatingUserId: input.actor.id,
       actorEmail: input.actor.email,
+      selection,
+      authorizationRef: environment.AI_REAL_DATA_APPROVAL_ID?.trim()
+        || SELVARA_PILOT_AUTHORIZATION.approvalId,
     }),
   );
   const activation = TERMINAL_ANALYSIS_JOB_STATUSES.has(admission.job.status)
@@ -216,5 +271,12 @@ export async function requestExistingCorpusAnalysis(input: {
         procedimentoId: input.procedimentoId,
         ...(input.withLegalResearch ? { withLegalResearch: true } : {}),
       });
-  return { admission, activation, budgetCompatibility };
+  return {
+    admission,
+    activation,
+    budgetCompatibility,
+    selection,
+    authorizationRef: environment.AI_REAL_DATA_APPROVAL_ID?.trim()
+      || SELVARA_PILOT_AUTHORIZATION.approvalId,
+  };
 }

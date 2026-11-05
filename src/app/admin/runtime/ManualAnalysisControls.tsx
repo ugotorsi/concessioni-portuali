@@ -12,9 +12,17 @@ interface TenantOption {
   label: string;
 }
 
+interface AiModelOption {
+  code: string;
+  label: string;
+  enabled: boolean;
+}
+
 export function ManualAnalysisControls(props: {
   procedimenti: readonly ProcedimentoOption[];
   tenants: readonly TenantOption[];
+  aiModels: readonly AiModelOption[];
+  defaultAiModelCode: string;
   singleExecutionId: string;
   batchExecutionId: string;
   singleAction: (formData: FormData) => Promise<void>;
@@ -49,6 +57,21 @@ export function ManualAnalysisControls(props: {
             ))}
           </select>
         </label>
+        <label className="grid gap-1 text-sm font-medium text-slate-700">
+          Provider e modello
+          <select
+            className="h-10 rounded-md border border-slate-300 px-3 text-sm"
+            name="aiModelSelection"
+            defaultValue={props.defaultAiModelCode}
+            required
+          >
+            {props.aiModels.map((model) => (
+              <option key={model.code} value={model.code} disabled={!model.enabled}>
+                {model.label}{model.enabled ? "" : " · dati reali non abilitati"}
+              </option>
+            ))}
+          </select>
+        </label>
         <Button type="submit" disabled={!props.procedimenti.length}>
           Avvia analisi manuale
         </Button>
@@ -77,6 +100,21 @@ export function ManualAnalysisControls(props: {
             {props.tenants.map((tenant) => (
               <option key={tenant.id} value={tenant.id}>
                 {tenant.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-slate-700">
+          Provider e modello
+          <select
+            className="h-10 rounded-md border border-slate-300 px-3 text-sm"
+            name="aiModelSelection"
+            defaultValue={props.defaultAiModelCode}
+            required
+          >
+            {props.aiModels.map((model) => (
+              <option key={model.code} value={model.code} disabled={!model.enabled}>
+                {model.label}{model.enabled ? "" : " · dati reali non abilitati"}
               </option>
             ))}
           </select>

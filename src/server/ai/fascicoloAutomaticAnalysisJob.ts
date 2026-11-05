@@ -33,7 +33,6 @@ import {
   type FascicoloDocumentAnalysisInput,
   type FascicoloDocumentExcerpt,
 } from "@/server/ai/fascicoloDocumentAnalysis";
-import { createOpenAiFascicoloDocumentRuntimeFromEnv } from "@/server/ai/openaiRuntime";
 import {
   calculateGpt56TerraCost,
   type OpenAiBillableUsage,
@@ -41,10 +40,17 @@ import {
 import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
 import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
 import {
+  aiSelectionFromMetadata,
+  DEFAULT_AI_MODEL_SELECTION,
+} from "@/server/ai/providerCatalog";
+import {
+  AiProviderRuntimeConfigurationError,
+  resolveAiDocumentRuntimeFromEnv,
+} from "@/server/ai/providerRuntime";
+import {
   RuntimeCostSettlementRequiredError,
   withRuntimeCostGate,
 } from "@/server/runtime/cost";
-import { runtimeCostEstimate } from "@/server/runtime/costConfig";
 import { isAutomationEnabled } from "@/server/automation/automationControl";
 import {
   FascicoloV7PreflightError,
@@ -139,14 +145,6 @@ export function rethrowAutomaticAnalysisProviderFailure(input: {
   throw input.error;
 }
 
-function automaticAnalysisUsdToEurRate(): number {
-  const value = Number(process.env.AI_OPENAI_USD_TO_EUR_RATE);
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new OpenAiRuntimeConfigurationError("AI_OPENAI_USD_TO_EUR_RATE");
-  }
-  return value;
-}
-
 const neutralIntakeReferenceSchema = z.object({
   referenceType: z.literal("FASCICOLO_DOCUMENT_VERSION"),
   referenceId: z.string().trim().min(1).max(256),
@@ -167,6 +165,13 @@ const documentCorpusReferenceSchema = z.object({
     trialContractVersion: z.literal(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).optional(),
     trialApprovalRef: z.literal(SELVARA_PILOT_AUTHORIZATION.approvalId).optional(),
     trialPreflightHash: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+    providerKind: z.enum(["OPENAI", "ANTHROPIC", "DEEPSEEK"]).optional(),
+    modelCode: z.string().trim().min(1).max(128).optional(),
+    selectionVersion: z.literal("AI_MODEL_SELECTION_V1").optional(),
+    approvalRef: z.string().trim().min(1).max(512).optional(),
+    approvalVersion: z.literal("AI_PROVIDER_AUTHORIZATION_V1").optional(),
+    handlingPolicyVersion: z.literal("AI_PROVIDER_DATA_POLICY_V1").optional(),
+    pricingVersion: z.string().trim().min(1).max(512).optional(),
   }).strict(),
 }).strict().superRefine((reference, context) => {
   const trialValues = [
@@ -180,6 +185,22 @@ const documentCorpusReferenceSchema = z.object({
       code: "custom",
       path: ["metadata"],
       message: "Controlled V7 metadata must be complete.",
+    });
+  }
+  const selectionValues = [
+    reference.metadata.providerKind,
+    reference.metadata.modelCode,
+    reference.metadata.selectionVersion,
+    reference.metadata.approvalRef,
+    reference.metadata.approvalVersion,
+    reference.metadata.handlingPolicyVersion,
+  ];
+  if (selectionValues.some((value) => value !== undefined)
+    && selectionValues.some((value) => value === undefined)) {
+    context.addIssue({
+      code: "custom",
+      path: ["metadata"],
+      message: "AI provider selection metadata must be complete.",
     });
   }
 });
@@ -355,6 +376,12 @@ export interface FascicoloAutomaticAnalysisDependencies {
 }
 
 export function fascicoloAutomaticAnalysisDiagnostic(error: unknown): Readonly<Record<string, unknown>> | null {
+  if (error instanceof AiProviderRuntimeConfigurationError) {
+    return {
+      event: "fascicolo_automatic_analysis_provider_runtime_error",
+      errorCode: error.code,
+    };
+  }
   if (error instanceof OpenAiRuntimeConfigurationError) {
     return {
       event: "fascicolo_automatic_analysis_configuration_error",
@@ -852,6 +879,10 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
           procedimentoId: true,
           purpose: true,
           operation: true,
+          inputReference: true,
+          actorId: true,
+          actorEmail: true,
+          actorRole: true,
         },
       });
       if (job?.purpose === FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE) {
@@ -864,83 +895,116 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         };
         assertSelvaraPilotAuthorization(process.env, authorizationScope);
       }
-      const estimatedAmount = runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR");
-      const usdToEurRate = automaticAnalysisUsdToEurRate();
-      let usage: OpenAiBillableUsage | null = null;
-      let requestSent = false;
-      const startedAt = Date.now();
-      const runtime = createOpenAiFascicoloDocumentRuntimeFromEnv(
-        undefined,
-        {
-          telemetry: {
-            onRequestSent: () => {
-              requestSent = true;
-            },
-            onUsage: (reportedUsage) => {
-              usage = reportedUsage;
-            },
-          },
-        },
+      const parsedReference = job
+        ? documentCorpusReferenceSchema.safeParse(job.inputReference)
+        : null;
+      const selection = parsedReference?.success
+        ? aiSelectionFromMetadata(parsedReference.data.metadata)
+        : DEFAULT_AI_MODEL_SELECTION;
+      if (authorizationScope && selection.provider !== "OPENAI") {
+        throw new AiProviderRuntimeConfigurationError("AI_PROVIDER_SELECTION_INVALID");
+      }
+      const resolved = resolveAiDocumentRuntimeFromEnv({
+        selection,
         authorizationScope,
-      );
-      return await withRuntimeCostGate({
+      });
+      const persistedAuthorizationRef = parsedReference?.success
+        ? parsedReference.data.metadata.approvalRef
+        : undefined;
+      if (persistedAuthorizationRef
+        && persistedAuthorizationRef !== resolved.authorizationRef) {
+        throw new AiProviderRuntimeConfigurationError("AI_PROVIDER_REAL_DATA_NOT_APPROVED");
+      }
+      const estimatedAmount = resolved.estimatedAmountEur;
+      const startedAt = Date.now();
+      const value = await withRuntimeCostGate({
         tenantId: input.tenantId,
         procedimentoId: input.procedimentoId,
         jobId: input.jobId,
-        provider: "OPENAI",
+        provider: selection.provider,
         operationType: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
         estimatedAmount,
         idempotencyKey: buildFascicoloAutomaticAnalysisCostIdempotencyKey(input),
       }, async () => {
         let value: unknown;
         try {
-          value = await runtime.analyze(input);
+          value = await resolved.runtime.analyze(input);
         } catch (error) {
           console.warn({
             event: "fascicolo_automatic_analysis_cost_unverifiable",
             jobId: input.jobId,
-            requestSent,
+            provider: selection.provider,
+            model: selection.model,
+            requestSent: resolved.requestWasSent(),
             estimatedAmount,
           });
-          rethrowAutomaticAnalysisProviderFailure({
-            error,
-            usage,
-            requestSent,
-            estimatedAmount,
-            usdToEurRate,
-          });
+          const actualAmount = resolved.actualAmountEur();
+          if (actualAmount !== null) {
+            throw new RuntimeCostSettlementRequiredError(actualAmount, error);
+          }
+          if (resolved.requestWasSent()) {
+            throw new RuntimeCostSettlementRequiredError(estimatedAmount, error);
+          }
+          throw error;
         }
-        if (!usage) {
+        const actualAmount = resolved.actualAmountEur();
+        if (actualAmount === null) {
           throw new RuntimeCostSettlementRequiredError(
             estimatedAmount,
-            new Error("OPENAI_USAGE_MISSING_AFTER_SUCCESS"),
+            new Error("AI_USAGE_MISSING_AFTER_SUCCESS"),
           );
         }
-        const accounting = calculateGpt56TerraCost({ usage, usdToEurRate });
         console.info({
           event: "fascicolo_automatic_analysis_performance",
           jobId: input.jobId,
+          provider: selection.provider,
+          model: selection.model,
           elapsedMs: Date.now() - startedAt,
           documentCount: input.documents.length,
           excerptCount: input.excerpts.length,
           inputCharacterCount: input.excerpts.reduce((count, excerpt) => count + excerpt.text.length, 0),
           estimatedAmount,
-          internallyAccountedAmount: accounting.accountedEur,
+          internallyAccountedAmount: actualAmount,
           providerBilledAmount: null,
           providerBillingVerification: "NOT_VERIFIED",
-          providerReportedUsage: accounting.usage,
-          pricingEffectiveDate: accounting.pricingEffectiveDate,
+          pricingVersion: resolved.pricingVersion,
         });
         return {
           value,
-          actualAmount: accounting.accountedEur,
+          actualAmount,
         };
       });
+      await auditSuccess({
+        azione: "FASCICOLO_AI_PROVIDER_EXECUTION",
+        entita: "AsyncJob",
+        entitaId: input.jobId,
+        enteId: input.tenantId,
+        actor: {
+          userId: job?.actorId ?? null,
+          userEmail: job?.actorEmail ?? null,
+          userRole: job?.actorRole ?? null,
+        },
+        metadata: {
+          provider: selection.provider,
+          model: selection.model,
+          selectionVersion: selection.selectionVersion,
+          authorizationRef: resolved.authorizationRef,
+          pricingVersion: resolved.pricingVersion,
+          dataPolicyVersion: resolved.dataPolicyVersion,
+          result: "SUCCEEDED",
+          estimatedAmount,
+          actualAmount: resolved.actualAmountEur(),
+        },
+      });
+      return value;
     } catch (error) {
       const diagnostic = fascicoloAutomaticAnalysisDiagnostic(error);
       if (diagnostic) console.error(diagnostic);
       if (error instanceof OpenAiRuntimeConfigurationError) {
         throw new AsyncJobExecutionError("CONFIGURATION", "AI_CONFIGURATION_ERROR", false);
+      }
+      if (error instanceof AiProviderRuntimeConfigurationError) {
+        throw new AsyncJobExecutionError("CONFIGURATION", error.code, false);
       }
       if (error instanceof AiRealDataActivationError) {
         throw new AsyncJobExecutionError("CONFIGURATION", "AI_REAL_DATA_DISABLED", false);

@@ -11,6 +11,10 @@ import {
   requestExistingCorpusAnalysis,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import {
+  AI_MODEL_CATALOG,
+  DEFAULT_AI_MODEL_SELECTION,
+} from "@/server/ai/providerCatalog";
 
 const enabledEnvironment = {
   DOCUMENT_WORKER_ACTIVATION_MODE: "RENDER_ONE_OFF",
@@ -137,6 +141,13 @@ describe("existing fascicolo corpus analysis", () => {
         metadata: {
           procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
           corpusHash: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+          providerKind: "OPENAI",
+          modelCode: "gpt-5.6-terra",
+          selectionVersion: "AI_MODEL_SELECTION_V1",
+          approvalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+          approvalVersion: "AI_PROVIDER_AUTHORIZATION_V1",
+          handlingPolicyVersion: "AI_PROVIDER_DATA_POLICY_V1",
+          pricingVersion: "OPENAI_GPT_5_6_TERRA_2026_10_21",
         },
       },
     }));
@@ -259,6 +270,51 @@ describe("existing fascicolo corpus analysis", () => {
     expect(changedPreflight.idempotencyKey).not.toBe(manualOne.idempotencyKey);
     expect(changedPreflight.requestFingerprint).not.toBe(manualOne.requestFingerprint);
     expect(manualOne.idempotencyKey).not.toBe(automatic.idempotencyKey);
+  });
+
+  it("binds the provider choice immutably to one authorized execution", () => {
+    const common = {
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      corpusFingerprint: "c".repeat(64),
+      executionId,
+      initiatingUserId: "admin-a",
+      actorEmail: "admin-a@example.test",
+      authorizationRef: "approval-a",
+    };
+    const openAi = normalizeAsyncJobAdmission(
+      buildFascicoloExistingCorpusAnalysisAdmission({
+        ...common,
+        selection: DEFAULT_AI_MODEL_SELECTION,
+      }),
+    );
+    const anthropic = normalizeAsyncJobAdmission(
+      buildFascicoloExistingCorpusAnalysisAdmission({
+        ...common,
+        selection: AI_MODEL_CATALOG[1].selection,
+      }),
+    );
+
+    expect(anthropic.idempotencyKey).toBe(openAi.idempotencyKey);
+    expect(anthropic.requestFingerprint).not.toBe(openAi.requestFingerprint);
+    expect(anthropic.inputReference.metadata).toMatchObject({
+      providerKind: "ANTHROPIC",
+      modelCode: "claude-sonnet-5",
+      approvalRef: "approval-a",
+    });
+  });
+
+  it("blocks unapproved providers before corpus loading or job admission", async () => {
+    const deps = dependencies();
+    await expect(requestExistingCorpusAnalysis({
+      ...request,
+      selection: AI_MODEL_CATALOG[1].selection,
+    }, deps)).rejects.toEqual(
+      new ExistingCorpusAnalysisRequestError("AI_PROVIDER_NOT_APPROVED"),
+    );
+    expect(deps.loadCorpus).not.toHaveBeenCalled();
+    expect(deps.admitJob).not.toHaveBeenCalled();
+    expect(deps.activateWorker).not.toHaveBeenCalled();
   });
 
   it("deduplicates simultaneous submissions for one execution", async () => {

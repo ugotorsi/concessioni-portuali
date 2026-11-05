@@ -40,6 +40,11 @@ import { GlobalAiControlForm } from "./GlobalAiControlForm";
 import { AutomationControlForm } from "./AutomationControlForm";
 import { ManualAnalysisControls } from "./ManualAnalysisControls";
 import { LegalWorkbenchSection } from "./LegalWorkbenchSection";
+import {
+  AI_MODEL_CATALOG,
+  aiModelSelectionCode,
+  DEFAULT_AI_MODEL_SELECTION,
+} from "@/server/ai/providerCatalog";
 
 export const dynamic = "force-dynamic";
 
@@ -382,6 +387,12 @@ export default async function RuntimeOperationsPage({
             <ManualAnalysisControls
               singleExecutionId={randomUUID()}
               batchExecutionId={randomUUID()}
+              defaultAiModelCode={aiModelSelectionCode(DEFAULT_AI_MODEL_SELECTION)}
+              aiModels={AI_MODEL_CATALOG.map((entry) => ({
+                code: aiModelSelectionCode(entry.selection),
+                label: entry.label,
+                enabled: entry.capabilities.realDataApproved && entry.pricingVersion !== null,
+              }))}
               procedimenti={activeProcedimenti.map((procedimento) => ({
                 id: procedimento.id,
                 label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,
