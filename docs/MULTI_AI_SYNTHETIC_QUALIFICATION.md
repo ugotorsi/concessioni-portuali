@@ -199,7 +199,7 @@ sono vere:
 3. alias temporaneo dedicato `*.vercel.app`, passato sia come `NEXTAUTH_URL`
    sia come `NOETRA_LIVE_QUALIFICATION_HOST`;
 4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
-5. authorization ID esatto `GH_ISSUE_70_2026_11_05`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_2`;
 6. branch esatto `qualification/multi-ai-synthetic-20261105`;
 7. commit Vercel uguale al commit esplicitamente atteso;
 8. Vercel Deployment Protection attiva;
@@ -257,7 +257,11 @@ Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
 una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
 fisso:
 
-`noetra:qualification:issue70:2026-11-05`
+`noetra:qualification:issue70:2026-11-06:run-2`
+
+Il namespace del primo tentativo
+`noetra:qualification:issue70:2026-11-05` resta distinto e non viene letto,
+azzerato o riutilizzato.
 
 Il lock non ha TTL: una prenotazione, anche se il processo termina, impedisce
 replay e recuperi automatici. Sono inoltre prenotati separatamente Anthropic e
@@ -333,11 +337,11 @@ vercel deploy --prod --skip-domain --yes `
   --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
   --scope=ugotorsis-projects `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_2 `
   -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
   -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_2 `
   -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
   -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app

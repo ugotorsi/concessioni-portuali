@@ -215,7 +215,7 @@ describe("issue #70 live synthetic qualification", () => {
   it("blocks replay before any provider request", async () => {
     const store = memoryStore();
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_05",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -363,7 +363,8 @@ describe("issue #70 live synthetic qualification", () => {
 describe("issue #70 deployment and request security", () => {
   const environment = {
     NOETRA_LIVE_QUALIFICATION_ENABLED: "true",
-    NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID: "GH_ISSUE_70_2026_11_05",
+    NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID:
+      "GH_ISSUE_70_2026_11_06_RUN_2",
     NOETRA_LIVE_QUALIFICATION_HOST:
       "concessioni-portuali-demo-issue70.vercel.app",
     VERCEL_ENV: "production",
@@ -582,7 +583,7 @@ describe("issue #70 distributed reservation store", () => {
       .mockResolvedValueOnce(Response.json({ result: "OK" }))
       .mockResolvedValueOnce(Response.json({
         result: JSON.stringify({
-          authorizationId: "GH_ISSUE_70_2026_11_05",
+          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
           status: "PASS",
           updatedAt: "2026-11-06T10:00:00.000Z",
           providers: [],
@@ -595,7 +596,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     const value: LiveQualificationStoredResult = {
-      authorizationId: "GH_ISSUE_70_2026_11_05",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -607,6 +608,10 @@ describe("issue #70 distributed reservation store", () => {
     expect(await store.read()).toMatchObject({ status: "PASS" });
     expect(JSON.parse(String(transport.mock.calls[0]?.[1]?.body)))
       .toEqual(expect.arrayContaining(["SET", "NX"]));
+    expect(String(transport.mock.calls[0]?.[1]?.body))
+      .toContain("noetra:qualification:issue70:2026-11-06:run-2:run");
+    expect(String(transport.mock.calls[0]?.[1]?.body))
+      .not.toContain("noetra:qualification:issue70:2026-11-05");
     expect(JSON.parse(String(transport.mock.calls[1]?.[1]?.body)))
       .toEqual(expect.arrayContaining(["SET", "NX"]));
     const commandBodies = transport.mock.calls.map((call) =>
@@ -623,7 +628,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_05",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
