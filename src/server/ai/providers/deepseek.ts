@@ -30,10 +30,17 @@ export const DEEPSEEK_CHAT_COMPLETIONS_ENDPOINT =
 export interface DeepSeekProviderTelemetry {
   onRequestSent?(): void;
   onUsage?(usage: AiBillableUsage): void;
+  onResponseMetadata?(metadata: { readonly stopReason: string | null }): void;
 }
 
 function positiveInteger(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0;
+}
+
+function sanitizedStopReason(value: unknown): string | null {
+  return typeof value === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(value)
+    ? value
+    : null;
 }
 
 function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
@@ -162,6 +169,17 @@ export function createDeepSeekAnalysisProvider(config: {
       if (!response.ok) {
         throw mapProviderHttpError(response.status, body, response.headers);
       }
+      const record = body && typeof body === "object" && !Array.isArray(body)
+        ? body as Record<string, unknown>
+        : null;
+      const choice = record && Array.isArray(record.choices)
+        ? record.choices[0]
+        : null;
+      config.telemetry?.onResponseMetadata?.({
+        stopReason: choice && typeof choice === "object" && !Array.isArray(choice)
+          ? sanitizedStopReason((choice as Record<string, unknown>).finish_reason)
+          : null,
+      });
       const result = extractPayload(body, config.model);
       if (config.telemetry?.onUsage) {
         if (!result.usage) throw new AiProviderAdapterError("CONFIGURATION", {

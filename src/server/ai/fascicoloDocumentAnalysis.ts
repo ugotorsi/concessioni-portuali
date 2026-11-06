@@ -155,6 +155,8 @@ function mapProviderError(error: AiProviderAdapterError): FascicoloDocumentAnaly
       return new FascicoloDocumentAnalysisError("AI_PROVIDER_TIMEOUT", error.diagnostics);
     case "RATE_LIMITED":
       return new FascicoloDocumentAnalysisError("AI_PROVIDER_RATE_LIMITED", error.diagnostics);
+    case "INVALID_RESPONSE":
+      return new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT", error.diagnostics);
   }
 }
 

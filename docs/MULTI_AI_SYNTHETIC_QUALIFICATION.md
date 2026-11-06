@@ -92,10 +92,9 @@ testi concisi, un solo item per i tre array necessari e array opzionali vuoti,
 con obiettivo inferiore a 700 output token. Il fixture completo usato dai test
 occupa 179 token `o200k_base`.
 
-Il limite configurato resta 1.000 e nessuna nuova prova live e autorizzata.
-Se una futura autorizzazione richiedesse margine aggiuntivo, il limite
-proposto e 2.000 output token. Con 4.000 input token per provider, il
-preventivo prudenziale diventerebbe:
+L'autorizzazione RUN_3 porta il limite a 2.000 output token, lasciando
+invariati il contratto e il massimo di 4.000 input token per provider. Il
+preventivo prudenziale diventa:
 
 | Provider | Massimo USD con 2.000 output token |
 |---|---:|
@@ -216,7 +215,7 @@ L'autorizzazione registrata nella issue #70 consente esclusivamente:
 - una richiesta a `claude-sonnet-5`;
 - una richiesta a `deepseek-v4-pro`;
 - fascicolo completamente inventato `SYN-001`;
-- massimo 4.000 token input e 1.000 output per richiesta;
+- massimo 4.000 token input e 2.000 output per richiesta;
 - budget cumulativo massimo 5 USD;
 - nessun retry, fallback, tool, ricerca, documento o dato reale.
 
@@ -236,7 +235,7 @@ sono vere:
 3. alias temporaneo dedicato `*.vercel.app`, passato sia come `NEXTAUTH_URL`
    sia come `NOETRA_LIVE_QUALIFICATION_HOST`;
 4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
-5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_2`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_3`;
 6. branch esatto `qualification/multi-ai-synthetic-20261105`;
 7. commit Vercel uguale al commit esplicitamente atteso;
 8. Vercel Deployment Protection attiva;
@@ -294,11 +293,12 @@ Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
 una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
 fisso:
 
-`noetra:qualification:issue70:2026-11-06:run-2`
+`noetra:qualification:issue70:2026-11-06:run-3`
 
-Il namespace del primo tentativo
-`noetra:qualification:issue70:2026-11-05` resta distinto e non viene letto,
-azzerato o riutilizzato.
+I namespace dei primi due tentativi,
+`noetra:qualification:issue70:2026-11-05` e
+`noetra:qualification:issue70:2026-11-06:run-2`, restano distinti e non
+vengono letti, azzerati o riutilizzati.
 
 Il lock non ha TTL: una prenotazione, anche se il processo termina, impedisce
 replay e recuperi automatici. Sono inoltre prenotati separatamente Anthropic e
@@ -334,15 +334,15 @@ con grounding limitato a `SYN.P1` e `SYN.P2`.
 Il preflight conta schema, istruzioni e input con `o200k_base` e aggiunge 1.024
 token di overhead prudenziale. Il POST e bloccato se la stima supera 4.000.
 L'uso restituito dal provider deve inoltre essere presente, coerente e non
-superare 4.000 input / 1.000 output.
+superare 4.000 input / 2.000 output.
 
 Preventivo massimo:
 
 | Provider | Criterio prudenziale | Massimo USD |
 |---|---|---:|
-| Claude Sonnet 5 | input/cache-write maggiore e output ufficiale | 0,026000 |
-| DeepSeek V4 Pro | tariffa peak, cache miss e output | 0,009240 |
-| Totale | somma | 0,035240 |
+| Claude Sonnet 5 | input/cache-write maggiore e output ufficiale | 0,036000 |
+| DeepSeek V4 Pro | tariffa peak, cache miss e output | 0,013200 |
+| Totale | somma | 0,049200 |
 
 Il costo consuntivo e calcolato dai contatori provider con il catalogo di
 riferimento versionato. Resta una stima tecnica distinta dalla fattura
@@ -374,14 +374,14 @@ vercel deploy --prod --skip-domain --yes `
   --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
   --scope=ugotorsis-projects `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_2 `
-  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
-  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_3 `
+  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run3.vercel.app `
+  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run3.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_2 `
-  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_3 `
+  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run3.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
-  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app
+  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run3.vercel.app
 ```
 
 I flag CLI `-b` e `-e` sono override build/runtime del singolo deployment e

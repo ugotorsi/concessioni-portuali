@@ -15,6 +15,7 @@ type ProviderResult = {
   } | null;
   estimatedCostUsd: number | null;
   anomaly: string | null;
+  stopReason: string | null;
 };
 
 type QualificationState = {
@@ -138,6 +139,7 @@ export function LiveQualificationPanel() {
                 <th className="p-3">JSON / riferimenti</th>
                 <th className="p-3">Token input / output</th>
                 <th className="p-3">Costo USD</th>
+                <th className="p-3">Stop reason</th>
                 <th className="p-3">Anomalia</th>
               </tr>
             </thead>
@@ -158,6 +160,7 @@ export function LiveQualificationPanel() {
                   <td className="p-3">
                     {provider.estimatedCostUsd?.toFixed(8) ?? "-"}
                   </td>
+                  <td className="p-3">{provider.stopReason ?? "-"}</td>
                   <td className="p-3">{provider.anomaly ?? "-"}</td>
                 </tr>
               ))}

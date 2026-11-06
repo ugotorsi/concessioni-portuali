@@ -3,7 +3,8 @@ export type AiProviderFailureCategory =
   | "TIMEOUT"
   | "RATE_LIMITED"
   | "CONFIGURATION"
-  | "REQUEST_REJECTED";
+  | "REQUEST_REJECTED"
+  | "INVALID_RESPONSE";
 
 export interface AiProviderErrorDiagnostics {
   readonly httpStatus: number;

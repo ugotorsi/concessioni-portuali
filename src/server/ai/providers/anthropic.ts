@@ -31,6 +31,7 @@ export const ANTHROPIC_API_VERSION = "2023-06-01";
 export interface AnthropicProviderTelemetry {
   onRequestSent?(): void;
   onUsage?(usage: AiBillableUsage): void;
+  onResponseMetadata?(metadata: { readonly stopReason: string | null }): void;
 }
 
 const ANTHROPIC_UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
@@ -63,6 +64,12 @@ export function toAnthropicOutputSchema(value: unknown): unknown {
 
 function positiveInteger(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0;
+}
+
+function sanitizedStopReason(value: unknown): string | null {
+  return typeof value === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(value)
+    ? value
+    : null;
 }
 
 function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
@@ -100,7 +107,7 @@ function responseFailure(
   code: AnthropicResponseFailureCode,
   response: Response,
 ): AiProviderAdapterError {
-  return new AiProviderAdapterError("REQUEST_REJECTED", {
+  return new AiProviderAdapterError("INVALID_RESPONSE", {
     httpStatus: response.status,
     providerCode: code,
     providerRequestId: sanitizedProviderRequestId(response.headers),
@@ -215,6 +222,9 @@ export function createAnthropicAnalysisProvider(config: {
       }
       const record = responseRecord(body, response);
       const usage = parseUsage(record);
+      config.telemetry?.onResponseMetadata?.({
+        stopReason: sanitizedStopReason(record.stop_reason),
+      });
       if (config.telemetry?.onUsage) {
         if (!usage) throw new AiProviderAdapterError("CONFIGURATION", {
           httpStatus: response.status,

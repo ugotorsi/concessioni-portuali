@@ -31,7 +31,7 @@ import type {
 } from "@/server/ai/qualification/liveSyntheticQualificationStore";
 
 export const LIVE_QUALIFICATION_MAX_INPUT_TOKENS = 4_000;
-export const LIVE_QUALIFICATION_MAX_OUTPUT_TOKENS = 1_000;
+export const LIVE_QUALIFICATION_MAX_OUTPUT_TOKENS = 2_000;
 export const LIVE_QUALIFICATION_TOTAL_BUDGET_USD = 5;
 export const LIVE_QUALIFICATION_TIMEOUT_MS = 45_000;
 export const LIVE_QUALIFICATION_MAX_RESPONSE_BYTES = 131_072;
@@ -49,6 +49,7 @@ export interface LiveQualificationProviderResult {
   readonly estimatedCostUsd: number | null;
   readonly anomaly: string | null;
   readonly providerDiagnostics: AiProviderErrorDiagnostics | null;
+  readonly stopReason: string | null;
 }
 
 export interface LiveQualificationRunResult {
@@ -212,6 +213,7 @@ function safeFailure(
   anomaly: string,
   usage: AiBillableUsage | null,
   providerDiagnostics: AiProviderErrorDiagnostics | null = null,
+  stopReason: string | null = null,
 ): LiveQualificationProviderResult {
   return {
     provider,
@@ -224,6 +226,7 @@ function safeFailure(
     estimatedCostUsd: null,
     anomaly,
     providerDiagnostics,
+    stopReason,
   };
 }
 
@@ -251,6 +254,7 @@ async function executeProvider(input: {
   provider: SyntheticQualificationProvider;
   usage: () => AiBillableUsage | null;
   requestSent: () => boolean;
+  stopReason: () => string | null;
 }): Promise<LiveQualificationProviderResult> {
   try {
     const output = await input.provider.analyze(request);
@@ -261,6 +265,8 @@ async function executeProvider(input: {
         input.requestSent(),
         "USAGE_MISSING_INVALID_OR_OVER_LIMIT",
         usage,
+        null,
+        input.stopReason(),
       );
     }
     const parsed = providerAnalysisPayloadV1Schema.safeParse(output);
@@ -271,6 +277,8 @@ async function executeProvider(input: {
           input.requestSent(),
           "ZOD_VALIDATION_ERROR",
           usage,
+          null,
+          input.stopReason(),
         ),
         estimatedCostUsd: calculateAiTokenCost({
           usage,
@@ -296,6 +304,7 @@ async function executeProvider(input: {
       estimatedCostUsd,
       anomaly: grounding.anomaly,
       providerDiagnostics: null,
+      stopReason: input.stopReason(),
     };
   } catch (error) {
     const usage = input.usage();
@@ -305,6 +314,7 @@ async function executeProvider(input: {
       errorCode(error),
       usage,
       error instanceof AiProviderAdapterError ? error.diagnostics : null,
+      input.stopReason(),
     );
     return usageValid(usage)
       ? {
@@ -325,7 +335,7 @@ function storedResult(input: {
   now: Date;
 }): LiveQualificationStoredResult {
   return {
-    authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
+    authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
     status: input.status,
     updatedAt: input.now.toISOString(),
     providers: input.providers,
@@ -362,6 +372,7 @@ export async function runLiveSyntheticQualification(input: {
   if (!reserved) throw new Error("LIVE_QUALIFICATION_ALREADY_RESERVED");
   const providers: LiveQualificationProviderResult[] = [];
   let anthropicUsage: AiBillableUsage | null = null;
+  let anthropicStopReason: string | null = null;
   let anthropicSent = false;
   const anthropic = createAnthropicAnalysisProvider({
     apiKey: anthropicKey,
@@ -382,6 +393,9 @@ export async function runLiveSyntheticQualification(input: {
       onUsage: (usage) => {
         anthropicUsage = usage;
       },
+      onResponseMetadata: (metadata) => {
+        anthropicStopReason = metadata.stopReason;
+      },
     },
   });
   const anthropicResult = await executeProvider({
@@ -390,6 +404,7 @@ export async function runLiveSyntheticQualification(input: {
     provider: anthropic,
     usage: () => anthropicUsage,
     requestSent: () => anthropicSent,
+    stopReason: () => anthropicStopReason,
   });
   providers.push(anthropicResult);
   await input.store.record(storedResult({
@@ -409,6 +424,7 @@ export async function runLiveSyntheticQualification(input: {
       estimatedCostUsd: null,
       anomaly: "INTERRUPTED_AFTER_ANTHROPIC_FAILURE",
       providerDiagnostics: null,
+      stopReason: null,
     });
     await input.store.record(storedResult({
       status: "FAIL",
@@ -425,6 +441,7 @@ export async function runLiveSyntheticQualification(input: {
   }
 
   let deepSeekUsage: AiBillableUsage | null = null;
+  let deepSeekStopReason: string | null = null;
   let deepSeekSent = false;
   const deepSeek = createDeepSeekAnalysisProvider({
     apiKey: deepSeekKey,
@@ -445,6 +462,9 @@ export async function runLiveSyntheticQualification(input: {
       onUsage: (usage) => {
         deepSeekUsage = usage;
       },
+      onResponseMetadata: (metadata) => {
+        deepSeekStopReason = metadata.stopReason;
+      },
     },
   });
   const deepSeekResult = await executeProvider({
@@ -453,6 +473,7 @@ export async function runLiveSyntheticQualification(input: {
     provider: deepSeek,
     usage: () => deepSeekUsage,
     requestSent: () => deepSeekSent,
+    stopReason: () => deepSeekStopReason,
   });
   providers.push(deepSeekResult);
   const totalEstimatedCostUsd = providers.reduce(

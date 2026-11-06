@@ -112,10 +112,9 @@ function memoryStore(): LiveQualificationRunStore & {
 
 describe("issue #70 live synthetic qualification", () => {
   it("preflights below the authorized token and cost limits", () => {
-    expect(liveQualificationPreflight()).toMatchObject({
-      compatible: true,
-      maximumCostUsd: 0.03524,
-    });
+    const preflight = liveQualificationPreflight();
+    expect(preflight.compatible).toBe(true);
+    expect(preflight.maximumCostUsd).toBeCloseTo(0.0492, 8);
     expect(liveQualificationPreflight().inputTokenUpperBound).toBeLessThanOrEqual(4_000);
   });
 
@@ -147,6 +146,7 @@ describe("issue #70 live synthetic qualification", () => {
         jsonValid: true,
         refsValid: true,
         usage: { inputTokens: 950, outputTokens: 180 },
+        stopReason: "end_turn",
       },
       {
         provider: "DEEPSEEK",
@@ -156,6 +156,7 @@ describe("issue #70 live synthetic qualification", () => {
         jsonValid: true,
         refsValid: true,
         usage: { inputTokens: 900, outputTokens: 160 },
+        stopReason: "stop",
       },
     ]);
     expect(anthropicTransport).toHaveBeenCalledOnce();
@@ -168,11 +169,11 @@ describe("issue #70 live synthetic qualification", () => {
     )) as Record<string, unknown>;
     expect(anthropicBody).toMatchObject({
       model: "claude-sonnet-5",
-      max_tokens: 1_000,
+      max_tokens: 2_000,
     });
     expect(deepSeekBody).toMatchObject({
       model: "deepseek-v4-pro",
-      max_tokens: 1_000,
+      max_tokens: 2_000,
       stream: false,
       thinking: { type: "disabled" },
     });
@@ -201,7 +202,7 @@ describe("issue #70 live synthetic qualification", () => {
         content: [{ type: "text", text: "{\"summary\":" }],
       },
       expected: "OUTPUT_TRUNCATED",
-      outputTokens: 1_000,
+      outputTokens: 2_000,
     },
     {
       name: "invalid JSON",
@@ -263,6 +264,7 @@ describe("issue #70 live synthetic qualification", () => {
         providerCode: expected,
         providerRequestId: "req_01H_safe",
       },
+      stopReason: response.stop_reason,
     });
     expect(result.providers[0]?.estimatedCostUsd).toBeGreaterThan(0);
     expect(JSON.stringify(result.providers[0]?.providerDiagnostics))
@@ -322,7 +324,7 @@ describe("issue #70 live synthetic qualification", () => {
   it("blocks replay before any provider request", async () => {
     const store = memoryStore();
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -435,6 +437,7 @@ describe("issue #70 live synthetic qualification", () => {
     expect(result.providers[1]).toMatchObject({
       status: "NOT_TESTED",
       attempted: false,
+      stopReason: null,
     });
   });
 
@@ -471,7 +474,7 @@ describe("issue #70 deployment and request security", () => {
   const environment = {
     NOETRA_LIVE_QUALIFICATION_ENABLED: "true",
     NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID:
-      "GH_ISSUE_70_2026_11_06_RUN_2",
+      "GH_ISSUE_70_2026_11_06_RUN_3",
     NOETRA_LIVE_QUALIFICATION_HOST:
       "concessioni-portuali-demo-issue70.vercel.app",
     VERCEL_ENV: "production",
@@ -690,7 +693,7 @@ describe("issue #70 distributed reservation store", () => {
       .mockResolvedValueOnce(Response.json({ result: "OK" }))
       .mockResolvedValueOnce(Response.json({
         result: JSON.stringify({
-          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
+          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
           status: "PASS",
           updatedAt: "2026-11-06T10:00:00.000Z",
           providers: [],
@@ -703,7 +706,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     const value: LiveQualificationStoredResult = {
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -716,7 +719,7 @@ describe("issue #70 distributed reservation store", () => {
     expect(JSON.parse(String(transport.mock.calls[0]?.[1]?.body)))
       .toEqual(expect.arrayContaining(["SET", "NX"]));
     expect(String(transport.mock.calls[0]?.[1]?.body))
-      .toContain("noetra:qualification:issue70:2026-11-06:run-2:run");
+      .toContain("noetra:qualification:issue70:2026-11-06:run-3:run");
     expect(String(transport.mock.calls[0]?.[1]?.body))
       .not.toContain("noetra:qualification:issue70:2026-11-05");
     expect(JSON.parse(String(transport.mock.calls[1]?.[1]?.body)))
@@ -735,7 +738,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_2",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
