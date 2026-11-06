@@ -376,9 +376,16 @@ describe("issue #70 deployment and request security", () => {
     AI_DEEPSEEK_API_KEY: "deepseek-secret",
     UPSTASH_REDIS_REST_URL: "https://production-rate-limit.example.test",
     UPSTASH_REDIS_REST_TOKEN: "production-redis-secret",
-    NOETRA_LIVE_QUALIFICATION_REDIS_REST_URL:
+    NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_READ_ONLY_TOKEN:
+      "issue70-read-only-secret",
+    NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN:
+      "issue70-redis-secret",
+    NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL:
       "https://issue70-lock.example.test",
-    NOETRA_LIVE_QUALIFICATION_REDIS_REST_TOKEN: "issue70-redis-secret",
+    NOETRA_LIVE_QUALIFICATION_REDIS_KV_URL:
+      "rediss://issue70-lock.example.test",
+    NOETRA_LIVE_QUALIFICATION_REDIS_REDIS_URL:
+      "rediss://issue70-lock.example.test",
     NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID: "redis_issue70_dedicated",
   };
 
@@ -428,11 +435,26 @@ describe("issue #70 deployment and request security", () => {
     expect(() => assertLiveQualificationEnvironment({
       env: {
         ...environment,
-        NOETRA_LIVE_QUALIFICATION_REDIS_REST_URL:
+        NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL:
           environment.UPSTASH_REDIS_REST_URL,
       },
       requestHost: "concessioni-portuali-demo-issue70.vercel.app",
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
+  });
+
+  it("requires the complete provider-managed Upstash variable set", () => {
+    for (const name of [
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_READ_ONLY_TOKEN",
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN",
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL",
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_URL",
+      "NOETRA_LIVE_QUALIFICATION_REDIS_REDIS_URL",
+    ]) {
+      expect(() => assertLiveQualificationEnvironment({
+        env: { ...environment, [name]: undefined },
+        requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
+    }
   });
 
   it("keeps the harness free of application data and storage imports", () => {

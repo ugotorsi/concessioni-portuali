@@ -247,16 +247,22 @@ applicativi. Nel ledger sono salvati solo stato, modello, validita JSON,
 validita riferimenti, token, costo stimato e anomalia redatta; mai chiavi,
 prompt o risposta integrale.
 
-Il preflight richiede
-`NOETRA_LIVE_QUALIFICATION_REDIS_REST_URL` e
-`NOETRA_LIVE_QUALIFICATION_REDIS_REST_TOKEN`, oltre al resource ID non segreto
-`NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID`, e rifiuta l'avvio se l'URL
-coincide con `UPSTASH_REDIS_REST_URL` o `KV_REST_API_URL`. Il riuso dello
-store Production avrebbe rischi di collisione operativa, cancellazione
-accidentale e privilegi condivisi; non e piu consentito. La risorsa dedicata
-deve essere collegata tramite integrazione Vercel/Shared Environment Variable
-senza leggere o copiare il token. La sua configurazione richiede
-un'autorizzazione operativa separata e non viene eseguita da questa PR.
+Il preflight richiede tutte e cinque le variabili provider-managed create
+dall'integrazione con prefisso `NOETRA_LIVE_QUALIFICATION_REDIS_`:
+
+- `NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_READ_ONLY_TOKEN`;
+- `NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN`;
+- `NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL`;
+- `NOETRA_LIVE_QUALIFICATION_REDIS_KV_URL`;
+- `NOETRA_LIVE_QUALIFICATION_REDIS_REDIS_URL`.
+
+L'harness usa direttamente `KV_REST_API_URL` e `KV_REST_API_TOKEN`. Il resource
+ID non segreto `NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID` deve essere
+fornito soltanto come override del deployment temporaneo. Il preflight rifiuta
+l'avvio se l'URL REST dedicato coincide con `UPSTASH_REDIS_REST_URL` o
+`KV_REST_API_URL`. Il riuso dello store Production avrebbe rischi di collisione
+operativa, cancellazione accidentale e privilegi condivisi; non e consentito.
+La connessione deve essere provider-managed, senza leggere o copiare token.
 
 ### Contratto e preflight economico
 
@@ -290,9 +296,11 @@ e pubblicato sulla PR #71.
 1. Annotare deployment ID attualmente servito da `app.noetra.it`.
 2. Verificare che Vercel Authentication protegga i deployment Production non
    promossi del progetto.
-3. Creare o collegare una risorsa Upstash dedicata con il prefisso
-   `NOETRA_LIVE_QUALIFICATION_REDIS_REST_`, verificando dal pannello Vercel che
-   non sia la risorsa rate-limit Production. Non estrarre il token.
+3. Creare una risorsa Upstash PAYG dedicata con `prodPack=false` e
+   `autoUpgrade=false`, quindi collegarla al solo ambiente Production con il
+   prefisso `NOETRA_LIVE_QUALIFICATION_REDIS_`. Il dry-run deve mostrare
+   esattamente le cinque variabili provider-managed elencate sopra. Verificare
+   che non sia la risorsa rate-limit Production e non estrarre i token.
 4. Scegliere un alias temporaneo Vercel dedicato, per esempio
    `concessioni-portuali-demo-issue70.vercel.app`.
 5. Dal worktree pulito della PR #71 eseguire un deployment Production non

@@ -34,8 +34,10 @@ function json(body: unknown, status: number): Response {
 
 function storeFromEnvironment() {
   return createLiveQualificationRunStore({
-    url: process.env.NOETRA_LIVE_QUALIFICATION_REDIS_REST_URL ?? "",
-    token: process.env.NOETRA_LIVE_QUALIFICATION_REDIS_REST_TOKEN ?? "",
+    url:
+      process.env.NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL ?? "",
+    token:
+      process.env.NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN ?? "",
   });
 }
 
