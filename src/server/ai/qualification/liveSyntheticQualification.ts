@@ -339,7 +339,7 @@ function storedResult(input: {
   now: Date;
 }): LiveQualificationStoredResult {
   return {
-    authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
+    authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
     status: input.status,
     updatedAt: input.now.toISOString(),
     providers: input.providers,
@@ -412,11 +412,14 @@ export async function runLiveSyntheticQualification(input: {
   });
   providers.push(anthropicResult);
   await input.store.record(storedResult({
-    status: anthropicResult.status === "PASS" ? "RUNNING" : "FAIL",
+    status: "RUNNING",
     providers,
     now: now(),
   }));
-  if (anthropicResult.status !== "PASS") {
+  const anthropicBudgetDebit = anthropicResult.estimatedCostUsd
+    ?? (anthropicResult.attempted ? maximumCostUsd("ANTHROPIC") : 0);
+  if (anthropicBudgetDebit + maximumCostUsd("DEEPSEEK")
+    > LIVE_QUALIFICATION_TOTAL_BUDGET_USD) {
     providers.push({
       provider: "DEEPSEEK",
       status: "NOT_TESTED",
@@ -426,7 +429,7 @@ export async function runLiveSyntheticQualification(input: {
       refsValid: null,
       usage: null,
       estimatedCostUsd: null,
-      anomaly: "INTERRUPTED_AFTER_ANTHROPIC_FAILURE",
+      anomaly: "DEEPSEEK_BUDGET_GATE_FAILED",
       providerDiagnostics: null,
       stopReason: null,
     });
@@ -484,7 +487,8 @@ export async function runLiveSyntheticQualification(input: {
     (total, provider) => total + (provider.estimatedCostUsd ?? 0),
     0,
   );
-  const status = deepSeekResult.status === "PASS"
+  const status = anthropicResult.status === "PASS"
+    && deepSeekResult.status === "PASS"
     && totalEstimatedCostUsd <= LIVE_QUALIFICATION_TOTAL_BUDGET_USD
     ? "PASS"
     : "FAIL";

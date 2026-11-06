@@ -1,5 +1,5 @@
 export const LIVE_QUALIFICATION_AUTHORIZATION_ID =
-  "GH_ISSUE_70_2026_11_06_RUN_3" as const;
+  "GH_ISSUE_70_2026_11_06_RUN_4" as const;
 export const LIVE_QUALIFICATION_BRANCH =
   "qualification/multi-ai-synthetic-20261105" as const;
 const LIVE_QUALIFICATION_ALLOWED_PATHS = new Set([

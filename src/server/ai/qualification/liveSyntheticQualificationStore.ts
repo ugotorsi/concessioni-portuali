@@ -1,7 +1,7 @@
 export type LiveQualificationProviderId = "ANTHROPIC" | "DEEPSEEK";
 
 export interface LiveQualificationStoredResult {
-  readonly authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3";
+  readonly authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4";
   readonly status: "RESERVED" | "RUNNING" | "PASS" | "FAIL";
   readonly updatedAt: string;
   readonly providers: readonly unknown[];
@@ -17,7 +17,7 @@ export interface LiveQualificationRunStore {
 
 type StoreFetch = (input: string | URL, init?: RequestInit) => Promise<Response>;
 
-const KEY_PREFIX = "noetra:qualification:issue70:2026-11-06:run-3";
+const KEY_PREFIX = "noetra:qualification:issue70:2026-11-06:run-4";
 
 function assertConfig(value: string): string {
   const trimmed = value.trim();

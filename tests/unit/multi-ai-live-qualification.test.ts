@@ -253,7 +253,7 @@ describe("issue #70 live synthetic qualification", () => {
     expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
-  it("rejects unexpected Anthropic content blocks without fallback", async () => {
+  it("rejects unexpected Anthropic blocks and still runs DeepSeek independently", async () => {
     const anthropicTransport = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({
         id: "msg_synthetic_tool",
@@ -299,8 +299,13 @@ describe("issue #70 live synthetic qualification", () => {
         providerRequestId: "req_unexpected_block",
       },
     });
+    expect(result.providers[1]).toMatchObject({
+      provider: "DEEPSEEK",
+      status: "PASS",
+      attempted: true,
+    });
     expect(anthropicTransport).toHaveBeenCalledOnce();
-    expect(deepSeekTransport).not.toHaveBeenCalled();
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
   it.each([
@@ -380,7 +385,12 @@ describe("issue #70 live synthetic qualification", () => {
     expect(JSON.stringify(result.providers[0]?.providerDiagnostics))
       .not.toContain("{\"summary\":");
     expect(anthropicTransport).toHaveBeenCalledOnce();
-    expect(deepSeekTransport).not.toHaveBeenCalled();
+    expect(result.providers[1]).toMatchObject({
+      provider: "DEEPSEEK",
+      status: "PASS",
+      attempted: true,
+    });
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
   it("reports strict Zod validation separately from Anthropic protocol failures", async () => {
@@ -402,10 +412,15 @@ describe("issue #70 live synthetic qualification", () => {
       anomaly: "ZOD_VALIDATION_ERROR",
       providerDiagnostics: null,
     });
-    expect(deepSeekTransport).not.toHaveBeenCalled();
+    expect(result.providers[1]).toMatchObject({
+      provider: "DEEPSEEK",
+      status: "PASS",
+      attempted: true,
+    });
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
-  it("stops after the first provider error without fallback or retry", async () => {
+  it("runs DeepSeek independently after an Anthropic error without retry", async () => {
     const anthropicTransport = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({ error: { type: "overloaded_error" } }, { status: 529 }),
     );
@@ -425,16 +440,16 @@ describe("issue #70 live synthetic qualification", () => {
     expect(result.status).toBe("FAIL");
     expect(result.providers).toMatchObject([
       { provider: "ANTHROPIC", status: "FAIL", attempted: true },
-      { provider: "DEEPSEEK", status: "NOT_TESTED", attempted: false },
+      { provider: "DEEPSEEK", status: "PASS", attempted: true },
     ]);
     expect(anthropicTransport).toHaveBeenCalledOnce();
-    expect(deepSeekTransport).not.toHaveBeenCalled();
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
   it("blocks replay before any provider request", async () => {
     const store = memoryStore();
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -512,11 +527,11 @@ describe("issue #70 live synthetic qualification", () => {
       },
       {
         provider: "DEEPSEEK",
-        status: "NOT_TESTED",
-        attempted: false,
+        status: "PASS",
+        attempted: true,
       },
     ]);
-    expect(deepSeekTransport).not.toHaveBeenCalled();
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
   it("fails semantic grounding on unknown or missing SYN references", async () => {
@@ -545,9 +560,9 @@ describe("issue #70 live synthetic qualification", () => {
       anomaly: "UNKNOWN_BASIS_REF",
     });
     expect(result.providers[1]).toMatchObject({
-      status: "NOT_TESTED",
-      attempted: false,
-      stopReason: null,
+      status: "PASS",
+      attempted: true,
+      stopReason: "stop",
     });
   });
 
@@ -576,7 +591,10 @@ describe("issue #70 live synthetic qualification", () => {
       refsValid: true,
       anomaly: "FABRICATED_EXTERNAL_SOURCE",
     });
-    expect(result.providers[1]).toMatchObject({ status: "NOT_TESTED" });
+    expect(result.providers[1]).toMatchObject({
+      status: "PASS",
+      attempted: true,
+    });
   });
 });
 
@@ -584,7 +602,7 @@ describe("issue #70 deployment and request security", () => {
   const environment = {
     NOETRA_LIVE_QUALIFICATION_ENABLED: "true",
     NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID:
-      "GH_ISSUE_70_2026_11_06_RUN_3",
+      "GH_ISSUE_70_2026_11_06_RUN_4",
     NOETRA_LIVE_QUALIFICATION_HOST:
       "concessioni-portuali-demo-issue70.vercel.app",
     VERCEL_ENV: "production",
@@ -803,7 +821,7 @@ describe("issue #70 distributed reservation store", () => {
       .mockResolvedValueOnce(Response.json({ result: "OK" }))
       .mockResolvedValueOnce(Response.json({
         result: JSON.stringify({
-          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
+          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
           status: "PASS",
           updatedAt: "2026-11-06T10:00:00.000Z",
           providers: [],
@@ -816,7 +834,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     const value: LiveQualificationStoredResult = {
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -829,7 +847,7 @@ describe("issue #70 distributed reservation store", () => {
     expect(JSON.parse(String(transport.mock.calls[0]?.[1]?.body)))
       .toEqual(expect.arrayContaining(["SET", "NX"]));
     expect(String(transport.mock.calls[0]?.[1]?.body))
-      .toContain("noetra:qualification:issue70:2026-11-06:run-3:run");
+      .toContain("noetra:qualification:issue70:2026-11-06:run-4:run");
     expect(String(transport.mock.calls[0]?.[1]?.body))
       .not.toContain("noetra:qualification:issue70:2026-11-05");
     expect(JSON.parse(String(transport.mock.calls[1]?.[1]?.body)))
@@ -848,7 +866,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_3",
+      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],

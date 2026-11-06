@@ -281,7 +281,7 @@ sono vere:
 3. alias temporaneo dedicato `*.vercel.app`, passato sia come `NEXTAUTH_URL`
    sia come `NOETRA_LIVE_QUALIFICATION_HOST`;
 4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
-5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_3`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_4`;
 6. branch esatto `qualification/multi-ai-synthetic-20261105`;
 7. commit Vercel uguale al commit esplicitamente atteso;
 8. Vercel Deployment Protection attiva;
@@ -339,11 +339,12 @@ Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
 una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
 fisso:
 
-`noetra:qualification:issue70:2026-11-06:run-3`
+`noetra:qualification:issue70:2026-11-06:run-4`
 
-I namespace dei primi due tentativi,
+I namespace dei primi tre tentativi,
 `noetra:qualification:issue70:2026-11-05` e
-`noetra:qualification:issue70:2026-11-06:run-2`, restano distinti e non
+`noetra:qualification:issue70:2026-11-06:run-2` e
+`noetra:qualification:issue70:2026-11-06:run-3`, restano distinti e non
 vengono letti, azzerati o riutilizzati.
 
 Il lock non ha TTL: una prenotazione, anche se il processo termina, impedisce
@@ -420,14 +421,14 @@ vercel deploy --prod --skip-domain --yes `
   --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
   --scope=ugotorsis-projects `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_3 `
-  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run3.vercel.app `
-  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run3.vercel.app `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_4 `
+  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run4.vercel.app `
+  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run4.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_3 `
-  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run3.vercel.app `
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_4 `
+  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run4.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
-  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run3.vercel.app
+  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run4.vercel.app
 ```
 
 I flag CLI `-b` e `-e` sono override build/runtime del singolo deployment e
@@ -475,10 +476,11 @@ vercel alias set <URL_DEPLOYMENT> concessioni-portuali-demo-issue70.vercel.app `
 
 ### Esecuzione e registrazione
 
-La route esegue prima Anthropic. Se qualsiasi controllo fallisce, DeepSeek
-resta `NOT_TESTED` e non viene tentato. Ogni adapter ha una sola invocazione
-`fetch`, timeout 45 secondi, risposta massima 128 KiB, nessun retry e nessun
-fallback.
+La route esegue prima Anthropic e poi DeepSeek come qualificazioni indipendenti.
+Un FAIL di Anthropic viene registrato ma non impedisce il singolo POST DeepSeek,
+purche il budget residuo conservativo e tutti i gate restino validi. Ogni
+adapter ha una sola invocazione `fetch`, timeout 45 secondi, risposta massima
+128 KiB, nessun retry e nessun fallback.
 
 Il risultato redatto restituito dalla route e persistito nel ledger e mostra:
 
