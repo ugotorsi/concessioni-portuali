@@ -21,6 +21,7 @@ import {
 import {
   mapProviderHttpError,
   readBoundedProviderJson,
+  sanitizedProviderRequestId,
   type AiProviderFetch,
 } from "@/server/ai/providers/http";
 
@@ -88,31 +89,58 @@ function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
   };
 }
 
-function extractPayload(body: unknown, model: string): {
-  payload: unknown;
-  usage: AiBillableUsage | null;
-} {
+type AnthropicResponseFailureCode =
+  | "OUTPUT_TRUNCATED"
+  | "JSON_PARSE_ERROR"
+  | "MODEL_MISMATCH"
+  | "UNEXPECTED_STOP_REASON"
+  | "PROVIDER_RESPONSE_INVALID";
+
+function responseFailure(
+  code: AnthropicResponseFailureCode,
+  response: Response,
+): AiProviderAdapterError {
+  return new AiProviderAdapterError("REQUEST_REJECTED", {
+    httpStatus: response.status,
+    providerCode: code,
+    providerRequestId: sanitizedProviderRequestId(response.headers),
+  });
+}
+
+function responseRecord(body: unknown, response: Response): Record<string, unknown> {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return { payload: null, usage: null };
+    throw responseFailure("PROVIDER_RESPONSE_INVALID", response);
   }
-  const record = body as Record<string, unknown>;
-  if (record.model !== model || record.stop_reason !== "end_turn"
-    || !Array.isArray(record.content) || record.content.length !== 1) {
-    return { payload: null, usage: parseUsage(record) };
+  return body as Record<string, unknown>;
+}
+
+function extractPayload(
+  record: Record<string, unknown>,
+  model: string,
+  response: Response,
+): unknown {
+  if (record.model !== model) {
+    throw responseFailure("MODEL_MISMATCH", response);
+  }
+  if (record.stop_reason === "max_tokens") {
+    throw responseFailure("OUTPUT_TRUNCATED", response);
+  }
+  if (record.stop_reason !== "end_turn") {
+    throw responseFailure("UNEXPECTED_STOP_REASON", response);
+  }
+  if (!Array.isArray(record.content) || record.content.length !== 1) {
+    throw responseFailure("PROVIDER_RESPONSE_INVALID", response);
   }
   const content = record.content[0];
   if (!content || typeof content !== "object" || Array.isArray(content)
     || (content as Record<string, unknown>).type !== "text"
     || typeof (content as Record<string, unknown>).text !== "string") {
-    return { payload: null, usage: parseUsage(record) };
+    throw responseFailure("PROVIDER_RESPONSE_INVALID", response);
   }
   try {
-    return {
-      payload: JSON.parse((content as Record<string, unknown>).text as string),
-      usage: parseUsage(record),
-    };
+    return JSON.parse((content as Record<string, unknown>).text as string);
   } catch {
-    return { payload: null, usage: parseUsage(record) };
+    throw responseFailure("JSON_PARSE_ERROR", response);
   }
 }
 
@@ -185,15 +213,17 @@ export function createAnthropicAnalysisProvider(config: {
       if (!response.ok) {
         throw mapProviderHttpError(response.status, body, response.headers);
       }
-      const result = extractPayload(body, config.model);
+      const record = responseRecord(body, response);
+      const usage = parseUsage(record);
       if (config.telemetry?.onUsage) {
-        if (!result.usage) throw new AiProviderAdapterError("CONFIGURATION", {
+        if (!usage) throw new AiProviderAdapterError("CONFIGURATION", {
           httpStatus: response.status,
           providerCode: "usage_missing_or_invalid",
+          providerRequestId: sanitizedProviderRequestId(response.headers),
         });
-        config.telemetry.onUsage(result.usage);
+        config.telemetry.onUsage(usage);
       }
-      return result.payload;
+      return extractPayload(record, config.model, response);
     } finally {
       clearTimeout(timeout);
     }

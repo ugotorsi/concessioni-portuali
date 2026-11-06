@@ -66,6 +66,43 @@ HTTP, tipo provider e request ID originali non sono recuperabili dopo il
 teardown del deployment e del ledger. La correzione e stata verificata solo
 con trasporti simulati, senza nuove richieste generative.
 
+### Diagnosi `JSON_SCHEMA_MISMATCH` del RUN_2
+
+Il RUN_2 ha registrato esattamente 1.000 output token, pari a
+`max_tokens`, ma il ledger non conservava `stop_reason` e le risorse
+temporanee sono state eliminate. La truncation non e quindi dimostrabile
+retroattivamente; `stop_reason=max_tokens` e tuttavia la spiegazione tecnica
+piu probabile.
+
+L'adapter distingue ora:
+
+- `OUTPUT_TRUNCATED` per `stop_reason=max_tokens`;
+- `JSON_PARSE_ERROR` per testo non decodificabile come JSON;
+- `MODEL_MISMATCH` per un modello di risposta diverso da quello richiesto;
+- `ZOD_VALIDATION_ERROR` soltanto quando il JSON completo non soddisfa il
+  contratto NOETRA.
+
+Per questi errori restano soltanto status HTTP, codice provider interno e
+request ID sanitizzato; prompt e risposta non sono registrati. Usage e costo
+stimato restano disponibili anche quando il payload e troncato.
+
+Il contratto sintetico non viene ridotto: tutte le sezioni obbligatorie
+restano presenti e la validazione Zod e invariata. Le istruzioni chiedono pero
+testi concisi, un solo item per i tre array necessari e array opzionali vuoti,
+con obiettivo inferiore a 700 output token. Il fixture completo usato dai test
+occupa 179 token `o200k_base`.
+
+Il limite configurato resta 1.000 e nessuna nuova prova live e autorizzata.
+Se una futura autorizzazione richiedesse margine aggiuntivo, il limite
+proposto e 2.000 output token. Con 4.000 input token per provider, il
+preventivo prudenziale diventerebbe:
+
+| Provider | Massimo USD con 2.000 output token |
+|---|---:|
+| Claude Sonnet 5 | 0,036000 |
+| DeepSeek V4 Pro | 0,013200 |
+| Totale | 0,049200 |
+
 ## Catalogo economico non approvato
 
 Versione: `MULTI_AI_PRICING_REFERENCE_2026_11_05`  

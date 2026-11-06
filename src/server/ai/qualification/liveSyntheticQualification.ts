@@ -8,7 +8,10 @@ import {
   calculateAiTokenCost,
   type AiBillableUsage,
 } from "@/server/ai/providerAccounting";
-import { AiProviderAdapterError } from "@/server/ai/providerErrors";
+import {
+  AiProviderAdapterError,
+  type AiProviderErrorDiagnostics,
+} from "@/server/ai/providerErrors";
 import { createAnthropicAnalysisProvider } from "@/server/ai/providers/anthropic";
 import { createDeepSeekAnalysisProvider } from "@/server/ai/providers/deepseek";
 import { OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA } from "@/server/ai/providers/openai";
@@ -45,6 +48,7 @@ export interface LiveQualificationProviderResult {
   readonly usage: AiBillableUsage | null;
   readonly estimatedCostUsd: number | null;
   readonly anomaly: string | null;
+  readonly providerDiagnostics: AiProviderErrorDiagnostics | null;
 }
 
 export interface LiveQualificationRunResult {
@@ -70,6 +74,8 @@ const request = {
       "Return only the requested structured JSON.",
       "Every factual statement must cite only SYN.P1 or SYN.P2.",
       "Identify the surface discrepancy and the insurance-policy deadline.",
+      "Keep the complete JSON under 700 output tokens.",
+      "Use at most one concise item in timeline, recordedState, and signals; keep unsupported optional sections empty.",
       "Do not use external tools, research, laws, people, or real documents.",
     ],
   },
@@ -205,6 +211,7 @@ function safeFailure(
   attempted: boolean,
   anomaly: string,
   usage: AiBillableUsage | null,
+  providerDiagnostics: AiProviderErrorDiagnostics | null = null,
 ): LiveQualificationProviderResult {
   return {
     provider,
@@ -216,11 +223,20 @@ function safeFailure(
     usage,
     estimatedCostUsd: null,
     anomaly,
+    providerDiagnostics,
   };
 }
 
 function errorCode(error: unknown): string {
   if (error instanceof AiProviderAdapterError) {
+    const code = error.diagnostics?.providerCode;
+    if (code && [
+      "OUTPUT_TRUNCATED",
+      "JSON_PARSE_ERROR",
+      "MODEL_MISMATCH",
+    ].includes(code)) {
+      return code;
+    }
     return `PROVIDER_${error.category}`;
   }
   if (error instanceof Error && /^[A-Z0-9_]+$/.test(error.message)) {
@@ -253,7 +269,7 @@ async function executeProvider(input: {
         ...safeFailure(
           input.providerId,
           input.requestSent(),
-          "JSON_SCHEMA_MISMATCH",
+          "ZOD_VALIDATION_ERROR",
           usage,
         ),
         estimatedCostUsd: calculateAiTokenCost({
@@ -279,14 +295,27 @@ async function executeProvider(input: {
       usage,
       estimatedCostUsd,
       anomaly: grounding.anomaly,
+      providerDiagnostics: null,
     };
   } catch (error) {
-    return safeFailure(
+    const usage = input.usage();
+    const failure = safeFailure(
       input.providerId,
       input.requestSent(),
       errorCode(error),
-      input.usage(),
+      usage,
+      error instanceof AiProviderAdapterError ? error.diagnostics : null,
     );
+    return usageValid(usage)
+      ? {
+          ...failure,
+          estimatedCostUsd: calculateAiTokenCost({
+            usage,
+            pricing: syntheticQualificationPricing(input.providerId),
+            usdToEurRate: 1,
+          }).billableUsd,
+        }
+      : failure;
   }
 }
 
@@ -379,6 +408,7 @@ export async function runLiveSyntheticQualification(input: {
       usage: null,
       estimatedCostUsd: null,
       anomaly: "INTERRUPTED_AFTER_ANTHROPIC_FAILURE",
+      providerDiagnostics: null,
     });
     await input.store.record(storedResult({
       status: "FAIL",

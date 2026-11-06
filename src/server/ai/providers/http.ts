@@ -48,7 +48,9 @@ function providerCode(body: unknown): string | null {
     : null;
 }
 
-function providerRequestId(headers: Pick<Headers, "get"> | undefined): string | null {
+export function sanitizedProviderRequestId(
+  headers: Pick<Headers, "get"> | undefined,
+): string | null {
   const value = headers?.get("request-id")
     ?? headers?.get("x-request-id")
     ?? headers?.get("anthropic-request-id");
@@ -63,7 +65,7 @@ export function mapProviderHttpError(
   const diagnostics = {
     httpStatus: status,
     providerCode: providerCode(body),
-    providerRequestId: providerRequestId(headers),
+    providerRequestId: sanitizedProviderRequestId(headers),
   };
   if (status === 408) return new AiProviderAdapterError("TIMEOUT", diagnostics);
   if (status === 429) return new AiProviderAdapterError("RATE_LIMITED", diagnostics);

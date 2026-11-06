@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { getEncoding } from "js-tiktoken";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -176,7 +177,12 @@ describe("issue #70 live synthetic qualification", () => {
       thinking: { type: "disabled" },
     });
     expect(JSON.stringify(anthropicBody)).toContain("SYN-001");
+    expect(JSON.stringify(anthropicBody)).toContain(
+      "Keep the complete JSON under 700 output tokens.",
+    );
     expect(JSON.stringify(deepSeekBody)).toContain("SYN-001");
+    expect(getEncoding("o200k_base").encode(JSON.stringify(validPayload)).length)
+      .toBeLessThan(700);
     expect(store.values.at(-1)).toMatchObject({
       status: "PASS",
       providers: [
@@ -184,6 +190,107 @@ describe("issue #70 live synthetic qualification", () => {
         { provider: "DEEPSEEK", status: "PASS" },
       ],
     });
+  });
+
+  it.each([
+    {
+      name: "output truncation",
+      response: {
+        model: "claude-sonnet-5",
+        stop_reason: "max_tokens",
+        content: [{ type: "text", text: "{\"summary\":" }],
+      },
+      expected: "OUTPUT_TRUNCATED",
+      outputTokens: 1_000,
+    },
+    {
+      name: "invalid JSON",
+      response: {
+        model: "claude-sonnet-5",
+        stop_reason: "end_turn",
+        content: [{ type: "text", text: "{\"summary\":" }],
+      },
+      expected: "JSON_PARSE_ERROR",
+      outputTokens: 120,
+    },
+    {
+      name: "model mismatch",
+      response: {
+        model: "claude-unexpected",
+        stop_reason: "end_turn",
+        content: [{ type: "text", text: JSON.stringify(validPayload) }],
+      },
+      expected: "MODEL_MISMATCH",
+      outputTokens: 120,
+    },
+  ])("distinguishes Anthropic $name without retaining response content", async ({
+    response,
+    expected,
+    outputTokens,
+  }) => {
+    const anthropicTransport = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        ...response,
+        usage: {
+          input_tokens: 800,
+          output_tokens: outputTokens,
+          cache_read_input_tokens: 100,
+          cache_creation_input_tokens: 50,
+        },
+      }, { headers: { "request-id": "req_01H_safe" } }),
+    );
+    const deepSeekTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(deepSeekResponse());
+
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport,
+      deepSeekTransport,
+    });
+
+    expect(result.providers[0]).toMatchObject({
+      provider: "ANTHROPIC",
+      status: "FAIL",
+      attempted: true,
+      usage: { inputTokens: 950, outputTokens },
+      anomaly: expected,
+      providerDiagnostics: {
+        httpStatus: 200,
+        providerCode: expected,
+        providerRequestId: "req_01H_safe",
+      },
+    });
+    expect(result.providers[0]?.estimatedCostUsd).toBeGreaterThan(0);
+    expect(JSON.stringify(result.providers[0]?.providerDiagnostics))
+      .not.toContain("{\"summary\":");
+    expect(anthropicTransport).toHaveBeenCalledOnce();
+    expect(deepSeekTransport).not.toHaveBeenCalled();
+  });
+
+  it("reports strict Zod validation separately from Anthropic protocol failures", async () => {
+    const deepSeekTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(deepSeekResponse());
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport: vi.fn<typeof fetch>()
+        .mockResolvedValue(anthropicResponse({ invalid: true })),
+      deepSeekTransport,
+    });
+
+    expect(result.providers[0]).toMatchObject({
+      status: "FAIL",
+      anomaly: "ZOD_VALIDATION_ERROR",
+      providerDiagnostics: null,
+    });
+    expect(deepSeekTransport).not.toHaveBeenCalled();
   });
 
   it("stops after the first provider error without fallback or retry", async () => {
