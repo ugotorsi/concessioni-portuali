@@ -73,8 +73,12 @@ function schemaKeywordValues(value: unknown, keyword: string): unknown[] {
 
 function anthropicResponse(payload: unknown, status = 200): Response {
   return Response.json({
+    id: "msg_synthetic_anthropic",
+    type: "message",
+    role: "assistant",
     model: "claude-sonnet-5",
     stop_reason: "end_turn",
+    stop_sequence: null,
     content: [{ type: "text", text: JSON.stringify(payload) }],
     usage: {
       input_tokens: 120,
@@ -263,6 +267,66 @@ describe("simulated Anthropic and DeepSeek adapters", () => {
       expect(schemaKeywordValues(wireSchema, "minimum")).toEqual([]);
       expect(schemaKeywordValues(wireSchema, "maximum")).toEqual([]);
     }
+  });
+
+  it("reports sanitized Anthropic response block metadata", async () => {
+    const onUsage = vi.fn();
+    const onResponseMetadata = vi.fn();
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        id: "msg_synthetic_thinking",
+        type: "message",
+        role: "assistant",
+        model: "claude-sonnet-5",
+        content: [
+          { type: "thinking", thinking: "", signature: "signature_synthetic" },
+          { type: "text", text: JSON.stringify({ invalid: true }) },
+        ],
+        stop_reason: "end_turn",
+        stop_sequence: null,
+        usage: {
+          input_tokens: 120,
+          output_tokens: 30,
+          cache_read_input_tokens: 20,
+          cache_creation_input_tokens: 10,
+          output_tokens_details: { thinking_tokens: 12 },
+        },
+      }),
+    );
+    const provider = createAnthropicAnalysisProvider({
+      apiKey: "synthetic-anthropic-key",
+      model: "claude-sonnet-5",
+      timeoutMs: 1_000,
+      maxRawResponseBytes: 64_000,
+      maxOutputTokens: 2_000,
+      transport,
+      telemetry: { onUsage, onResponseMetadata },
+    });
+    const service = createFascicoloDocumentAnalysisService({
+      provider,
+      maxInputBytes: 64_000,
+      realDataActivation: activation,
+    });
+
+    await expect(service.analyze(analysisInput)).rejects.toMatchObject({
+      code: "INVALID_PROVIDER_OUTPUT",
+    });
+    expect(onResponseMetadata).toHaveBeenCalledWith({
+      stopReason: "end_turn",
+      contentBlockTypes: ["thinking", "text"],
+    });
+    expect(onUsage).toHaveBeenCalledWith(expect.objectContaining({
+      outputTokens: 30,
+      reasoningOutputTokens: 12,
+    }));
+    const request = JSON.parse(String(transport.mock.calls[0]?.[1]?.body));
+    expect(request).toMatchObject({
+      model: "claude-sonnet-5",
+      thinking: { type: "disabled" },
+    });
+    expect(transport.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "anthropic-version": "2026-10-21",
+    });
   });
 
   it.each([

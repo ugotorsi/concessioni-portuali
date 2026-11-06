@@ -55,8 +55,12 @@ function anthropicResponse(
   status = 200,
 ): Response {
   return Response.json({
+    id: "msg_synthetic_anthropic",
+    type: "message",
+    role: "assistant",
     model: "claude-sonnet-5",
     stop_reason: "end_turn",
+    stop_sequence: null,
     content: [{ type: "text", text: JSON.stringify(payload) }],
     usage: {
       input_tokens: 800,
@@ -170,6 +174,10 @@ describe("issue #70 live synthetic qualification", () => {
     expect(anthropicBody).toMatchObject({
       model: "claude-sonnet-5",
       max_tokens: 2_000,
+      thinking: { type: "disabled" },
+    });
+    expect(anthropicTransport.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "anthropic-version": "2026-10-21",
     });
     expect(deepSeekBody).toMatchObject({
       model: "deepseek-v4-pro",
@@ -191,6 +199,108 @@ describe("issue #70 live synthetic qualification", () => {
         { provider: "DEEPSEEK", status: "PASS" },
       ],
     });
+  });
+
+  it("accepts documented Anthropic thinking and text blocks with metering", async () => {
+    const anthropicTransport = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        id: "msg_synthetic_thinking",
+        type: "message",
+        role: "assistant",
+        model: "claude-sonnet-5",
+        content: [
+          { type: "thinking", thinking: "", signature: "signature_synthetic" },
+          { type: "text", text: JSON.stringify(validPayload) },
+        ],
+        stop_reason: "end_turn",
+        stop_sequence: null,
+        usage: {
+          input_tokens: 2_579,
+          output_tokens: 821,
+          cache_read_input_tokens: 0,
+          cache_creation_input_tokens: 0,
+          output_tokens_details: { thinking_tokens: 642 },
+        },
+      }),
+    );
+    const deepSeekTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(deepSeekResponse());
+
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport,
+      deepSeekTransport,
+    });
+
+    expect(result.providers[0]).toMatchObject({
+      provider: "ANTHROPIC",
+      status: "PASS",
+      model: "claude-sonnet-5",
+      jsonValid: true,
+      refsValid: true,
+      stopReason: "end_turn",
+      usage: {
+        inputTokens: 2_579,
+        outputTokens: 821,
+        reasoningOutputTokens: 642,
+      },
+    });
+    expect(anthropicTransport).toHaveBeenCalledOnce();
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
+  });
+
+  it("rejects unexpected Anthropic content blocks without fallback", async () => {
+    const anthropicTransport = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        id: "msg_synthetic_tool",
+        type: "message",
+        role: "assistant",
+        model: "claude-sonnet-5",
+        content: [
+          {
+            type: "tool_use",
+            id: "toolu_synthetic",
+            name: "unrequested_tool",
+            input: {},
+          },
+          { type: "text", text: JSON.stringify(validPayload) },
+        ],
+        stop_reason: "end_turn",
+        stop_sequence: null,
+        usage: {
+          input_tokens: 800,
+          output_tokens: 180,
+        },
+      }, { headers: { "request-id": "req_unexpected_block" } }),
+    );
+    const deepSeekTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(deepSeekResponse());
+
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport,
+      deepSeekTransport,
+    });
+
+    expect(result.providers[0]).toMatchObject({
+      status: "FAIL",
+      anomaly: "UNEXPECTED_CONTENT_BLOCK",
+      providerDiagnostics: {
+        httpStatus: 200,
+        providerCode: "UNEXPECTED_CONTENT_BLOCK",
+        providerRequestId: "req_unexpected_block",
+      },
+    });
+    expect(anthropicTransport).toHaveBeenCalledOnce();
+    expect(deepSeekTransport).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -102,6 +102,52 @@ preventivo prudenziale diventa:
 | DeepSeek V4 Pro | 0,013200 |
 | Totale | 0,049200 |
 
+### Diagnosi `PROVIDER_RESPONSE_INVALID` del RUN_3
+
+Il RUN_3 ha ricevuto HTTP 200 con `stop_reason=end_turn`, 821 output token su
+2.000 e un envelope top-level valido. `MODEL_MISMATCH`, truncation e JSON
+malformato avevano codici distinti; il codice generico poteva quindi provenire
+soltanto dal controllo sui blocchi `content`.
+
+La causa e l'interazione di due condizioni:
+
+1. Claude Sonnet 5 usa adaptive thinking quando il campo `thinking` e omesso.
+   La Messages API puo quindi restituire un blocco `thinking` o
+   `redacted_thinking` prima del blocco `text` contenente il JSON.
+2. L'adapter richiedeva `record.content.length === 1` e rifiutava prima del
+   parsing qualsiasi risposta con piu blocchi.
+
+Il raw envelope del RUN_3 non e stato conservato, quindi non e possibile
+dimostrare retroattivamente se il primo blocco fosse `thinking` o
+`redacted_thinking`. La combinazione e tuttavia coerente con il comportamento
+documentato del modello e identifica il difetto concreto del parser.
+
+La correzione:
+
+- usa la versione API corrente `2026-10-21`;
+- invia `thinking: { type: "disabled" }` per la qualificazione strutturata,
+  evitando token di ragionamento non necessari;
+- accetta e ignora in sicurezza blocchi `thinking` e
+  `redacted_thinking`, estraendo soltanto i blocchi `text`;
+- concatena in ordine eventuali blocchi `text` e decodifica il JSON una sola
+  volta;
+- rifiuta blocchi inattesi, blocchi malformati e risposte prive di testo con
+  codici sanitizzati distinti;
+- registra `output_tokens_details.thinking_tokens` quando presente;
+- conserva invariati validazione Zod, grounding dei riferimenti, budget,
+  one-shot lock e divieto di retry/fallback.
+
+Riferimenti ufficiali:
+
+- [Thinking](https://platform.claude.com/docs/en/build-with-claude/thinking):
+  Claude Sonnet 5 usa adaptive thinking senza un campo `thinking` e accetta
+  `thinking: {"type":"disabled"}`;
+- [Structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs):
+  il JSON e restituito in un blocco `text` e deve continuare a essere validato
+  contro il contratto originale;
+- [API versioning](https://platform.claude.com/docs/en/api/versioning):
+  Anthropic raccomanda la versione corrente `2026-10-21`.
+
 ## Catalogo economico non approvato
 
 Versione: `MULTI_AI_PRICING_REFERENCE_2026_11_05`  

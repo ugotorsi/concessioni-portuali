@@ -237,6 +237,10 @@ function errorCode(error: unknown): string {
       "OUTPUT_TRUNCATED",
       "JSON_PARSE_ERROR",
       "MODEL_MISMATCH",
+      "CONTENT_BLOCKS_INVALID",
+      "TEXT_BLOCK_MISSING",
+      "TEXT_BLOCK_INVALID",
+      "UNEXPECTED_CONTENT_BLOCK",
     ].includes(code)) {
       return code;
     }

@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 
 import type { AiProviderId } from "@/server/ai/providerCatalog";
+import { ANTHROPIC_API_VERSION } from "@/server/ai/providers/anthropicProtocol";
 
 export const AI_PROVIDER_ENVIRONMENT = {
   OPENAI: {
@@ -17,7 +18,7 @@ export const AI_PROVIDER_ENVIRONMENT = {
     modelsUrl: "https://api.anthropic.com/v1/models",
     headers: (apiKey: string) => ({
       "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
+      "anthropic-version": ANTHROPIC_API_VERSION,
     }),
   },
   DEEPSEEK: {

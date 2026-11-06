@@ -24,14 +24,23 @@ import {
   sanitizedProviderRequestId,
   type AiProviderFetch,
 } from "@/server/ai/providers/http";
+import {
+  ANTHROPIC_API_VERSION,
+  ANTHROPIC_MESSAGES_ENDPOINT,
+} from "@/server/ai/providers/anthropicProtocol";
 
-export const ANTHROPIC_MESSAGES_ENDPOINT = "https://api.anthropic.com/v1/messages";
-export const ANTHROPIC_API_VERSION = "2023-06-01";
+export {
+  ANTHROPIC_API_VERSION,
+  ANTHROPIC_MESSAGES_ENDPOINT,
+} from "@/server/ai/providers/anthropicProtocol";
 
 export interface AnthropicProviderTelemetry {
   onRequestSent?(): void;
   onUsage?(usage: AiBillableUsage): void;
-  onResponseMetadata?(metadata: { readonly stopReason: string | null }): void;
+  onResponseMetadata?(metadata: {
+    readonly stopReason: string | null;
+    readonly contentBlockTypes: readonly string[] | null;
+  }): void;
 }
 
 const ANTHROPIC_UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
@@ -72,6 +81,19 @@ function sanitizedStopReason(value: unknown): string | null {
     : null;
 }
 
+function sanitizedContentBlockTypes(value: unknown): readonly string[] | null {
+  if (!Array.isArray(value)) return null;
+  const types = value.map((block) => (
+    block && typeof block === "object" && !Array.isArray(block)
+      ? (block as Record<string, unknown>).type
+      : null
+  ));
+  return types.every((type) =>
+    typeof type === "string" && /^[a-z0-9_]{1,64}$/.test(type))
+    ? types as string[]
+    : null;
+}
+
 function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
   const usage = body.usage;
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return null;
@@ -80,9 +102,19 @@ function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
   const outputTokens = record.output_tokens;
   const cachedInputTokens = record.cache_read_input_tokens ?? 0;
   const cacheWriteInputTokens = record.cache_creation_input_tokens ?? 0;
+  const outputTokenDetails = record.output_tokens_details;
+  const reasoningOutputTokens = outputTokenDetails == null
+    ? 0
+    : outputTokenDetails && typeof outputTokenDetails === "object"
+      && !Array.isArray(outputTokenDetails)
+      ? (outputTokenDetails as Record<string, unknown>).thinking_tokens ?? 0
+      : null;
   if (![inputTokens, outputTokens, cachedInputTokens, cacheWriteInputTokens].every(
     (value) => typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
-  )) return null;
+  ) || typeof reasoningOutputTokens !== "number"
+    || !Number.isSafeInteger(reasoningOutputTokens)
+    || reasoningOutputTokens < 0
+    || reasoningOutputTokens > (outputTokens as number)) return null;
   const totalInputTokens = (inputTokens as number)
     + (cachedInputTokens as number)
     + (cacheWriteInputTokens as number);
@@ -92,7 +124,7 @@ function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
     cachedInputTokens: cachedInputTokens as number,
     cacheWriteInputTokens: cacheWriteInputTokens as number,
     outputTokens: outputTokens as number,
-    reasoningOutputTokens: 0,
+    reasoningOutputTokens,
   };
 }
 
@@ -101,6 +133,10 @@ type AnthropicResponseFailureCode =
   | "JSON_PARSE_ERROR"
   | "MODEL_MISMATCH"
   | "UNEXPECTED_STOP_REASON"
+  | "CONTENT_BLOCKS_INVALID"
+  | "TEXT_BLOCK_MISSING"
+  | "TEXT_BLOCK_INVALID"
+  | "UNEXPECTED_CONTENT_BLOCK"
   | "PROVIDER_RESPONSE_INVALID";
 
 function responseFailure(
@@ -135,17 +171,39 @@ function extractPayload(
   if (record.stop_reason !== "end_turn") {
     throw responseFailure("UNEXPECTED_STOP_REASON", response);
   }
-  if (!Array.isArray(record.content) || record.content.length !== 1) {
-    throw responseFailure("PROVIDER_RESPONSE_INVALID", response);
+  if (!Array.isArray(record.content) || record.content.length === 0) {
+    throw responseFailure("CONTENT_BLOCKS_INVALID", response);
   }
-  const content = record.content[0];
-  if (!content || typeof content !== "object" || Array.isArray(content)
-    || (content as Record<string, unknown>).type !== "text"
-    || typeof (content as Record<string, unknown>).text !== "string") {
-    throw responseFailure("PROVIDER_RESPONSE_INVALID", response);
+  const textBlocks: string[] = [];
+  for (const content of record.content) {
+    if (!content || typeof content !== "object" || Array.isArray(content)) {
+      throw responseFailure("CONTENT_BLOCKS_INVALID", response);
+    }
+    const block = content as Record<string, unknown>;
+    if (block.type === "text") {
+      if (typeof block.text !== "string") {
+        throw responseFailure("TEXT_BLOCK_INVALID", response);
+      }
+      textBlocks.push(block.text);
+      continue;
+    }
+    if (block.type === "thinking") {
+      if (typeof block.thinking !== "string" || typeof block.signature !== "string") {
+        throw responseFailure("CONTENT_BLOCKS_INVALID", response);
+      }
+      continue;
+    }
+    if (block.type === "redacted_thinking") {
+      if (typeof block.data !== "string") {
+        throw responseFailure("CONTENT_BLOCKS_INVALID", response);
+      }
+      continue;
+    }
+    throw responseFailure("UNEXPECTED_CONTENT_BLOCK", response);
   }
+  if (textBlocks.length === 0) throw responseFailure("TEXT_BLOCK_MISSING", response);
   try {
-    return JSON.parse((content as Record<string, unknown>).text as string);
+    return JSON.parse(textBlocks.join(""));
   } catch {
     throw responseFailure("JSON_PARSE_ERROR", response);
   }
@@ -192,6 +250,7 @@ export function createAnthropicAnalysisProvider(config: {
           body: JSON.stringify({
             model: config.model,
             max_tokens: config.maxOutputTokens,
+            thinking: { type: "disabled" },
             system: buildAiProviderInstructions(request),
             messages: [{ role: "user", content: buildAiProviderInput(request) }],
             output_config: {
@@ -224,6 +283,7 @@ export function createAnthropicAnalysisProvider(config: {
       const usage = parseUsage(record);
       config.telemetry?.onResponseMetadata?.({
         stopReason: sanitizedStopReason(record.stop_reason),
+        contentBlockTypes: sanitizedContentBlockTypes(record.content),
       });
       if (config.telemetry?.onUsage) {
         if (!usage) throw new AiProviderAdapterError("CONFIGURATION", {
