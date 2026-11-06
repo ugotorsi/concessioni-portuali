@@ -147,6 +147,7 @@ export class FascicoloDocumentAnalysisError extends Error {
 function mapProviderError(error: AiProviderAdapterError): FascicoloDocumentAnalysisError {
   switch (error.category) {
     case "CONFIGURATION":
+    case "REQUEST_REJECTED":
       return new FascicoloDocumentAnalysisError("AI_CONFIGURATION_ERROR", error.diagnostics);
     case "UNAVAILABLE":
       return new FascicoloDocumentAnalysisError("AI_PROVIDER_UNAVAILABLE", error.diagnostics);

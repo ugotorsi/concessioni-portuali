@@ -390,6 +390,7 @@ function failureCategory(error: unknown): SyntheticSmokeFailure["summary"]["erro
   if (error instanceof AiProviderAdapterError) {
     switch (error.category) {
       case "CONFIGURATION":
+      case "REQUEST_REJECTED":
         return "AI_CONFIGURATION_ERROR";
       case "TIMEOUT":
         return "AI_PROVIDER_TIMEOUT";

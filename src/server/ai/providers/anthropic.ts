@@ -32,6 +32,34 @@ export interface AnthropicProviderTelemetry {
   onUsage?(usage: AiBillableUsage): void;
 }
 
+const ANTHROPIC_UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
+  "minimum",
+  "maximum",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "multipleOf",
+  "minLength",
+  "maxLength",
+  "maxItems",
+  "uniqueItems",
+  "contains",
+  "minContains",
+  "maxContains",
+]);
+
+export function toAnthropicOutputSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(toAnthropicOutputSchema);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key, item]) => (
+        !ANTHROPIC_UNSUPPORTED_SCHEMA_KEYWORDS.has(key)
+        && (key !== "minItems" || item === 0 || item === 1)
+      ))
+      .map(([key, item]) => [key, toAnthropicOutputSchema(item)]),
+  );
+}
+
 function positiveInteger(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0;
 }
@@ -134,7 +162,7 @@ export function createAnthropicAnalysisProvider(config: {
             output_config: {
               format: {
                 type: "json_schema",
-                schema: aiProviderOutputSchema(request),
+                schema: toAnthropicOutputSchema(aiProviderOutputSchema(request)),
               },
             },
           }),
@@ -154,7 +182,9 @@ export function createAnthropicAnalysisProvider(config: {
         throw error;
       }
       if (controller.signal.aborted) throw new AiProviderAdapterError("TIMEOUT");
-      if (!response.ok) throw mapProviderHttpError(response.status, body);
+      if (!response.ok) {
+        throw mapProviderHttpError(response.status, body, response.headers);
+      }
       const result = extractPayload(body, config.model);
       if (config.telemetry?.onUsage) {
         if (!result.usage) throw new AiProviderAdapterError("CONFIGURATION", {

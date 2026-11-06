@@ -159,7 +159,9 @@ export function createDeepSeekAnalysisProvider(config: {
         throw error;
       }
       if (controller.signal.aborted) throw new AiProviderAdapterError("TIMEOUT");
-      if (!response.ok) throw mapProviderHttpError(response.status, body);
+      if (!response.ok) {
+        throw mapProviderHttpError(response.status, body, response.headers);
+      }
       const result = extractPayload(body, config.model);
       if (config.telemetry?.onUsage) {
         if (!result.usage) throw new AiProviderAdapterError("CONFIGURATION", {

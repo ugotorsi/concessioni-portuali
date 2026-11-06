@@ -21,7 +21,7 @@ OpenAI resta il provider principale. Anthropic e DeepSeek conservano:
 | Controllo | Claude Sonnet 5 | DeepSeek V4 Pro | Note |
 |---|---|---|---|
 | Trasporto simulato, zero rete provider | PASS | PASS | Sono accettati solo transport iniettati nei test. |
-| Contratto JSON NOETRA | PASS | PASS | Anthropic usa JSON Schema strict; DeepSeek JSON object con schema nelle istruzioni. |
+| Contratto JSON NOETRA | PASS | PASS | Anthropic riceve uno schema strutturale compatibile e NOETRA valida localmente il contratto rigoroso originale; DeepSeek usa JSON object con schema nelle istruzioni. |
 | JSON malformato o campi extra | PASS | PASS | Output respinto. |
 | Riferimenti pagina forniti | PASS | PASS | I `basisRefs` top-level sono confrontati con le pagine inviate. |
 | Evidence span sconosciuto | PASS | PASS | L'item viene quarantinato e il risultato non e promovibile. |
@@ -46,6 +46,25 @@ OpenAI resta il provider principale. Anthropic e DeepSeek conservano:
    `cache_read_input_tokens` e `cache_creation_input_tokens` nel totale input
    logico richiesto dal contratto contabile NOETRA. I tre componenti restano
    separati per la tariffazione.
+3. Lo schema inviato ad Anthropic elimina in modo ricorsivo e senza mutare lo
+   schema originale i vincoli non supportati dall'API (`minimum`, `maximum`,
+   `multipleOf`, `minLength`, `maxLength`, vincoli array diversi da
+   `minItems: 0|1`). Restano invariati struttura, `required`,
+   `additionalProperties: false`, pattern e formati supportati. La risposta
+   continua a essere validata localmente dal contratto Zod completo.
+4. Gli HTTP `4xx` non transitori diversi da autenticazione, timeout e rate
+   limit sono classificati `REQUEST_REJECTED`, non
+   `PROVIDER_UNAVAILABLE`. La diagnostica interna conserva esclusivamente
+   status HTTP, tipo/codice provider e request ID sanitizzato.
+
+La diagnosi e coerente con le
+[limitazioni JSON Schema ufficiali di Anthropic](https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-schema-limitations):
+i vincoli numerici, `minLength`, `maxLength` e i vincoli array oltre
+`minItems` 0 o 1 possono causare HTTP 400. Il tentativo live precedente aveva
+persistito soltanto la categoria normalizzata `PROVIDER_UNAVAILABLE`; status
+HTTP, tipo provider e request ID originali non sono recuperabili dopo il
+teardown del deployment e del ledger. La correzione e stata verificata solo
+con trasporti simulati, senza nuove richieste generative.
 
 ## Catalogo economico non approvato
 
@@ -146,8 +165,8 @@ Fonti:
 
 ## Validazione
 
-- test mirati: 47/47 PASS;
-- suite completa: 349 file PASS, 4.518 test PASS;
+- test mirati Anthropic e harness: 88/88 PASS;
+- suite completa: 349 file PASS, 4.527 test PASS;
 - skip attesi: 5 file, 34 test;
 - lint delle modifiche, error-level: PASS;
 - TypeScript typecheck: PASS;

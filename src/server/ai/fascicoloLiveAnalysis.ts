@@ -108,6 +108,7 @@ function mapAdapterError(error: AiProviderAdapterError): AiFascicoloLiveAnalysis
     case "RATE_LIMITED":
       return new AiFascicoloLiveAnalysisError("AI_PROVIDER_RATE_LIMITED");
     case "CONFIGURATION":
+    case "REQUEST_REJECTED":
       return new AiFascicoloLiveAnalysisError("AI_CONFIGURATION_ERROR");
   }
 }

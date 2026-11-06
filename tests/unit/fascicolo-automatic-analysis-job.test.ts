@@ -315,6 +315,7 @@ describe("automatic analysis safe diagnostics", () => {
       errorCode: "AI_CONFIGURATION_ERROR",
       httpStatus,
       providerCode,
+      providerRequestId: null,
     });
   });
 });

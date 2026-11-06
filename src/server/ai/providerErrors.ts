@@ -1,8 +1,14 @@
-export type AiProviderFailureCategory = "UNAVAILABLE" | "TIMEOUT" | "RATE_LIMITED" | "CONFIGURATION";
+export type AiProviderFailureCategory =
+  | "UNAVAILABLE"
+  | "TIMEOUT"
+  | "RATE_LIMITED"
+  | "CONFIGURATION"
+  | "REQUEST_REJECTED";
 
 export interface AiProviderErrorDiagnostics {
   readonly httpStatus: number;
   readonly providerCode: string | null;
+  readonly providerRequestId?: string | null;
 }
 
 export class AiProviderAdapterError extends Error {

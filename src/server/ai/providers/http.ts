@@ -48,12 +48,30 @@ function providerCode(body: unknown): string | null {
     : null;
 }
 
-export function mapProviderHttpError(status: number, body: unknown): AiProviderAdapterError {
-  const diagnostics = { httpStatus: status, providerCode: providerCode(body) };
+function providerRequestId(headers: Pick<Headers, "get"> | undefined): string | null {
+  const value = headers?.get("request-id")
+    ?? headers?.get("x-request-id")
+    ?? headers?.get("anthropic-request-id");
+  return value && /^[A-Za-z0-9_.:-]{1,200}$/.test(value) ? value : null;
+}
+
+export function mapProviderHttpError(
+  status: number,
+  body: unknown,
+  headers?: Pick<Headers, "get">,
+): AiProviderAdapterError {
+  const diagnostics = {
+    httpStatus: status,
+    providerCode: providerCode(body),
+    providerRequestId: providerRequestId(headers),
+  };
   if (status === 408) return new AiProviderAdapterError("TIMEOUT", diagnostics);
   if (status === 429) return new AiProviderAdapterError("RATE_LIMITED", diagnostics);
   if (status === 401 || status === 403) {
     return new AiProviderAdapterError("CONFIGURATION", diagnostics);
+  }
+  if (status >= 400 && status <= 499) {
+    return new AiProviderAdapterError("REQUEST_REJECTED", diagnostics);
   }
   return new AiProviderAdapterError("UNAVAILABLE", diagnostics);
 }
