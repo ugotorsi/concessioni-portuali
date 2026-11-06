@@ -15,6 +15,8 @@ export {
 };
 export const LIVE_QUALIFICATION_CSRF_COOKIE =
   "__Host-noetra-live-qualification-csrf" as const;
+export const LIVE_QUALIFICATION_VERCEL_PROJECT_ID =
+  "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu" as const;
 
 export type LiveQualificationEnvironment =
   Readonly<Record<string, string | undefined>>;
@@ -23,12 +25,13 @@ export type LiveQualificationEnvironmentCheck =
   | "ENABLED"
   | "AUTHORIZATION_ID"
   | "VERCEL_ENV"
+  | "VERCEL_PROJECT_ID"
+  | "VERCEL_DEPLOYMENT_ID"
+  | "VERCEL_URL"
   | "DEPLOYMENT_HOST"
   | "REQUEST_HOST"
   | "PRODUCTION_HOST"
   | "NEXTAUTH_URL"
-  | "EXPECTED_COMMIT_FORMAT"
-  | "VERCEL_BUILD_GIT_COMMIT_SHA"
   | "NEXTAUTH_SECRET"
   | "AI_ANTHROPIC_API_KEY"
   | "AI_DEEPSEEK_API_KEY"
@@ -108,6 +111,14 @@ export function assertLiveQualificationEnvironment(input: {
       "AUTHORIZATION_ID",
     ],
     [env.VERCEL_ENV === "production", "VERCEL_ENV"],
+    [
+      env.VERCEL_PROJECT_ID === LIVE_QUALIFICATION_VERCEL_PROJECT_ID,
+      "VERCEL_PROJECT_ID",
+    ],
+    [
+      /^dpl_[A-Za-z0-9]+$/.test(env.VERCEL_DEPLOYMENT_ID ?? ""),
+      "VERCEL_DEPLOYMENT_ID",
+    ],
   ] as const) {
     if (matches) continue;
     throw new LiveQualificationSecurityError(
@@ -117,7 +128,13 @@ export function assertLiveQualificationEnvironment(input: {
   }
   const deploymentHost = liveQualificationDeploymentHost(env);
   const requestHost = normalizedHost(input.requestHost);
+  const vercelUrl = normalizedHost(env.VERCEL_URL);
   for (const [matches, check] of [
+    [
+      Boolean(vercelUrl && vercelUrl.endsWith(".vercel.app")
+        && vercelUrl !== deploymentHost),
+      "VERCEL_URL",
+    ],
     [
       Boolean(deploymentHost && deploymentHost.endsWith(".vercel.app")),
       "DEPLOYMENT_HOST",
@@ -136,27 +153,6 @@ export function assertLiveQualificationEnvironment(input: {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
       "NEXTAUTH_URL",
-    );
-  }
-  const expectedCommit = required(
-    env,
-    "NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT",
-    "EXPECTED_COMMIT_FORMAT",
-  );
-  if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
-    throw new LiveQualificationSecurityError(
-      "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-      "EXPECTED_COMMIT_FORMAT",
-    );
-  }
-  if (required(
-    env,
-    "NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA",
-    "VERCEL_BUILD_GIT_COMMIT_SHA",
-  ) !== expectedCommit) {
-    throw new LiveQualificationSecurityError(
-      "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-      "VERCEL_BUILD_GIT_COMMIT_SHA",
     );
   }
   for (const [name, check] of [

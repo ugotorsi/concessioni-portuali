@@ -366,11 +366,13 @@ describe("issue #70 deployment and request security", () => {
     NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID: "GH_ISSUE_70_2026_11_05",
     NOETRA_LIVE_QUALIFICATION_HOST:
       "concessioni-portuali-demo-issue70.vercel.app",
-    NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT: "a".repeat(40),
     VERCEL_ENV: "production",
+    VERCEL_PROJECT_ID: "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu",
+    VERCEL_DEPLOYMENT_ID: "dpl_issue70",
+    VERCEL_URL:
+      "concessioni-portuali-demo-generated.vercel.app",
     VERCEL_GIT_COMMIT_REF: "qualification/multi-ai-synthetic-20261105",
     VERCEL_GIT_COMMIT_SHA: "a".repeat(40),
-    NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: "a".repeat(40),
     NEXTAUTH_URL: "https://concessioni-portuali-demo-issue70.vercel.app",
     NEXTAUTH_SECRET: "nextauth-secret",
     AI_ANTHROPIC_API_KEY: "anthropic-secret",
@@ -404,13 +406,6 @@ describe("issue #70 deployment and request security", () => {
       requestHost: "app.noetra.it",
     })).toThrow("LIVE_QUALIFICATION_HOST_INVALID");
     expect(() => assertLiveQualificationEnvironment({
-      env: {
-        ...environment,
-        NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: "b".repeat(40),
-      },
-      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
-    })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
-    expect(() => assertLiveQualificationEnvironment({
       env: { ...environment, NEXTAUTH_URL: "https://app.noetra.it" },
       requestHost: "concessioni-portuali-demo-issue70.vercel.app",
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
@@ -421,19 +416,41 @@ describe("issue #70 deployment and request security", () => {
       assertLiveQualificationEnvironment({
         env: {
           ...environment,
-          NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: undefined,
+          VERCEL_DEPLOYMENT_ID: undefined,
         },
         requestHost: "concessioni-portuali-demo-issue70.vercel.app",
       });
       expect.unreachable();
     } catch (error) {
       expect(error).toMatchObject({
-        code: "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-        environmentCheck: "VERCEL_BUILD_GIT_COMMIT_SHA",
+        code: "LIVE_QUALIFICATION_ENVIRONMENT_DISABLED",
+        environmentCheck: "VERCEL_DEPLOYMENT_ID",
       });
       expect(JSON.stringify(error)).not.toContain("anthropic-secret");
       expect(JSON.stringify(error)).not.toContain("deepseek-secret");
       expect(JSON.stringify(error)).not.toContain("issue70-redis-secret");
+    }
+  });
+
+  it("binds the harness to Vercel-generated deployment identity", () => {
+    for (const [name, value, check] of [
+      ["VERCEL_PROJECT_ID", "prj_other", "VERCEL_PROJECT_ID"],
+      ["VERCEL_DEPLOYMENT_ID", "user-controlled", "VERCEL_DEPLOYMENT_ID"],
+      [
+        "VERCEL_URL",
+        "concessioni-portuali-demo-issue70.vercel.app",
+        "VERCEL_URL",
+      ],
+    ] as const) {
+      try {
+        assertLiveQualificationEnvironment({
+          env: { ...environment, [name]: value },
+          requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+        });
+        expect.unreachable();
+      } catch (error) {
+        expect(error).toMatchObject({ environmentCheck: check });
+      }
     }
   });
 

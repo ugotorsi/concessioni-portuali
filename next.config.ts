@@ -34,10 +34,6 @@ const productionContentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-	env: {
-		NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA:
-			process.env.VERCEL_GIT_COMMIT_SHA ?? "",
-	},
 	async headers() {
 		const headers = [...commonSecurityHeaders];
 

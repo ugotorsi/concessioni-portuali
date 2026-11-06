@@ -146,8 +146,8 @@ Fonti:
 
 ## Validazione
 
-- test mirati: 46/46 PASS;
-- suite completa: 349 file PASS, 4.517 test PASS;
+- test mirati: 47/47 PASS;
+- suite completa: 349 file PASS, 4.518 test PASS;
 - skip attesi: 5 file, 34 test;
 - lint delle modifiche, error-level: PASS;
 - TypeScript typecheck: PASS;
@@ -316,12 +316,10 @@ vercel deploy --prod --skip-domain --yes `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
   -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
   -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
-  -b NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT=<COMMIT_PR_71> `
   -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
   -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
   -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
-  -e NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT=<COMMIT_PR_71> `
   -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
   -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app
 ```
@@ -337,13 +335,14 @@ sia l'alias temporaneo.
 
 Per i deployment creati dalla CLI, `VERCEL_GIT_COMMIT_REF` e
 `VERCEL_GIT_COMMIT_SHA` non sono identita runtime affidabili anche quando il
-progetto espone automaticamente le system env. Prima dell'alias, verificare
-tramite l'API Vercel che i metadati `gitCommitSha` e `gitCommitRef` del
-deployment corrispondano al commit e al ramo revisionati. Durante il build,
-Next.js incorpora inoltre `VERCEL_GIT_COMMIT_SHA`, system env fornita da
-Vercel, in `NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA`. Il gate runtime confronta
-questo SHA di build con `NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT`; il solo
-flag atteso non e sufficiente ad autorizzare il codice.
+progetto espone automaticamente le system env. Il gate richiede invece
+`VERCEL_PROJECT_ID`, `VERCEL_DEPLOYMENT_ID` e `VERCEL_URL`, identita generate
+da Vercel e non sostituite da flag dell'operatore. Prima dell'alias, interrogare
+l'API Vercel usando il `VERCEL_DEPLOYMENT_ID` restituito dal deploy e verificare
+che progetto, target, `gitCommitSha`, `gitCommitRef`, stato e assenza di alias
+corrispondano all'operazione autorizzata. Assegnare l'alias soltanto a quel
+deployment verificato: l'identita del commit non dipende da un flag impostabile
+dall'utente.
 
 6. Prima di assegnare l'alias, verificare che una richiesta anonima all'URL
    generato sia bloccata dalla Deployment Protection. Se risponde la pagina
