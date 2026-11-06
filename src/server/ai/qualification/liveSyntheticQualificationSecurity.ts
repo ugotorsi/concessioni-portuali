@@ -19,13 +19,36 @@ export const LIVE_QUALIFICATION_CSRF_COOKIE =
 export type LiveQualificationEnvironment =
   Readonly<Record<string, string | undefined>>;
 
+export type LiveQualificationEnvironmentCheck =
+  | "ENABLED"
+  | "AUTHORIZATION_ID"
+  | "VERCEL_ENV"
+  | "VERCEL_GIT_COMMIT_REF"
+  | "DEPLOYMENT_HOST"
+  | "REQUEST_HOST"
+  | "PRODUCTION_HOST"
+  | "NEXTAUTH_URL"
+  | "EXPECTED_COMMIT_FORMAT"
+  | "VERCEL_GIT_COMMIT_SHA"
+  | "NEXTAUTH_SECRET"
+  | "AI_ANTHROPIC_API_KEY"
+  | "AI_DEEPSEEK_API_KEY"
+  | "REDIS_KV_REST_API_READ_ONLY_TOKEN"
+  | "REDIS_KV_REST_API_TOKEN"
+  | "REDIS_KV_REST_API_URL"
+  | "REDIS_KV_URL"
+  | "REDIS_REDIS_URL"
+  | "REDIS_RESOURCE_ID"
+  | "REDIS_STORE_ISOLATION";
+
 export class LiveQualificationSecurityError extends Error {
   constructor(readonly code:
     | "LIVE_QUALIFICATION_ENVIRONMENT_DISABLED"
     | "LIVE_QUALIFICATION_CONFIGURATION_INVALID"
     | "LIVE_QUALIFICATION_HOST_INVALID"
     | "LIVE_QUALIFICATION_CSRF_INVALID"
-    | "LIVE_QUALIFICATION_ORIGIN_INVALID") {
+    | "LIVE_QUALIFICATION_ORIGIN_INVALID",
+  readonly environmentCheck?: LiveQualificationEnvironmentCheck) {
     super(code);
     this.name = "LiveQualificationSecurityError";
   }
@@ -36,28 +59,38 @@ function normalizedHost(value: string | null | undefined): string {
     .replace(/\/.*$/, "").replace(/:\d+$/, "");
 }
 
-function required(env: LiveQualificationEnvironment, name: string): string {
+function required(
+  env: LiveQualificationEnvironment,
+  name: string,
+  check: LiveQualificationEnvironmentCheck,
+): string {
   const value = env[name]?.trim();
   if (!value || value === "[SENSITIVE]") {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      check,
     );
   }
   return value;
 }
 
-function normalizedUrl(value: string): string {
+function normalizedUrl(
+  value: string,
+  check: LiveQualificationEnvironmentCheck,
+): string {
   let url: URL;
   try {
     url = new URL(value);
   } catch {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      check,
     );
   }
   if (url.protocol !== "https:") {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      check,
     );
   }
   return url.href.replace(/\/+$/, "").toLowerCase();
@@ -68,62 +101,104 @@ export function assertLiveQualificationEnvironment(input: {
   requestHost: string | null;
 }): void {
   const env = input.env ?? process.env;
-  if (env.NOETRA_LIVE_QUALIFICATION_ENABLED !== "true"
-    || env.NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID
-      !== LIVE_QUALIFICATION_AUTHORIZATION_ID
-    || env.VERCEL_ENV !== "production"
-    || env.VERCEL_GIT_COMMIT_REF !== LIVE_QUALIFICATION_BRANCH) {
+  for (const [matches, check] of [
+    [env.NOETRA_LIVE_QUALIFICATION_ENABLED === "true", "ENABLED"],
+    [
+      env.NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID
+        === LIVE_QUALIFICATION_AUTHORIZATION_ID,
+      "AUTHORIZATION_ID",
+    ],
+    [env.VERCEL_ENV === "production", "VERCEL_ENV"],
+    [
+      env.VERCEL_GIT_COMMIT_REF === LIVE_QUALIFICATION_BRANCH,
+      "VERCEL_GIT_COMMIT_REF",
+    ],
+  ] as const) {
+    if (matches) continue;
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_ENVIRONMENT_DISABLED",
+      check,
     );
   }
   const deploymentHost = liveQualificationDeploymentHost(env);
   const requestHost = normalizedHost(input.requestHost);
-  if (!deploymentHost || !deploymentHost.endsWith(".vercel.app")
-    || requestHost !== deploymentHost
-    || requestHost === "app.noetra.it") {
-    throw new LiveQualificationSecurityError("LIVE_QUALIFICATION_HOST_INVALID");
+  for (const [matches, check] of [
+    [
+      Boolean(deploymentHost && deploymentHost.endsWith(".vercel.app")),
+      "DEPLOYMENT_HOST",
+    ],
+    [requestHost === deploymentHost, "REQUEST_HOST"],
+    [requestHost !== "app.noetra.it", "PRODUCTION_HOST"],
+  ] as const) {
+    if (matches) continue;
+    throw new LiveQualificationSecurityError(
+      "LIVE_QUALIFICATION_HOST_INVALID",
+      check,
+    );
   }
-  if (normalizedHost(required(env, "NEXTAUTH_URL")) !== deploymentHost) {
+  if (normalizedHost(required(env, "NEXTAUTH_URL", "NEXTAUTH_URL"))
+    !== deploymentHost) {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      "NEXTAUTH_URL",
     );
   }
   const expectedCommit = required(
     env,
     "NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT",
+    "EXPECTED_COMMIT_FORMAT",
   );
-  if (!/^[a-f0-9]{40}$/.test(expectedCommit)
-    || required(env, "VERCEL_GIT_COMMIT_SHA") !== expectedCommit) {
+  if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      "EXPECTED_COMMIT_FORMAT",
     );
   }
-  for (const name of [
-    "NEXTAUTH_SECRET",
-    "AI_ANTHROPIC_API_KEY",
-    "AI_DEEPSEEK_API_KEY",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_READ_ONLY_TOKEN",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_KV_URL",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_REDIS_URL",
-    "NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID",
-  ]) {
-    required(env, name);
+  if (required(env, "VERCEL_GIT_COMMIT_SHA", "VERCEL_GIT_COMMIT_SHA")
+    !== expectedCommit) {
+    throw new LiveQualificationSecurityError(
+      "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+      "VERCEL_GIT_COMMIT_SHA",
+    );
+  }
+  for (const [name, check] of [
+    ["NEXTAUTH_SECRET", "NEXTAUTH_SECRET"],
+    ["AI_ANTHROPIC_API_KEY", "AI_ANTHROPIC_API_KEY"],
+    ["AI_DEEPSEEK_API_KEY", "AI_DEEPSEEK_API_KEY"],
+    [
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_READ_ONLY_TOKEN",
+      "REDIS_KV_REST_API_READ_ONLY_TOKEN",
+    ],
+    [
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_TOKEN",
+      "REDIS_KV_REST_API_TOKEN",
+    ],
+    [
+      "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL",
+      "REDIS_KV_REST_API_URL",
+    ],
+    ["NOETRA_LIVE_QUALIFICATION_REDIS_KV_URL", "REDIS_KV_URL"],
+    ["NOETRA_LIVE_QUALIFICATION_REDIS_REDIS_URL", "REDIS_REDIS_URL"],
+    ["NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID", "REDIS_RESOURCE_ID"],
+  ] as const) {
+    required(env, name, check);
   }
   const dedicatedStoreUrl = normalizedUrl(required(
     env,
     "NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL",
-  ));
+    "REDIS_KV_REST_API_URL",
+  ), "REDIS_KV_REST_API_URL");
   for (const sharedName of [
     "UPSTASH_REDIS_REST_URL",
     "KV_REST_API_URL",
   ]) {
     const sharedUrl = env[sharedName]?.trim();
-    if (sharedUrl && normalizedUrl(sharedUrl) === dedicatedStoreUrl) {
+    if (sharedUrl
+      && normalizedUrl(sharedUrl, "REDIS_STORE_ISOLATION")
+        === dedicatedStoreUrl) {
       throw new LiveQualificationSecurityError(
         "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+        "REDIS_STORE_ISOLATION",
       );
     }
   }

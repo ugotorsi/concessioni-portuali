@@ -408,6 +408,24 @@ describe("issue #70 deployment and request security", () => {
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
   });
 
+  it("identifies only the failed environment check without exposing values", () => {
+    try {
+      assertLiveQualificationEnvironment({
+        env: { ...environment, VERCEL_GIT_COMMIT_SHA: undefined },
+        requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      });
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toMatchObject({
+        code: "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
+        environmentCheck: "VERCEL_GIT_COMMIT_SHA",
+      });
+      expect(JSON.stringify(error)).not.toContain("anthropic-secret");
+      expect(JSON.stringify(error)).not.toContain("deepseek-secret");
+      expect(JSON.stringify(error)).not.toContain("issue70-redis-secret");
+    }
+  });
+
   it("isolates the deployment to auth and qualification paths", () => {
     expect(isLiveQualificationDeployment(environment)).toBe(true);
     expect(liveQualificationDeploymentHost(environment))

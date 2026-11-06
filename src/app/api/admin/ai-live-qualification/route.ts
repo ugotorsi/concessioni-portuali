@@ -48,7 +48,12 @@ function environmentAvailable(request: Request): boolean {
     });
     return true;
   } catch (error) {
-    if (error instanceof LiveQualificationSecurityError) return false;
+    if (error instanceof LiveQualificationSecurityError) {
+      console.error("LIVE_QUALIFICATION_ENVIRONMENT_REJECTED", {
+        check: error.environmentCheck ?? "UNKNOWN",
+      });
+      return false;
+    }
     throw error;
   }
 }
