@@ -395,6 +395,10 @@ describe("issue #70 deployment and request security", () => {
       requestHost: "concessioni-portuali-demo-issue70.vercel.app",
     })).not.toThrow();
     expect(() => assertLiveQualificationEnvironment({
+      env: { ...environment, VERCEL_GIT_COMMIT_REF: undefined },
+      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+    })).not.toThrow();
+    expect(() => assertLiveQualificationEnvironment({
       env: environment,
       requestHost: "app.noetra.it",
     })).toThrow("LIVE_QUALIFICATION_HOST_INVALID");

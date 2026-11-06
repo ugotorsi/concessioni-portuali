@@ -146,8 +146,8 @@ Fonti:
 
 ## Validazione
 
-- test mirati: 45/45 PASS;
-- suite completa: 349 file PASS, 4.516 test PASS;
+- test mirati: 46/46 PASS;
+- suite completa: 349 file PASS, 4.517 test PASS;
 - skip attesi: 5 file, 34 test;
 - lint delle modifiche, error-level: PASS;
 - TypeScript typecheck: PASS;
@@ -334,6 +334,15 @@ Variables per `NEXTAUTH_URL`. Prima e dopo il deploy, acquisire via API Vercel
 l'ID/versione della variabile Production globale e verificare che sia
 invariata; ispezionare inoltre il deployment e verificare che il suo override
 sia l'alias temporaneo.
+
+Per i deployment creati dalla CLI, `VERCEL_GIT_COMMIT_REF` non e un'identita
+runtime affidabile anche quando il progetto espone automaticamente le system
+env. Prima dell'alias, verificare tramite l'API Vercel che i metadati
+`gitCommitSha` e `gitCommitRef` del deployment corrispondano al commit e al ramo
+revisionati. Il gate runtime confronta poi `VERCEL_GIT_COMMIT_SHA`, system env
+immutabile fornita da Vercel, con
+`NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT`; il solo flag atteso non e
+sufficiente ad autorizzare il codice.
 
 6. Prima di assegnare l'alias, verificare che una richiesta anonima all'URL
    generato sia bloccata dalla Deployment Protection. Se risponde la pagina

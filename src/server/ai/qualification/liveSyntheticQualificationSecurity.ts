@@ -23,7 +23,6 @@ export type LiveQualificationEnvironmentCheck =
   | "ENABLED"
   | "AUTHORIZATION_ID"
   | "VERCEL_ENV"
-  | "VERCEL_GIT_COMMIT_REF"
   | "DEPLOYMENT_HOST"
   | "REQUEST_HOST"
   | "PRODUCTION_HOST"
@@ -109,10 +108,6 @@ export function assertLiveQualificationEnvironment(input: {
       "AUTHORIZATION_ID",
     ],
     [env.VERCEL_ENV === "production", "VERCEL_ENV"],
-    [
-      env.VERCEL_GIT_COMMIT_REF === LIVE_QUALIFICATION_BRANCH,
-      "VERCEL_GIT_COMMIT_REF",
-    ],
   ] as const) {
     if (matches) continue;
     throw new LiveQualificationSecurityError(
