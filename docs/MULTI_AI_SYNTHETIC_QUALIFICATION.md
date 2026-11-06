@@ -335,14 +335,15 @@ l'ID/versione della variabile Production globale e verificare che sia
 invariata; ispezionare inoltre il deployment e verificare che il suo override
 sia l'alias temporaneo.
 
-Per i deployment creati dalla CLI, `VERCEL_GIT_COMMIT_REF` non e un'identita
-runtime affidabile anche quando il progetto espone automaticamente le system
-env. Prima dell'alias, verificare tramite l'API Vercel che i metadati
-`gitCommitSha` e `gitCommitRef` del deployment corrispondano al commit e al ramo
-revisionati. Il gate runtime confronta poi `VERCEL_GIT_COMMIT_SHA`, system env
-immutabile fornita da Vercel, con
-`NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT`; il solo flag atteso non e
-sufficiente ad autorizzare il codice.
+Per i deployment creati dalla CLI, `VERCEL_GIT_COMMIT_REF` e
+`VERCEL_GIT_COMMIT_SHA` non sono identita runtime affidabili anche quando il
+progetto espone automaticamente le system env. Prima dell'alias, verificare
+tramite l'API Vercel che i metadati `gitCommitSha` e `gitCommitRef` del
+deployment corrispondano al commit e al ramo revisionati. Durante il build,
+Next.js incorpora inoltre `VERCEL_GIT_COMMIT_SHA`, system env fornita da
+Vercel, in `NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA`. Il gate runtime confronta
+questo SHA di build con `NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT`; il solo
+flag atteso non e sufficiente ad autorizzare il codice.
 
 6. Prima di assegnare l'alias, verificare che una richiesta anonima all'URL
    generato sia bloccata dalla Deployment Protection. Se risponde la pagina

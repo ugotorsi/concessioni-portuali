@@ -28,7 +28,7 @@ export type LiveQualificationEnvironmentCheck =
   | "PRODUCTION_HOST"
   | "NEXTAUTH_URL"
   | "EXPECTED_COMMIT_FORMAT"
-  | "VERCEL_GIT_COMMIT_SHA"
+  | "VERCEL_BUILD_GIT_COMMIT_SHA"
   | "NEXTAUTH_SECRET"
   | "AI_ANTHROPIC_API_KEY"
   | "AI_DEEPSEEK_API_KEY"
@@ -149,11 +149,14 @@ export function assertLiveQualificationEnvironment(input: {
       "EXPECTED_COMMIT_FORMAT",
     );
   }
-  if (required(env, "VERCEL_GIT_COMMIT_SHA", "VERCEL_GIT_COMMIT_SHA")
-    !== expectedCommit) {
+  if (required(
+    env,
+    "NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA",
+    "VERCEL_BUILD_GIT_COMMIT_SHA",
+  ) !== expectedCommit) {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-      "VERCEL_GIT_COMMIT_SHA",
+      "VERCEL_BUILD_GIT_COMMIT_SHA",
     );
   }
   for (const [name, check] of [

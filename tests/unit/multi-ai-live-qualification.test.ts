@@ -370,6 +370,7 @@ describe("issue #70 deployment and request security", () => {
     VERCEL_ENV: "production",
     VERCEL_GIT_COMMIT_REF: "qualification/multi-ai-synthetic-20261105",
     VERCEL_GIT_COMMIT_SHA: "a".repeat(40),
+    NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: "a".repeat(40),
     NEXTAUTH_URL: "https://concessioni-portuali-demo-issue70.vercel.app",
     NEXTAUTH_SECRET: "nextauth-secret",
     AI_ANTHROPIC_API_KEY: "anthropic-secret",
@@ -403,7 +404,10 @@ describe("issue #70 deployment and request security", () => {
       requestHost: "app.noetra.it",
     })).toThrow("LIVE_QUALIFICATION_HOST_INVALID");
     expect(() => assertLiveQualificationEnvironment({
-      env: { ...environment, VERCEL_GIT_COMMIT_SHA: "b".repeat(40) },
+      env: {
+        ...environment,
+        NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: "b".repeat(40),
+      },
       requestHost: "concessioni-portuali-demo-issue70.vercel.app",
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
     expect(() => assertLiveQualificationEnvironment({
@@ -415,14 +419,17 @@ describe("issue #70 deployment and request security", () => {
   it("identifies only the failed environment check without exposing values", () => {
     try {
       assertLiveQualificationEnvironment({
-        env: { ...environment, VERCEL_GIT_COMMIT_SHA: undefined },
+        env: {
+          ...environment,
+          NOETRA_VERCEL_BUILD_GIT_COMMIT_SHA: undefined,
+        },
         requestHost: "concessioni-portuali-demo-issue70.vercel.app",
       });
       expect.unreachable();
     } catch (error) {
       expect(error).toMatchObject({
         code: "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-        environmentCheck: "VERCEL_GIT_COMMIT_SHA",
+        environmentCheck: "VERCEL_BUILD_GIT_COMMIT_SHA",
       });
       expect(JSON.stringify(error)).not.toContain("anthropic-secret");
       expect(JSON.stringify(error)).not.toContain("deepseek-secret");
