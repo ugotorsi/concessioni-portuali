@@ -15,6 +15,8 @@ import {
   buildAiProviderInstructions,
   aiProviderOutputSchema,
   type AiAnalysisProviderRequest,
+  type SyntheticQualificationProvider,
+  type SyntheticQualificationProviderRequestV1,
 } from "@/server/ai/providers/providerRequest";
 import {
   mapProviderHttpError,
@@ -95,7 +97,8 @@ export function createDeepSeekAnalysisProvider(config: {
   transport?: AiProviderFetch;
   telemetry?: DeepSeekProviderTelemetry;
   authorizeRequest?: () => Promise<void>;
-}): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
+}): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider
+  & SyntheticQualificationProvider {
   if (!config.apiKey.trim() || !config.model.trim()
     || !positiveInteger(config.timeoutMs)
     || !positiveInteger(config.maxRawResponseBytes)
@@ -107,6 +110,7 @@ export function createDeepSeekAnalysisProvider(config: {
   function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: FascicoloDocumentProviderRequestV1): Promise<unknown>;
+  function analyze(request: SyntheticQualificationProviderRequestV1): Promise<unknown>;
   async function analyze(request: AiAnalysisProviderRequest): Promise<unknown> {
     await config.authorizeRequest?.();
     const controller = new AbortController();
@@ -170,5 +174,6 @@ export function createDeepSeekAnalysisProvider(config: {
     }
   }
 
-  return { analyze } as AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider;
+  return { analyze } as AiAnalysisProvider & AiOutboundAnalysisProvider
+    & FascicoloDocumentAnalysisProvider & SyntheticQualificationProvider;
 }

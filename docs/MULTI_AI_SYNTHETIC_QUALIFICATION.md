@@ -153,23 +153,232 @@ Fonti:
 - TypeScript typecheck: PASS;
 - build Production locale con segreto NextAuth effimero: PASS.
 
-## Proposta per il successivo live test sintetico
+## Live test sintetico autorizzato: percorso operativo
 
-Richiede una nuova autorizzazione esplicita.
+L'autorizzazione registrata nella issue #70 consente esclusivamente:
 
-- budget massimo cumulativo: **5 USD**;
-- prenotazione interna: 2,50 USD per provider;
-- una richiesta a Claude Sonnet 5 e una a DeepSeek V4 Pro;
-- massimo 100.000 token input e 10.000 token output per richiesta;
-- nessun retry, fallback, tool, ricerca o documento reale;
-- prompt e risposta interamente sintetici;
-- tariffazione DeepSeek sempre al picco e cache-write Anthropic sempre alla
-  tariffa prudenziale di un'ora;
-- stop immediato per metering assente/incoerente, risposta non conforme,
-  timeout, errore provider o preventivo oltre budget;
-- consuntivo separato per provider e confronto con l'addebito effettivo.
+- una richiesta a `claude-sonnet-5`;
+- una richiesta a `deepseek-v4-pro`;
+- fascicolo completamente inventato `SYN-001`;
+- massimo 4.000 token input e 1.000 output per richiesta;
+- budget cumulativo massimo 5 USD;
+- nessun retry, fallback, tool, ricerca, documento o dato reale.
 
-Con i prezzi di riferimento, il worst case tariffario dei limiti proposti e
-circa 0,50 USD per Anthropic e 0,1716 USD per DeepSeek. Il cap di 5 USD e una
-prenotazione prudenziale, non una garanzia sulla fatturazione definitiva del
-provider.
+Il primo preflight del 6 novembre 2026 non ha eseguito chiamate perche
+`vercel env run` non rendeva disponibili localmente i Secret Production. Le
+chiavi non devono essere estratte, visualizzate, scaricate o copiate.
+
+### Architettura temporanea
+
+Il nuovo harness e raggiungibile soltanto quando tutte le seguenti condizioni
+sono vere:
+
+1. target Vercel `production`, necessario solo per rendere disponibili i
+   Secret gia custoditi nel progetto;
+2. deployment creato con `--skip-domain`, senza promozione o alias verso
+   `app.noetra.it`;
+3. alias temporaneo dedicato `*.vercel.app`, passato sia come `NEXTAUTH_URL`
+   sia come `NOETRA_LIVE_QUALIFICATION_HOST`;
+4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_05`;
+6. branch esatto `qualification/multi-ai-synthetic-20261105`;
+7. commit Vercel uguale al commit esplicitamente atteso;
+8. Vercel Deployment Protection attiva;
+9. risorsa Upstash dedicata alla sola issue #70, diversa dallo store di rate
+   limit Production;
+10. sessione applicativa ADMIN gia MFA-ready e MFA verificata;
+11. token CSRF HMAC legato ad amministratore, host, cookie HttpOnly e scadenza.
+
+Quando il flag temporaneo e attivo, il middleware consente esclusivamente:
+
+- login, logout e soli endpoint Auth.js necessari a Credentials/JWT;
+- `/admin/ai-live-qualification`;
+- `/api/admin/ai-live-qualification`;
+- asset statici Next.js.
+
+Dashboard, procedimenti, documenti, report e tutte le altre API applicative
+restituiscono 404 sul deployment temporaneo. L'harness non importa Prisma,
+repository, query di fascicolo, storage documentale o worker. L'unico accesso
+applicativo ammesso e il piano di autenticazione necessario a verificare ADMIN
+e MFA. Enrollment MFA, password recovery, WorkOS e ogni richiesta con header
+`Next-Action` sono bloccati, inclusa l'invocazione diretta di Server Actions
+attraverso una route altrimenti ammessa.
+
+### Database di autenticazione condiviso
+
+Il deployment non e fisicamente isolato dal database Production. Poiche usa il
+target Vercel `production`, Auth.js riceve il `DATABASE_URL` Production del
+progetto `concessioni-portuali-demo`. Il preflight dichiara quindi
+esplicitamente `SHARED_PRODUCTION_DATABASE`.
+
+Accessi necessari e verificati nel codice:
+
+- login: lettura della riga `User` per email, password hash, ruolo, lockout e
+  stato/segreto MFA;
+- password errata: aggiornamento di tentativi falliti, ultimo errore ed
+  eventuale lockout;
+- login riuscito: azzeramento lockout/tentativi e aggiornamento `lastLoginAt`;
+- validazione di ogni sessione: lettura `User` per stato attivo, ruolo, lockout,
+  MFA e versione password;
+- login, logout, successo/fallimento MFA: scrittura della catena `ActivityLog`.
+
+Non sono effettuate letture di fascicoli, tenant, concessioni, documenti,
+report o storage. L'enrollment MFA e escluso dall'allowlist, quindi il
+deployment richiede un ADMIN gia configurato e non modifica segreto o recovery
+code MFA. Questa dipendenza auth Production e un rischio residuo esplicito:
+credenziali errate o un login riuscito producono le normali scritture auth e
+audit Production.
+
+### Concorrenza, duplicati e replay
+
+Vercel puo eseguire piu istanze concorrenti e non offre un limite
+`maxInstances` per funzione. Un lock in memoria non e quindi sufficiente.
+
+Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
+una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
+fisso:
+
+`noetra:qualification:issue70:2026-11-05`
+
+Il lock non ha TTL: una prenotazione, anche se il processo termina, impedisce
+replay e recuperi automatici. Sono inoltre prenotati separatamente Anthropic e
+DeepSeek prima del rispettivo POST. Nessun codice enumera o legge namespace
+applicativi. Nel ledger sono salvati solo stato, modello, validita JSON,
+validita riferimenti, token, costo stimato e anomalia redatta; mai chiavi,
+prompt o risposta integrale.
+
+Il preflight richiede
+`NOETRA_LIVE_QUALIFICATION_REDIS_REST_URL` e
+`NOETRA_LIVE_QUALIFICATION_REDIS_REST_TOKEN`, oltre al resource ID non segreto
+`NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID`, e rifiuta l'avvio se l'URL
+coincide con `UPSTASH_REDIS_REST_URL` o `KV_REST_API_URL`. Il riuso dello
+store Production avrebbe rischi di collisione operativa, cancellazione
+accidentale e privilegi condivisi; non e piu consentito. La risorsa dedicata
+deve essere collegata tramite integrazione Vercel/Shared Environment Variable
+senza leggere o copiare il token. La sua configurazione richiede
+un'autorizzazione operativa separata e non viene eseguita da questa PR.
+
+### Contratto e preflight economico
+
+Il contratto documentale V7 completo supera 35 KB prima dei dati e non e
+compatibile con il limite autorizzato di 4.000 token. Il live test usa quindi
+il contratto compatto `ai-fascicolo-analysis/v1`, gia condiviso dagli adapter,
+con grounding limitato a `SYN.P1` e `SYN.P2`.
+
+Il preflight conta schema, istruzioni e input con `o200k_base` e aggiunge 1.024
+token di overhead prudenziale. Il POST e bloccato se la stima supera 4.000.
+L'uso restituito dal provider deve inoltre essere presente, coerente e non
+superare 4.000 input / 1.000 output.
+
+Preventivo massimo:
+
+| Provider | Criterio prudenziale | Massimo USD |
+|---|---|---:|
+| Claude Sonnet 5 | input/cache-write maggiore e output ufficiale | 0,026000 |
+| DeepSeek V4 Pro | tariffa peak, cache miss e output | 0,009240 |
+| Totale | somma | 0,035240 |
+
+Il costo consuntivo e calcolato dai contatori provider con il catalogo di
+riferimento versionato. Resta una stima tecnica distinta dalla fattura
+definitiva.
+
+### Sequenza di deployment futura
+
+Non eseguire questa sequenza finche il commit non e stato revisionato, committato
+e pubblicato sulla PR #71.
+
+1. Annotare deployment ID attualmente servito da `app.noetra.it`.
+2. Verificare che Vercel Authentication protegga i deployment Production non
+   promossi del progetto.
+3. Creare o collegare una risorsa Upstash dedicata con il prefisso
+   `NOETRA_LIVE_QUALIFICATION_REDIS_REST_`, verificando dal pannello Vercel che
+   non sia la risorsa rate-limit Production. Non estrarre il token.
+4. Scegliere un alias temporaneo Vercel dedicato, per esempio
+   `concessioni-portuali-demo-issue70.vercel.app`.
+5. Dal worktree pulito della PR #71 eseguire un deployment Production non
+   promosso, passando soltanto valori non segreti per i flag temporanei:
+
+```powershell
+vercel deploy --prod --skip-domain --yes `
+  --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
+  --scope=ugotorsis-projects `
+  -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
+  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
+  -b NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT=<COMMIT_PR_71> `
+  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app `
+  -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_05 `
+  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70.vercel.app `
+  -e NOETRA_LIVE_QUALIFICATION_EXPECTED_COMMIT=<COMMIT_PR_71> `
+  -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
+  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70.vercel.app
+```
+
+I flag CLI `-b` e `-e` sono override build/runtime del singolo deployment e
+assicurano che anche il middleware usi l'allowlist. In particolare,
+`-e NEXTAUTH_URL=...` non modifica la variabile Production globale:
+non usare `vercel env add`, `vercel env update` o il pannello Environment
+Variables per `NEXTAUTH_URL`. Prima e dopo il deploy, acquisire via API Vercel
+l'ID/versione della variabile Production globale e verificare che sia
+invariata; ispezionare inoltre il deployment e verificare che il suo override
+sia l'alias temporaneo.
+
+6. Prima di assegnare l'alias, verificare che una richiesta anonima all'URL
+   generato sia bloccata dalla Deployment Protection. Se risponde la pagina
+   applicativa, eliminare il deployment e fermarsi.
+7. Verificare nuovamente che `app.noetra.it` punti ancora al deployment
+   annotato al punto 1.
+8. Assegnare esclusivamente l'alias temporaneo:
+
+```powershell
+vercel alias set <URL_DEPLOYMENT> concessioni-portuali-demo-issue70.vercel.app `
+  --scope=ugotorsis-projects
+```
+
+9. Verificare in forma anonima che `/login` sia protetto e, con accesso Vercel
+   autorizzato, che `/dashboard`, `/documenti`, `/procedimenti` e una API dati
+   restituiscano 404. Inviare anche un POST con header `Next-Action` alla pagina
+   harness e verificare 404.
+10. Accedere all'alias temporaneo come ADMIN gia MFA-ready, completare il login
+   MFA e aprire
+   `/admin/ai-live-qualification`.
+11. Controllare che il preflight dichiari database auth Production condiviso,
+    store lock dedicato, ledger `READY`, token e costo massimo; digitare
+    `ESEGUI DUE TEST SYN-001` una sola volta.
+
+### Esecuzione e registrazione
+
+La route esegue prima Anthropic. Se qualsiasi controllo fallisce, DeepSeek
+resta `NOT_TESTED` e non viene tentato. Ogni adapter ha una sola invocazione
+`fetch`, timeout 45 secondi, risposta massima 128 KiB, nessun retry e nessun
+fallback.
+
+Il risultato redatto restituito dalla route e persistito nel ledger e mostra:
+
+- PASS, FAIL o NOT_TESTED;
+- modello verificato dall'adapter;
+- validita JSON;
+- grounding esclusivo `SYN.P1` / `SYN.P2`;
+- input, cache read/write e output token;
+- costo USD stimato;
+- anomalia normalizzata.
+
+Il rapporto deve essere copiato nella issue #70 distinguendo chiamate
+effettivamente inviate da provider non tentati.
+
+### Disattivazione obbligatoria
+
+Subito dopo la registrazione:
+
+1. rimuovere l'alias temporaneo con `vercel alias remove`;
+2. eliminare il deployment temporaneo;
+3. verificare che l'alias non risolva piu;
+4. verificare ancora che `app.noetra.it` punti al deployment originario;
+5. lasciare il ledger permanente come blocco replay e prova redatta;
+6. non promuovere, unire o riusare l'harness per fascicoli reali.
+
+La presenza delle chiavi o un eventuale PASS non modifica
+`technicalQualificationApproved`, `realDataApproved`,
+`automaticExecutionApproved`, `pricingVersion`, i controlli manuali o il
+provider automatico.
