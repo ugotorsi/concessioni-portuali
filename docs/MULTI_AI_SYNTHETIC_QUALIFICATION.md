@@ -146,8 +146,8 @@ Fonti:
 
 ## Validazione
 
-- test mirati: 41/41 PASS;
-- suite completa: 348 file PASS, 4.499 test PASS;
+- test mirati: 45/45 PASS;
+- suite completa: 349 file PASS, 4.516 test PASS;
 - skip attesi: 5 file, 34 test;
 - lint delle modifiche, error-level: PASS;
 - TypeScript typecheck: PASS;
@@ -296,11 +296,14 @@ e pubblicato sulla PR #71.
 1. Annotare deployment ID attualmente servito da `app.noetra.it`.
 2. Verificare che Vercel Authentication protegga i deployment Production non
    promossi del progetto.
-3. Creare una risorsa Upstash PAYG dedicata con `prodPack=false` e
-   `autoUpgrade=false`, quindi collegarla al solo ambiente Production con il
-   prefisso `NOETRA_LIVE_QUALIFICATION_REDIS_`. Il dry-run deve mostrare
-   esattamente le cinque variabili provider-managed elencate sopra. Verificare
-   che non sia la risorsa rate-limit Production e non estrarre i token.
+3. Inventariare ID e nome, mai i valori, di tutte le env Production
+   preesistenti. Verificare che il teardown sicuro sia disponibile, quindi
+   creare una sola risorsa Upstash PAYG senza canone fisso, con
+   `prodPack=false` e `autoUpgrade=false`, e collegarla al solo ambiente
+   Production con il prefisso `NOETRA_LIVE_QUALIFICATION_REDIS_`. Il dry-run
+   deve mostrare esattamente le cinque variabili provider-managed elencate
+   sopra. Verificare che non sia la risorsa rate-limit Production e non
+   estrarre i token.
 4. Scegliere un alias temporaneo Vercel dedicato, per esempio
    `concessioni-portuali-demo-issue70.vercel.app`.
 5. Dal worktree pulito della PR #71 eseguire un deployment Production non
@@ -382,9 +385,18 @@ Subito dopo la registrazione:
 1. rimuovere l'alias temporaneo con `vercel alias remove`;
 2. eliminare il deployment temporaneo;
 3. verificare che l'alias non risolva piu;
-4. verificare ancora che `app.noetra.it` punti al deployment originario;
-5. lasciare il ledger permanente come blocco replay e prova redatta;
-6. non promuovere, unire o riusare l'harness per fascicoli reali.
+4. disconnettere l'integrazione Upstash dal progetto demo;
+5. rimuovere per ID esattamente le cinque env Production provider-managed
+   inventariate dopo il collegamento, senza leggere i valori;
+6. eliminare la sola risorsa Redis dedicata alla issue #70;
+7. confrontare ID e nomi delle env Production con l'inventario iniziale e
+   verificare che tutte le configurazioni preesistenti siano invariate;
+8. verificare ancora che `app.noetra.it` punti al deployment originario;
+9. non promuovere, unire o riusare l'harness per fascicoli reali.
+
+Il ledger Redis resta il blocco replay e la prova redatta soltanto fino alla
+registrazione del risultato nella issue #70; viene eliminato insieme alla
+risorsa dedicata durante il teardown obbligatorio.
 
 La presenza delle chiavi o un eventuale PASS non modifica
 `technicalQualificationApproved`, `realDataApproved`,
