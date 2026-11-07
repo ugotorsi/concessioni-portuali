@@ -557,7 +557,7 @@ describe("issue #70 live synthetic qualification", () => {
   it("blocks replay before any provider request", async () => {
     const store = memoryStore();
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
+      authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -710,9 +710,7 @@ describe("issue #70 deployment and request security", () => {
   const environment = {
     NOETRA_LIVE_QUALIFICATION_ENABLED: "true",
     NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID:
-      "GH_ISSUE_70_2026_11_06_RUN_4",
-    NOETRA_LIVE_QUALIFICATION_HOST:
-      "concessioni-portuali-demo-issue70.vercel.app",
+      "GH_ISSUE_70_2026_11_07_RUN_5",
     VERCEL_ENV: "production",
     VERCEL_PROJECT_ID: "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu",
     VERCEL_DEPLOYMENT_ID: "dpl_issue70",
@@ -720,7 +718,8 @@ describe("issue #70 deployment and request security", () => {
       "concessioni-portuali-demo-generated.vercel.app",
     VERCEL_GIT_COMMIT_REF: "qualification/multi-ai-synthetic-20261105",
     VERCEL_GIT_COMMIT_SHA: "a".repeat(40),
-    NEXTAUTH_URL: "https://concessioni-portuali-demo-issue70.vercel.app",
+    NEXTAUTH_URL:
+      "https://concessioni-portuali-demo-generated.vercel.app",
     NEXTAUTH_SECRET: "nextauth-secret",
     AI_ANTHROPIC_API_KEY: "anthropic-secret",
     AI_DEEPSEEK_API_KEY: "deepseek-secret",
@@ -739,14 +738,14 @@ describe("issue #70 deployment and request security", () => {
     NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID: "redis_issue70_dedicated",
   };
 
-  it("allows only the dedicated non-production alias and authorized commit", () => {
+  it("allows only the generated protected deployment host", () => {
     expect(() => assertLiveQualificationEnvironment({
       env: environment,
-      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      requestHost: "concessioni-portuali-demo-generated.vercel.app",
     })).not.toThrow();
     expect(() => assertLiveQualificationEnvironment({
       env: { ...environment, VERCEL_GIT_COMMIT_REF: undefined },
-      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      requestHost: "concessioni-portuali-demo-generated.vercel.app",
     })).not.toThrow();
     expect(() => assertLiveQualificationEnvironment({
       env: environment,
@@ -754,7 +753,7 @@ describe("issue #70 deployment and request security", () => {
     })).toThrow("LIVE_QUALIFICATION_HOST_INVALID");
     expect(() => assertLiveQualificationEnvironment({
       env: { ...environment, NEXTAUTH_URL: "https://app.noetra.it" },
-      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      requestHost: "concessioni-portuali-demo-generated.vercel.app",
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
   });
 
@@ -765,7 +764,7 @@ describe("issue #70 deployment and request security", () => {
           ...environment,
           VERCEL_DEPLOYMENT_ID: undefined,
         },
-        requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+        requestHost: "concessioni-portuali-demo-generated.vercel.app",
       });
       expect.unreachable();
     } catch (error) {
@@ -785,14 +784,14 @@ describe("issue #70 deployment and request security", () => {
       ["VERCEL_DEPLOYMENT_ID", "user-controlled", "VERCEL_DEPLOYMENT_ID"],
       [
         "VERCEL_URL",
-        "concessioni-portuali-demo-issue70.vercel.app",
+        "app.noetra.it",
         "VERCEL_URL",
       ],
     ] as const) {
       try {
         assertLiveQualificationEnvironment({
           env: { ...environment, [name]: value },
-          requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+          requestHost: "concessioni-portuali-demo-generated.vercel.app",
         });
         expect.unreachable();
       } catch (error) {
@@ -804,7 +803,7 @@ describe("issue #70 deployment and request security", () => {
   it("isolates the deployment to auth and qualification paths", () => {
     expect(isLiveQualificationDeployment(environment)).toBe(true);
     expect(liveQualificationDeploymentHost(environment))
-      .toBe("concessioni-portuali-demo-issue70.vercel.app");
+      .toBe("concessioni-portuali-demo-generated.vercel.app");
     expect(isLiveQualificationAllowedPath("/login")).toBe(true);
     expect(isLiveQualificationAllowedPath("/api/auth/session")).toBe(true);
     expect(isLiveQualificationAllowedPath("/api/auth/mfa/enrollment")).toBe(false);
@@ -831,7 +830,7 @@ describe("issue #70 deployment and request security", () => {
         NOETRA_LIVE_QUALIFICATION_REDIS_KV_REST_API_URL:
           environment.UPSTASH_REDIS_REST_URL,
       },
-      requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+      requestHost: "concessioni-portuali-demo-generated.vercel.app",
     })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
   });
 
@@ -845,7 +844,7 @@ describe("issue #70 deployment and request security", () => {
     ]) {
       expect(() => assertLiveQualificationEnvironment({
         env: { ...environment, [name]: undefined },
-        requestHost: "concessioni-portuali-demo-issue70.vercel.app",
+        requestHost: "concessioni-portuali-demo-generated.vercel.app",
       })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
     }
   });
@@ -929,7 +928,7 @@ describe("issue #70 distributed reservation store", () => {
       .mockResolvedValueOnce(Response.json({ result: "OK" }))
       .mockResolvedValueOnce(Response.json({
         result: JSON.stringify({
-          authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
+          authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
           status: "PASS",
           updatedAt: "2026-11-06T10:00:00.000Z",
           providers: [],
@@ -942,7 +941,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     const value: LiveQualificationStoredResult = {
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
+      authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],
@@ -955,7 +954,7 @@ describe("issue #70 distributed reservation store", () => {
     expect(JSON.parse(String(transport.mock.calls[0]?.[1]?.body)))
       .toEqual(expect.arrayContaining(["SET", "NX"]));
     expect(String(transport.mock.calls[0]?.[1]?.body))
-      .toContain("noetra:qualification:issue70:2026-11-06:run-4:run");
+      .toContain("noetra:qualification:issue70:2026-11-07:run-5:run");
     expect(String(transport.mock.calls[0]?.[1]?.body))
       .not.toContain("noetra:qualification:issue70:2026-11-05");
     expect(JSON.parse(String(transport.mock.calls[1]?.[1]?.body)))
@@ -974,7 +973,7 @@ describe("issue #70 distributed reservation store", () => {
       transport,
     });
     expect(await store.reserveRun({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
+      authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
       status: "RESERVED",
       updatedAt: "2026-11-06T10:00:00.000Z",
       providers: [],

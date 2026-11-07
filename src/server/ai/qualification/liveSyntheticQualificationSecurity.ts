@@ -132,7 +132,7 @@ export function assertLiveQualificationEnvironment(input: {
   for (const [matches, check] of [
     [
       Boolean(vercelUrl && vercelUrl.endsWith(".vercel.app")
-        && vercelUrl !== deploymentHost),
+        && vercelUrl === deploymentHost),
       "VERCEL_URL",
     ],
     [

@@ -98,7 +98,7 @@ export async function GET(request: Request): Promise<Response> {
       maxAge: 10 * 60,
     });
     return json({
-      authorizationId: "GH_ISSUE_70_2026_11_06_RUN_4",
+      authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
       syntheticCase: "SYN-001",
       authentication: {
         databaseScope: "SHARED_PRODUCTION_DATABASE",

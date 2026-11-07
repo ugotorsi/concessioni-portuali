@@ -278,10 +278,10 @@ sono vere:
    Secret gia custoditi nel progetto;
 2. deployment creato con `--skip-domain`, senza promozione o alias verso
    `app.noetra.it`;
-3. alias temporaneo dedicato `*.vercel.app`, passato sia come `NEXTAUTH_URL`
-   sia come `NOETRA_LIVE_QUALIFICATION_HOST`;
+3. URL generato `*.vercel.app`, protetto da Vercel Authentication e usato
+   dinamicamente come `NEXTAUTH_URL`;
 4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
-5. authorization ID esatto `GH_ISSUE_70_2026_11_06_RUN_4`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_07_RUN_5`;
 6. branch esatto `qualification/multi-ai-synthetic-20261105`;
 7. commit Vercel uguale al commit esplicitamente atteso;
 8. Vercel Deployment Protection attiva;
@@ -339,7 +339,7 @@ Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
 una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
 fisso:
 
-`noetra:qualification:issue70:2026-11-06:run-4`
+`noetra:qualification:issue70:2026-11-07:run-5`
 
 I namespace dei primi tre tentativi,
 `noetra:qualification:issue70:2026-11-05` e
@@ -486,9 +486,7 @@ e pubblicato sulla PR #71.
    deve mostrare esattamente le cinque variabili provider-managed elencate
    sopra. Verificare che non sia la risorsa rate-limit Production e non
    estrarre i token.
-4. Scegliere un alias temporaneo Vercel dedicato, per esempio
-   `concessioni-portuali-demo-issue70.vercel.app`.
-5. Dal worktree pulito della PR #71 eseguire un deployment Production non
+4. Dal worktree pulito della PR #71 eseguire un deployment Production non
    promosso, passando soltanto valori non segreti per i flag temporanei:
 
 ```powershell
@@ -496,24 +494,19 @@ vercel deploy --prod --skip-domain --yes `
   --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
   --scope=ugotorsis-projects `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_4 `
-  -b NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run4.vercel.app `
-  -b NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run4.vercel.app `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5 `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_06_RUN_4 `
-  -e NOETRA_LIVE_QUALIFICATION_HOST=concessioni-portuali-demo-issue70-run4.vercel.app `
-  -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO> `
-  -e NEXTAUTH_URL=https://concessioni-portuali-demo-issue70-run4.vercel.app
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5 `
+  -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO>
 ```
 
 I flag CLI `-b` e `-e` sono override build/runtime del singolo deployment e
-assicurano che anche il middleware usi l'allowlist. In particolare,
-`-e NEXTAUTH_URL=...` non modifica la variabile Production globale:
-non usare `vercel env add`, `vercel env update` o il pannello Environment
-Variables per `NEXTAUTH_URL`. Prima e dopo il deploy, acquisire via API Vercel
+assicurano che anche il middleware usi l'allowlist. `NEXTAUTH_URL` deriva
+esclusivamente dalla system env `VERCEL_URL` del deployment autorizzato:
+non usare `vercel env add`, `vercel env update`, alias custom o il pannello
+Environment Variables. Prima e dopo il deploy, acquisire via API Vercel
 l'ID/versione della variabile Production globale e verificare che sia
-invariata; ispezionare inoltre il deployment e verificare che il suo override
-sia l'alias temporaneo.
+invariata.
 
 Per i deployment creati dalla CLI, `VERCEL_GIT_COMMIT_REF` e
 `VERCEL_GIT_COMMIT_SHA` non sono identita runtime affidabili anche quando il
@@ -526,26 +519,19 @@ corrispondano all'operazione autorizzata. Assegnare l'alias soltanto a quel
 deployment verificato: l'identita del commit non dipende da un flag impostabile
 dall'utente.
 
-6. Prima di assegnare l'alias, verificare che una richiesta anonima all'URL
+5. Verificare che una richiesta anonima all'URL
    generato sia bloccata dalla Deployment Protection. Se risponde la pagina
    applicativa, eliminare il deployment e fermarsi.
-7. Verificare nuovamente che `app.noetra.it` punti ancora al deployment
+6. Verificare nuovamente che `app.noetra.it` punti ancora al deployment
    annotato al punto 1.
-8. Assegnare esclusivamente l'alias temporaneo:
-
-```powershell
-vercel alias set <URL_DEPLOYMENT> concessioni-portuali-demo-issue70.vercel.app `
-  --scope=ugotorsis-projects
-```
-
-9. Verificare in forma anonima che `/login` sia protetto e, con accesso Vercel
+7. Verificare in forma anonima che `/login` sia protetto e, con accesso Vercel
    autorizzato, che `/dashboard`, `/documenti`, `/procedimenti` e una API dati
    restituiscano 404. Inviare anche un POST con header `Next-Action` alla pagina
    harness e verificare 404.
-10. Accedere all'alias temporaneo come ADMIN gia MFA-ready, completare il login
+8. Accedere all'URL generato come ADMIN gia MFA-ready, completare il login
    MFA e aprire
    `/admin/ai-live-qualification`.
-11. Controllare che il preflight dichiari database auth Production condiviso,
+9. Controllare che il preflight dichiari database auth Production condiviso,
     store lock dedicato, ledger `READY`, token e costo massimo; digitare
     `ESEGUI DUE TEST SYN-001` una sola volta.
 
@@ -574,17 +560,16 @@ effettivamente inviate da provider non tentati.
 
 Subito dopo la registrazione:
 
-1. rimuovere l'alias temporaneo con `vercel alias remove`;
-2. eliminare il deployment temporaneo;
-3. verificare che l'alias non risolva piu;
-4. disconnettere l'integrazione Upstash dal progetto demo;
-5. rimuovere per ID esattamente le cinque env Production provider-managed
+1. eliminare il deployment temporaneo;
+2. verificare che il suo URL non risolva piu;
+3. disconnettere l'integrazione Upstash dal progetto demo;
+4. rimuovere per ID esattamente le cinque env Production provider-managed
    inventariate dopo il collegamento, senza leggere i valori;
-6. eliminare la sola risorsa Redis dedicata alla issue #70;
-7. confrontare ID e nomi delle env Production con l'inventario iniziale e
+5. eliminare la sola risorsa Redis dedicata alla issue #70;
+6. confrontare ID e nomi delle env Production con l'inventario iniziale e
    verificare che tutte le configurazioni preesistenti siano invariate;
-8. verificare ancora che `app.noetra.it` punti al deployment originario;
-9. non promuovere, unire o riusare l'harness per fascicoli reali.
+7. verificare ancora che `app.noetra.it` punti al deployment originario;
+8. non promuovere, unire o riusare l'harness per fascicoli reali.
 
 Il ledger Redis resta il blocco replay e la prova redatta soltanto fino alla
 registrazione del risultato nella issue #70; viene eliminato insieme alla

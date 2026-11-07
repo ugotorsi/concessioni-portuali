@@ -1,5 +1,5 @@
 export const LIVE_QUALIFICATION_AUTHORIZATION_ID =
-  "GH_ISSUE_70_2026_11_06_RUN_4" as const;
+  "GH_ISSUE_70_2026_11_07_RUN_5" as const;
 export const LIVE_QUALIFICATION_BRANCH =
   "qualification/multi-ai-synthetic-20261105" as const;
 const LIVE_QUALIFICATION_ALLOWED_PATHS = new Set([
@@ -22,6 +22,16 @@ const LIVE_QUALIFICATION_ALLOWED_PREFIXES = [
 export type LiveQualificationDeploymentEnvironment =
   Readonly<Record<string, string | undefined>>;
 
+function normalizedHost(value: string | null | undefined): string {
+  return (value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/.*$/, "")
+    .replace(/:\d+$/, "")
+    .replace(/\.$/, "");
+}
+
 export function isLiveQualificationDeployment(
   env: LiveQualificationDeploymentEnvironment,
 ): boolean {
@@ -33,12 +43,15 @@ export function isLiveQualificationDeployment(
 export function liveQualificationDeploymentHost(
   env: LiveQualificationDeploymentEnvironment,
 ): string {
-  return (env.NOETRA_LIVE_QUALIFICATION_HOST ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/\/.*$/, "")
-    .replace(/:\d+$/, "");
+  return normalizedHost(env.VERCEL_URL);
+}
+
+export function liveQualificationDeploymentOrigin(
+  env: LiveQualificationDeploymentEnvironment,
+): string | null {
+  if (!isLiveQualificationDeployment(env)) return null;
+  const host = liveQualificationDeploymentHost(env);
+  return host && host !== "app.noetra.it" ? `https://${host}` : null;
 }
 
 export function isLiveQualificationAllowedPath(pathname: string): boolean {
