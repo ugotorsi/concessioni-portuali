@@ -8,10 +8,52 @@ import {
   OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA,
 } from "@/server/ai/providers/openai";
 
+export interface SyntheticQualificationProviderRequestV1 {
+  readonly systemPolicy: {
+    readonly purpose: "SYNTHETIC_PROVIDER_QUALIFICATION_ONLY";
+    readonly dataTrust: "UNTRUSTED_SYNTHETIC_DATA";
+    readonly toolsAllowed: false;
+    readonly externalResearchAllowed: false;
+    readonly mutationsAllowed: false;
+    readonly instructions: readonly string[];
+  };
+  readonly qualificationData: {
+    readonly schemaVersion: "NOETRA_SYNTHETIC_QUALIFICATION_V1";
+    readonly content: {
+      readonly fascicoloId: "SYN-001";
+      readonly location: "Porto Fantasia";
+      readonly excerpts: readonly {
+        readonly reference: "SYN.P1" | "SYN.P2";
+        readonly text: string;
+      }[];
+    };
+  };
+  readonly requestedOutputContract: {
+    readonly schemaVersion: "ai-fascicolo-analysis/v1";
+    readonly outputMode: "STRUCTURED_PAYLOAD_ONLY";
+    readonly allowedSections: readonly [
+      "summary",
+      "timeline",
+      "recordedState",
+      "signals",
+      "investigativeQuestions",
+      "suggestedActivities",
+      "legalResearchQuestions",
+    ];
+    readonly signalTypes: readonly ["INFO", "VERIFY"];
+    readonly basisRefsMeaning: "SYNTHETIC_EXCERPT_ID_ONLY";
+  };
+}
+
+export interface SyntheticQualificationProvider {
+  analyze(request: SyntheticQualificationProviderRequestV1): Promise<unknown>;
+}
+
 export type AiAnalysisProviderRequest =
   | AiAnalysisProviderRequestV1
   | AiOutboundAnalysisProviderRequestV1
-  | FascicoloDocumentProviderRequestV1;
+  | FascicoloDocumentProviderRequestV1
+  | SyntheticQualificationProviderRequestV1;
 
 export function buildAiProviderInstructions(request: AiAnalysisProviderRequest): string {
   return JSON.stringify({
@@ -47,6 +89,13 @@ export function buildAiProviderInput(request: AiAnalysisProviderRequest): string
       "BEGIN_UNTRUSTED_OUTBOUND_DATA",
       JSON.stringify(request.outboundData),
       "END_UNTRUSTED_OUTBOUND_DATA",
+    ].join("\n");
+  }
+  if ("qualificationData" in request) {
+    return [
+      "BEGIN_UNTRUSTED_SYNTHETIC_QUALIFICATION_DATA",
+      JSON.stringify(request.qualificationData),
+      "END_UNTRUSTED_SYNTHETIC_QUALIFICATION_DATA",
     ].join("\n");
   }
   return [

@@ -15,6 +15,8 @@ import {
   buildAiProviderInstructions,
   aiProviderOutputSchema,
   type AiAnalysisProviderRequest,
+  type SyntheticQualificationProvider,
+  type SyntheticQualificationProviderRequestV1,
 } from "@/server/ai/providers/providerRequest";
 import {
   mapProviderHttpError,
@@ -28,10 +30,17 @@ export const DEEPSEEK_CHAT_COMPLETIONS_ENDPOINT =
 export interface DeepSeekProviderTelemetry {
   onRequestSent?(): void;
   onUsage?(usage: AiBillableUsage): void;
+  onResponseMetadata?(metadata: { readonly stopReason: string | null }): void;
 }
 
 function positiveInteger(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0;
+}
+
+function sanitizedStopReason(value: unknown): string | null {
+  return typeof value === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(value)
+    ? value
+    : null;
 }
 
 function parseUsage(body: Record<string, unknown>): AiBillableUsage | null {
@@ -95,7 +104,8 @@ export function createDeepSeekAnalysisProvider(config: {
   transport?: AiProviderFetch;
   telemetry?: DeepSeekProviderTelemetry;
   authorizeRequest?: () => Promise<void>;
-}): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
+}): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider
+  & SyntheticQualificationProvider {
   if (!config.apiKey.trim() || !config.model.trim()
     || !positiveInteger(config.timeoutMs)
     || !positiveInteger(config.maxRawResponseBytes)
@@ -107,6 +117,7 @@ export function createDeepSeekAnalysisProvider(config: {
   function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: FascicoloDocumentProviderRequestV1): Promise<unknown>;
+  function analyze(request: SyntheticQualificationProviderRequestV1): Promise<unknown>;
   async function analyze(request: AiAnalysisProviderRequest): Promise<unknown> {
     await config.authorizeRequest?.();
     const controller = new AbortController();
@@ -155,7 +166,20 @@ export function createDeepSeekAnalysisProvider(config: {
         throw error;
       }
       if (controller.signal.aborted) throw new AiProviderAdapterError("TIMEOUT");
-      if (!response.ok) throw mapProviderHttpError(response.status, body);
+      if (!response.ok) {
+        throw mapProviderHttpError(response.status, body, response.headers);
+      }
+      const record = body && typeof body === "object" && !Array.isArray(body)
+        ? body as Record<string, unknown>
+        : null;
+      const choice = record && Array.isArray(record.choices)
+        ? record.choices[0]
+        : null;
+      config.telemetry?.onResponseMetadata?.({
+        stopReason: choice && typeof choice === "object" && !Array.isArray(choice)
+          ? sanitizedStopReason((choice as Record<string, unknown>).finish_reason)
+          : null,
+      });
       const result = extractPayload(body, config.model);
       if (config.telemetry?.onUsage) {
         if (!result.usage) throw new AiProviderAdapterError("CONFIGURATION", {
@@ -170,5 +194,6 @@ export function createDeepSeekAnalysisProvider(config: {
     }
   }
 
-  return { analyze } as AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider;
+  return { analyze } as AiAnalysisProvider & AiOutboundAnalysisProvider
+    & FascicoloDocumentAnalysisProvider & SyntheticQualificationProvider;
 }

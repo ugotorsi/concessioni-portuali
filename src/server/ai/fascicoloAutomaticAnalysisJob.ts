@@ -422,6 +422,7 @@ export function fascicoloAutomaticAnalysisDiagnostic(error: unknown): Readonly<R
       errorCode: error.code,
       httpStatus: error.providerDiagnostics.httpStatus,
       providerCode: error.providerDiagnostics.providerCode,
+      providerRequestId: error.providerDiagnostics.providerRequestId ?? null,
     };
   }
   return null;

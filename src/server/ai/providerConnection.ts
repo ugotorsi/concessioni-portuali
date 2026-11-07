@@ -21,6 +21,10 @@ const providerModelsResponseSchema = z.object({
 }).passthrough();
 
 const MAX_MODELS_RESPONSE_BYTES = 1_000_000;
+const MAX_BALANCE_RESPONSE_BYTES = 64_000;
+const deepSeekBalanceResponseSchema = z.object({
+  is_available: z.boolean(),
+}).passthrough();
 
 interface ProviderConnectionActor {
   readonly userId: string;
@@ -38,6 +42,7 @@ export async function verifyAiProviderConnection(input: {
   readonly verified: boolean;
   readonly credentialValid: boolean;
   readonly modelAvailable: boolean;
+  readonly balanceSufficient: boolean | null;
   readonly modelTechnicallyQualified: boolean;
   readonly httpStatus: number | null;
   readonly code: string;
@@ -59,6 +64,7 @@ export async function verifyAiProviderConnection(input: {
       verified: false,
       credentialValid: false,
       modelAvailable: false,
+      balanceSufficient: null,
       modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
       httpStatus: null,
       code: "AI_PROVIDER_CREDENTIAL_MISSING",
@@ -85,6 +91,7 @@ export async function verifyAiProviderConnection(input: {
       verified: false,
       credentialValid: false,
       modelAvailable: false,
+      balanceSufficient: null,
       modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
       httpStatus: null,
       code: "AI_PROVIDER_VERIFICATION_SECRET_MISSING",
@@ -131,6 +138,7 @@ export async function verifyAiProviderConnection(input: {
       verified: false,
       credentialValid: false,
       modelAvailable: false,
+      balanceSufficient: null,
       modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
       httpStatus: null,
       code,
@@ -177,8 +185,78 @@ export async function verifyAiProviderConnection(input: {
       }
     }
   }
-  const verified = credentialValid && modelResponseValid && modelAvailable;
-  const code = !credentialValid
+  const deepSeekBalanceRejected = input.provider === "DEEPSEEK"
+    && response.status === 402;
+  let balanceSufficient: boolean | null = deepSeekBalanceRejected ? false : null;
+  let balanceHttpStatus: number | null = deepSeekBalanceRejected
+    ? response.status
+    : null;
+  let balanceResponseValid = false;
+  let balanceFailureCode: string | null = deepSeekBalanceRejected
+    ? "AI_PROVIDER_BALANCE_INSUFFICIENT"
+    : null;
+  if (input.provider === "DEEPSEEK"
+    && credentialValid
+    && modelResponseValid
+    && modelAvailable) {
+    const balanceController = new AbortController();
+    const balanceTimeout = setTimeout(() => balanceController.abort(), 8_000);
+    try {
+      const balanceResponse = await (input.fetch ?? globalThis.fetch.bind(globalThis))(
+        AI_PROVIDER_ENVIRONMENT.DEEPSEEK.balanceUrl,
+        {
+          method: "GET",
+          headers: config.headers(apiKey),
+          signal: balanceController.signal,
+          cache: "no-store",
+          redirect: "error",
+        },
+      );
+      balanceHttpStatus = balanceResponse.status;
+      if (balanceResponse.ok) {
+        const contentLength = Number(balanceResponse.headers.get("content-length"));
+        if (!Number.isFinite(contentLength)
+          || contentLength <= MAX_BALANCE_RESPONSE_BYTES) {
+          const body = await balanceResponse.text();
+          if (Buffer.byteLength(body, "utf8") <= MAX_BALANCE_RESPONSE_BYTES) {
+            try {
+              const parsed = deepSeekBalanceResponseSchema.safeParse(JSON.parse(body));
+              if (parsed.success) {
+                balanceResponseValid = true;
+                balanceSufficient = parsed.data.is_available;
+              }
+            } catch {
+              balanceResponseValid = false;
+            }
+          }
+        }
+      } else if (balanceResponse.status === 402) {
+        balanceSufficient = false;
+        balanceFailureCode = "AI_PROVIDER_BALANCE_INSUFFICIENT";
+      } else {
+        balanceFailureCode = `AI_PROVIDER_BALANCE_HTTP_${balanceResponse.status}`;
+      }
+    } catch {
+      balanceFailureCode = balanceController.signal.aborted
+        ? "AI_PROVIDER_BALANCE_TIMEOUT"
+        : "AI_PROVIDER_BALANCE_UNREACHABLE";
+    } finally {
+      clearTimeout(balanceTimeout);
+    }
+    if (!balanceFailureCode && !balanceResponseValid) {
+      balanceFailureCode = "AI_PROVIDER_BALANCE_RESPONSE_INVALID";
+    } else if (!balanceFailureCode && balanceSufficient === false) {
+      balanceFailureCode = "AI_PROVIDER_BALANCE_INSUFFICIENT";
+    }
+  }
+  const balanceVerified = input.provider !== "DEEPSEEK"
+    || balanceSufficient === true;
+  const verified = credentialValid
+    && modelResponseValid
+    && modelAvailable
+    && balanceVerified;
+  const code = balanceFailureCode
+    ?? (!credentialValid
     ? response.status === 401 || response.status === 403
       ? "AI_PROVIDER_CREDENTIAL_REJECTED"
       : `AI_PROVIDER_CONNECTION_HTTP_${response.status}`
@@ -186,14 +264,15 @@ export async function verifyAiProviderConnection(input: {
       ? "AI_PROVIDER_MODELS_RESPONSE_INVALID"
       : !modelAvailable
         ? "AI_PROVIDER_MODEL_UNAVAILABLE"
-        : "AI_PROVIDER_CONNECTION_VERIFIED";
+        : "AI_PROVIDER_CONNECTION_VERIFIED");
   const result = {
     provider: input.provider,
     verified,
     credentialValid,
     modelAvailable,
+    balanceSufficient,
     modelTechnicallyQualified: entry.capabilities.technicalQualificationApproved,
-    httpStatus: response.status,
+    httpStatus: balanceFailureCode ? balanceHttpStatus : response.status,
     code,
     generationRequested: false as const,
     expectedGenerationCostEur: 0 as const,
