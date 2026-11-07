@@ -281,7 +281,7 @@ sono vere:
 3. URL generato `*.vercel.app`, protetto da Vercel Authentication e usato
    dinamicamente come `NEXTAUTH_URL`;
 4. `NOETRA_LIVE_QUALIFICATION_ENABLED=true`;
-5. authorization ID esatto `GH_ISSUE_70_2026_11_07_RUN_5`;
+5. authorization ID esatto `GH_ISSUE_70_2026_11_07_RUN_5_BIS`;
 6. branch esatto `qualification/multi-ai-synthetic-20261105`;
 7. commit Vercel uguale al commit esplicitamente atteso;
 8. Vercel Deployment Protection attiva;
@@ -339,7 +339,7 @@ Prima di qualunque POST provider, l'harness esegue un `SET ... NX` atomico in
 una risorsa Upstash dedicata esclusivamente alla issue #70, usando il namespace
 fisso:
 
-`noetra:qualification:issue70:2026-11-07:run-5`
+`noetra:qualification:issue70:2026-11-07:run-5-bis`
 
 I namespace dei primi tre tentativi,
 `noetra:qualification:issue70:2026-11-05` e
@@ -494,9 +494,9 @@ vercel deploy --prod --skip-domain --yes `
   --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
   --scope=ugotorsis-projects `
   -b NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5 `
+  -b NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5_BIS `
   -e NOETRA_LIVE_QUALIFICATION_ENABLED=true `
-  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5 `
+  -e NOETRA_LIVE_QUALIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_RUN_5_BIS `
   -e NOETRA_LIVE_QUALIFICATION_REDIS_RESOURCE_ID=<RESOURCE_ID_DEDICATO>
 ```
 

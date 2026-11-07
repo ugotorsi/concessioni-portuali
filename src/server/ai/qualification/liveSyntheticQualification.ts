@@ -352,7 +352,7 @@ function storedResult(input: {
   now: Date;
 }): LiveQualificationStoredResult {
   return {
-    authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5",
+    authorizationId: "GH_ISSUE_70_2026_11_07_RUN_5_BIS",
     status: input.status,
     updatedAt: input.now.toISOString(),
     providers: input.providers,
