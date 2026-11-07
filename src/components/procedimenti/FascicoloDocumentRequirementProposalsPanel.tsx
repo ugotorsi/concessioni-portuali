@@ -133,10 +133,10 @@ export function FascicoloDocumentRequirementProposalsPanel({
 
               <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
                 <p>
-                  Questa proposta richiede una verifica umana dell'applicabilità e della sussistenza, per il procedimento, del requisito di autorizzazione ex art. 16.
+                  Questa proposta richiede una verifica umana dell&apos;applicabilità e della sussistenza, per il procedimento, del requisito di autorizzazione ex art. 16.
                 </p>
                 <p className="mt-1">
-                  Non accerta l'esistenza o l'assenza del titolo, né la sua validità, efficacia o sufficienza; non determina la completezza documentale, la regolarità del procedimento, l'ammissibilità dell'istanza o la concedibilità.
+                  Non accerta l&apos;esistenza o l&apos;assenza del titolo, né la sua validità, efficacia o sufficienza; non determina la completezza documentale, la regolarità del procedimento, l&apos;ammissibilità dell&apos;istanza o la concedibilità.
                 </p>
               </div>
 

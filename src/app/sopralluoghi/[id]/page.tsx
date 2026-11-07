@@ -401,7 +401,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
           <CardHeader>
             <CardTitle>Lettura tecnica e azione consigliata</CardTitle>
             <CardDescription>
-              La piattaforma supporta la verifica istruttoria e non sostituisce le determinazioni dell'Autorità.
+              La piattaforma supporta la verifica istruttoria e non sostituisce le determinazioni dell&apos;Autorità.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-slate-700">

@@ -101,8 +101,9 @@ export default async function RuntimeOperationsPage({
     ? await getLegalWorkbenchSnapshot(selectedProcedimentoId)
     : null;
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const [automationControl, aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, pendingExtractionJobs, policies, costs, cost30Days, cost7Days, reservedCosts, activeProcedimenti] = await Promise.all([
     getAutomationControlState(),
     getGlobalAiControlState(),

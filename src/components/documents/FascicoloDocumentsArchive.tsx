@@ -233,7 +233,7 @@ export function FascicoloDocumentsArchive({
                   ) : null}
                   {item.extraction?.status === "PENDING" ? (
                     <p role="status" className="rounded-md border border-sky-200 bg-sky-50 p-3 text-sky-900">
-                      Estrazione ammessa e in attesa dell'esecutore.
+                      Estrazione ammessa e in attesa dell&apos;esecutore.
                     </p>
                   ) : null}
                   {item.extraction?.status === "PROCESSING" ? (

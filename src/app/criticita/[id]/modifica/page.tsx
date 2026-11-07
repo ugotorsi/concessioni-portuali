@@ -99,7 +99,7 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
                   <p className="text-xs text-slate-600">
-                    Classificazione istruttoria interna non vincolante: la decisione resta in capo all'Autorità competente.
+                    Classificazione istruttoria interna non vincolante: la decisione resta in capo all&apos;Autorità competente.
                   </p>
                 </div>
 

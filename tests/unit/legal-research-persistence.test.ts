@@ -202,24 +202,80 @@ function matchesScalar(actual: unknown, expected: unknown): boolean {
   return actual === expected;
 }
 
+interface MissionHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  tenantId: string;
+  caseId: string;
+  fascicoloReference: string | null;
+  payloadFingerprint: string;
+  assignedActorId: string | null;
+  lifecycleStatus: string;
+  status: string;
+  claimExpiresAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AttemptHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  claimantId: string;
+  leaseExpiresAt: Date;
+  finalBundleId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface BundleHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  missionId: string;
+  fingerprint: string;
+  payload: ResearchEvidenceBundle;
+  createdAt: Date;
+}
+
+interface VerificationHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  tenantId: string;
+  missionId: string;
+  fingerprint: string;
+  createdAt: Date;
+}
+
+type MissionWhere = {
+  id?: string;
+  tenantId: string;
+  assignedActorId?: string;
+  caseId?: string;
+  fascicoloReference?: string;
+  lifecycleStatus?: string;
+  status?: { in: string[] };
+  OR?: readonly [Record<string, never>, { claimExpiresAt: { lte: Date } }];
+};
+
 function createHarness() {
-  const missions = new Map<string, Record<string, any>>();
-  const attempts = new Map<string, Record<string, any>>();
-  const bundles = new Map<string, Record<string, any>>();
-  const verifications = new Map<string, Record<string, any>>();
+  const missions = new Map<string, MissionHarnessRecord>();
+  const attempts = new Map<string, AttemptHarnessRecord>();
+  const bundles = new Map<string, BundleHarnessRecord>();
+  const verifications = new Map<string, VerificationHarnessRecord>();
   const persistQuestionResults = vi.fn(async () => []);
 
   const missionDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; payloadFingerprint?: string };
+    }) => {
       if (where.id) return missions.get(where.id) ?? null;
       return [...missions.values()].find((item) => item.payloadFingerprint === where.payloadFingerprint) ?? null;
     }),
-    findUniqueOrThrow: vi.fn(async ({ where }: any) => {
+    findUniqueOrThrow: vi.fn(async ({ where }: { where: { id: string } }) => {
       const value = missions.get(where.id);
       if (!value) throw new Error("NOT_FOUND");
       return value;
     }),
-    findMany: vi.fn(async ({ where, take }: any) => {
+    findMany: vi.fn(async ({ where, take }: { where: MissionWhere; take: number }) => {
       let values = [...missions.values()].filter((item) => item.tenantId === where.tenantId);
       if (where.assignedActorId !== undefined) {
         values = values.filter((item) => item.assignedActorId === where.assignedActorId);
@@ -231,20 +287,38 @@ function createHarness() {
       if (where.lifecycleStatus !== undefined) {
         values = values.filter((item) => item.lifecycleStatus === where.lifecycleStatus);
       }
-      if (where.status?.in) values = values.filter((item) => where.status.in.includes(item.status));
-      if (where.OR) {
+      const statuses = where.status?.in;
+      if (statuses) values = values.filter((item) => statuses.includes(item.status));
+      const leaseCutoff = where.OR?.[1].claimExpiresAt.lte;
+      if (leaseCutoff) {
         values = values.filter((item) => ["PENDING", "DEFERRED"].includes(item.status)
-          || (item.status === "IN_PROGRESS" && item.claimExpiresAt <= where.OR[1].claimExpiresAt.lte));
+          || (
+            item.status === "IN_PROGRESS"
+            && item.claimExpiresAt !== null
+            && item.claimExpiresAt <= leaseCutoff
+          ));
       }
       return values
         .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
         .slice(0, take);
     }),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        tenantId: string;
+        caseId: string;
+        payloadFingerprint: string;
+      };
+    }) => {
       if (missions.has(data.id)) throw p2002("ResearchMissionRecord", "id");
       const value = {
         ...data,
-        fascicoloReference: data.fascicoloReference ?? null,
+        fascicoloReference: typeof data.fascicoloReference === "string"
+          ? data.fascicoloReference
+          : null,
+        assignedActorId: typeof data.assignedActorId === "string"
+          ? data.assignedActorId
+          : null,
         status: "PENDING",
         lifecycleStatus: "CURRENT",
         stateVersion: 0,
@@ -260,14 +334,21 @@ function createHarness() {
       missions.set(value.id, value);
       return value;
     }),
-    updateMany: vi.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: {
+      where: { id: string } & Record<string, unknown>;
+      data: Record<string, unknown>;
+    }) => {
       const value = missions.get(where.id);
       if (!value || Object.entries(where).some(([key, expected]) =>
         key !== "id" && !matchesScalar(value[key], expected))) return { count: 0 };
       const next = { ...value };
       for (const [key, update] of Object.entries(data)) {
-        next[key] = update && typeof update === "object" && "increment" in update
-          ? next[key] + (update as { increment: number }).increment
+        const increment = update && typeof update === "object" && "increment" in update
+          ? (update as { increment: unknown }).increment
+          : null;
+        const current = next[key];
+        next[key] = typeof increment === "number" && typeof current === "number"
+          ? current + increment
           : update;
       }
       next.updatedAt = now;
@@ -277,8 +358,14 @@ function createHarness() {
   };
 
   const attemptDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => attempts.get(where.id) ?? null),
-    create: vi.fn(async ({ data }: any) => {
+    findUnique: vi.fn(async ({ where }: { where: { id: string } }) => attempts.get(where.id) ?? null),
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        claimantId: string;
+        leaseExpiresAt: Date;
+      };
+    }) => {
       if (attempts.has(data.id)) throw p2002("ResearchExecutionAttempt", "id");
       const value = {
         ...data,
@@ -297,7 +384,10 @@ function createHarness() {
       attempts.set(value.id, value);
       return value;
     }),
-    updateMany: vi.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: {
+      where: { id: string } & Record<string, unknown>;
+      data: Record<string, unknown>;
+    }) => {
       const value = attempts.get(where.id);
       if (!value || Object.entries(where).some(([key, expected]) =>
         key !== "id" && !matchesScalar(value[key], expected))) return { count: 0 };
@@ -308,15 +398,27 @@ function createHarness() {
   };
 
   const bundleDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; fingerprint?: string };
+    }) => {
       if (where.id) return bundles.get(where.id) ?? null;
       return [...bundles.values()].find((item) => item.fingerprint === where.fingerprint) ?? null;
     }),
-    findMany: vi.fn(async ({ where, take }: any) => [...bundles.values()]
+    findMany: vi.fn(async ({ where, take }: {
+      where: { missionId: { in: string[] } };
+      take: number;
+    }) => [...bundles.values()]
       .filter((item) => where.missionId.in.includes(item.missionId))
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .slice(0, take)),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        missionId: string;
+        fingerprint: string;
+        payload: ResearchEvidenceBundle;
+      };
+    }) => {
       if (bundles.has(data.id)
         || [...bundles.values()].some((item) => item.fingerprint === data.fingerprint)) {
         throw p2002("ResearchEvidenceBundleRecord", "fingerprint");
@@ -328,14 +430,26 @@ function createHarness() {
   };
 
   const verificationDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; fingerprint?: string };
+    }) => {
       if (where.id) return verifications.get(where.id) ?? null;
       return [...verifications.values()].find((item) => item.fingerprint === where.fingerprint) ?? null;
     }),
-    findFirst: vi.fn(async ({ where }: any) => [...verifications.values()]
+    findFirst: vi.fn(async ({ where }: {
+      where: { missionId: string; tenantId: string };
+    }) => [...verifications.values()]
       .filter((item) => item.missionId === where.missionId && item.tenantId === where.tenantId)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0] ?? null),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        tenantId: string;
+        missionId: string;
+        fingerprint: string;
+        createdAt?: Date;
+      };
+    }) => {
       if ([...verifications.values()].some((item) => item.fingerprint === data.fingerprint)) {
         throw p2002("ResearchAssistedVerificationRecord", "fingerprint");
       }
@@ -2032,7 +2146,10 @@ describe("Block 3B.13B research mission persistence", () => {
           expect(returnedErrors).toEqual([]);
           expect(mcpTools).toContain("research_complete_mission");
           expect(mcpSubmissions[0].assistedVerificationFingerprint).toBe(executorFingerprint);
-          expect(harness.bundles.get(attempt.finalBundleId)?.payload).toEqual(mcpSubmissions[0]);
+          expect(attempt.finalBundleId).not.toBeNull();
+          const finalBundleId = attempt.finalBundleId;
+          if (!finalBundleId) throw new Error("FINAL_BUNDLE_ID_MISSING");
+          expect(harness.bundles.get(finalBundleId)?.payload).toEqual(mcpSubmissions[0]);
           expect(attempt).toMatchObject({ totalCalls: 7, simpliciterCalls: 5, moonlitCalls: 2, completionState: "COMPLETE" });
           expect(harness.missions.get(mission.missionId)?.status).toBe("COMPLETED");
         } else {
