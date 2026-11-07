@@ -31,7 +31,6 @@ export type LiveQualificationEnvironmentCheck =
   | "DEPLOYMENT_HOST"
   | "REQUEST_HOST"
   | "PRODUCTION_HOST"
-  | "NEXTAUTH_URL"
   | "NEXTAUTH_SECRET"
   | "AI_ANTHROPIC_API_KEY"
   | "AI_DEEPSEEK_API_KEY"
@@ -146,13 +145,6 @@ export function assertLiveQualificationEnvironment(input: {
     throw new LiveQualificationSecurityError(
       "LIVE_QUALIFICATION_HOST_INVALID",
       check,
-    );
-  }
-  if (normalizedHost(required(env, "NEXTAUTH_URL", "NEXTAUTH_URL"))
-    !== deploymentHost) {
-    throw new LiveQualificationSecurityError(
-      "LIVE_QUALIFICATION_CONFIGURATION_INVALID",
-      "NEXTAUTH_URL",
     );
   }
   for (const [name, check] of [

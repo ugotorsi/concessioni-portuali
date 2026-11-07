@@ -24,6 +24,7 @@ import {
   isLiveQualificationDeployment,
   isLiveQualificationRequestAllowed,
   liveQualificationDeploymentHost,
+  liveQualificationDeploymentOrigin,
 } from "@/server/ai/qualification/liveSyntheticQualificationDeployment";
 
 const validPayload = {
@@ -751,10 +752,8 @@ describe("issue #70 deployment and request security", () => {
       env: environment,
       requestHost: "app.noetra.it",
     })).toThrow("LIVE_QUALIFICATION_HOST_INVALID");
-    expect(() => assertLiveQualificationEnvironment({
-      env: { ...environment, NEXTAUTH_URL: "https://app.noetra.it" },
-      requestHost: "concessioni-portuali-demo-generated.vercel.app",
-    })).toThrow("LIVE_QUALIFICATION_CONFIGURATION_INVALID");
+    expect(liveQualificationDeploymentOrigin(environment))
+      .toBe("https://concessioni-portuali-demo-generated.vercel.app");
   });
 
   it("identifies only the failed environment check without exposing values", () => {
