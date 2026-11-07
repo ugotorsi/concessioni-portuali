@@ -166,11 +166,9 @@ export function isExistingCorpusAnalysisRequestEnabled(
     "AI_OPENAI_USD_TO_EUR_RATE_SOURCE",
     "ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR",
   ].every((name) => Boolean(environment[name]?.trim()));
-  return environment.ASYNC_PROVIDER_EXECUTION_ENABLED?.trim().toLowerCase() === "true"
-    && environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
+  return environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
     && runtimeValuesPresent
     && createRealDataActivationPolicy({
-      AI_REAL_DATA_ENABLED: environment.AI_REAL_DATA_ENABLED,
       AI_REAL_DATA_APPROVAL_ID: environment.AI_REAL_DATA_APPROVAL_ID,
       AI_PROVIDER_PROJECT_CLASS: environment.AI_PROVIDER_PROJECT_CLASS,
     }).enabled;

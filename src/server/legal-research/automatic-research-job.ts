@@ -26,6 +26,12 @@ import {
   type ManualResearchPolicyDecision,
   type ManualResearchPolicyEnv,
 } from "./manual-research-policy";
+import {
+  evaluatePersistedAutomaticResearchPolicy,
+  evaluatePersistedManualResearchPolicy,
+  getPersistedResearchScopePolicy,
+} from "./persisted-research-policy";
+import type { ResearchChannel } from "@/server/ai/scopePolicy";
 import { createAutomaticResearchProviderAdapters } from "./automatic-research-providers";
 import {
   readProviderCredentialKey,
@@ -108,17 +114,27 @@ async function ensureResearchExecution(
   }>,
   mode: "AUTOMATIC" | "MANUAL",
 ): Promise<AutomaticResearchAdmissionResult> {
-  const decision = mode === "AUTOMATIC"
-    ? evaluateAutomaticResearchPolicy({
-      tenantId: input.tenantId,
-      mission: input.mission,
-      env: input.env as AutomaticResearchPolicyEnv,
-    })
-    : evaluateManualResearchPolicy({
-      tenantId: input.tenantId,
-      mission: input.mission,
-      env: input.env as ManualResearchPolicyEnv,
-    });
+  const decision = input.env
+    ? mode === "AUTOMATIC"
+      ? evaluateAutomaticResearchPolicy({
+          tenantId: input.tenantId,
+          mission: input.mission,
+          env: input.env as AutomaticResearchPolicyEnv,
+        })
+      : evaluateManualResearchPolicy({
+          tenantId: input.tenantId,
+          mission: input.mission,
+          env: input.env as ManualResearchPolicyEnv,
+        })
+    : mode === "AUTOMATIC"
+      ? await evaluatePersistedAutomaticResearchPolicy({
+          tenantId: input.tenantId,
+          mission: input.mission,
+        })
+      : await evaluatePersistedManualResearchPolicy({
+          tenantId: input.tenantId,
+          mission: input.mission,
+        });
   if (!decision.authorized || !decision.policyDecisionRef) {
     return { outcome: "NOT_AUTHORIZED", requirementCode: decision.requirementCode, jobId: null };
   }
@@ -277,6 +293,7 @@ type ExecutionAuthority = Readonly<{
   tenantId: string;
   actorId: string;
   decision: AutomaticResearchPolicyDecision | ManualResearchPolicyDecision;
+  researchChannels: readonly ResearchChannel[];
 }>;
 
 export interface AutomaticResearchExecutionDependencies {
@@ -285,7 +302,10 @@ export interface AutomaticResearchExecutionDependencies {
     jobId: string;
     missionId: string;
   }>): Promise<ExecutionAuthority | null>;
-  createProviderAdapters(input: Readonly<{ requestTimeoutMs: number }>): Promise<readonly import("./provider-research-adapters").ResearchProviderAdapter[]>;
+  createProviderAdapters(input: Readonly<{
+    requestTimeoutMs: number;
+    enabledProviders: readonly ("MOONLIT" | "SIMPLICITER")[];
+  }>): Promise<readonly import("./provider-research-adapters").ResearchProviderAdapter[]>;
   execute(input: Readonly<{
     authority: ExecutionAuthority;
     providerAdapters: readonly import("./provider-research-adapters").ResearchProviderAdapter[];
@@ -344,23 +364,36 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
     const stored = await getResearchMission(input.missionId, { actorId: job.actorId, tenantId: job.tenantId });
     if (!stored) return deny("RESEARCH_MISSION_NOT_ACCESSIBLE");
     const decision = job.policyDecisionRef?.startsWith("manual-research-policy-v1:")
-      ? evaluateManualResearchPolicy({ tenantId: job.tenantId, mission: stored.mission })
-      : evaluateAutomaticResearchPolicy({ tenantId: job.tenantId, mission: stored.mission });
+      ? await evaluatePersistedManualResearchPolicy({
+          tenantId: job.tenantId,
+          mission: stored.mission,
+        })
+      : await evaluatePersistedAutomaticResearchPolicy({
+          tenantId: job.tenantId,
+          mission: stored.mission,
+        });
     if (!decision.authorized) return deny(decision.requirementCode ?? "RESEARCH_POLICY_NOT_AUTHORIZED");
     if (decision.policyDecisionRef !== job.policyDecisionRef) return deny("RESEARCH_POLICY_CHANGED_SINCE_ADMISSION");
+    const scopePolicy = await getPersistedResearchScopePolicy({
+      tenantId: job.tenantId,
+      procedimentoId: stored.mission.caseReference.caseId,
+    });
     return {
       mission: stored.mission,
       tenantId: job.tenantId,
       actorId: job.actorId,
       decision,
+      researchChannels: scopePolicy.researchChannels,
     };
   },
   createProviderAdapters: createAutomaticResearchProviderAdapters,
   async execute(input) {
     const decision = input.authority.decision;
     const credentialKey = readProviderCredentialKey();
-    const legalDataHunterApiKey = process.env.LEGAL_DATA_HUNTER_API_KEY?.trim()
-      || (credentialKey ? await resolveLegalDataHunterApiKey(credentialKey) : null);
+    const legalDataHunterApiKey = input.authority.researchChannels.includes("LEGAL_DATA_HUNTER")
+      ? process.env.LEGAL_DATA_HUNTER_API_KEY?.trim()
+        || (credentialKey ? await resolveLegalDataHunterApiKey(credentialKey) : null)
+      : null;
     const executor = createTrustedMissionExecutor({
       client: createLocalTrustedResearchClient({
         actor: { actorId: decision.workerActorId!, tenantId: input.authority.tenantId },
@@ -445,9 +478,16 @@ export function createAutomaticResearchExecutionHandler(
       await dependencies.assertAiExecutionAllowed();
       const adapters = await dependencies.createProviderAdapters({
         requestTimeoutMs: authority.decision.providerTimeoutMs!,
+        enabledProviders: authority.researchChannels.filter(
+          (channel): channel is "MOONLIT" | "SIMPLICITER" => (
+            channel === "MOONLIT" || channel === "SIMPLICITER"
+          ),
+        ),
       });
       const availableCapabilities = new Set(adapters.map((adapter) => adapter.capability));
-      availableCapabilities.add("KEYWORD_DISCOVERY");
+      if (authority.researchChannels.includes("LEGAL_DATA_HUNTER")) {
+        availableCapabilities.add("KEYWORD_DISCOVERY");
+      }
       const missingCapability = authority.mission.executionPlan?.requiredCapabilities
         .find((capability) => !availableCapabilities.has(capability));
       if (missingCapability) {

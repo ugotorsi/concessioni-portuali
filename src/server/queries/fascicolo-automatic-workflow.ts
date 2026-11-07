@@ -19,6 +19,7 @@ import {
 import { listOperationalProposals, type OperationalProposalRecord } from "@/server/fascicolo-operational-proposals";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import type { AuthorityCandidate, ResearchMission } from "@/server/legal-research/bridge";
 import {
   CLASSIFICATION_REVIEW_ACTION,
@@ -798,7 +799,14 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
             : extractionFailed
               ? "ERROR" as const
               : "STALE" as const;
-  const researchPolicy = evaluateAutomaticResearchPolicy({ tenantId });
+  const researchEnvironment = await effectiveResearchPolicyEnvironment({
+    tenantId,
+    procedimentoId,
+  });
+  const researchPolicy = evaluateAutomaticResearchPolicy({
+    tenantId,
+    env: researchEnvironment,
+  });
   let projectedHistoricalMissions: (FascicoloResearchMissionReadModel & { lifecycleStatus: "HISTORICAL" })[] = [];
 
   const readModel: Omit<FascicoloAutomaticWorkflowReadModel, "structuredReport" | "structuredReportSnapshots"> = {
@@ -886,6 +894,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       const missionPolicy = evaluateAutomaticResearchPolicy({
         tenantId,
         mission: mission.payload as unknown as ResearchMission,
+        env: researchEnvironment,
       });
       const bundleRecord = mission.executionAttempts[0]?.evidenceBundles[0] ?? null;
       const bundle = record(bundleRecord?.payload);

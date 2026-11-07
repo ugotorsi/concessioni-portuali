@@ -9,6 +9,7 @@ import { getFascicoloDocumentCorpusForTenant } from "@/server/queries/fascicolo-
 
 import { admitCurrentKnowledgeManualResearch } from "./automatic-research-job";
 import { manualResearchPlanner } from "./manual-research-policy";
+import { effectiveResearchPolicyEnvironment } from "./persisted-research-policy";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "./persistence";
 
 const TERMINAL_JOB_STATUSES = new Set(["SUCCEEDED", "TERMINAL_FAILED", "CANCELLED"]);
@@ -133,12 +134,16 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     };
   }
   const runCurrentRevisionResearch = async (analysisJobId: string | null) => {
+    const researchEnvironment = await effectiveResearchPolicyEnvironment({
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+    });
     await dependencies.recoverMissions({
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
       candidateActorId: input.actor.id,
       requireValidCandidate: true,
-      autonomousResearch: manualResearchPlanner(input.tenantId),
+      autonomousResearch: manualResearchPlanner(input.tenantId, researchEnvironment),
     });
     const admissions = await dependencies.admitResearch({
       tenantId: input.tenantId,

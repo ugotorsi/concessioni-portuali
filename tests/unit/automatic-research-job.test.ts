@@ -1,6 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
+vi.mock("@/server/legal-research/persisted-research-policy", async () => {
+  const automatic = await import("@/server/legal-research/automatic-research-policy");
+  const manual = await import("@/server/legal-research/manual-research-policy");
+  return {
+    evaluatePersistedAutomaticResearchPolicy: (input: {
+      tenantId: string;
+      mission?: Parameters<typeof automatic.evaluateAutomaticResearchPolicy>[0]["mission"];
+    }) => automatic.evaluateAutomaticResearchPolicy({ ...input, env: process.env }),
+    evaluatePersistedManualResearchPolicy: (input: {
+      tenantId: string;
+      mission: Parameters<typeof manual.evaluateManualResearchPolicy>[0]["mission"];
+    }) => manual.evaluateManualResearchPolicy({ ...input, env: process.env }),
+    getPersistedResearchScopePolicy: () => Promise.resolve({
+      researchChannels: ["MOONLIT", "SIMPLICITER", "LEGAL_DATA_HUNTER"],
+    }),
+  };
+});
 const getResearchMissionMock = vi.hoisted(() => vi.fn());
 vi.mock("@/server/legal-research/persistence", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/server/legal-research/persistence")>()),
@@ -294,7 +311,13 @@ describe("automatic research queue job", () => {
     const orchestrateSourceChain = vi.fn(async () => undefined);
     const handler = createAutomaticResearchExecutionHandler({
       assertAiExecutionAllowed: vi.fn(async () => undefined),
-      loadAuthority: vi.fn(async () => ({ mission, tenantId: "tenant-1", actorId: "actor-1", decision })),
+      loadAuthority: vi.fn(async () => ({
+        mission,
+        tenantId: "tenant-1",
+        actorId: "actor-1",
+        decision,
+        researchChannels: ["MOONLIT"] as const,
+      })),
       createProviderAdapters: vi.fn(async () => [{ capability: "SEMANTIC_DISCOVERY" } as never]),
       execute,
       orchestrateSourceChain,
@@ -319,6 +342,7 @@ describe("automatic research queue job", () => {
         tenantId: "tenant-1",
         actorId: "actor-1",
         decision,
+        researchChannels: ["MOONLIT"] as const,
       })),
       createProviderAdapters,
       execute,
@@ -339,7 +363,13 @@ describe("automatic research queue job", () => {
     }));
     const handler = createAutomaticResearchExecutionHandler({
       assertAiExecutionAllowed: vi.fn(async () => undefined),
-      loadAuthority: vi.fn(async () => ({ mission, tenantId: "tenant-1", actorId: "actor-1", decision })),
+      loadAuthority: vi.fn(async () => ({
+        mission,
+        tenantId: "tenant-1",
+        actorId: "actor-1",
+        decision,
+        researchChannels: ["MOONLIT"] as const,
+      })),
       createProviderAdapters: vi.fn(async () => [{ capability: "SEMANTIC_DISCOVERY" } as never]),
       execute,
     });

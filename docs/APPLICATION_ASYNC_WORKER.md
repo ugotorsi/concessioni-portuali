@@ -219,13 +219,19 @@ immutable commit. Open the release against `staging-operativo`, require the stag
 workflow, TypeScript, focused tests, and production build to pass, then deploy web and
 the application-worker base service from the same SHA.
 
-Keep `AI_REAL_DATA_ENABLED=false`, `ASYNC_PROVIDER_EXECUTION_ENABLED=false`,
-`DOCUMENT_WORKER_ACTIVATION_MODE=DISABLED`, and
-`AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` through deployment and readiness.
-Enabling the exact V7 approval and one-off activation requires a separate authorization.
-After the one job reaches `SUCCEEDED` or `TERMINAL_FAILED`, restore those disabled
-values, restart the affected processes, keep the worker suspended, and retain the job,
-cost ledger, diagnostics, knowledge revision, and report artifacts.
+Keep the persistent ADMIN controls for AI, provider execution, general automation,
+automatic research, and fascicolo policy OFF through deployment and readiness.
+`AI_REAL_DATA_APPROVAL_ID` plus
+`AI_PROVIDER_PROJECT_CLASS=REAL_DATA_APPROVED` authorize the deployment but do not
+command execution. `AI_REAL_DATA_ENABLED`, `ASYNC_PROVIDER_EXECUTION_ENABLED`, and
+`AUTOMATIC_RESEARCH_EXECUTION_ENABLED` are retained only as legacy diagnostics and
+must not be treated as the operational source of truth. The emergency kill-switch,
+provider qualification, budget gates, tenant/fascicolo restrictions, and worker
+infrastructure remain non-derogable. Enabling the exact V7 approval and one-off
+activation requires a separate authorization. After the one job reaches `SUCCEEDED`
+or `TERMINAL_FAILED`, restore the persistent controls to OFF, keep the worker
+suspended, and retain the job, cost ledger, diagnostics, knowledge revision, and
+report artifacts.
 
 For the controlled V7 run, a valid and grounded provider output is encrypted with
 AES-256-GCM and written to a dedicated Neon recovery table before structured knowledge
@@ -249,12 +255,13 @@ historical status, makes no provider call, and deletes the artifact after succes
 ### Manual legal research with general automation off
 
 The explicit `Avvia analisi giuridica` action uses a separate fail-closed policy from
-the periodic automatic reconciler. Keep `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false`
-and configure the web process and the one-off application worker with the same values:
+the periodic automatic reconciler. Keep automatic research OFF in the persistent
+system/tenant/fascicolo policy and configure bounded technical defaults consistently
+for the web process and one-off application worker:
 
-- `MANUAL_RESEARCH_EXECUTION_ENABLED=true`;
-- `MANUAL_RESEARCH_TENANT_ALLOWLIST=<tenant IDs>`;
-- `MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST=<procedure IDs>`;
+- `MANUAL_RESEARCH_EXECUTION_ENABLED=true` (legacy fallback and diagnostics);
+- `MANUAL_RESEARCH_TENANT_ALLOWLIST=<tenant IDs>` (legacy fallback);
+- `MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST=<procedure IDs>` (legacy fallback);
 - `MANUAL_RESEARCH_ALLOWED_CAPABILITIES=<comma-separated capabilities>`;
 - `MANUAL_RESEARCH_MAX_CALLS=<maximum calls per mission>`;
 - `MANUAL_RESEARCH_WORKER_ACTOR_ID=<authorized worker actor>`;

@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { isRealDataDeploymentAuthorized } from "@/server/ai/realDataActivation";
 
 export const GLOBAL_AI_CONTROL_ACTION = "AI_GLOBAL_CONTROL_CHANGE";
 export const GLOBAL_AI_CONTROL_ENTITY = "GlobalAiControl";
@@ -36,6 +37,7 @@ export interface GlobalAiControlState {
   requestedEnabled: boolean;
   effectiveEnabled: boolean;
   emergencyDisabled: boolean;
+  deploymentAuthorized: boolean;
   environmentEnabled: boolean;
   environmentGates: Record<GlobalAiEnvironmentGateName, boolean>;
   updatedAt: Date | null;
@@ -116,15 +118,14 @@ export async function getGlobalAiControlState(
   const requestedEnabled = requestedEnabledFromMetadata(latest?.metadata ?? null);
   const killSwitchActive = emergencyDisabled(environment);
   const environmentGates = readEnvironmentGates(environment);
-  const environmentEnabled = GLOBAL_AI_ENVIRONMENT_GATE_NAMES.some(
-    (name) => environmentGates[name],
-  );
+  const deploymentAuthorized = isRealDataDeploymentAuthorized(environment);
 
   return {
     requestedEnabled,
-    effectiveEnabled: requestedEnabled && !killSwitchActive && environmentEnabled,
+    effectiveEnabled: requestedEnabled && !killSwitchActive && deploymentAuthorized,
     emergencyDisabled: killSwitchActive,
-    environmentEnabled,
+    deploymentAuthorized,
+    environmentEnabled: deploymentAuthorized,
     environmentGates,
     updatedAt: latest?.createdAt ?? null,
     updatedBy: latest

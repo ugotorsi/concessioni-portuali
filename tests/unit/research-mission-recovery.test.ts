@@ -22,6 +22,11 @@ vi.mock("@/server/fascicolo-knowledge/researchMissionLifecycle", () => ({
 vi.mock("@/server/fascicolo-knowledge/referenceDateConfirmation", () => ({
   loadReferenceDateConfirmations: loadConfirmationsMock,
 }));
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async () => ({
+    AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
+  })),
+}));
 
 import {
   recoverCurrentKnowledgeResearchMissions,

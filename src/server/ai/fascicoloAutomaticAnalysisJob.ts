@@ -20,6 +20,7 @@ import {
 } from "@/server/legal-research/bridge";
 import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
 import { manualResearchPlanner } from "@/server/legal-research/manual-research-policy";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import { createResearchMissionRecord } from "@/server/legal-research/persistence";
 import {
   ensureAutomaticResearchExecution,
@@ -1170,6 +1171,10 @@ async function reconcileStructuredKnowledgeMissions(input: {
       procedimentoId: input.revision.procedimentoId,
     })
     : [];
+  const researchEnvironment = await effectiveResearchPolicyEnvironment({
+    tenantId: input.revision.tenantId,
+    procedimentoId: input.revision.procedimentoId,
+  });
   let plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
   try {
     plans = buildKnowledgeResearchMissionPlans(input.revision, {
@@ -1179,8 +1184,8 @@ async function reconcileStructuredKnowledgeMissions(input: {
       allowBuildingRevision: input.allowBuildingRevision,
       referenceDateConfirmations,
       autonomousResearch: manualLegalAnalysisPipelineEnabled()
-        ? manualResearchPlanner(input.revision.tenantId)
-        : autonomousResearchPlanner(input.revision.tenantId),
+        ? manualResearchPlanner(input.revision.tenantId, researchEnvironment)
+        : autonomousResearchPlanner(input.revision.tenantId, researchEnvironment),
     });
   } catch {
     throw new AsyncJobExecutionError(

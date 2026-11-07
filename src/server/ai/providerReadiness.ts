@@ -15,6 +15,7 @@ import {
   getAiProviderControlSnapshot,
   type AiProviderControlSnapshot,
 } from "@/server/ai/providerControl";
+import { isRealDataDeploymentAuthorized } from "@/server/ai/realDataActivation";
 
 export const AI_PROVIDER_CONNECTION_VERIFICATION_ACTION =
   "AI_PROVIDER_CONNECTION_VERIFICATION";
@@ -156,9 +157,7 @@ export async function getAiProviderReadiness(input: {
     const pricingApproved = entry.pricingVersion !== null
       && estimatedCostLimitEur !== null;
     const realDataAuthorized = entry.capabilities.realDataApproved
-      && environment.AI_REAL_DATA_ENABLED?.trim().toLowerCase() === "true"
-      && Boolean(environment.AI_REAL_DATA_APPROVAL_ID?.trim())
-      && environment.AI_PROVIDER_PROJECT_CLASS?.trim() === "REAL_DATA_APPROVED";
+      && isRealDataDeploymentAuthorized(environment);
     const manualEnabled = providerControl?.manualEnabled
       ?? provider === "OPENAI";
     const automaticSelected = control.automaticSelection.provider === provider;

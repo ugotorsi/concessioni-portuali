@@ -54,11 +54,39 @@ function statusClass(status: AiEngineView["status"]): string {
 export function AiEngineControls(props: {
   engines: readonly AiEngineView[];
   updateManualAction: (formData: FormData) => Promise<void>;
+  updateAllAction?: (formData: FormData) => Promise<void>;
   selectAutomaticAction: (formData: FormData) => Promise<void>;
   verifyConnectionAction: (formData: FormData) => Promise<void>;
 }) {
+  const eligibleProviders = props.engines.filter((engine) => engine.manualEligible);
+  const excludedProviders = props.engines.filter((engine) => !engine.manualEligible);
   return (
-    <div className="grid gap-4 xl:grid-cols-3">
+    <div className="space-y-4">
+      {props.updateAllAction ? <div className="flex flex-wrap gap-2">
+        <form action={props.updateAllAction}>
+          <input type="hidden" name="enabled" value="true" />
+          <input type="hidden" name="confirmation" value="UPDATE_ALL_ELIGIBLE_AI_PROVIDERS" />
+          <Button type="submit" size="sm">
+            Attiva tutti gli idonei
+          </Button>
+        </form>
+        <form action={props.updateAllAction}>
+          <input type="hidden" name="enabled" value="false" />
+          <input type="hidden" name="confirmation" value="UPDATE_ALL_ELIGIBLE_AI_PROVIDERS" />
+          <Button type="submit" size="sm" variant="outline">
+            Disattiva tutti
+          </Button>
+        </form>
+      </div> : null}
+      <p className="text-xs text-slate-600">
+        Attivazione bulk: {eligibleProviders.map((engine) => engine.label).join(", ") || "nessun provider idoneo"}.
+        {excludedProviders.length > 0
+          ? ` Esclusi: ${excludedProviders.map((engine) => (
+            `${engine.label} (${engine.error ?? "requisiti non soddisfatti"})`
+          )).join("; ")}.`
+          : ""}
+      </p>
+      <div className="grid gap-4 xl:grid-cols-3">
       {props.engines.map((engine) => (
         <article key={engine.provider} className="space-y-4 rounded-lg border border-slate-200 p-4">
           <div className="flex items-start justify-between gap-3">
@@ -144,6 +172,7 @@ export function AiEngineControls(props: {
           </div>
         </article>
       ))}
+      </div>
     </div>
   );
 }

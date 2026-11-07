@@ -12,6 +12,7 @@ import {
 import { loadReferenceDateConfirmations } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { createResearchMission } from "@/server/legal-research/bridge";
 import { isAutomationEnabled } from "@/server/automation/automationControl";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 
 export const PERIODIC_LEGAL_RESEARCH_DEFAULT_INTERVAL_DAYS = 7;
 export const PERIODIC_LEGAL_RESEARCH_RECONCILE_INTERVAL_MS = 60 * 60 * 1_000;
@@ -154,6 +155,10 @@ const defaultDependencies: PeriodicLegalResearchDependencies = {
         procedimentoId: revision.procedimentoId,
       });
       if (!current || current.id !== revision.id) continue;
+      const researchEnvironment = await effectiveResearchPolicyEnvironment({
+        tenantId: revision.tenantId,
+        procedimentoId: revision.procedimentoId,
+      });
       targets.push({
         tenantId: revision.tenantId,
         procedimentoId: revision.procedimentoId,
@@ -161,7 +166,7 @@ const defaultDependencies: PeriodicLegalResearchDependencies = {
         assignedActorId: assignedActor.id,
         plans: buildKnowledgeResearchMissionPlans(current, {
           maxQuestionsPerWave: DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
-          autonomousResearch: autonomousResearchPlanner(revision.tenantId),
+          autonomousResearch: autonomousResearchPlanner(revision.tenantId, researchEnvironment),
           referenceDateConfirmations: await loadReferenceDateConfirmations({
             tenantId: revision.tenantId,
             procedimentoId: revision.procedimentoId,

@@ -1,5 +1,6 @@
 import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
 import type { ResearchMission } from "@/server/legal-research/bridge";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import { prisma } from "@/lib/prisma";
 
 import {
@@ -91,13 +92,20 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
   });
+  const autonomousResearch = input.autonomousResearch ?? autonomousResearchPlanner(
+    input.tenantId,
+    await effectiveResearchPolicyEnvironment({
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+    }),
+  );
   let plans;
   try {
     plans = buildKnowledgeResearchMissionPlans(revision, {
       maxQuestionsPerWave:
         input.maxQuestionsPerWave ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
       referenceDateConfirmations,
-      autonomousResearch: input.autonomousResearch ?? autonomousResearchPlanner(input.tenantId),
+      autonomousResearch,
     });
   } catch {
     throw new ResearchMissionRecoveryError("RESEARCH_MISSION_PLANNING_FAILED");

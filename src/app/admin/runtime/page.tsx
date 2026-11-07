@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +19,7 @@ import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { getAutomationControlState } from "@/server/automation/automationControl";
 import { getAiProviderControlSnapshot } from "@/server/ai/providerControl";
 import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
+import { getResearchChannelAvailability } from "@/server/ai/scopePolicy";
 import { getLegalWorkbenchSnapshot } from "@/server/runtime/legalWorkbench";
 
 import {
@@ -35,6 +37,7 @@ import {
   startLegalAnalysisPipeline,
   upsertRuntimeBudgetPolicy,
   updateAutomationControl,
+  updateAllEligibleAiProviders,
   updateAiProviderManualControl,
   updateGlobalAiControl,
   selectAutomaticAiProvider,
@@ -161,6 +164,7 @@ export default async function RuntimeOperationsPage({
     generalAutomationEnabled: automationControl.effectiveEnabled,
     control: providerControl,
   });
+  const researchChannels = await getResearchChannelAvailability();
   const serviceCenter = buildServiceCenterSnapshot({
     health,
     databaseIdentity,
@@ -171,6 +175,9 @@ export default async function RuntimeOperationsPage({
     },
     activeBudgetPolicyScopes: policies.map((policy) => policy.scope),
     automationEnabled: automationControl.effectiveEnabled,
+    aiControl,
+    aiProviders: aiEngines,
+    researchChannels,
   });
   const renderApplicationWorkerConfigured = Boolean(
     process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
@@ -335,9 +342,9 @@ export default async function RuntimeOperationsPage({
                 </dd>
               </div>
             </dl>
-            {aiControl.requestedEnabled && !aiControl.environmentEnabled ? (
+            {aiControl.requestedEnabled && !aiControl.deploymentAuthorized ? (
               <p className="text-sm font-medium text-amber-700">
-                Comando ON registrato, ma le AI restano non operative perché tutti i gate ambientali sono disabilitati.
+                Comando ON registrato, ma manca l&apos;autorizzazione deployment al trattamento dei dati reali.
               </p>
             ) : null}
             {aiControl.emergencyDisabled ? (
@@ -346,7 +353,7 @@ export default async function RuntimeOperationsPage({
               </p>
             ) : null}
             <div>
-              <p className="text-sm font-medium text-slate-700">Gate ambientali</p>
+              <p className="text-sm font-medium text-slate-700">Stato legacy dei gate deployment</p>
               <ul className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
                 {Object.entries(AI_GATE_LABELS).map(([name, label]) => {
                   const enabled =
@@ -377,7 +384,8 @@ export default async function RuntimeOperationsPage({
               </div>
             </dl>
             <p className="text-xs text-slate-500">
-              I gate ambientali, le autorizzazioni dei provider e i limiti di spesa restano sempre prioritari.
+              Approval dati reali, classe progetto, kill-switch, autorizzazioni provider e limiti di spesa restano sempre prioritari.
+              I gate operativi legacy sono mostrati per diagnostica ma non sostituiscono il comando persistente dell&apos;amministratore.
               Le chiamate già inviate al provider potrebbero non essere annullabili immediatamente.
             </p>
             <GlobalAiControlForm
@@ -407,11 +415,31 @@ export default async function RuntimeOperationsPage({
                   : null,
               }))}
               updateManualAction={updateAiProviderManualControl}
+              updateAllAction={updateAllEligibleAiProviders}
               selectAutomaticAction={selectAutomaticAiProvider}
               verifyConnectionAction={verifyAiProviderConnectionAction}
             />
           </CardContent>
         </Card>
+      </section>
+
+      <section className="mt-6 space-y-4" aria-labelledby="tenant-ai-policy-title">
+        <h2 id="tenant-ai-policy-title" className="text-lg font-semibold text-slate-900">
+          Policy AI per ente
+        </h2>
+        <p className="text-sm text-slate-600">
+          Ogni ente può solo restringere i limiti di sistema; i fascicoli possono restringere
+          ulteriormente la policy dell&apos;ente.
+        </p>
+        {tenantOptions.map((tenant) => (
+          <FascicoloAiResearchControlPanel
+            key={tenant.id}
+            scope="TENANT"
+            tenantId={tenant.id}
+            tenantLabel={tenant.label}
+            canEdit
+          />
+        ))}
       </section>
 
       <section className="mt-6" aria-labelledby="manual-analysis-title">

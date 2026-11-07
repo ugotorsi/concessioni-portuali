@@ -153,7 +153,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
 
   it("fails closed before B2C6 composition for disabled activation or invalid configuration", () => {
     const disabled = validEnv();
-    delete disabled.AI_REAL_DATA_ENABLED;
+    delete disabled.AI_REAL_DATA_APPROVAL_ID;
     expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(disabled)).toThrowError(
       expect.objectContaining({ code: "AI_REAL_DATA_DISABLED" }),
     );
@@ -248,7 +248,6 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
   });
 
   it.each([
-    "AI_REAL_DATA_ENABLED",
     "AI_REAL_DATA_APPROVAL_ID",
     "AI_PROVIDER_PROJECT_CLASS",
   ] as const)("fails closed before composition when %s is missing", (envName) => {
@@ -269,8 +268,8 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     const transport = fakeTransport();
     try {
       createOpenAiFascicoloRuntimeFromEnv(validEnv({
-        AI_REAL_DATA_ENABLED: "TRUE",
         AI_REAL_DATA_APPROVAL_ID: approval,
+        AI_PROVIDER_PROJECT_CLASS: "real_data_approved",
       }), { transport });
       throw new Error("Expected disabled gate");
     } catch (error) {

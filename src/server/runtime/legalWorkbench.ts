@@ -6,6 +6,7 @@ import {
   loadReferenceDateConfirmations,
   type ReferenceDateReviewQuestion,
 } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import { evaluateManualResearchPolicy } from "@/server/legal-research/manual-research-policy";
 import {
   isLegalDataHunterApiKeyConfigured,
@@ -16,14 +17,13 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 
 const ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALYSIS_V1";
 
-function autonomousChannelStatus(tenantId: string, procedimentoId: string) {
-  const decision = evaluateManualResearchPolicy({ tenantId });
+async function autonomousChannelStatus(tenantId: string, procedimentoId: string) {
+  const decision = evaluateManualResearchPolicy({
+    tenantId,
+    env: await effectiveResearchPolicyEnvironment({ tenantId, procedimentoId }),
+  });
   if (!decision.authorized) return { authorized: false, requirementCode: decision.requirementCode };
-  const procedimenti = process.env.MANUAL_RESEARCH_PROCEDIMENTO_ALLOWLIST
-    ?.split(",").map((value) => value.trim()) ?? [];
-  return procedimenti.includes(procedimentoId)
-    ? { authorized: true, requirementCode: null }
-    : { authorized: false, requirementCode: "MANUAL_RESEARCH_PROCEDIMENTO_NOT_ALLOWED" };
+  return { authorized: true, requirementCode: null };
 }
 
 export interface LegalWorkbenchSource {
@@ -240,7 +240,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
       };
     }),
     research: {
-      autonomousChannel: autonomousChannelStatus(tenantId, procedimentoId),
+      autonomousChannel: await autonomousChannelStatus(tenantId, procedimentoId),
       providerCredentials,
       legalDataHunterConfigured,
       jobs: researchJobs.map((job) => ({

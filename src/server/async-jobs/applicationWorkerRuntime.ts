@@ -5,6 +5,7 @@ import {
   registerRuntimeWorker,
   setRuntimeWorkerStatus,
 } from "@/server/runtime/health";
+import { isRealDataDeploymentAuthorized } from "@/server/runtime/realDataAuthorization";
 import { RuntimeCostConfigurationError, runtimeCostEstimate } from "@/server/runtime/costConfig";
 
 import type { DrainOneAsyncJobOutcome } from "./worker";
@@ -223,7 +224,9 @@ export function parseApplicationAsyncWorkerConfig(
   if (workerId.length > 256) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
-  const providerExecutionEnabled = enabled(environment.ASYNC_PROVIDER_EXECUTION_ENABLED);
+  const providerExecutionEnabled =
+    environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
+    && isRealDataDeploymentAuthorized(environment);
   const dedicatedMode = enabled(environment.ASYNC_WORKER_DEDICATED_MODE);
   const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
   const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);

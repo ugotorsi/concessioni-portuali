@@ -109,11 +109,11 @@ const request = {
 };
 
 describe("existing fascicolo corpus analysis", () => {
-  it("requires the activation and real-data gates before admission", async () => {
+  it("requires immutable real-data authorization before admission", async () => {
     expect(isExistingCorpusAnalysisRequestEnabled({
       ...enabledEnvironment,
       ASYNC_PROVIDER_EXECUTION_ENABLED: "false",
-    })).toBe(false);
+    })).toBe(true);
     expect(isExistingCorpusAnalysisRequestEnabled(enabledEnvironment)).toBe(true);
 
     const deps = dependencies();
@@ -121,7 +121,7 @@ describe("existing fascicolo corpus analysis", () => {
       ...request,
       environment: {
         ...enabledEnvironment,
-        ASYNC_PROVIDER_EXECUTION_ENABLED: "false",
+        AI_REAL_DATA_APPROVAL_ID: "",
       },
     }, deps)).rejects.toEqual(
       new ExistingCorpusAnalysisRequestError("ANALYSIS_ACTIVATION_DISABLED"),

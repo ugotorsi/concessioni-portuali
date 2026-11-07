@@ -181,6 +181,61 @@ export async function setAiProviderManualEnabled(input: {
   });
 }
 
+export async function setAiProvidersManualEnabled(input: {
+  readonly providers: readonly AiProviderId[];
+  readonly enabled: boolean;
+  readonly actor: ProviderControlActor;
+  readonly reason?: string | null;
+}) {
+  const providers = [...new Set(input.providers.map((provider) => (
+    aiProviderIdSchema.parse(provider)
+  )))];
+  return prisma.$transaction(async (tx) => {
+    await acquireProviderControlLock(tx);
+    const existing = await tx.activityLog.findMany({
+      where: {
+        azione: AI_PROVIDER_MANUAL_CONTROL_ACTION,
+        entita: AI_PROVIDER_CONTROL_ENTITY,
+        entitaId: { in: providers },
+        esito: "SUCCESS",
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: { entitaId: true, metadata: true },
+    });
+    const previousByProvider = new Map<AiProviderId, boolean>();
+    for (const event of existing) {
+      const provider = aiProviderIdSchema.safeParse(event.entitaId);
+      if (!provider.success || previousByProvider.has(provider.data)) continue;
+      const metadata = metadataRecord(event.metadata);
+      previousByProvider.set(
+        provider.data,
+        typeof metadata?.newEnabled === "boolean"
+          ? metadata.newEnabled
+          : manualDefault(provider.data),
+      );
+    }
+    const audits = [];
+    for (const provider of providers) {
+      const audit = await createAuditLogInTransaction(tx, {
+        azione: AI_PROVIDER_MANUAL_CONTROL_ACTION,
+        entita: AI_PROVIDER_CONTROL_ENTITY,
+        entitaId: provider,
+        esito: "SUCCESS",
+        actor: input.actor,
+        metadata: {
+          provider,
+          previousEnabled: previousByProvider.get(provider) ?? manualDefault(provider),
+          newEnabled: input.enabled,
+          bulk: true,
+          reason: input.reason?.trim() || null,
+        },
+      });
+      audits.push({ provider, updatedAt: audit.createdAt });
+    }
+    return { enabled: input.enabled, providers: audits };
+  });
+}
+
 export async function setAutomaticAiProvider(input: {
   readonly selection: AiModelSelection;
   readonly actor: ProviderControlActor;
