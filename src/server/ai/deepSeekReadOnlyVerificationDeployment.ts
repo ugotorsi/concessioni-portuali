@@ -5,7 +5,6 @@ export const DEEPSEEK_READONLY_VERIFICATION_PATH =
 export const DEEPSEEK_READONLY_VERIFICATION_API_PATH =
   "/api/admin/deepseek-readonly-verification" as const;
 const EXPECTED_VERCEL_PROJECT_ID = "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu";
-const EXPECTED_VERCEL_ORG_ID = "team_jT8QBufySulc3clxzIl6RqnL";
 
 const ALLOWED_PATHS = new Set([
   "/login",
@@ -45,7 +44,6 @@ export function isDeepSeekReadOnlyVerificationDeployment(
       === DEEPSEEK_READONLY_VERIFICATION_AUTHORIZATION_ID
     && env.VERCEL_ENV === "production"
     && env.VERCEL_PROJECT_ID === EXPECTED_VERCEL_PROJECT_ID
-    && env.VERCEL_ORG_ID === EXPECTED_VERCEL_ORG_ID
     && /^dpl_[a-z0-9]+$/i.test(env.VERCEL_DEPLOYMENT_ID ?? "");
 }
 

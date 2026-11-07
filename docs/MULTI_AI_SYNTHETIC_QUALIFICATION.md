@@ -428,8 +428,9 @@ Il deployment dedicato abilita soltanto
 `/admin/deepseek-readonly-verification`, login/logout, callback auth e asset
 statici. L'host ammesso deriva da `VERCEL_URL`; il codice imposta
 `NEXTAUTH_URL` su quell'origine soltanto quando sono presenti i due override
-deployment-specific e le system env identificano progetto, organizzazione e
-deployment Vercel attesi:
+deployment-specific e le system env identificano progetto e deployment Vercel
+attesi. L'organizzazione viene verificata esternamente via
+API/CLI, perche `VERCEL_ORG_ID` non e una system env runtime documentata:
 
 - `NOETRA_DEEPSEEK_READONLY_VERIFICATION_ENABLED=true`
 - `NOETRA_DEEPSEEK_READONLY_VERIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_DEEPSEEK_READONLY`

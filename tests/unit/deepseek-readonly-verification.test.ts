@@ -29,7 +29,6 @@ const environment = {
   VERCEL_ENV: "production",
   VERCEL_URL: "isolated-check.example.vercel.app",
   VERCEL_PROJECT_ID: "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu",
-  VERCEL_ORG_ID: "team_jT8QBufySulc3clxzIl6RqnL",
   VERCEL_DEPLOYMENT_ID: "dpl_IsolatedReadOnly123",
 };
 
@@ -47,7 +46,6 @@ describe("isolated DeepSeek read-only verification", () => {
     vi.stubEnv("VERCEL_ENV", environment.VERCEL_ENV);
     vi.stubEnv("VERCEL_URL", environment.VERCEL_URL);
     vi.stubEnv("VERCEL_PROJECT_ID", environment.VERCEL_PROJECT_ID);
-    vi.stubEnv("VERCEL_ORG_ID", environment.VERCEL_ORG_ID);
     vi.stubEnv("VERCEL_DEPLOYMENT_ID", environment.VERCEL_DEPLOYMENT_ID);
     mocks.requireAdminWithMfa.mockResolvedValue({
       id: "admin-1",
