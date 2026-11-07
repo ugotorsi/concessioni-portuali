@@ -378,6 +378,13 @@ compatibile con il limite autorizzato di 4.000 token. Il live test usa quindi
 il contratto compatto `ai-fascicolo-analysis/v1`, gia condiviso dagli adapter,
 con grounding limitato a `SYN.P1` e `SYN.P2`.
 
+La scadenza della polizza e considerata grounded soltanto quando la stessa
+affermazione cita `SYN.P1`, identifica esplicitamente la polizza e riporta la
+data documentata `01/05/2027`. L'informazione puo essere rappresentata nella
+timeline tramite `recordedAt` oppure in un'altra sezione del contratto tramite
+la data testuale esatta; la sezione scelta dal modello non sostituisce ne
+indebolisce questi tre requisiti probatori.
+
 Il preflight conta schema, istruzioni e input con `o200k_base` e aggiunge 1.024
 token di overhead prudenziale. Il POST e bloccato se la stima supera 4.000.
 L'uso restituito dal provider deve inoltre essere presente, coerente e non
@@ -394,6 +401,14 @@ Preventivo massimo:
 Il costo consuntivo e calcolato dai contatori provider con il catalogo di
 riferimento versionato. Resta una stima tecnica distinta dalla fattura
 definitiva.
+
+La verifica amministrativa DeepSeek usa esclusivamente richieste GET senza
+generazione: controlla prima `/models` per `deepseek-v4-pro` e poi
+`/user/balance`. La connessione e verificata soltanto se la risposta saldo e
+valida e `is_available` e `true`; importi e credenziali non vengono registrati.
+Un HTTP 402 o `is_available=false` produce
+`AI_PROVIDER_BALANCE_INSUFFICIENT` e richiede il ripristino del saldo
+dell'account associato alla chiave prima di qualunque nuovo collaudo.
 
 ### Sequenza di deployment futura
 

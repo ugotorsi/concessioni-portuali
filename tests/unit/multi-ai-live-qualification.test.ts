@@ -189,6 +189,9 @@ describe("issue #70 live synthetic qualification", () => {
     expect(JSON.stringify(anthropicBody)).toContain(
       "Keep the complete JSON under 700 output tokens.",
     );
+    expect(JSON.stringify(anthropicBody)).toContain(
+      "report the insurance-policy deadline with its exact date and SYN.P1 reference",
+    );
     expect(JSON.stringify(deepSeekBody)).toContain("SYN-001");
     expect(getEncoding("o200k_base").encode(JSON.stringify(validPayload)).length)
       .toBeLessThan(700);
@@ -199,6 +202,74 @@ describe("issue #70 live synthetic qualification", () => {
         { provider: "DEEPSEEK", status: "PASS" },
       ],
     });
+  });
+
+  it("accepts the documented policy deadline outside timeline when fully grounded", async () => {
+    const payload = {
+      ...validPayload,
+      timeline: [{
+        recordedAt: "2027-05-15T00:00:00.000Z",
+        text: "La concessione sintetica scade il 15 maggio 2027.",
+        basisRefs: ["SYN.P1"],
+      }],
+      recordedState: [{
+        text: "The insurance-policy deadline is May 1, 2027.",
+        basisRefs: ["SYN.P1"],
+      }],
+    };
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport: vi.fn<typeof fetch>()
+        .mockResolvedValue(anthropicResponse(payload)),
+      deepSeekTransport: vi.fn<typeof fetch>()
+        .mockResolvedValue(deepSeekResponse(payload)),
+    });
+
+    expect(result.status).toBe("PASS");
+    expect(result.providers).toMatchObject([
+      { provider: "ANTHROPIC", status: "PASS", refsValid: true },
+      { provider: "DEEPSEEK", status: "PASS", refsValid: true },
+    ]);
+  });
+
+  it("rejects an undocumented policy date outside timeline", async () => {
+    const payload = {
+      ...validPayload,
+      timeline: [{
+        recordedAt: "2027-05-15T00:00:00.000Z",
+        text: "La concessione sintetica scade il 15 maggio 2027.",
+        basisRefs: ["SYN.P1"],
+      }],
+      recordedState: [{
+        text: "The insurance-policy deadline is June 1, 2027.",
+        basisRefs: ["SYN.P1"],
+      }],
+    };
+    const deepSeekTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(deepSeekResponse());
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport: vi.fn<typeof fetch>()
+        .mockResolvedValue(anthropicResponse(payload)),
+      deepSeekTransport,
+    });
+
+    expect(result.providers[0]).toMatchObject({
+      provider: "ANTHROPIC",
+      status: "FAIL",
+      jsonValid: true,
+      refsValid: true,
+      anomaly: "POLICY_DEADLINE_NOT_GROUNDED",
+    });
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
   });
 
   it("accepts documented Anthropic thinking and text blocks with metering", async () => {
@@ -441,6 +512,43 @@ describe("issue #70 live synthetic qualification", () => {
     expect(result.providers).toMatchObject([
       { provider: "ANTHROPIC", status: "FAIL", attempted: true },
       { provider: "DEEPSEEK", status: "PASS", attempted: true },
+    ]);
+    expect(anthropicTransport).toHaveBeenCalledOnce();
+    expect(deepSeekTransport).toHaveBeenCalledOnce();
+  });
+
+  it("classifies DeepSeek HTTP 402 as insufficient balance without retry", async () => {
+    const anthropicTransport = vi.fn<typeof fetch>()
+      .mockResolvedValue(anthropicResponse());
+    const deepSeekTransport = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json(
+        { error: { type: "invalid_request_error" } },
+        { status: 402 },
+      ),
+    );
+
+    const result = await runLiveSyntheticQualification({
+      environment: {
+        AI_ANTHROPIC_API_KEY: "synthetic-anthropic-key",
+        AI_DEEPSEEK_API_KEY: "synthetic-deepseek-key",
+      },
+      store: memoryStore(),
+      anthropicTransport,
+      deepSeekTransport,
+    });
+
+    expect(result.providers).toMatchObject([
+      { provider: "ANTHROPIC", status: "PASS", attempted: true },
+      {
+        provider: "DEEPSEEK",
+        status: "FAIL",
+        attempted: true,
+        anomaly: "PROVIDER_INSUFFICIENT_BALANCE",
+        providerDiagnostics: {
+          httpStatus: 402,
+          providerCode: "invalid_request_error",
+        },
+      },
     ]);
     expect(anthropicTransport).toHaveBeenCalledOnce();
     expect(deepSeekTransport).toHaveBeenCalledOnce();
