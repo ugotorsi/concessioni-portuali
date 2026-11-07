@@ -10,6 +10,11 @@ import {
   isLiveQualificationRequestAllowed,
   liveQualificationDeploymentHost,
 } from "@/server/ai/qualification/liveSyntheticQualificationDeployment";
+import {
+  assertDeepSeekReadOnlyVerificationRequest,
+  isDeepSeekReadOnlyVerificationDeployment,
+  isDeepSeekReadOnlyVerificationRequestAllowed,
+} from "@/server/ai/deepSeekReadOnlyVerificationDeployment";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const MCP_PATH = "/api/mcp";
@@ -148,6 +153,28 @@ function isDedicatedMcpAllowedPath(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  if (isDeepSeekReadOnlyVerificationDeployment(process.env)) {
+    try {
+      assertDeepSeekReadOnlyVerificationRequest({
+        env: process.env,
+        requestHost: request.headers.get("host") ?? request.nextUrl.host,
+      });
+    } catch {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+    if (!isDeepSeekReadOnlyVerificationRequestAllowed({
+      pathname,
+      hasNextActionHeader: request.headers.has("next-action"),
+    })) {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+  }
   if (isLiveQualificationDeployment(process.env)) {
     const expectedHost = liveQualificationDeploymentHost(process.env);
     const requestHost = request.nextUrl.hostname.toLowerCase();

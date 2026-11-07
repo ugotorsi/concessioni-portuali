@@ -410,6 +410,65 @@ Un HTTP 402 o `is_available=false` produce
 `AI_PROVIDER_BALANCE_INSUFFICIENT` e richiede il ripristino del saldo
 dell'account associato alla chiave prima di qualunque nuovo collaudo.
 
+#### Verifica read-only post-ricarica
+
+Le variabili Vercel di tipo `sensitive` sono disponibili al runtime ma non
+sono esportabili con `vercel env run`, `vercel env pull` o `decrypt=true`.
+Inoltre un deployment Preview riceve soltanto le env Preview: non eredita la
+chiave Production e gli override Preview specifici di un altro branch non si
+applicano alla branch di qualificazione.
+
+Il percorso minimo che non modifica `app.noetra.it` e non duplica la chiave e
+un deployment Production **staged**, creato con `--prod --skip-domain` e mai
+promosso. Riceve le env Production, inclusa la chiave `sensitive`, ma resta
+separato dagli alias Production. Il progetto deve mantenere la Deployment
+Protection sul suo URL generato.
+
+Il deployment dedicato abilita soltanto
+`/admin/deepseek-readonly-verification`, login/logout, callback auth e asset
+statici. L'host ammesso deriva da `VERCEL_URL`; il codice imposta
+`NEXTAUTH_URL` su quell'origine soltanto quando sono presenti i due override
+deployment-specific e le system env identificano progetto, organizzazione e
+deployment Vercel attesi:
+
+- `NOETRA_DEEPSEEK_READONLY_VERIFICATION_ENABLED=true`
+- `NOETRA_DEEPSEEK_READONLY_VERIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_DEEPSEEK_READONLY`
+
+La pagina e l'azione richiedono ADMIN con MFA. Il pulsante esegue soltanto GET
+`/models` e GET `/user/balance`, senza retry; persiste nell'audit esclusivamente
+esiti sanitizzati, fingerprint HMAC della configurazione e codici tecnici.
+Non registra chiave, importi o payload provider.
+
+Una futura esecuzione autorizzata deve:
+
+1. partire da worktree pulito e commit completo presente su `origin`;
+2. acquisire l'ID corrente di `app.noetra.it`;
+3. creare il deployment, senza alias, passando entrambi gli override sia al
+   build sia al runtime:
+
+```powershell
+vercel deploy --prod --skip-domain --yes `
+  --project=prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu `
+  --scope=ugotorsis-projects `
+  -b NOETRA_DEEPSEEK_READONLY_VERIFICATION_ENABLED=true `
+  -b NOETRA_DEEPSEEK_READONLY_VERIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_DEEPSEEK_READONLY `
+  -e NOETRA_DEEPSEEK_READONLY_VERIFICATION_ENABLED=true `
+  -e NOETRA_DEEPSEEK_READONLY_VERIFICATION_AUTHORIZATION_ID=GH_ISSUE_70_2026_11_07_DEEPSEEK_READONLY
+```
+
+4. non eseguire `vercel promote` o `vercel alias set`;
+5. verificare via API progetto, target `production`, commit, stato `READY`,
+   assenza di alias e Deployment Protection prima dell'accesso;
+6. autenticarsi sul solo URL generato con ADMIN+MFA e usare la pagina dedicata;
+7. registrare soltanto HTTP status, `credentialValid`, `modelAvailable`,
+   `balanceSufficient` e codice esito;
+8. eliminare quel deployment per ID e confermare che `app.noetra.it`, env e
+   risorse preesistenti siano invariati.
+
+Non usare un Preview ordinario: richiederebbe duplicare o riscopare la chiave
+`sensitive`. Non usare alias temporanei: la configurazione corrente protegge
+gli URL generati ma esclude i custom domain dalla Vercel Authentication.
+
 ### Sequenza di deployment futura
 
 Non eseguire questa sequenza finche il commit non e stato revisionato, committato

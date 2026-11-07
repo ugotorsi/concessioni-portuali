@@ -10,6 +10,15 @@ import { decryptMfaSecret, isMfaRequiredRole, verifyMfaCode } from "@/lib/mfa";
 import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
 import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import {
+  deepSeekReadOnlyVerificationOrigin,
+} from "@/server/ai/deepSeekReadOnlyVerificationDeployment";
+
+const deepSeekVerificationOrigin =
+  deepSeekReadOnlyVerificationOrigin(process.env);
+if (deepSeekVerificationOrigin) {
+  process.env.NEXTAUTH_URL = deepSeekVerificationOrigin;
+}
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
 const credentialsSchema = z.object({

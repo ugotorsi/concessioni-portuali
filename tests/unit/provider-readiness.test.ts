@@ -133,6 +133,95 @@ describe("AI provider readiness", () => {
     });
   });
 
+  it("surfaces a successful DeepSeek balance verification without amounts", async () => {
+    const deepSeekEnvironment = {
+      NEXTAUTH_SECRET: openAiEnvironment.NEXTAUTH_SECRET,
+      AI_DEEPSEEK_API_KEY: "configured-deepseek-not-exposed",
+    };
+    const deepSeekFingerprint = aiProviderConfigurationFingerprint({
+      provider: "DEEPSEEK",
+      model: "deepseek-v4-pro",
+      apiKey: deepSeekEnvironment.AI_DEEPSEEK_API_KEY,
+      fingerprintSecret: deepSeekEnvironment.NEXTAUTH_SECRET,
+    });
+    mocks.findMany.mockResolvedValue([{
+      entitaId: "DEEPSEEK",
+      esito: "SUCCESS",
+      metadata: {
+        verified: true,
+        credentialValid: true,
+        modelAvailable: true,
+        balanceSufficient: true,
+        httpStatus: 200,
+        code: "AI_PROVIDER_CONNECTION_VERIFIED",
+        model: "deepseek-v4-pro",
+        configurationFingerprint: deepSeekFingerprint,
+      },
+      createdAt: new Date("2026-11-07T08:00:00Z"),
+    }]);
+
+    const readiness = await getAiProviderReadiness({
+      globalAiEnabled: false,
+      generalAutomationEnabled: false,
+      environment: deepSeekEnvironment,
+      control,
+    });
+
+    expect(readiness.find((provider) => provider.provider === "DEEPSEEK")).toMatchObject({
+      connectionStatus: "VERIFIED",
+      credentialValid: true,
+      modelAvailable: true,
+      balanceSufficient: true,
+      verificationCode: "AI_PROVIDER_CONNECTION_VERIFIED",
+      verificationHttpStatus: 200,
+    });
+  });
+
+  it("reports a DeepSeek insufficient-balance failure before real-data eligibility", async () => {
+    const deepSeekEnvironment = {
+      NEXTAUTH_SECRET: openAiEnvironment.NEXTAUTH_SECRET,
+      AI_DEEPSEEK_API_KEY: "configured-deepseek-not-exposed",
+    };
+    const deepSeekFingerprint = aiProviderConfigurationFingerprint({
+      provider: "DEEPSEEK",
+      model: "deepseek-v4-pro",
+      apiKey: deepSeekEnvironment.AI_DEEPSEEK_API_KEY,
+      fingerprintSecret: deepSeekEnvironment.NEXTAUTH_SECRET,
+    });
+    mocks.findMany.mockResolvedValue([{
+      entitaId: "DEEPSEEK",
+      esito: "FAILURE",
+      metadata: {
+        verified: false,
+        credentialValid: true,
+        modelAvailable: true,
+        balanceSufficient: false,
+        httpStatus: 402,
+        code: "AI_PROVIDER_BALANCE_INSUFFICIENT",
+        model: "deepseek-v4-pro",
+        configurationFingerprint: deepSeekFingerprint,
+      },
+      createdAt: new Date("2026-11-07T08:00:00Z"),
+    }]);
+
+    const readiness = await getAiProviderReadiness({
+      globalAiEnabled: false,
+      generalAutomationEnabled: false,
+      environment: deepSeekEnvironment,
+      control,
+    });
+
+    expect(readiness.find((provider) => provider.provider === "DEEPSEEK")).toMatchObject({
+      connectionStatus: "FAILED",
+      credentialValid: true,
+      modelAvailable: true,
+      balanceSufficient: false,
+      verificationCode: "AI_PROVIDER_BALANCE_INSUFFICIENT",
+      verificationHttpStatus: 402,
+      error: "Il saldo API DeepSeek non risulta utilizzabile.",
+    });
+  });
+
   it("invalidates verification after the credential or model configuration changes", async () => {
     mocks.findMany.mockResolvedValue([{
       entitaId: "OPENAI",

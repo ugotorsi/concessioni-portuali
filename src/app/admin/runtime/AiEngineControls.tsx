@@ -10,6 +10,9 @@ interface AiEngineView {
   connectionStatus: "VERIFIED" | "FAILED" | "STALE" | "NOT_VERIFIED";
   credentialValid: boolean;
   modelAvailable: boolean;
+  balanceSufficient: boolean | null;
+  verificationCode: string | null;
+  verificationHttpStatus: number | null;
   modelTechnicallyQualified: boolean;
   lastVerifiedAtLabel: string | null;
   realDataAuthorized: boolean;
@@ -28,6 +31,10 @@ interface AiEngineView {
 
 function yesNo(value: boolean): string {
   return value ? "Sì" : "No";
+}
+
+function yesNoUnknown(value: boolean | null): string {
+  return value === null ? "Non verificato" : yesNo(value);
 }
 
 function connectionLabel(status: AiEngineView["connectionStatus"]): string {
@@ -69,6 +76,11 @@ export function AiEngineControls(props: {
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Credenziale valida</dt><dd className="font-medium">{yesNo(engine.credentialValid)}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Connessione</dt><dd className="font-medium">{connectionLabel(engine.connectionStatus)}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Modello disponibile</dt><dd className="font-medium">{yesNo(engine.modelAvailable)}</dd></div>
+            {engine.provider === "DEEPSEEK" ? (
+              <div className="flex justify-between gap-3"><dt className="text-slate-500">Saldo API utilizzabile</dt><dd className="font-medium">{yesNoUnknown(engine.balanceSufficient)}</dd></div>
+            ) : null}
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">Esito tecnico</dt><dd className="text-right font-mono text-xs">{engine.verificationCode ?? "Non disponibile"}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-slate-500">HTTP verifica</dt><dd className="font-medium">{engine.verificationHttpStatus ?? "Non disponibile"}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Modello qualificato</dt><dd className="font-medium">{yesNo(engine.modelTechnicallyQualified)}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Dati reali</dt><dd className="font-medium">{engine.realDataAuthorized ? "Autorizzati" : "Non autorizzati"}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-slate-500">Manuale</dt><dd className="font-medium">{engine.manualEnabled ? "ON" : "OFF"}</dd></div>
@@ -125,7 +137,8 @@ export function AiEngineControls(props: {
                 Verifica connessione
               </Button>
               <p className="mt-1 text-xs text-slate-500">
-                Solo endpoint di autenticazione/modelli; nessuna generazione e costo atteso €0.
+                Solo GET amministrative: elenco modelli e, per DeepSeek, saldo disponibile.
+                Nessuna generazione, nessun retry e costo atteso €0.
               </p>
             </form>
           </div>
