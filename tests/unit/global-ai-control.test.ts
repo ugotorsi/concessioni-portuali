@@ -68,11 +68,13 @@ describe("global AI control", () => {
 
   it("reads ON from the latest successful audit event", async () => {
     activityFindFirstMock.mockResolvedValue({
+      id: "event-1",
       metadata: { previousState: "OFF", newState: "ON" },
       createdAt: new Date("2026-10-22T08:00:00.000Z"),
       userId: "admin-1",
       userEmail: "admin@example.test",
       userRole: "ADMIN",
+      currentHash: "a".repeat(64),
     });
 
     await expect(getGlobalAiControlState({
@@ -84,7 +86,52 @@ describe("global AI control", () => {
       effectiveEnabled: true,
       emergencyDisabled: false,
       environmentEnabled: true,
+      blockers: [],
+      lastTransition: {
+        eventId: "event-1",
+        previousState: "OFF",
+        newState: "ON",
+        reason: null,
+        cancelledQueuedJobs: 0,
+        cancellationRequestedJobs: 0,
+        auditHash: "a".repeat(64),
+      },
       updatedBy: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    });
+  });
+
+  it("reports explicit blockers and preserves the latest transition reason", async () => {
+    activityFindFirstMock.mockResolvedValue({
+      id: "event-2",
+      metadata: {
+        previousState: "ON",
+        newState: "OFF",
+        reason: "Incident containment",
+        cancelledQueuedJobs: 3,
+        cancellationRequestedJobs: 2,
+      },
+      createdAt: new Date("2026-10-22T09:00:00.000Z"),
+      userId: "admin-1",
+      userEmail: "admin@example.test",
+      userRole: "ADMIN",
+      currentHash: "b".repeat(64),
+    });
+
+    await expect(getGlobalAiControlState({
+      AI_GLOBAL_EMERGENCY_DISABLED: "true",
+    })).resolves.toMatchObject({
+      requestedEnabled: false,
+      effectiveEnabled: false,
+      blockers: ["ADMIN_COMMAND_OFF", "DEPLOYMENT_NOT_AUTHORIZED", "EMERGENCY_DISABLED"],
+      lastTransition: {
+        eventId: "event-2",
+        previousState: "ON",
+        newState: "OFF",
+        reason: "Incident containment",
+        cancelledQueuedJobs: 3,
+        cancellationRequestedJobs: 2,
+        auditHash: "b".repeat(64),
+      },
     });
   });
 

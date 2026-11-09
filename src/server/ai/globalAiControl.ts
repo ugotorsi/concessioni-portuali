@@ -46,6 +46,16 @@ export interface GlobalAiControlState {
     userEmail: string | null;
     userRole: string | null;
   } | null;
+  blockers: readonly ("ADMIN_COMMAND_OFF" | "DEPLOYMENT_NOT_AUTHORIZED" | "EMERGENCY_DISABLED")[];
+  lastTransition: {
+    eventId: string;
+    previousState: "ON" | "OFF";
+    newState: "ON" | "OFF";
+    reason: string | null;
+    cancelledQueuedJobs: number;
+    cancellationRequestedJobs: number;
+    auditHash: string;
+  } | null;
 }
 
 export class GlobalAiDisabledError extends Error {
@@ -62,6 +72,43 @@ function requestedEnabledFromMetadata(metadata: Prisma.JsonValue | null): boolea
     return false;
   }
   return metadata.newState === "ON";
+}
+
+function transitionFromMetadata(
+  event: {
+    id: string;
+    metadata: Prisma.JsonValue | null;
+    currentHash: string;
+  } | null,
+): GlobalAiControlState["lastTransition"] {
+  if (!event?.metadata || typeof event.metadata !== "object" || Array.isArray(event.metadata)) {
+    return null;
+  }
+  const metadata = event.metadata;
+  const previousState = metadata.previousState === "ON" ? "ON" : "OFF";
+  const newState = metadata.newState === "ON" ? "ON" : "OFF";
+  const reason = typeof metadata.reason === "string" && metadata.reason.trim()
+    ? metadata.reason.trim()
+    : null;
+  const cancelledQueuedJobs = typeof metadata.cancelledQueuedJobs === "number"
+    && Number.isSafeInteger(metadata.cancelledQueuedJobs)
+    && metadata.cancelledQueuedJobs >= 0
+    ? metadata.cancelledQueuedJobs
+    : 0;
+  const cancellationRequestedJobs = typeof metadata.cancellationRequestedJobs === "number"
+    && Number.isSafeInteger(metadata.cancellationRequestedJobs)
+    && metadata.cancellationRequestedJobs >= 0
+    ? metadata.cancellationRequestedJobs
+    : 0;
+  return {
+    eventId: event.id,
+    previousState,
+    newState,
+    reason,
+    cancelledQueuedJobs,
+    cancellationRequestedJobs,
+    auditHash: event.currentHash,
+  };
 }
 
 function emergencyDisabled(
@@ -108,17 +155,24 @@ export async function getGlobalAiControlState(
     },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: {
+      id: true,
       metadata: true,
       createdAt: true,
       userId: true,
       userEmail: true,
       userRole: true,
+      currentHash: true,
     },
   });
   const requestedEnabled = requestedEnabledFromMetadata(latest?.metadata ?? null);
   const killSwitchActive = emergencyDisabled(environment);
   const environmentGates = readEnvironmentGates(environment);
   const deploymentAuthorized = isRealDataDeploymentAuthorized(environment);
+  const blockers: GlobalAiControlState["blockers"] = [
+    ...(!requestedEnabled ? ["ADMIN_COMMAND_OFF" as const] : []),
+    ...(!deploymentAuthorized ? ["DEPLOYMENT_NOT_AUTHORIZED" as const] : []),
+    ...(killSwitchActive ? ["EMERGENCY_DISABLED" as const] : []),
+  ];
 
   return {
     requestedEnabled,
@@ -127,6 +181,8 @@ export async function getGlobalAiControlState(
     deploymentAuthorized,
     environmentEnabled: deploymentAuthorized,
     environmentGates,
+    blockers,
+    lastTransition: transitionFromMetadata(latest ?? null),
     updatedAt: latest?.createdAt ?? null,
     updatedBy: latest
       ? {
