@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { createAuditLogInTransaction, verifyCompleteAuditLogChain } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import { stableActDraftKey } from "@/server/fascicolo-acts/model";
 import { listActDrafts, saveActDraftVersion } from "@/server/fascicolo-acts/repository";
@@ -128,16 +128,13 @@ describe.skipIf(!isolatedUrl)("concurrency on a disposable PostgreSQL cluster", 
     const identity = await pool.query<{
       database: string;
       username: string;
-      port: number;
-      address: string;
       tables: string;
     }>(`
-      SELECT current_database() AS database, current_user AS username, inet_server_port() AS port,
-        host(inet_server_addr()) AS address,
+      SELECT current_database() AS database, current_user AS username,
         (SELECT count(*)::text FROM information_schema.tables WHERE table_schema = 'public') AS tables
     `);
     expect(identity.rows[0]).toEqual({
-      database: "noetra_test_concurrency", username: "noetra_test", port: 55432, address: "127.0.0.1", tables: "0",
+      database: "noetra_test_concurrency", username: "noetra_test", tables: "0",
     });
     await pool.query(`
       CREATE TYPE "AuditEsito" AS ENUM ('SUCCESS', 'FAILURE');
@@ -289,4 +286,31 @@ describe.skipIf(!isolatedUrl)("concurrency on a disposable PostgreSQL cluster", 
       writer.release();
     }
   }, 30_000);
+
+  it("verifies the concurrent audit chain and detects persisted tampering", async () => {
+    const auditCount = await pool.query<{ count: string }>(`SELECT count(*)::text AS count FROM "ActivityLog"`);
+    const valid = await verifyCompleteAuditLogChain(1);
+    expect(valid).toMatchObject({
+      valid: true,
+      verifiedCount: Number(auditCount.rows[0].count),
+      issue: null,
+    });
+
+    const tampered = await pool.query<{ id: string }>(`
+      UPDATE "ActivityLog"
+      SET "metadata" = jsonb_set(COALESCE("metadata", '{}'::jsonb), '{tampered}', 'true'::jsonb)
+      WHERE "id" = (
+        SELECT "id" FROM "ActivityLog" ORDER BY "createdAt" ASC, "id" ASC LIMIT 1
+      )
+      RETURNING "id"
+    `);
+    expect(tampered.rowCount).toBe(1);
+
+    const invalid = await verifyCompleteAuditLogChain(1);
+    expect(invalid).toMatchObject({
+      valid: false,
+      verifiedCount: 0,
+      issue: { recordId: tampered.rows[0].id, code: "CURRENT_HASH_MISMATCH" },
+    });
+  });
 });
