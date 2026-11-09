@@ -2,8 +2,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   computeAuditHash,
+  createHistoricalAuditHashVerificationState,
   sanitizeMetadata,
-  verifyAuditHashRecords,
+  verifyHistoricalAuditHashRecords,
   type AuditHashRecord,
   type AuditHashChainVerification,
 } from "@/server/audit/hash";
@@ -139,7 +140,7 @@ export async function verifyCompleteAuditLogChain(
     throw new Error("AUDIT_HASH_CHAIN_BATCH_SIZE_INVALID");
   }
   let last: { createdAt: Date; id: string } | null = null;
-  let previousHash: string | null = null;
+  let verificationState = createHistoricalAuditHashVerificationState();
   let verifiedCount = 0;
   for (;;) {
     const rows: AuditHashRecord[] = await prisma.activityLog.findMany({
@@ -171,18 +172,18 @@ export async function verifyCompleteAuditLogChain(
       },
     });
     if (rows.length === 0) {
-      return { valid: true, verifiedCount, finalHash: previousHash, issue: null };
+      return { valid: true, verifiedCount, finalHash: verificationState.previousHash, issue: null };
     }
-    const result = verifyAuditHashRecords(rows, previousHash);
+    const result = verifyHistoricalAuditHashRecords(rows, verificationState);
     verifiedCount += result.verifiedCount;
     if (!result.valid) {
       return { ...result, verifiedCount };
     }
-    previousHash = result.finalHash;
+    verificationState = result.state;
     const tail: AuditHashRecord = rows.at(-1)!;
     last = { createdAt: tail.createdAt, id: tail.id };
     if (rows.length < batchSize) {
-      return { valid: true, verifiedCount, finalHash: previousHash, issue: null };
+      return { valid: true, verifiedCount, finalHash: verificationState.previousHash, issue: null };
     }
   }
 }
