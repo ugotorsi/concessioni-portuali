@@ -250,6 +250,68 @@ describe("fascicolo act draft repository", () => {
     });
     expect(archived.current.changeNote).toContain(reference.draftKey);
     expect(archived.history).toHaveLength(2);
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{
+        draftKey: duplicateKey,
+        expectedVersion: 1,
+        bodySha256: reference.bodySha256,
+      }],
+      reason: "Retry della stessa archiviazione",
+    })).resolves.toEqual({ archivedDraftKeys: [] });
+  });
+
+  it("refuses to archive an identical draft referenced by an active dependency", async () => {
+    const reference = await saveActDraftVersion({ scope, draftKey: null, expectedVersion: 0, content, actor });
+    const duplicateKey = "act_dependency0000000000000";
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${duplicateKey}`,
+      metadata: { ...reference, draftKey: duplicateKey },
+      createdAt: new Date("2026-11-03T13:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "7".repeat(64),
+    });
+    const dependentKey = "act_dependent00000000000000";
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${dependentKey}`,
+      metadata: {
+        ...reference,
+        draftKey: dependentKey,
+        templateKey: "OTHER_TEMPLATE",
+        title: "Bozza dipendente",
+        dependencies: [duplicateKey],
+      },
+      createdAt: new Date("2026-11-03T14:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "6".repeat(64),
+    });
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{ draftKey: duplicateKey, expectedVersion: 1, bodySha256: reference.bodySha256 }],
+      reason: "Verifica dipendenze",
+    })).rejects.toThrow("ARCHIVE_DUPLICATE_NOT_IDENTICAL_OR_LINKED");
   });
 
   it("refuses to archive divergent content or stale duplicate versions", async () => {

@@ -211,6 +211,12 @@ describe("Lotto 7 operational proposal generation", () => {
         materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
         before: null,
         after: expect.objectContaining({ numeroAtto: "17/2023" }),
+        evidence: [{
+          basisRef: "DOCUMENT_1.PAGE_1",
+          documentFileVersionId: "version-1",
+          pageNumber: 1,
+          textSha256: sha("e"),
+        }],
         previewOnly: true,
       }),
       expect.objectContaining({
@@ -226,6 +232,18 @@ describe("Lotto 7 operational proposal generation", () => {
     expect(concessionReconciliation?.warningCodes).not.toContain("MANUAL_ACTION_REQUIRED");
     expect(reconciliations.find((candidate) => candidate.proposalType === "NOTE")?.warningCodes)
       .toContain("MANUAL_ACTION_REQUIRED");
+
+    value.proceduralContext.concessione = {
+      numeroAtto: " 17/2023 ",
+      stato: "ATTIVA",
+      dataRilascio: "2022-04-03T00:00:00.000Z",
+    };
+    expect(generate(value).filter((candidate) => candidate.proposalType === "CONCESSION_LINK_OR_CREATE"))
+      .toHaveLength(1);
+
+    value.proceduralContext.concessione.dataRilascio = "2023-04-03T00:00:00.000Z";
+    expect(generate(value).filter((candidate) => candidate.proposalType === "CONCESSION_LINK_OR_CREATE"))
+      .toHaveLength(0);
   });
 
   it("keeps multiple documents and does not invent dependencies from the order of activities", () => {

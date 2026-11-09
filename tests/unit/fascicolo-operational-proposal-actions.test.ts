@@ -135,6 +135,54 @@ describe("Lotto 7 operational proposal server actions", () => {
     expect(mocks.materialize).not.toHaveBeenCalled();
   });
 
+  it("builds a concession amendment from professional fields and immutable proposal evidence", async () => {
+    const evidence = [{
+      basisRef: "DOCUMENT_1.PAGE_7",
+      documentFileVersionId: "version-1",
+      pageNumber: 7,
+      textSha256: "f".repeat(64),
+    }];
+    mocks.list.mockResolvedValue([{
+      ...proposal,
+      proposalType: "CONCESSION_LINK_OR_CREATE",
+      proposedPayload: { evidence },
+    }]);
+    await reviewOperationalProposalAction(form({
+      procedimentoId: "procedure-1",
+      proposalId: "proposal-1",
+      action: "AMEND_AND_APPROVE",
+      reviewVersion: "0",
+      concessionMaterializationMode: "LINK_EXISTING",
+      concessioneId: "concession-1",
+      numeroAtto: "17/2023",
+      dataRilascio: "2023-07-14",
+      reviewNote: "Titolo verificato",
+    }));
+
+    expect(mocks.review).toHaveBeenCalledWith(expect.objectContaining({
+      action: "AMEND_AND_APPROVE",
+      approvedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "LINK_EXISTING",
+        concessioneId: "concession-1",
+        numeroAtto: "17/2023",
+        dataRilascio: "2023-07-14",
+        evidence,
+      },
+    }));
+  });
+
+  it("rejects plain approval for concession reconciliation", async () => {
+    mocks.list.mockResolvedValue([{ ...proposal, proposalType: "CONCESSION_LINK_OR_CREATE" }]);
+    await expect(reviewOperationalProposalAction(form({
+      procedimentoId: "procedure-1",
+      proposalId: "proposal-1",
+      action: "APPROVE",
+      reviewVersion: "0",
+    }))).rejects.toThrow("CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED");
+    expect(mocks.review).not.toHaveBeenCalled();
+  });
+
   it("blocks approval of a proposal generated from a superseded report or a stale analysis", async () => {
     mocks.list.mockResolvedValue([{ ...proposal, structuredReportFingerprint: "e".repeat(64) }]);
     await expect(reviewOperationalProposalAction(form({

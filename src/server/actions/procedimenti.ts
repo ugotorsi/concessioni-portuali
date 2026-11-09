@@ -12,8 +12,8 @@ import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
 import { admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
-import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
-import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { sanitizeMetadata } from "@/server/audit/hash";
+import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { getAuditRequestContext } from "@/server/audit/requestContext";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import {
@@ -1386,69 +1386,37 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
       createdDecisionEnteId = createdDecision.enteId;
       createdDecisionConcessioneId = createdDecision.concessioneId;
 
-      await tx.activityLog.create({
-        data: await (async () => {
-          const metadata = sanitizeMetadata({
-            procedimentoId: procedimento.id,
-            concessioneId,
-            tipoDecisione: parsed.data.decisionType,
-            decisioniConsentite: decisionPreview.map((item) => item.tipoDecisione),
-            numeroAtto: parsed.data.numeroAtto,
-            protocolloAtto: parsed.data.protocolloAtto,
-            organoCompetente: parsed.data.organoCompetente,
-            adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
-            adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
-            scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
-            registeredByUserId: persistedUserId,
-            statoConcessionePrecedente: concessione.stato,
-            statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
-            dataEfficacia: dataEfficacia.toISOString(),
-            effettoTitolo: outcome.effettoTitolo,
-            statoEffetto: initialEffectStatus,
-          });
-
-          const previous = await tx.activityLog.findFirst({
-            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-            select: { currentHash: true },
-          });
-
-          const createdAt = new Date();
-          const previousHash = previous?.currentHash ?? null;
-          const currentHash = computeAuditHash({
-            previousHash,
-            createdAt,
-            azione: "DECISIONE_REGISTRATA",
-            entita: "DecisioneProcedimento",
-            entitaId: createdDecision.id,
-            enteId: procedimento.enteId,
-            concessioneId,
-            esito: "SUCCESS",
-            actor: {
-              userId: persistedUserId,
-              userEmail: currentUser.email,
-              userRole: role,
-            },
-            metadata,
-          });
-
-          return {
-            userId: persistedUserId,
-            userEmail: currentUser.email,
-            userRole: role,
-            enteId: procedimento.enteId,
-            concessioneId,
-            ipAddress: requestContext.ipAddress,
-            userAgent: requestContext.userAgent,
-            azione: "DECISIONE_REGISTRATA",
-            entita: "DecisioneProcedimento",
-            entitaId: createdDecision.id,
-            esito: "SUCCESS",
-            metadata: metadata ?? undefined,
-            previousHash,
-            currentHash,
-            createdAt,
-          };
-        })(),
+      await createAuditLogInTransaction(tx, {
+        azione: "DECISIONE_REGISTRATA",
+        entita: "DecisioneProcedimento",
+        entitaId: createdDecision.id,
+        enteId: procedimento.enteId,
+        concessioneId,
+        esito: "SUCCESS",
+        metadata: {
+          procedimentoId: procedimento.id,
+          concessioneId,
+          tipoDecisione: parsed.data.decisionType,
+          decisioniConsentite: decisionPreview.map((item) => item.tipoDecisione),
+          numeroAtto: parsed.data.numeroAtto,
+          protocolloAtto: parsed.data.protocolloAtto,
+          organoCompetente: parsed.data.organoCompetente,
+          adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
+          adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
+          scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
+          registeredByUserId: persistedUserId,
+          statoConcessionePrecedente: concessione.stato,
+          statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
+          dataEfficacia: dataEfficacia.toISOString(),
+          effettoTitolo: outcome.effettoTitolo,
+          statoEffetto: initialEffectStatus,
+        },
+        actor: {
+          userId: persistedUserId,
+          userEmail: currentUser.email,
+          userRole: role,
+        },
+        requestContext,
       });
     });
   } catch (error) {

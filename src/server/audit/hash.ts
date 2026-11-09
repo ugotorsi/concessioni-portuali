@@ -21,6 +21,27 @@ export interface ComputeAuditHashInput {
   metadata: Prisma.InputJsonValue | null;
 }
 
+export interface AuditHashRecord extends Omit<ComputeAuditHashInput, "previousHash" | "actor"> {
+  id: string;
+  previousHash: string | null;
+  currentHash: string;
+  userId: string | null;
+  userEmail: string | null;
+  userRole: string | null;
+}
+
+export interface AuditHashChainVerification {
+  valid: boolean;
+  verifiedCount: number;
+  finalHash: string | null;
+  issue: {
+    recordId: string;
+    code: "PREVIOUS_HASH_MISMATCH" | "CURRENT_HASH_MISMATCH";
+    expectedHash: string | null;
+    observedHash: string | null;
+  } | null;
+}
+
 const sensitiveKeyPattern = /password|token|secret|session|cookie|authorization|apikey|api_key/i;
 
 function sortObjectKeys(value: unknown): unknown {
@@ -73,4 +94,59 @@ export function computeAuditHash(input: ComputeAuditHashInput): string {
   };
 
   return createHash("sha256").update(stableStringify(payload)).digest("hex");
+}
+
+export function verifyAuditHashRecords(
+  records: readonly AuditHashRecord[],
+  initialPreviousHash: string | null = null,
+): AuditHashChainVerification {
+  let previousHash = initialPreviousHash;
+  let verifiedCount = 0;
+  for (const record of records) {
+    if (record.previousHash !== previousHash) {
+      return {
+        valid: false,
+        verifiedCount,
+        finalHash: previousHash,
+        issue: {
+          recordId: record.id,
+          code: "PREVIOUS_HASH_MISMATCH",
+          expectedHash: previousHash,
+          observedHash: record.previousHash,
+        },
+      };
+    }
+    const expectedCurrentHash = computeAuditHash({
+      previousHash,
+      createdAt: record.createdAt,
+      azione: record.azione,
+      entita: record.entita,
+      entitaId: record.entitaId,
+      enteId: record.enteId,
+      concessioneId: record.concessioneId,
+      esito: record.esito,
+      actor: {
+        userId: record.userId,
+        userEmail: record.userEmail,
+        userRole: record.userRole,
+      },
+      metadata: record.metadata,
+    });
+    if (record.currentHash !== expectedCurrentHash) {
+      return {
+        valid: false,
+        verifiedCount,
+        finalHash: previousHash,
+        issue: {
+          recordId: record.id,
+          code: "CURRENT_HASH_MISMATCH",
+          expectedHash: expectedCurrentHash,
+          observedHash: record.currentHash,
+        },
+      };
+    }
+    previousHash = record.currentHash;
+    verifiedCount += 1;
+  }
+  return { valid: true, verifiedCount, finalHash: previousHash, issue: null };
 }

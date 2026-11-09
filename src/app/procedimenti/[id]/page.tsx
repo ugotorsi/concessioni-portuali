@@ -23,7 +23,10 @@ import { buildActivitySpecs } from "@/server/fascicolo-operational-activities/mo
 import { listOperationalActivities } from "@/server/fascicolo-operational-activities/repository";
 import { generateOperationalProposalCandidates } from "@/server/fascicolo-operational-proposals/generation";
 import { previewOperationalProposalReconciliation } from "@/server/fascicolo-operational-proposals/preview";
-import { listProposalReconciliations } from "@/server/fascicolo-operational-proposals/repository";
+import {
+  listConcessionMaterializationOptions,
+  listProposalReconciliations,
+} from "@/server/fascicolo-operational-proposals/repository";
 import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
@@ -334,6 +337,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         concessioneId: detail.concessione?.id ?? null,
       })
     : [];
+  const concessionMaterializationOptions = activeSection === "proposals" && detail.canonicalEnteId
+    ? await listConcessionMaterializationOptions({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : { concessions: [], concessionaires: [] };
   const guidedSection = activeSection === "proposals" && (automaticWorkflow?.structuredReport || operationalActivities.length > 0) ? (
     <FascicoloGuidedActivities
       procedimentoId={detail.procedimento.id}
@@ -411,6 +420,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           drafts={operationalDrafts}
           activitySpecs={activitySpecs}
           currentReportFingerprint={automaticWorkflow?.structuredReport?.reportFingerprint}
+          concessionMaterializationOptions={concessionMaterializationOptions}
         />
       </div>
     </details>

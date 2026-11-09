@@ -18,6 +18,7 @@ import {
   SOURCE_KEY,
 } from "../src/server/fascicolo-document-requirements/types";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { computeAuditHash } from "../src/server/audit/hash";
 import type {
   Art47CodNavLettera,
   EsitoRegolarizzazione,
@@ -76,28 +77,31 @@ function buildAuditHash(payload: {
   azione: string;
   entita: string;
   entitaId: string | null;
+  enteId: string | null;
   concessioneId: string | null;
   esito: "SUCCESS" | "FAILURE";
-  metadata: Record<string, string | null>;
+  metadata: {
+    seed: boolean;
+    message: string;
+  };
   createdAt: Date;
 }): string {
-  return createHash("sha256")
-    .update(
-      JSON.stringify({
-        previousHash: payload.previousHash,
-        userId: payload.userId,
-        userEmail: payload.userEmail,
-        userRole: payload.userRole,
-        azione: payload.azione,
-        entita: payload.entita,
-        entitaId: payload.entitaId,
-        concessioneId: payload.concessioneId,
-        esito: payload.esito,
-        metadata: payload.metadata,
-        createdAt: payload.createdAt.toISOString(),
-      }),
-    )
-    .digest("hex");
+  return computeAuditHash({
+    previousHash: payload.previousHash,
+    createdAt: payload.createdAt,
+    azione: payload.azione,
+    entita: payload.entita,
+    entitaId: payload.entitaId,
+    enteId: payload.enteId,
+    concessioneId: payload.concessioneId,
+    esito: payload.esito,
+    actor: {
+      userId: payload.userId,
+      userEmail: payload.userEmail,
+      userRole: payload.userRole,
+    },
+    metadata: payload.metadata,
+  });
 }
 
 async function clearDemoData() {
@@ -2182,6 +2186,7 @@ async function main() {
   for (const row of seedAuditRows) {
     const snapshot = row.userId ? userSnapshotById[row.userId] : null;
     const createdAt = new Date();
+    const enteId = row.concessioneId ? concessioneEnteById[row.concessioneId] ?? null : null;
     const currentHash = buildAuditHash({
       previousHash,
       userId: row.userId,
@@ -2190,10 +2195,11 @@ async function main() {
       azione: row.azione,
       entita: row.entita,
       entitaId: row.entitaId,
+      enteId,
       concessioneId: row.concessioneId,
       esito: "SUCCESS",
       metadata: {
-        seed: "true",
+        seed: true,
         message: row.message,
       },
       createdAt,
@@ -2204,7 +2210,7 @@ async function main() {
         userId: row.userId,
         userEmail: snapshot?.email,
         userRole: snapshot?.ruolo,
-        enteId: row.concessioneId ? concessioneEnteById[row.concessioneId] ?? null : null,
+        enteId,
         concessioneId: row.concessioneId,
         azione: row.azione,
         entita: row.entita,

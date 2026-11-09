@@ -50,6 +50,7 @@ describe("global AI control", () => {
 
   it("defaults persistently to OFF when no control event exists", async () => {
     await expect(getGlobalAiControlState({})).resolves.toMatchObject({
+      controlEventStatus: "ABSENT",
       requestedEnabled: false,
       effectiveEnabled: false,
       emergencyDisabled: false,
@@ -82,6 +83,7 @@ describe("global AI control", () => {
       AI_REAL_DATA_APPROVAL_ID: "approval-1",
       AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     })).resolves.toMatchObject({
+      controlEventStatus: "VALID",
       requestedEnabled: true,
       effectiveEnabled: true,
       emergencyDisabled: false,
@@ -97,6 +99,30 @@ describe("global AI control", () => {
         auditHash: "a".repeat(64),
       },
       updatedBy: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    });
+  });
+
+  it("fails closed and exposes an invalid latest control event instead of presenting it as OFF", async () => {
+    activityFindFirstMock.mockResolvedValue({
+      id: "event-invalid",
+      metadata: { previousState: "ON", newState: "UNKNOWN" },
+      createdAt: new Date("2026-10-22T09:30:00.000Z"),
+      userId: "admin-1",
+      userEmail: "admin@example.test",
+      userRole: "ADMIN",
+      currentHash: "c".repeat(64),
+    });
+
+    await expect(getGlobalAiControlState({
+      AI_REAL_DATA_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+    })).resolves.toMatchObject({
+      controlEventStatus: "INVALID",
+      requestedEnabled: false,
+      effectiveEnabled: false,
+      blockers: ["ADMIN_COMMAND_OFF", "INVALID_CONTROL_EVENT"],
+      lastTransition: null,
     });
   });
 

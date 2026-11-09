@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
+const createAuditLogInTransactionMock = vi.hoisted(() => vi.fn());
 
 const txMock = vi.hoisted(() => ({
   $queryRaw: vi.fn(),
@@ -40,6 +41,7 @@ vi.mock("@/lib/auth", async () => {
 vi.mock("@/server/audit/auditLog", () => ({
   auditFailure: auditFailureMock,
   auditSuccess: auditSuccessMock,
+  createAuditLogInTransaction: createAuditLogInTransactionMock,
 }));
 
 import { applyRegisteredDecisionEffect } from "@/server/procedimenti/applyRegisteredDecisionEffect";
@@ -93,8 +95,7 @@ describe("applyRegisteredDecisionEffect", () => {
     });
     txMock.concessione.updateMany.mockResolvedValue({ count: 1 });
     txMock.concessione.findUnique.mockResolvedValue({ stato: "ATTIVA" });
-    txMock.activityLog.findFirst.mockResolvedValue({ currentHash: "prev-hash" });
-    txMock.activityLog.create.mockResolvedValue({ id: "log-1" });
+    createAuditLogInTransactionMock.mockResolvedValue({ id: "log-1" });
   });
 
   it("applica separatamente un effetto pronto", async () => {
@@ -108,9 +109,10 @@ describe("applyRegisteredDecisionEffect", () => {
         data: expect.objectContaining({ stato: "DECADUTA" }),
       }),
     );
-    expect(txMock.activityLog.create).toHaveBeenCalledTimes(1);
-    expect(txMock.activityLog.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ userId: "user-1" }) }),
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledTimes(1);
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
     );
   });
 
@@ -125,8 +127,9 @@ describe("applyRegisteredDecisionEffect", () => {
     });
 
     expect(result.status).toBe("APPLIED");
-    expect(txMock.activityLog.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ userId: null }) }),
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ actor: expect.objectContaining({ userId: null }) }),
     );
   });
 
@@ -232,10 +235,9 @@ describe("applyRegisteredDecisionEffect", () => {
         data: expect.objectContaining({ statoEffetto: "BLOCCATO", effettoApplicatoAt: null }),
       }),
     );
-    expect(txMock.activityLog.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO" }),
-      }),
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO" }),
     );
     expect(auditFailureMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ azione: "EFFETTO_APPLICAZIONE_FALLITA" }),
@@ -266,11 +268,13 @@ describe("applyRegisteredDecisionEffect", () => {
     txMock.concessione.updateMany.mockRejectedValueOnce(new Error("DB_UPDATE_FAILED"));
 
     await expect(applyRegisteredDecisionEffect({ decisioneId: "dec-1" })).rejects.toThrow(/DB_UPDATE_FAILED/);
-    expect(txMock.activityLog.create).not.toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ azione: "EFFETTO_APPLICATO" }) }),
+    expect(createAuditLogInTransactionMock).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ azione: "EFFETTO_APPLICATO" }),
     );
-    expect(txMock.activityLog.create).not.toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO" }) }),
+    expect(createAuditLogInTransactionMock).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO" }),
     );
     expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({ azione: "EFFETTO_APPLICAZIONE_FALLITA" }));
   });

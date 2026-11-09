@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   FASCICOLO_OPERATIONAL_PROPOSAL_POLICY_VERSION,
   OperationalProposalRepositoryError,
+  listConcessionMaterializationOptions,
   listOperationalProposals,
   listProposalReconciliations,
   materializeOperationalProposal,
@@ -26,6 +27,9 @@ const migration = readFileSync(path.join(
 ), "utf8");
 const concessionProposalMigration = readFileSync(path.join(
   process.cwd(), "prisma", "migrations", "20261109_add_concession_operational_proposal", "migration.sql",
+), "utf8");
+const concessionIdentityMigration = readFileSync(path.join(
+  process.cwd(), "prisma", "migrations", "20261110_concession_normalized_identity", "migration.sql",
 ), "utf8");
 const databases: PGlite[] = [];
 const reportFingerprint = "a".repeat(64);
@@ -66,7 +70,11 @@ async function database() {
     CREATE TYPE "TipologiaBene" AS ENUM ('AREA_SCOPERTA','BANCHINA','MOLO','SPECCHIO_ACQUEO','BOX','LOCALE','MANUFATTO','ALTRO');
     CREATE TYPE "AttivitaConcessione" AS ENUM ('DIPORTO','COMMERCIALE','TURISTICO_RICREATIVA','LOGISTICA','CANTIERISTICA','SERVIZI_PORTUALI','PASSEGGERI','ALTRO');
     CREATE TYPE "StatoConcessione" AS ENUM ('ATTIVA','SCADUTA','IN_PROROGA','SOSPESA','REVOCATA','DECADUTA','ARCHIVIATA');
-    CREATE TABLE "Concessionario" ("id" TEXT PRIMARY KEY);
+    CREATE TABLE "Concessionario" (
+      "id" TEXT PRIMARY KEY,
+      "denominazione" TEXT NOT NULL DEFAULT '',
+      "codiceFiscale" TEXT
+    );
     CREATE TABLE "Concessione" (
       "id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "numeroAtto" TEXT NOT NULL DEFAULT '',
       "dataRilascio" TIMESTAMPTZ NOT NULL DEFAULT '2000-01-01', "dataScadenza" TIMESTAMPTZ NOT NULL DEFAULT '2000-01-02',
@@ -124,8 +132,14 @@ async function database() {
       "azione" TEXT NOT NULL, "esito" TEXT NOT NULL, "metadata" JSONB, "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
-    INSERT INTO "Concessionario" VALUES ('concessionaire-default'),('concessionaire-selvara');
-    INSERT INTO "Concessione" ("id","enteId") VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
+    INSERT INTO "Concessionario" ("id","denominazione","codiceFiscale") VALUES
+      ('concessionaire-default','Default S.p.A.','11111111111'),
+      ('concessionaire-selvara','Selvara S.p.A.','22222222222'),
+      ('concessionaire-b','Altro tenant S.p.A.','33333333333');
+    INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId") VALUES
+      ('concession-a','tenant-a','A/2000','concessionaire-default'),
+      ('concession-selvara-existing','tenant-a','S/2001','concessionaire-selvara'),
+      ('concession-b','tenant-b','B/2000','concessionaire-b');
     INSERT INTO "Procedimento" ("id","enteId","concessioneId") VALUES
       ('procedure-a','tenant-a','concession-a'),
       ('procedure-b','tenant-b','concession-b'),
@@ -142,6 +156,7 @@ async function database() {
   `);
   await db.exec(migration);
   await db.exec(concessionProposalMigration);
+  await db.exec(concessionIdentityMigration);
   return db;
 }
 
@@ -298,6 +313,12 @@ describe("Lotto 7 operational proposal persistence", () => {
 
   it("creates and links a reviewed concession once while preserving evidence and blocking collisions", async () => {
     const db = await database();
+    const immutableEvidence = {
+      basisRef: "DOCUMENT_1.PAGE_7",
+      documentFileVersionId: "version-1",
+      pageNumber: 7,
+      textSha256: "f".repeat(64),
+    };
     const proposalCandidate = candidate("CONCESSION_LINK_OR_CREATE", {
       procedimentoId: "procedure-neutral",
       knowledgeRevisionId: "revision-neutral",
@@ -307,7 +328,7 @@ describe("Lotto 7 operational proposal persistence", () => {
         reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
         materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
         after: { numeroAtto: "17/2023", dataRilascio: "2023-07-14" },
-        evidence: [],
+        evidence: [immutableEvidence],
       },
       warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED"],
     });
@@ -335,12 +356,7 @@ describe("Lotto 7 operational proposal persistence", () => {
       areaDescrizione: "Banchina B4, piazzale R4 e magazzino M4",
       canoneAnnuo: 192000,
       note: "Materializzazione validata professionalmente.",
-      evidence: [{
-        basisRef: "DOCUMENT_1.PAGE_7",
-        documentFileVersionId: "version-1",
-        pageNumber: 7,
-        textSha256: "f".repeat(64),
-      }],
+      evidence: [immutableEvidence],
     };
     const approved = await reviewOperationalProposal({
       tenantId: "tenant-a",
@@ -377,6 +393,66 @@ describe("Lotto 7 operational proposal persistence", () => {
     expect(concession.rows[0]).toMatchObject({ numeroAtto: "17/2023", canoneAnnuo: "192000" });
   });
 
+  it("rejects professional concession evidence that differs from the immutable proposal", async () => {
+    const db = await database();
+    await db.query(`
+      UPDATE "Concessione"
+      SET "numeroAtto"='99/2020',"dataRilascio"='2020-01-02'
+      WHERE "id"='concession-a'
+    `);
+    const evidence = {
+      basisRef: "DOCUMENT_1.PAGE_7",
+      documentFileVersionId: "version-1",
+      pageNumber: 7,
+      textSha256: "f".repeat(64),
+    };
+    const proposalCandidate = candidate("CONCESSION_LINK_OR_CREATE", {
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      proposalFingerprint: "1".repeat(64),
+      proposedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
+        evidence: [evidence],
+      },
+      warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED"],
+    });
+    const reconciled = await reconcileOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      structuredReportFingerprint: reportFingerprint,
+      candidates: [proposalCandidate],
+      expectedCorpusFingerprint: corpusFingerprint,
+      expectedPreviewFingerprint: await previewFingerprint(db, [proposalCandidate], "procedure-neutral"),
+    }, repositoryContext(db));
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: reconciled.proposals[0].id,
+      action: "AMEND_AND_APPROVE",
+      expectedReviewVersion: 0,
+      approvedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "LINK_EXISTING",
+        concessioneId: "concession-a",
+        numeroAtto: "99/2020",
+        dataRilascio: "2020-01-02",
+        evidence: [{ ...evidence, documentFileVersionId: "foreign-version" }],
+      },
+      actor: materializationActor,
+    }, repositoryContext(db));
+
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "CONCESSION_EVIDENCE_MISMATCH" });
+  });
+
   it("keeps write authority tenant-scoped and rejects concessions of another tenant", async () => {
     const db = await database();
     for (const [tenantId, procedimentoId] of [["tenant-b", "procedure-neutral"], ["tenant-a", "procedure-inconsistent"], ["tenant-b", "procedure-a"]]) {
@@ -391,6 +467,37 @@ describe("Lotto 7 operational proposal persistence", () => {
         expectedPreviewFingerprint: "0".repeat(64),
       }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
     }
+  });
+
+  it("lists only tenant-scoped concession materialization choices", async () => {
+    const db = await database();
+    const options = await listConcessionMaterializationOptions({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+    }, repositoryContext(db));
+
+    expect(options.concessions.map((item) => item.id).sort()).toEqual([
+      "concession-a",
+      "concession-selvara-existing",
+    ]);
+    expect(options.concessionaires.map((item) => item.id).sort()).toEqual([
+      "concessionaire-default",
+      "concessionaire-selvara",
+    ]);
+    expect(options.concessions).not.toContainEqual(expect.objectContaining({ id: "concession-b" }));
+    expect(options.concessionaires).not.toContainEqual(expect.objectContaining({ id: "concessionaire-b" }));
+  });
+
+  it("enforces normalized concession identity in the database across concurrent writers", async () => {
+    const db = await database();
+    await expect(db.query(`
+      INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId")
+      VALUES ('duplicate-a','tenant-a',' a / 2000 ','concessionaire-default')
+    `)).rejects.toThrow();
+    await expect(db.query(`
+      INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId")
+      VALUES ('same-number-other-tenant','tenant-b','A/2000','concessionaire-b')
+    `)).resolves.toBeDefined();
   });
 
   it("preserves approved history but prevents materializing an outdated proposal", async () => {

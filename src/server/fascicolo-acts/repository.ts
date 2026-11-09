@@ -338,6 +338,11 @@ export async function archiveIdenticalActDrafts(input: {
       ))).flatMap((activity) => activity.current.drafts.map((link) => link.draftKey)),
     );
     const byKey = new Map(drafts.map((draft) => [draft.draftKey, draft]));
+    const activeInboundDependencies = new Set(
+      drafts
+        .filter((draft) => draft.current.status !== "ARCHIVIATA")
+        .flatMap((draft) => draft.current.dependencies),
+    );
     const reference = byKey.get(input.reference.draftKey);
     if (!reference
       || reference.current.version !== input.reference.expectedVersion
@@ -348,13 +353,15 @@ export async function archiveIdenticalActDrafts(input: {
     const archivedDraftKeys: string[] = [];
     for (const expected of input.duplicates) {
       const duplicate = byKey.get(expected.draftKey);
-      if (!duplicate
-        || duplicate.current.version !== expected.expectedVersion
-        || duplicate.current.bodySha256 !== expected.bodySha256) {
+      if (!duplicate || duplicate.current.bodySha256 !== expected.bodySha256) {
         throw new ActDraftVersionConflictError();
       }
       if (duplicate.current.status === "ARCHIVIATA") continue;
+      if (duplicate.current.version !== expected.expectedVersion) {
+        throw new ActDraftVersionConflictError();
+      }
       if (linkedDraftKeys.has(duplicate.draftKey)
+        || activeInboundDependencies.has(duplicate.draftKey)
         || duplicate.current.templateKey !== reference.current.templateKey
         || duplicate.current.issueSemanticKey !== reference.current.issueSemanticKey
         || duplicate.current.bodySha256 !== reference.current.bodySha256) {

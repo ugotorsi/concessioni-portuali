@@ -392,6 +392,14 @@ function exactDate(value: JsonValue | undefined): string | null {
   return text(candidate.precision) === "EXACT" ? text(candidate.from) : null;
 }
 
+function normalizedConcessionNumber(value: string | null | undefined): string | null {
+  return value ? value.replace(/\s+/gu, "").toLocaleLowerCase("it-IT") : null;
+}
+
+function normalizedIsoDate(value: string | null | undefined): string | null {
+  return value?.match(/^\d{4}-\d{2}-\d{2}/u)?.[0] ?? null;
+}
+
 function metadataReconciliationCandidates(input: GenerationInput): OperationalProposalCandidate[] {
   const context = input.report.proceduralContext;
   if (!context) return [];
@@ -402,12 +410,46 @@ function metadataReconciliationCandidates(input: GenerationInput): OperationalPr
     const title = text(payload.title) ?? item.normalizedText;
     const date = exactDate(payload.date);
     const proceduralRole = text(payload.proceduralRole);
-    const evidence = item.evidence.map((entry) => ({ ...entry }));
+    const evidence = item.evidence.flatMap((entry) =>
+      entry.basisRef && entry.documentFileVersionId
+        ? [{
+            basisRef: entry.basisRef,
+            documentFileVersionId: entry.documentFileVersionId,
+            pageNumber: entry.pageNumber,
+            textSha256: entry.textSha256,
+          }]
+        : []);
     const candidates: OperationalProposalCandidate[] = [];
     const isConcession = /concession|titolo demanial|atto demanial/i.test(`${actType} ${title}`);
-    if (isConcession && number && context.concessione?.numeroAtto !== number) {
+    const documentedNumber = normalizedConcessionNumber(number);
+    const currentNumber = normalizedConcessionNumber(context.concessione?.numeroAtto);
+    const documentedDate = normalizedIsoDate(date);
+    const currentDate = normalizedIsoDate(context.concessione?.dataRilascio);
+    const concessionIdentityDiffers = currentNumber !== documentedNumber
+      || documentedDate !== null && currentDate !== documentedDate;
+    if (isConcession && number && concessionIdentityDiffers) {
       const before = context.concessione;
-      candidates.push(buildCandidate({
+      if (evidence.length === 0) {
+        candidates.push(buildCandidate({
+          ...input,
+          knowledgeRevisionId: input.report.knowledgeRevisionId,
+          proposalType: "NOTE",
+          title: `Verificare manualmente il titolo amministrativo ${number}`,
+          description: "Il titolo documentato non dispone di una versione file e di un riferimento probatorio completi; non può aggiornare dati autoritativi.",
+          proposedPayload: {
+            action: "VERIFY_CONCESSION_EVIDENCE",
+            numeroAtto: number,
+            dataRilascio: date,
+            targetEntity: "CONCESSIONE",
+          },
+          originatingKnowledgeItemIds: [item.id],
+          originatingIssueSemanticKeys: issueKeysForItem(input.report, item.id),
+          rationale: "La riconciliazione autoritativa è bloccata finché l'evidenza non identifica versione documentale, pagina e hash.",
+          confidence: item.confidence,
+          warningCodes: ["MANUAL_ACTION_REQUIRED", "DOCUMENT_EVIDENCE_INCOMPLETE"],
+        }));
+      } else {
+        candidates.push(buildCandidate({
         ...input,
         knowledgeRevisionId: input.report.knowledgeRevisionId,
         proposalType: "CONCESSION_LINK_OR_CREATE",
@@ -433,7 +475,8 @@ function metadataReconciliationCandidates(input: GenerationInput): OperationalPr
         rationale: "Proposta documentale in sola anteprima; richiede verifica del titolo e conferma umana prima di ogni scrittura autoritativa.",
         confidence: item.confidence,
         warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
-      }));
+        }));
+      }
     }
     const isFinalAct = proceduralRole === "CHALLENGED_ACT"
       || /determinazione|decreto|provvedimento|decisione/i.test(`${actType} ${title}`)

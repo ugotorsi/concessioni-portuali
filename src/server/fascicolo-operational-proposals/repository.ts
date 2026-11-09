@@ -39,6 +39,20 @@ export interface OperationalProposalRepositoryContext {
   now?: () => Date;
 }
 
+export interface ConcessionMaterializationOptions {
+  concessions: readonly {
+    id: string;
+    numeroAtto: string;
+    dataRilascio: Date;
+    concessionarioDenominazione: string;
+  }[];
+  concessionaires: readonly {
+    id: string;
+    denominazione: string;
+    codiceFiscale: string | null;
+  }[];
+}
+
 // ActivityLog.userId references User: system actors are recorded by role and metadata, never as user ids.
 export function toActivityLogAuditActor(input: Pick<OperationalProposalAuditInput, "actor" | "metadata">): {
   actor: { userId: string | null; userEmail: string | null; userRole: string };
@@ -124,6 +138,8 @@ export class OperationalProposalRepositoryError extends Error {
     | "MANUAL_ACTION_REQUIRED"
     | "CONCESSION_REQUIRED_FOR_MATERIALIZATION"
     | "CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED"
+    | "CONCESSION_EVIDENCE_MISMATCH"
+    | "CONCESSIONAIRE_TENANT_SCOPE_REQUIRED"
     | "CONCESSION_TARGET_NOT_FOUND"
     | "CONCESSION_ALREADY_LINKED"
     | "CONCESSION_COLLISION"
@@ -674,6 +690,32 @@ const concessionMaterializationPayloadSchema = z.discriminatedUnion("materializa
   concessionCreatePayloadSchema,
 ]);
 
+function canonicalEvidence(value: z.output<typeof concessionEvidenceSchema>): string {
+  return `${value.basisRef}\u0000${value.documentFileVersionId}\u0000${value.pageNumber}\u0000${value.textSha256}`;
+}
+
+function assertConcessionEvidenceBoundToProposal(
+  proposal: OperationalProposalRecord,
+  approvedEvidence: readonly z.output<typeof concessionEvidenceSchema>[],
+): void {
+  const proposedPayload = proposal.proposedPayload && typeof proposal.proposedPayload === "object"
+    && !Array.isArray(proposal.proposedPayload)
+    ? proposal.proposedPayload
+    : null;
+  const proposedEvidence = z.array(concessionEvidenceSchema).min(1).max(100)
+    .safeParse(proposedPayload?.evidence);
+  if (!proposedEvidence.success) {
+    throw new OperationalProposalRepositoryError("CONCESSION_EVIDENCE_MISMATCH");
+  }
+  const expected = proposedEvidence.data.map(canonicalEvidence).sort();
+  const approved = approvedEvidence.map(canonicalEvidence).sort();
+  if (new Set(approved).size !== approved.length
+    || expected.length !== approved.length
+    || expected.some((value, index) => value !== approved[index])) {
+    throw new OperationalProposalRepositoryError("CONCESSION_EVIDENCE_MISMATCH");
+  }
+}
+
 async function materializeConcession(
   tx: OperationalProposalSqlExecutor,
   proposal: OperationalProposalRecord,
@@ -684,6 +726,7 @@ async function materializeConcession(
     throw new OperationalProposalRepositoryError("CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED");
   }
   const payload = parsed.data;
+  assertConcessionEvidenceBoundToProposal(proposal, payload.evidence);
   if (payload.materializationMode === "LINK_EXISTING") {
     const target = await tx.query<{ id: string; numeroAtto: string; dataRilascio: Date }>(`
       SELECT "id","numeroAtto","dataRilascio"
@@ -715,10 +758,18 @@ async function materializeConcession(
     throw new OperationalProposalRepositoryError("CONCESSION_ALREADY_LINKED");
   }
   const concessionario = await tx.query<{ id: string }>(`
-    SELECT "id" FROM "Concessionario" WHERE "id"=$1 FOR SHARE
-  `, [payload.concessionarioId]);
+    SELECT c."id"
+    FROM "Concessionario" c
+    WHERE c."id"=$1
+      AND EXISTS (
+        SELECT 1
+        FROM "Concessione" existing
+        WHERE existing."concessionarioId"=c."id" AND existing."enteId"=$2
+      )
+    FOR SHARE
+  `, [payload.concessionarioId, proposal.tenantId]);
   if (!concessionario.rows[0]) {
-    throw new OperationalProposalRepositoryError("CONCESSION_TARGET_NOT_FOUND");
+    throw new OperationalProposalRepositoryError("CONCESSIONAIRE_TENANT_SCOPE_REQUIRED");
   }
   const normalizedNumber = payload.numeroAtto.replace(/\s+/gu, "").toLocaleLowerCase("it-IT");
   const collision = await tx.query<{ id: string }>(`
@@ -732,7 +783,7 @@ async function materializeConcession(
     throw new OperationalProposalRepositoryError("CONCESSION_COLLISION");
   }
   const entityId = deterministicId("concessione", proposal.id);
-  await tx.query(`
+  const inserted = await tx.query<{ id: string }>(`
     INSERT INTO "Concessione" (
       "id","numeroAtto","dataRilascio","dataScadenza","normaRiferimento",
       "tipologiaBene","attivita","areaDescrizione","canoneAnnuo","stato",
@@ -743,6 +794,8 @@ async function materializeConcession(
       $6::"TipologiaBene",$7::"AttivitaConcessione",$8,$9,$10::"StatoConcessione",
       $11,$12,$13,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
     )
+    ON CONFLICT DO NOTHING
+    RETURNING "id"
   `, [
     entityId,
     payload.numeroAtto,
@@ -758,6 +811,9 @@ async function materializeConcession(
     payload.concessionarioId,
     proposal.tenantId,
   ]);
+  if (!inserted.rows[0]) {
+    throw new OperationalProposalRepositoryError("CONCESSION_COLLISION");
+  }
   const linked = await tx.query<{ id: string }>(`
     UPDATE "Procedimento"
     SET "concessioneId"=$3,"updatedAt"=CURRENT_TIMESTAMP
@@ -922,4 +978,32 @@ export async function listOperationalProposals(input: {
     ...proposal,
     reviewEvents: events.rows.filter((event) => event.proposalId === proposal.id),
   }));
+}
+
+export async function listConcessionMaterializationOptions(input: {
+  tenantId: string;
+  procedimentoId: string;
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<ConcessionMaterializationOptions> {
+  const ctx = context(overrides);
+  await assertReadAuthority(ctx.read, input.tenantId, input.procedimentoId);
+  const [concessions, concessionaires] = await Promise.all([
+    ctx.read.query<ConcessionMaterializationOptions["concessions"][number]>(`
+      SELECT c."id",c."numeroAtto",c."dataRilascio",
+        holder."denominazione" AS "concessionarioDenominazione"
+      FROM "Concessione" c
+      JOIN "Concessionario" holder ON holder."id"=c."concessionarioId"
+      WHERE c."enteId"=$1
+      ORDER BY c."dataRilascio" DESC,c."numeroAtto",c."id"
+    `, [input.tenantId]),
+    ctx.read.query<ConcessionMaterializationOptions["concessionaires"][number]>(`
+      SELECT holder."id",holder."denominazione",holder."codiceFiscale"
+      FROM "Concessionario" holder
+      WHERE EXISTS (
+        SELECT 1 FROM "Concessione" c
+        WHERE c."concessionarioId"=holder."id" AND c."enteId"=$1
+      )
+      ORDER BY holder."denominazione",holder."id"
+    `, [input.tenantId]),
+  ]);
+  return { concessions: concessions.rows, concessionaires: concessionaires.rows };
 }

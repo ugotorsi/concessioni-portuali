@@ -332,7 +332,9 @@ export default async function RuntimeOperationsPage({
               <div>
                 <dt className="text-slate-500">Comando richiesto dall&apos;ADMIN</dt>
                 <dd className="font-medium text-slate-900">
-                  {aiControl.requestedEnabled ? "ON" : "OFF"}
+                  {aiControl.controlEventStatus === "INVALID"
+                    ? "NON DETERMINABILE (evento non valido)"
+                    : aiControl.requestedEnabled ? "ON" : "OFF"}
                 </dd>
               </div>
               <div>
@@ -375,6 +377,12 @@ export default async function RuntimeOperationsPage({
             {aiControl.requestedEnabled && !aiControl.deploymentAuthorized ? (
               <p className="text-sm font-medium text-amber-700">
                 Comando ON registrato, ma manca l&apos;autorizzazione deployment al trattamento dei dati reali.
+              </p>
+            ) : null}
+            {aiControl.controlEventStatus === "INVALID" ? (
+              <p className="text-sm font-medium text-red-700">
+                L&apos;ultimo evento di controllo AI non contiene uno stato ON/OFF valido. Il sistema resta disabilitato
+                in modo conservativo; l&apos;evento deve essere verificato nell&apos;audit.
               </p>
             ) : null}
             {aiControl.emergencyDisabled ? (
@@ -429,10 +437,10 @@ export default async function RuntimeOperationsPage({
             </dl>
             {aiControl.lastTransition ? (
               <details className="rounded border border-slate-200 px-3 py-2 text-xs text-slate-600">
-                <summary className="cursor-pointer font-medium">Integrità e conseguenze dell&apos;ultimo comando</summary>
+                <summary className="cursor-pointer font-medium">Identità e conseguenze dell&apos;ultimo comando</summary>
                 <dl className="mt-2 grid gap-2 sm:grid-cols-2">
                   <div><dt>Evento</dt><dd className="font-mono">{aiControl.lastTransition.eventId}</dd></div>
-                  <div><dt>Hash audit</dt><dd className="break-all font-mono">{aiControl.lastTransition.auditHash}</dd></div>
+                  <div><dt>Hash audit (catena non verificata in questa vista)</dt><dd className="break-all font-mono">{aiControl.lastTransition.auditHash}</dd></div>
                   <div><dt>Job in coda annullati</dt><dd>{aiControl.lastTransition.cancelledQueuedJobs}</dd></div>
                   <div><dt>Cancellazioni richieste</dt><dd>{aiControl.lastTransition.cancellationRequestedJobs}</dd></div>
                 </dl>

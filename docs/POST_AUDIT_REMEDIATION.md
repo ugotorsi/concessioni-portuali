@@ -12,8 +12,23 @@ La pagina amministrativa rappresenta separatamente:
 - automazione generale;
 - ultimo evento audit, motivazione, hash e contatori di cancellazione.
 
+Un evento di controllo privo di stati `ON`/`OFF` validi e rappresentato come
+`INVALID`, mantiene l'esecuzione disabilitata e non viene trasformato
+silenziosamente in un comando `OFF`. L'hash del singolo evento e distinto
+dall'esito della verifica completa della catena.
+
 La diagnostica e in sola lettura. Non cambia controlli, provider, policy, worker o
 automazioni.
+
+Tutti i writer applicativi di `ActivityLog` usano il writer transazionale
+centralizzato, che acquisisce lo stesso advisory lock prima di leggere la coda
+della catena. Il verificatore completo rilegge gli eventi in ordine
+`createdAt/id`, controlla ogni `previousHash` e ricalcola ogni `currentHash` in
+batch, senza caricare l'intera tabella in memoria.
+
+Il seed demo distruttivo resta separato dal percorso applicativo perche ricrea la
+catena da un database ripulito, ma usa la stessa funzione canonica di hashing,
+incluso `enteId`, affinche anche i dati seed superino il verificatore completo.
 
 ## Riconciliazione del titolo concessorio
 
@@ -24,13 +39,18 @@ documento. La proposta operativa `CONCESSION_LINK_OR_CREATE` e deterministica e
 resta non materializzabile finche un professionista non approva un payload
 completo.
 
+La UI di revisione presenta soltanto concessioni e concessionari gia associati
+allo stesso ente. Il server ripete comunque i controlli di tenant e costruisce il
+payload professionale usando le evidenze immutabili della proposta: l'operatore
+non puo sostituire versione documentale, pagina o hash.
+
 La materializzazione ammette esclusivamente:
 
 - collegamento a una concessione esistente dello stesso ente, con numero e data
   verificati;
 - creazione di una concessione con tutti i campi obbligatori, concessionario
-  esistente, almeno un'evidenza verificabile e assenza di collisioni per
-  ente/numero.
+  gia associato allo stesso ente, almeno un'evidenza identica a quella della
+  proposta e assenza di collisioni per ente/numero normalizzato.
 
 La transazione collega il procedimento e registra una materializzazione
 idempotente. Scadenze e criticita continuano a richiedere proposte distinte,
@@ -39,8 +59,12 @@ criticita viene creata dalla sola riconciliazione del titolo.
 
 La migrazione
 `20261109_add_concession_operational_proposal` aggiunge esclusivamente il nuovo
-valore enum. La sua applicazione a Production e la successiva riconciliazione
-dei dati richiedono autorizzazioni operative separate.
+valore enum. La migrazione successiva
+`20261110_concession_normalized_identity` interrompe esplicitamente
+l'applicazione se rileva duplicati storici e, soltanto su dati coerenti, aggiunge
+un indice univoco tenant-scoped sul numero normalizzato. La loro applicazione a
+Production e la successiva riconciliazione dei dati richiedono autorizzazioni
+operative separate.
 
 ## Bozze
 
@@ -52,7 +76,9 @@ Le copie storiche possono essere archiviate soltanto quando:
 - riferimento e copie hanno versione e hash attesi;
 - problema, modello e contenuto coincidono;
 - la copia non e collegata a un'attivita;
+- nessuna bozza attiva dipende dalla copia;
 - un operatore autorizzato conferma e motiva l'operazione.
 
 L'archiviazione aggiunge una versione immutabile `ARCHIVIATA` alla catena audit;
-non elimina bozze, versioni o eventi.
+non elimina bozze, versioni o eventi. Ripetere la stessa richiesta su una copia
+gia archiviata e un no-op idempotente.
