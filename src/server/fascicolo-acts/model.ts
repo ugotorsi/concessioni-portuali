@@ -46,6 +46,7 @@ export const actDraftVersionMetadataSchema = actDraftContentSchema.extend({
   draftKey: z.string().min(1).max(64),
   version: z.number().int().positive(),
   bodySha256: z.string().regex(/^[a-f0-9]{64}$/),
+  creationFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional(),
 }).strict();
 
 export type ActDraftVersionMetadata = z.infer<typeof actDraftVersionMetadataSchema>;
@@ -80,8 +81,15 @@ export function stableActDraftKey(
   templateKey: string,
   issueSemanticKey: string | null,
 ): string {
+  return `act_${actDraftCreationFingerprint(templateKey, issueSemanticKey).slice(0, 24)}`;
+}
+
+export function actDraftCreationFingerprint(
+  templateKey: string,
+  issueSemanticKey: string | null,
+): string {
   const identity = `${issueSemanticKey ?? "unassigned"}\u0000${templateKey}\u0000default`;
-  return `act_${createHash("sha256").update(identity, "utf8").digest("hex").slice(0, 24)}`;
+  return createHash("sha256").update(identity, "utf8").digest("hex");
 }
 
 export function bodySha256(body: string): string {

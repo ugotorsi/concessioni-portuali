@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
@@ -23,12 +21,14 @@ import {
   ACT_DRAFT_ENTITY,
   ACT_DRAFT_LOCK_NAMESPACE,
   ACT_DRAFT_SCHEMA_VERSION,
+  actDraftCreationFingerprint,
   actDraftMatchesTemplate,
   actDraftEntityId,
   actDraftVersionMetadataSchema,
   bodySha256,
   normalizeActDraftContent,
   projectActDrafts,
+  stableActDraftKey,
   type ActDraft,
   type ActDraftContent,
   type ActDraftVersion,
@@ -229,9 +229,14 @@ export async function saveActDraftVersion(input: {
   content: ActDraftContent;
   actor: ActDraftActor;
 }): Promise<ActDraftVersionMetadata> {
-  const draftKey = input.draftKey ?? `act_${randomUUID().replace(/-/g, "").slice(0, 24)}`;
+  const draftKey = input.draftKey ?? stableActDraftKey(
+    input.content.templateKey,
+    input.content.issueSemanticKey,
+  );
   const entityId = actDraftEntityId(input.scope.procedimentoId, draftKey);
   const content = normalizeActDraftContent(input.content, draftKey);
+  const creating = input.expectedVersion === 0;
+  const enforceCreateIdentity = input.idempotentCreate === true || input.draftKey === null;
 
   if (input.guidedContext && (!input.idempotentCreate || input.expectedVersion !== 0
     || input.guidedContext.templateKey !== content.templateKey
@@ -239,7 +244,7 @@ export async function saveActDraftVersion(input: {
     throw new ActivityWorkflowError("INVALID_DRAFT", "L'identità della bozza non corrisponde all'attività.");
   }
   const save = async (tx: Prisma.TransactionClient) => {
-    if (input.idempotentCreate) await lockActivityScope(tx, input.scope);
+    if (creating) await lockActivityScope(tx, input.scope);
     await lockDraft(tx, entityId);
     if (input.guidedContext) await assertGuidedDraftContext(tx, input.scope, input.guidedContext);
     const drafts = await listActDrafts(input.scope, tx);
@@ -247,7 +252,7 @@ export async function saveActDraftVersion(input: {
     if (content.dependencies.some((key) => !knownKeys.has(key))) {
       throw new Error("Dipendenza non riconosciuta nel procedimento corrente.");
     }
-    if (input.idempotentCreate && input.expectedVersion === 0) {
+    if (creating && enforceCreateIdentity) {
       const matches = drafts.filter((draft) => actDraftMatchesTemplate(draft, {
         templateKey: content.templateKey,
         issueSemanticKey: content.issueSemanticKey,
@@ -265,7 +270,7 @@ export async function saveActDraftVersion(input: {
     const latestVersion = drafts.find((draft) => draft.draftKey === draftKey)?.current ?? null;
     const latest = latestVersion?.version ?? 0;
     if (latest !== input.expectedVersion) {
-      if (input.idempotentCreate && input.expectedVersion === 0 && latestVersion
+      if (creating && latestVersion
         && latestVersion.templateKey === content.templateKey
         && latestVersion.issueSemanticKey === content.issueSemanticKey) {
         return versionMetadata(latestVersion);
@@ -283,6 +288,8 @@ export async function saveActDraftVersion(input: {
       draftKey,
       version: latest + 1,
       bodySha256: bodySha256(content.body),
+      creationFingerprint: latestVersion?.creationFingerprint
+        ?? actDraftCreationFingerprint(content.templateKey, content.issueSemanticKey),
     };
     await appendDraftVersion(tx, input.scope, input.actor, metadata);
     return metadata;
@@ -290,6 +297,80 @@ export async function saveActDraftVersion(input: {
   return input.guidedContext
     ? runSerializableTransactionWithRetry(save)
     : prisma.$transaction(save);
+}
+
+export async function archiveIdenticalActDrafts(input: {
+  scope: ActDraftScope;
+  actor: ActDraftActor;
+  reference: { draftKey: string; expectedVersion: number; bodySha256: string };
+  duplicates: readonly { draftKey: string; expectedVersion: number; bodySha256: string }[];
+  reason: string;
+}): Promise<{ archivedDraftKeys: readonly string[] }> {
+  if (!input.reason.trim() || input.duplicates.length === 0) {
+    throw new Error("ARCHIVE_DUPLICATES_INPUT_INVALID");
+  }
+  const requestedKeys = [input.reference.draftKey, ...input.duplicates.map((item) => item.draftKey)];
+  if (new Set(requestedKeys).size !== requestedKeys.length) {
+    throw new Error("ARCHIVE_DUPLICATES_INPUT_INVALID");
+  }
+  return runSerializableTransactionWithRetry(async (tx) => {
+    await lockActivityScope(tx, input.scope);
+    for (const draftKey of [...requestedKeys].sort()) {
+      await lockDraft(tx, actDraftEntityId(input.scope.procedimentoId, draftKey));
+    }
+    const [drafts, activityRows] = await Promise.all([
+      listActDrafts(input.scope, tx),
+      tx.activityLog.findMany({
+        where: {
+          enteId: input.scope.tenantId,
+          entita: ACTIVITY_ENTITY,
+          azione: ACTIVITY_AUDIT_ACTION,
+          esito: "SUCCESS",
+          entitaId: { startsWith: `${input.scope.procedimentoId}::` },
+        },
+        select: { metadata: true, createdAt: true, userEmail: true, currentHash: true, entitaId: true },
+      }),
+    ]);
+    const linkedDraftKeys = new Set(
+      projectActivities(activityRows.map((row) => activityVersionFromLogRow(
+        row,
+        input.scope.procedimentoId,
+      ))).flatMap((activity) => activity.current.drafts.map((link) => link.draftKey)),
+    );
+    const byKey = new Map(drafts.map((draft) => [draft.draftKey, draft]));
+    const reference = byKey.get(input.reference.draftKey);
+    if (!reference
+      || reference.current.version !== input.reference.expectedVersion
+      || reference.current.bodySha256 !== input.reference.bodySha256
+      || reference.current.status === "ARCHIVIATA") {
+      throw new ActDraftVersionConflictError();
+    }
+    const archivedDraftKeys: string[] = [];
+    for (const expected of input.duplicates) {
+      const duplicate = byKey.get(expected.draftKey);
+      if (!duplicate
+        || duplicate.current.version !== expected.expectedVersion
+        || duplicate.current.bodySha256 !== expected.bodySha256) {
+        throw new ActDraftVersionConflictError();
+      }
+      if (duplicate.current.status === "ARCHIVIATA") continue;
+      if (linkedDraftKeys.has(duplicate.draftKey)
+        || duplicate.current.templateKey !== reference.current.templateKey
+        || duplicate.current.issueSemanticKey !== reference.current.issueSemanticKey
+        || duplicate.current.bodySha256 !== reference.current.bodySha256) {
+        throw new Error("ARCHIVE_DUPLICATE_NOT_IDENTICAL_OR_LINKED");
+      }
+      const metadata = actDraftVersionMetadataSchema.parse({
+        ...versionMetadata(duplicate.current),
+        status: "ARCHIVIATA",
+        version: duplicate.current.version + 1,
+        changeNote: `Copia identica archiviata; riferimento ${reference.draftKey}. ${input.reason.trim()}`,
+      });
+      await appendDraftVersion(tx, input.scope, input.actor, metadata);
+      archivedDraftKeys.push(duplicate.draftKey);
+    }
+    return { archivedDraftKeys };
+  });
 }
 
 export async function associateLegacyActDraft(input: {
