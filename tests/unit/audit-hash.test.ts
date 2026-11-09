@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { computeAuditHash, sanitizeMetadata, stableStringify } from "@/server/audit/hash";
+import {
+  computeAuditHash,
+  sanitizeMetadata,
+  stableStringify,
+  verifyAuditHashRecords,
+  type AuditHashRecord,
+} from "@/server/audit/hash";
 
 describe("audit hash helpers", () => {
   it("filtra metadata sensibili", () => {
@@ -81,5 +87,49 @@ describe("audit hash helpers", () => {
     });
 
     expect(left).toBe(right);
+  });
+
+  it("verifica puntatori e hash dell'intera sequenza senza accettare alterazioni", () => {
+    const base = {
+      createdAt: new Date("2026-01-03T10:00:00.000Z"),
+      azione: "TEST",
+      entita: "Entity",
+      entitaId: "entity-1",
+      enteId: "tenant-1",
+      concessioneId: null,
+      esito: "SUCCESS" as const,
+      userId: "user-1",
+      userEmail: "user@example.test",
+      userRole: "ADMIN",
+      metadata: { value: 1 },
+    };
+    const record = (id: string, previousHash: string | null, metadata = base.metadata): AuditHashRecord => {
+      const input = {
+        ...base,
+        metadata,
+        previousHash,
+        actor: { userId: base.userId, userEmail: base.userEmail, userRole: base.userRole },
+      };
+      return { id, ...base, metadata, previousHash, currentHash: computeAuditHash(input) };
+    };
+    const first = record("audit-1", null);
+    const second = record("audit-2", first.currentHash, { value: 2 });
+
+    expect(verifyAuditHashRecords([first, second])).toEqual({
+      valid: true,
+      verifiedCount: 2,
+      finalHash: second.currentHash,
+      issue: null,
+    });
+    expect(verifyAuditHashRecords([{ ...first, metadata: { value: 99 } }, second])).toMatchObject({
+      valid: false,
+      verifiedCount: 0,
+      issue: { recordId: "audit-1", code: "CURRENT_HASH_MISMATCH" },
+    });
+    expect(verifyAuditHashRecords([first, { ...second, previousHash: "fork" }])).toMatchObject({
+      valid: false,
+      verifiedCount: 1,
+      issue: { recordId: "audit-2", code: "PREVIOUS_HASH_MISMATCH" },
+    });
   });
 });

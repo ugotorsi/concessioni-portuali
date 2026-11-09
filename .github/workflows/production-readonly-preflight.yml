@@ -1,0 +1,49 @@
+name: Production read-only preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: Full release-candidate commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-readonly-preflight
+  cancel-in-progress: false
+
+jobs:
+  post-audit-preflight:
+    if: github.ref == 'refs/heads/release/v7-integrated-services'
+    runs-on: ubuntu-latest
+    environment: production-readonly
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected release candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify exact release candidate
+        env:
+          EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+        run: |
+          printf '%s' "$EXPECTED_COMMIT" | grep -Eq '^[0-9a-f]{40}$'
+          test "$(git rev-parse HEAD)" = "$EXPECTED_COMMIT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run fixed read-only Production checks
+        env:
+          NOETRA_PRODUCTION_READONLY_DATABASE_URL: ${{ secrets.NOETRA_PRODUCTION_READONLY_DATABASE_URL }}
+        run: npm run runtime:verify-post-audit-production-readonly -- --confirm-production-read-only

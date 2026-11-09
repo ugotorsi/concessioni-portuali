@@ -319,7 +319,7 @@ describe("worker-safe fascicolo document analysis", () => {
       },
     });
     expect(analyzed.structuredKnowledgeCompilation.diagnostics).toContainEqual({
-      code: "CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION",
+      code: "CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION:CONCESSION_TITLE_RECONCILIATION_V1",
       path: "structuredKnowledge.items",
       action: "REBUILT",
     });

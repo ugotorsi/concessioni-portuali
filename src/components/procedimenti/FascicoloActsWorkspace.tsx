@@ -4,6 +4,7 @@ import { FilePenLine, FileText, History, Link2, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { formatDateIT } from "@/lib/utils";
 import {
+  archiveIdenticalActDraftsAction,
   restoreActDraftVersionAction,
   saveActDraftVersionAction,
 } from "@/server/actions/fascicolo-acts";
@@ -298,6 +299,37 @@ export function FascicoloActsWorkspace({
                       ))}
                     </tbody>
                   </table>
+                  {canManage && group.members.some((member) =>
+                    member.reconciliation === "IDENTICAL_DUPLICATE"
+                    && !member.linkedToActivity
+                    && member.status !== "ARCHIVIATA") ? (
+                    <form action={archiveIdenticalActDraftsAction} className="mt-3 space-y-2 border-t border-amber-200 pt-3">
+                      <input type="hidden" name="procedimentoId" value={procedimentoId} />
+                      <input type="hidden" name="referenceDraftKey" value={group.members[0]!.draftKey} />
+                      <input type="hidden" name="referenceExpectedVersion" value={group.members[0]!.version} />
+                      <input type="hidden" name="referenceBodySha256" value={group.members[0]!.bodySha256} />
+                      {group.members.filter((member) =>
+                        member.reconciliation === "IDENTICAL_DUPLICATE"
+                        && !member.linkedToActivity
+                        && member.status !== "ARCHIVIATA").map((member) => (
+                        <span key={member.draftKey}>
+                          <input type="hidden" name="duplicateDraftKeys" value={member.draftKey} />
+                          <input type="hidden" name="duplicateExpectedVersions" value={member.version} />
+                          <input type="hidden" name="duplicateBodySha256s" value={member.bodySha256} />
+                        </span>
+                      ))}
+                      <label className="block text-xs font-medium text-amber-950">
+                        Motivazione dell&apos;archiviazione
+                        <input name="reason" required minLength={3} maxLength={1900} className={`${inputClass} mt-1 bg-white`}
+                          placeholder="Copie storiche identiche verificate" />
+                      </label>
+                      <label className="flex items-start gap-2 text-xs">
+                        <input type="checkbox" name="confirmed" value="true" required className="mt-0.5" />
+                        Confermo l&apos;archiviazione non distruttiva delle sole copie identiche non collegate.
+                      </label>
+                      <Button type="submit" variant="secondary">Archivia copie identiche</Button>
+                    </form>
+                  ) : null}
                 </div>
               ) : null}
               {groupDrafts.map((draft) => {

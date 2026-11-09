@@ -324,6 +324,8 @@ function hasOnlySuppliedBasisRefs(
 
 const CONCESSION_TITLE_PATTERN =
   /\b((?:atto\s+di\s+)?concessione\s+demaniale(?:\s+marittima)?\s+n(?:\.|°)?\s*(\d{1,6}\s*\/\s*\d{4}))\b/iu;
+export const CONCESSION_TITLE_RECONCILIATION_CONTRACT_VERSION =
+  "CONCESSION_TITLE_RECONCILIATION_V1" as const;
 
 function exactDateFromText(text: string): {
   precision: "EXACT";
@@ -559,7 +561,7 @@ export function createFascicoloDocumentAnalysisService(config: {
           quarantinedItemLocalIds: compiled.quarantinedItemLocalIds,
           diagnostics: [
             ...(reconciledKnowledge.reconciled ? [{
-              code: "CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION",
+              code: `CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION:${CONCESSION_TITLE_RECONCILIATION_CONTRACT_VERSION}`,
               path: "structuredKnowledge.items",
               action: "REBUILT" as const,
             }] : []),

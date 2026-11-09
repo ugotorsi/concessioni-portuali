@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getAuditRequestContextMock = vi.hoisted(() => vi.fn());
-const prismaMock = vi.hoisted(() => ({ $transaction: vi.fn() }));
+const prismaMock = vi.hoisted(() => ({
+  $transaction: vi.fn(),
+  activityLog: { findMany: vi.fn() },
+}));
 
 vi.mock("@/lib/auth", () => ({ getCurrentUser: getCurrentUserMock }));
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
@@ -10,7 +13,7 @@ vi.mock("@/server/audit/requestContext", () => ({
   getAuditRequestContext: getAuditRequestContextMock,
 }));
 
-import { createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { createAuditLogInTransaction, verifyCompleteAuditLogChain } from "@/server/audit/auditLog";
 import { computeAuditHash } from "@/server/audit/hash";
 
 const actor = { userId: "user-1", userEmail: "user@example.test", userRole: "ADMIN" };
@@ -39,6 +42,61 @@ describe("createAuditLogInTransaction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
+  });
+
+  describe("verifyCompleteAuditLogChain", () => {
+    it("verifies ordered pages while carrying the previous page hash", async () => {
+      const make = (id: string, createdAt: Date, previousHash: string | null) => {
+        const common = {
+          createdAt,
+          azione: "TEST",
+          entita: "Entity",
+          entitaId: id,
+          enteId: "tenant-1",
+          concessioneId: null,
+          esito: "SUCCESS" as const,
+          metadata: { id },
+          userId: "user-1",
+          userEmail: "user@example.test",
+          userRole: "ADMIN",
+        };
+        return {
+          id,
+          ...common,
+          previousHash,
+          currentHash: computeAuditHash({
+            ...common,
+            previousHash,
+            actor: {
+              userId: common.userId,
+              userEmail: common.userEmail,
+              userRole: common.userRole,
+            },
+          }),
+        };
+      };
+      const first = make("audit-1", new Date("2026-08-19T12:00:00.000Z"), null);
+      const second = make("audit-2", new Date("2026-08-19T12:00:00.001Z"), first.currentHash);
+      const third = make("audit-3", new Date("2026-08-19T12:00:00.002Z"), second.currentHash);
+      prismaMock.activityLog.findMany
+        .mockResolvedValueOnce([first, second])
+        .mockResolvedValueOnce([third]);
+
+      await expect(verifyCompleteAuditLogChain(2)).resolves.toEqual({
+        valid: true,
+        verifiedCount: 3,
+        finalHash: third.currentHash,
+        issue: null,
+      });
+      expect(prismaMock.activityLog.findMany).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        where: {
+          OR: [
+            { createdAt: { gt: second.createdAt } },
+            { createdAt: second.createdAt, id: { gt: second.id } },
+          ],
+        },
+      }));
+    });
   });
 
   it("uses a strictly increasing timestamp after acquiring the chain lock", async () => {

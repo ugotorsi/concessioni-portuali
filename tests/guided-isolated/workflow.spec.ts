@@ -371,8 +371,34 @@ test("La simulazione precede una riconciliazione reversibile senza cancellare la
   await approvalForm.locator('textarea[name="reviewNote"]').fill("Approvazione successiva al ripristino.");
   await submit(approval);
   await expect(first.getByRole("button", { name: "Collega approvazione all'attività" })).toBeVisible();
-  await page.reload();
+
+  await openDetails(page.locator("summary").filter({ hasText: "Altre proposte e storico delle revisioni" }));
+  const concession = page.getByRole("heading", {
+    name: "Riconciliare il titolo amministrativo 17/2023",
+  }).locator("xpath=ancestor::article");
+  await expect(concession).toContainText("Concessione da collegare o creare");
+  await concession.locator("summary").filter({ hasText: "Crea e collega una nuova concessione" }).click();
+  const createButton = concession.getByRole("button", { name: "Verifica, modifica e approva la creazione" });
+  const createForm = createButton.locator("xpath=ancestor::form");
+  await expect(createForm.locator('input[name="numeroAtto"]')).toHaveValue("17/2023");
+  await expect(createForm.locator('input[name="dataRilascio"]')).toHaveValue("2023-04-03");
+  await createForm.locator('select[name="concessionarioId"]').selectOption({ index: 1 });
+  await createForm.locator('input[name="dataScadenza"]').fill("2033-04-03");
+  await createForm.locator('textarea[name="reviewNote"]').fill(
+    "Titolo, data, concessionario e durata verificati sui documenti sintetici.",
+  );
+  await submit(createButton);
+  const materialize = concession.getByRole("button", { name: "Materializza" });
+  await expect(materialize).toBeVisible();
+  await submit(materialize);
+  await page.goto(`/procedimenti/${reconciliation}?section=concession`);
+  await expect(page.getByText("17/2023", { exact: true }).first()).toBeVisible();
+  await page.goto(`/procedimenti/${reconciliation}?section=proposals`);
   await openDetails(preview.locator("summary").first());
   await openDetails(summaries);
   await expect(preview).toContainText("Coda cambiata: ripristino bloccato");
+  await openDetails(page.locator("summary").filter({ hasText: "Altre proposte e storico delle revisioni" }));
+  await expect(page.getByRole("heading", {
+    name: "Riconciliare il titolo amministrativo 17/2023",
+  }).locator("xpath=ancestor::article")).toContainText("Materializzata");
 });

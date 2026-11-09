@@ -40,7 +40,59 @@ const reviewSchema = proposalSchema.extend({
   reviewVersion: z.coerce.number().int().nonnegative(),
   approvedPayload: z.string().optional(),
   reviewNote: z.string().trim().max(10_000).optional(),
+  concessionMaterializationMode: z.enum(["LINK_EXISTING", "CREATE"]).optional(),
+  concessioneId: z.string().trim().max(256).optional(),
+  numeroAtto: z.string().trim().max(256).optional(),
+  dataRilascio: z.string().trim().max(10).optional(),
+  dataScadenza: z.string().trim().max(10).optional(),
+  concessionarioId: z.string().trim().max(256).optional(),
+  normaRiferimento: z.string().trim().max(64).optional(),
+  tipologiaBene: z.string().trim().max(64).optional(),
+  attivita: z.string().trim().max(64).optional(),
+  stato: z.string().trim().max(64).optional(),
+  areaDescrizione: z.string().trim().max(10_000).optional(),
+  canoneAnnuo: z.string().trim().max(64).optional(),
+  note: z.string().trim().max(10_000).optional(),
 }).strict();
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function concessionApprovedPayload(
+  input: z.output<typeof reviewSchema>,
+  proposal: OperationalProposalRecord,
+): Record<string, unknown> {
+  const proposed = record(proposal.proposedPayload);
+  const evidence = proposed?.evidence;
+  if (!Array.isArray(evidence) || evidence.length === 0 || !input.concessionMaterializationMode) {
+    throw new OperationalProposalRepositoryError("INVALID_AMENDMENT");
+  }
+  const common = {
+    reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+    materializationMode: input.concessionMaterializationMode,
+    numeroAtto: input.numeroAtto,
+    dataRilascio: input.dataRilascio,
+    evidence,
+  };
+  if (input.concessionMaterializationMode === "LINK_EXISTING") {
+    return { ...common, concessioneId: input.concessioneId };
+  }
+  return {
+    ...common,
+    dataScadenza: input.dataScadenza,
+    concessionarioId: input.concessionarioId,
+    normaRiferimento: input.normaRiferimento,
+    tipologiaBene: input.tipologiaBene,
+    attivita: input.attivita,
+    stato: input.stato,
+    areaDescrizione: input.areaDescrizione || null,
+    canoneAnnuo: input.canoneAnnuo ? Number(input.canoneAnnuo) : null,
+    note: input.note || null,
+  };
+}
 
 interface AuthorizedScope {
   tenantId: string;
@@ -188,6 +240,19 @@ export async function reviewOperationalProposalAction(formData: FormData): Promi
     reviewVersion: formData.get("reviewVersion"),
     approvedPayload: formData.get("approvedPayload")?.toString(),
     reviewNote: formData.get("reviewNote")?.toString(),
+    concessionMaterializationMode: formData.get("concessionMaterializationMode")?.toString(),
+    concessioneId: formData.get("concessioneId")?.toString(),
+    numeroAtto: formData.get("numeroAtto")?.toString(),
+    dataRilascio: formData.get("dataRilascio")?.toString(),
+    dataScadenza: formData.get("dataScadenza")?.toString(),
+    concessionarioId: formData.get("concessionarioId")?.toString(),
+    normaRiferimento: formData.get("normaRiferimento")?.toString(),
+    tipologiaBene: formData.get("tipologiaBene")?.toString(),
+    attivita: formData.get("attivita")?.toString(),
+    stato: formData.get("stato")?.toString(),
+    areaDescrizione: formData.get("areaDescrizione")?.toString(),
+    canoneAnnuo: formData.get("canoneAnnuo")?.toString(),
+    note: formData.get("note")?.toString(),
   });
   const scope = await authorizedScope(input.procedimentoId);
   try {
@@ -199,8 +264,15 @@ export async function reviewOperationalProposalAction(formData: FormData): Promi
         throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
       }
     }
+    if (proposal.proposalType === "CONCESSION_LINK_OR_CREATE"
+      && input.action !== "REJECT"
+      && input.action !== "AMEND_AND_APPROVE") {
+      throw new OperationalProposalRepositoryError("CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED");
+    }
     const approvedPayload = input.action === "AMEND_AND_APPROVE"
-      ? JSON.parse(input.approvedPayload ?? "") as unknown
+      ? proposal.proposalType === "CONCESSION_LINK_OR_CREATE"
+        ? concessionApprovedPayload(input, proposal)
+        : JSON.parse(input.approvedPayload ?? "") as unknown
       : undefined;
     await reviewOperationalProposal({
       tenantId: scope.tenantId,

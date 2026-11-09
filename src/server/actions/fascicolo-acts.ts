@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure } from "@/server/audit/auditLog";
 import { ACT_DRAFT_ENTITY, ACT_DRAFT_STATUSES, actDraftEntityId, stableActDraftKey } from "@/server/fascicolo-acts/model";
-import { associateLegacyActDraft, listActAttachmentOptions, listActDraftVersions, saveActDraftVersion, type ActDraftActor, type ActDraftScope } from "@/server/fascicolo-acts/repository";
+import { archiveIdenticalActDrafts, associateLegacyActDraft, listActAttachmentOptions, listActDraftVersions, saveActDraftVersion, type ActDraftActor, type ActDraftScope } from "@/server/fascicolo-acts/repository";
 import { buildActTemplateCatalog, findActTemplate, reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
 import { ActivityWorkflowError, buildActivitySpecs } from "@/server/fascicolo-operational-activities/model";
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
@@ -57,6 +57,22 @@ const associateSchema = scopeSchema.extend({
   note: z.string().trim().min(3).max(1_900),
   confirmed: z.literal("true"),
 }).strict();
+
+const archiveDuplicatesSchema = scopeSchema.extend({
+  referenceDraftKey: z.string().trim().min(1).max(64),
+  referenceExpectedVersion: z.coerce.number().int().positive(),
+  referenceBodySha256: z.string().regex(/^[a-f0-9]{64}$/),
+  duplicateDraftKeys: z.array(z.string().trim().min(1).max(64)).min(1).max(100),
+  duplicateExpectedVersions: z.array(z.coerce.number().int().positive()).min(1).max(100),
+  duplicateBodySha256s: z.array(z.string().regex(/^[a-f0-9]{64}$/)).min(1).max(100),
+  reason: z.string().trim().min(3).max(1_900),
+  confirmed: z.literal("true"),
+}).strict().superRefine((input, context) => {
+  if (input.duplicateDraftKeys.length !== input.duplicateExpectedVersions.length
+    || input.duplicateDraftKeys.length !== input.duplicateBodySha256s.length) {
+    context.addIssue({ code: "custom", message: "ARCHIVE_DUPLICATES_INPUT_INVALID" });
+  }
+});
 
 async function authorizedScope(procedimentoId: string): Promise<{ scope: ActDraftScope; actor: ActDraftActor; label: string; responsabile: string | null; unita: string | null }> {
   const role = await requireRole();
@@ -358,6 +374,42 @@ export async function restoreActDraftVersionAction(formData: FormData): Promise<
     });
   } catch (error) {
     await auditBlocked(authorized.scope, authorized.actor, input.draftKey, error);
+    throw error;
+  }
+  revalidatePath(actsPath(input.procedimentoId));
+}
+
+export async function archiveIdenticalActDraftsAction(formData: FormData): Promise<void> {
+  const input = archiveDuplicatesSchema.parse({
+    procedimentoId: formData.get("procedimentoId"),
+    referenceDraftKey: formData.get("referenceDraftKey"),
+    referenceExpectedVersion: formData.get("referenceExpectedVersion"),
+    referenceBodySha256: formData.get("referenceBodySha256"),
+    duplicateDraftKeys: formData.getAll("duplicateDraftKeys"),
+    duplicateExpectedVersions: formData.getAll("duplicateExpectedVersions"),
+    duplicateBodySha256s: formData.getAll("duplicateBodySha256s"),
+    reason: formData.get("reason"),
+    confirmed: formData.get("confirmed"),
+  });
+  const authorized = await authorizedScope(input.procedimentoId);
+  try {
+    await archiveIdenticalActDrafts({
+      scope: authorized.scope,
+      actor: authorized.actor,
+      reference: {
+        draftKey: input.referenceDraftKey,
+        expectedVersion: input.referenceExpectedVersion,
+        bodySha256: input.referenceBodySha256,
+      },
+      duplicates: input.duplicateDraftKeys.map((draftKey, index) => ({
+        draftKey,
+        expectedVersion: input.duplicateExpectedVersions[index]!,
+        bodySha256: input.duplicateBodySha256s[index]!,
+      })),
+      reason: input.reason,
+    });
+  } catch (error) {
+    await auditBlocked(authorized.scope, authorized.actor, input.referenceDraftKey, error);
     throw error;
   }
   revalidatePath(actsPath(input.procedimentoId));

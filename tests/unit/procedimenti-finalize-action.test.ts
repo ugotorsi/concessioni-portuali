@@ -9,6 +9,7 @@ const requireConcessioneTenantAccessMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
+const createAuditLogInTransactionMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 const applyRegisteredDecisionEffectMock = vi.hoisted(() => vi.fn());
 const auditAlreadyAppliedDecisionEffectMock = vi.hoisted(() => vi.fn());
@@ -70,6 +71,7 @@ vi.mock("@/lib/tenant-auth", async () => {
 vi.mock("@/server/audit/auditLog", () => ({
   auditFailure: auditFailureMock,
   auditSuccess: auditSuccessMock,
+  createAuditLogInTransaction: createAuditLogInTransactionMock,
 }));
 
 vi.mock("@/server/procedimenti/applyRegisteredDecisionEffect", () => ({
@@ -214,8 +216,7 @@ describe("finalizeProcedimentoDecisionAction", () => {
     txMock.procedimento.update.mockResolvedValue({ id: "proc-1" });
     txMock.decisioneProcedimento.create.mockResolvedValue({ id: "dec-1", enteId: "ente-a", concessioneId: "con-1" });
     txMock.concessione.update.mockResolvedValue({ id: "con-1" });
-    txMock.activityLog.findFirst.mockResolvedValue({ currentHash: "prev-hash" });
-    txMock.activityLog.create.mockResolvedValue({ id: "log-1" });
+    createAuditLogInTransactionMock.mockResolvedValue({ id: "log-1" });
     txMock.$executeRaw.mockResolvedValue(1);
 
     applyRegisteredDecisionEffectMock.mockResolvedValue({
@@ -315,12 +316,13 @@ describe("finalizeProcedimentoDecisionAction", () => {
     );
     expect(txMock.concessione.update).not.toHaveBeenCalled();
     expect(applyRegisteredDecisionEffectMock).toHaveBeenCalledTimes(1);
-    expect(txMock.activityLog.create).toHaveBeenCalledTimes(1);
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledTimes(1);
     expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ registeredByUserId: "user-1" }) }),
     );
-    expect(txMock.activityLog.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ userId: "user-1" }) }),
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
     );
     expect(auditSuccessMock).toHaveBeenCalledWith(
       expect.objectContaining({ azione: "EFFETTO_PRONTO", actor: expect.objectContaining({ userId: "user-1" }) }),
@@ -343,8 +345,9 @@ describe("finalizeProcedimentoDecisionAction", () => {
     expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ registeredByUserId: null }) }),
     );
-    expect(txMock.activityLog.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ userId: null }) }),
+    expect(createAuditLogInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ actor: expect.objectContaining({ userId: null }) }),
     );
     expect(auditSuccessMock).toHaveBeenCalledWith(
       expect.objectContaining({ azione: "EFFETTO_PRONTO", actor: expect.objectContaining({ userId: null }) }),
@@ -476,7 +479,7 @@ describe("finalizeProcedimentoDecisionAction", () => {
       codiceErrore: "DB_UPDATE_FAILED",
     });
 
-    expect(txMock.activityLog.create).toHaveBeenCalled();
+    expect(createAuditLogInTransactionMock).toHaveBeenCalled();
   });
 
   it("quando conflitto concessione in apply propaga stato effettivamente persistito", async () => {

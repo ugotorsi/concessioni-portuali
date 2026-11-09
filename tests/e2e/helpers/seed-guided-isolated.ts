@@ -79,11 +79,10 @@ async function main() {
   const { buildFascicoloDocumentKnowledgeEvidence, readFascicoloDocumentCorpusInTransaction } =
     await import("@/server/queries/fascicolo-document-corpus");
   try {
-    const identity = await prisma.$queryRaw<Array<{ database: string; username: string; port: number }>>`
-      SELECT current_database() AS database, current_user AS username, inet_server_port() AS port
+    const identity = await prisma.$queryRaw<Array<{ database: string; username: string }>>`
+      SELECT current_database() AS database, current_user AS username
     `;
-    if (identity[0]?.database !== "noetra_test_workflow" || identity[0]?.username !== "noetra_test"
-      || identity[0]?.port !== 55432) {
+    if (identity[0]?.database !== "noetra_test_workflow" || identity[0]?.username !== "noetra_test") {
       throw new Error("The server did not identify itself as the disposable workflow database.");
     }
     const admin = await prisma.user.findUniqueOrThrow({
@@ -195,6 +194,28 @@ async function main() {
               basisRefs: ["DOCUMENT_1.PAGE_1"],
               payload: { normalizedStatement: scenario.fact, subjectLocalIds: [], object: null, qualifier: null },
             },
+            ...(scenario.id === caseId("reconciliation") ? [{
+              localId: "concession-act",
+              kind: "LEGAL_ACT" as const,
+              confidence: 95,
+              basisRefs: ["DOCUMENT_1.PAGE_1"],
+              payload: {
+                documentBasisRef: "DOCUMENT_1.PAGE_1",
+                actType: "Atto di concessione demaniale",
+                proceduralRole: null,
+                authoritySubjectLocalId: null,
+                number: "17/2023",
+                date: {
+                  precision: "EXACT" as const,
+                  from: "2023-04-03",
+                  to: null,
+                  originalText: "3 aprile 2023",
+                  confidence: 95,
+                },
+                title: "Atto di concessione demaniale n. 17/2023",
+                declaredEffects: [],
+              },
+            }] : []),
             ...(scenario.id === caseId("porto-aurora") ? [{
               localId: "gap-planimetria",
               kind: "GAP" as const,
@@ -216,7 +237,10 @@ async function main() {
               areaOfLaw: "diritto amministrativo",
               priority: "HIGH",
               rationale: "Problematica preparata manualmente per il collaudo sintetico.",
-              originatingItemLocalIds: ["fact"],
+              originatingItemLocalIds: [
+                "fact",
+                ...(scenario.id === caseId("reconciliation") ? ["concession-act"] : []),
+              ],
               confidence: 90,
               referenceDateBasis: null,
             },

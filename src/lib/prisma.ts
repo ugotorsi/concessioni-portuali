@@ -2,6 +2,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 import { Pool } from "pg";
 
+import { assertIsolatedPreviewEnvironment } from "@/server/release/previewIsolation";
+
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
@@ -36,6 +38,7 @@ function getPrismaClient(): PrismaClient {
   }
 
   assertExpectedDatabaseHost(databaseUrl, process.env.EXPECTED_DATABASE_HOST_PREFIX);
+  assertIsolatedPreviewEnvironment(process.env);
 
   const client = new PrismaClient({
     adapter: new PrismaPg(

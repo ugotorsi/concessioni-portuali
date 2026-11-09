@@ -50,6 +50,7 @@ describe("global AI control", () => {
 
   it("defaults persistently to OFF when no control event exists", async () => {
     await expect(getGlobalAiControlState({})).resolves.toMatchObject({
+      controlEventStatus: "ABSENT",
       requestedEnabled: false,
       effectiveEnabled: false,
       emergencyDisabled: false,
@@ -68,11 +69,13 @@ describe("global AI control", () => {
 
   it("reads ON from the latest successful audit event", async () => {
     activityFindFirstMock.mockResolvedValue({
+      id: "event-1",
       metadata: { previousState: "OFF", newState: "ON" },
       createdAt: new Date("2026-10-22T08:00:00.000Z"),
       userId: "admin-1",
       userEmail: "admin@example.test",
       userRole: "ADMIN",
+      currentHash: "a".repeat(64),
     });
 
     await expect(getGlobalAiControlState({
@@ -80,11 +83,81 @@ describe("global AI control", () => {
       AI_REAL_DATA_APPROVAL_ID: "approval-1",
       AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     })).resolves.toMatchObject({
+      controlEventStatus: "VALID",
       requestedEnabled: true,
       effectiveEnabled: true,
       emergencyDisabled: false,
       environmentEnabled: true,
+      blockers: [],
+      lastTransition: {
+        eventId: "event-1",
+        previousState: "OFF",
+        newState: "ON",
+        reason: null,
+        cancelledQueuedJobs: 0,
+        cancellationRequestedJobs: 0,
+        auditHash: "a".repeat(64),
+      },
       updatedBy: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    });
+  });
+
+  it("fails closed and exposes an invalid latest control event instead of presenting it as OFF", async () => {
+    activityFindFirstMock.mockResolvedValue({
+      id: "event-invalid",
+      metadata: { previousState: "ON", newState: "UNKNOWN" },
+      createdAt: new Date("2026-10-22T09:30:00.000Z"),
+      userId: "admin-1",
+      userEmail: "admin@example.test",
+      userRole: "ADMIN",
+      currentHash: "c".repeat(64),
+    });
+
+    await expect(getGlobalAiControlState({
+      AI_REAL_DATA_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+    })).resolves.toMatchObject({
+      controlEventStatus: "INVALID",
+      requestedEnabled: false,
+      effectiveEnabled: false,
+      blockers: ["ADMIN_COMMAND_OFF", "INVALID_CONTROL_EVENT"],
+      lastTransition: null,
+    });
+  });
+
+  it("reports explicit blockers and preserves the latest transition reason", async () => {
+    activityFindFirstMock.mockResolvedValue({
+      id: "event-2",
+      metadata: {
+        previousState: "ON",
+        newState: "OFF",
+        reason: "Incident containment",
+        cancelledQueuedJobs: 3,
+        cancellationRequestedJobs: 2,
+      },
+      createdAt: new Date("2026-10-22T09:00:00.000Z"),
+      userId: "admin-1",
+      userEmail: "admin@example.test",
+      userRole: "ADMIN",
+      currentHash: "b".repeat(64),
+    });
+
+    await expect(getGlobalAiControlState({
+      AI_GLOBAL_EMERGENCY_DISABLED: "true",
+    })).resolves.toMatchObject({
+      requestedEnabled: false,
+      effectiveEnabled: false,
+      blockers: ["ADMIN_COMMAND_OFF", "DEPLOYMENT_NOT_AUTHORIZED", "EMERGENCY_DISABLED"],
+      lastTransition: {
+        eventId: "event-2",
+        previousState: "ON",
+        newState: "OFF",
+        reason: "Incident containment",
+        cancelledQueuedJobs: 3,
+        cancellationRequestedJobs: 2,
+        auditHash: "b".repeat(64),
+      },
     });
   });
 

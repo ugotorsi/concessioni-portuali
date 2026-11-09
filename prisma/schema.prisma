@@ -86,6 +86,7 @@ enum StructuredFascicoloReportStatus {
 enum FascicoloOperationalProposalType {
   DEADLINE
   CRITICALITY
+  CONCESSION_LINK_OR_CREATE
   DOCUMENT_REQUIREMENT
   CHECKLIST_ITEM
   ACTIVITY

@@ -3,8 +3,8 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/tenant-auth";
-import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
-import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { sanitizeMetadata } from "@/server/audit/hash";
+import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
 import type { AuditRequestContext } from "@/server/audit/requestContext";
 
 interface ActorInput {
@@ -139,14 +139,16 @@ async function writeConflictAuditInTx(input: {
   persisted: PersistedDecisionSnapshot | null;
   blockUpdateCount: number;
 }) {
-  const previous = await input.tx.activityLog.findFirst({
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    select: { currentHash: true },
-  });
-
-  const createdAt = new Date();
-  const previousHash = previous?.currentHash ?? null;
-  const metadata = sanitizeMetadata({
+  await createAuditLogInTransaction(input.tx, {
+    azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO",
+    entita: "DecisioneProcedimento",
+    entitaId: input.details.decisioneId,
+    enteId: input.details.enteId,
+    concessioneId: input.details.concessioneId,
+    esito: "FAILURE",
+    actor: input.actor,
+    requestContext: input.requestContext,
+    metadata: {
     code: "CONCESSIONE_STATE_CONFLICT",
     decisioneId: input.details.decisioneId,
     procedimentoId: input.details.procedimentoId,
@@ -158,42 +160,6 @@ async function writeConflictAuditInTx(input: {
     persistedStatoEffetto: input.persisted?.statoEffetto ?? null,
     persistedEffectVersion: input.persisted?.effectVersion ?? null,
     blockUpdateCount: input.blockUpdateCount,
-  }) as Prisma.InputJsonValue;
-
-  const currentHash = computeAuditHash({
-    previousHash,
-    createdAt,
-    azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO",
-    entita: "DecisioneProcedimento",
-    entitaId: input.details.decisioneId,
-    enteId: input.details.enteId,
-    concessioneId: input.details.concessioneId,
-    esito: "FAILURE",
-    actor: {
-      userId: input.actor.userId,
-      userEmail: input.actor.userEmail,
-      userRole: input.actor.userRole,
-    },
-    metadata,
-  });
-
-  await input.tx.activityLog.create({
-    data: {
-      userId: input.actor.userId,
-      userEmail: input.actor.userEmail,
-      userRole: input.actor.userRole,
-      enteId: input.details.enteId,
-      concessioneId: input.details.concessioneId,
-      ipAddress: input.requestContext?.ipAddress ?? null,
-      userAgent: input.requestContext?.userAgent ?? null,
-      azione: "EFFETTO_BLOCCATO_CONFLITTO_STATO",
-      entita: "DecisioneProcedimento",
-      entitaId: input.details.decisioneId,
-      esito: "FAILURE",
-      metadata,
-      previousHash,
-      currentHash,
-      createdAt,
     },
   });
 }
@@ -375,49 +341,17 @@ export async function applyRegisteredDecisionEffect(
         );
       }
 
-      const previous = await tx.activityLog.findFirst({
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        select: { currentHash: true },
-      });
-
-      const createdAt = new Date();
-      const previousHash = previous?.currentHash ?? null;
       const metadata = buildMetadata(row, "Applicazione tecnica separata dell'effetto registrato.");
-      const currentHash = computeAuditHash({
-        previousHash,
-        createdAt,
+      await createAuditLogInTransaction(tx, {
         azione: "EFFETTO_APPLICATO",
         entita: "DecisioneProcedimento",
         entitaId: row.id,
         enteId: row.enteId,
         concessioneId: row.concessioneId,
         esito: "SUCCESS",
-        actor: {
-          userId: actor.userId,
-          userEmail: actor.userEmail,
-          userRole: actor.userRole,
-        },
+        actor,
+        requestContext: input.requestContext,
         metadata,
-      });
-
-      await tx.activityLog.create({
-        data: {
-          userId: actor.userId,
-          userEmail: actor.userEmail,
-          userRole: actor.userRole,
-          enteId: row.enteId,
-          concessioneId: row.concessioneId,
-          ipAddress: input.requestContext?.ipAddress ?? null,
-          userAgent: input.requestContext?.userAgent ?? null,
-          azione: "EFFETTO_APPLICATO",
-          entita: "DecisioneProcedimento",
-          entitaId: row.id,
-          esito: "SUCCESS",
-          metadata,
-          previousHash,
-          currentHash,
-          createdAt,
-        },
       });
 
       return {

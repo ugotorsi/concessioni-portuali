@@ -68,11 +68,12 @@ vi.mock("@/server/audit/auditLog", () => ({
 
 import {
   ActDraftVersionConflictError,
+  archiveIdenticalActDrafts,
   associateLegacyActDraft,
   listActDrafts,
   saveActDraftVersion,
 } from "@/server/fascicolo-acts/repository";
-import { stableActDraftKey } from "@/server/fascicolo-acts/model";
+import { bodySha256, stableActDraftKey } from "@/server/fascicolo-acts/model";
 import {
   ACTIVITY_AUDIT_ACTION,
   ACTIVITY_ENTITY,
@@ -168,7 +169,8 @@ describe("fascicolo act draft repository", () => {
   it("appends versions with optimistic concurrency", async () => {
     const first = await saveActDraftVersion({ scope, draftKey: null, expectedVersion: 0, content, actor });
     expect(first.version).toBe(1);
-    expect(first.draftKey).toMatch(/^act_[a-f0-9]{24}$/);
+    expect(first.draftKey).toBe(stableActDraftKey(content.templateKey, content.issueSemanticKey));
+    expect(first.creationFingerprint).toMatch(/^[a-f0-9]{64}$/);
 
     const second = await saveActDraftVersion({
       scope, draftKey: first.draftKey, expectedVersion: 1, actor,
@@ -199,6 +201,155 @@ describe("fascicolo act draft repository", () => {
     expect(first).toMatchObject({ draftKey, version: 1, body: "Testo iniziale" });
     expect(retry).toEqual(first);
     expect(rows).toHaveLength(1);
+  });
+
+  it("archives historical identical duplicates as immutable versions and preserves the reference", async () => {
+    const reference = await saveActDraftVersion({
+      scope,
+      draftKey: "act_reference00000000000000",
+      expectedVersion: 0,
+      content,
+      actor,
+    });
+    const duplicateKey = "act_duplicate00000000000000";
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${duplicateKey}`,
+      metadata: { ...reference, draftKey: duplicateKey },
+      createdAt: new Date("2026-11-03T13:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "9".repeat(64),
+    });
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{
+        draftKey: duplicateKey,
+        expectedVersion: 1,
+        bodySha256: reference.bodySha256,
+      }],
+      reason: "Duplicato storico verificato",
+    })).resolves.toEqual({ archivedDraftKeys: [duplicateKey] });
+
+    const drafts = await listActDrafts(scope);
+    expect(drafts.find((draft) => draft.draftKey === reference.draftKey)?.current.status).toBe("BOZZA");
+    const archived = drafts.find((draft) => draft.draftKey === duplicateKey)!;
+    expect(archived.current).toMatchObject({
+      status: "ARCHIVIATA",
+      version: 2,
+      bodySha256: reference.bodySha256,
+    });
+    expect(archived.current.changeNote).toContain(reference.draftKey);
+    expect(archived.history).toHaveLength(2);
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{
+        draftKey: duplicateKey,
+        expectedVersion: 1,
+        bodySha256: reference.bodySha256,
+      }],
+      reason: "Retry della stessa archiviazione",
+    })).resolves.toEqual({ archivedDraftKeys: [] });
+  });
+
+  it("refuses to archive an identical draft referenced by an active dependency", async () => {
+    const reference = await saveActDraftVersion({ scope, draftKey: null, expectedVersion: 0, content, actor });
+    const duplicateKey = "act_dependency0000000000000";
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${duplicateKey}`,
+      metadata: { ...reference, draftKey: duplicateKey },
+      createdAt: new Date("2026-11-03T13:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "7".repeat(64),
+    });
+    const dependentKey = "act_dependent00000000000000";
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${dependentKey}`,
+      metadata: {
+        ...reference,
+        draftKey: dependentKey,
+        templateKey: "OTHER_TEMPLATE",
+        title: "Bozza dipendente",
+        dependencies: [duplicateKey],
+      },
+      createdAt: new Date("2026-11-03T14:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "6".repeat(64),
+    });
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{ draftKey: duplicateKey, expectedVersion: 1, bodySha256: reference.bodySha256 }],
+      reason: "Verifica dipendenze",
+    })).rejects.toThrow("ARCHIVE_DUPLICATE_NOT_IDENTICAL_OR_LINKED");
+  });
+
+  it("refuses to archive divergent content or stale duplicate versions", async () => {
+    const reference = await saveActDraftVersion({ scope, draftKey: null, expectedVersion: 0, content, actor });
+    const duplicateKey = "act_divergent0000000000000";
+    const divergentHash = bodySha256("Contenuto diverso");
+    rows.push({
+      entita: "FascicoloActDraft",
+      azione: "FASCICOLO_ACT_DRAFT_VERSION_SAVED",
+      enteId: scope.tenantId,
+      esito: "SUCCESS",
+      entitaId: `${scope.procedimentoId}::${duplicateKey}`,
+      metadata: {
+        ...reference,
+        draftKey: duplicateKey,
+        body: "Contenuto diverso",
+        bodySha256: divergentHash,
+      },
+      createdAt: new Date("2026-11-03T13:00:00.000Z"),
+      userEmail: actor.actorEmail,
+      currentHash: "8".repeat(64),
+    });
+
+    await expect(archiveIdenticalActDrafts({
+      scope,
+      actor,
+      reference: {
+        draftKey: reference.draftKey,
+        expectedVersion: reference.version,
+        bodySha256: reference.bodySha256,
+      },
+      duplicates: [{
+        draftKey: duplicateKey,
+        expectedVersion: 1,
+        bodySha256: divergentHash,
+      }],
+      reason: "Verifica",
+    })).rejects.toThrow("ARCHIVE_DUPLICATE_NOT_IDENTICAL_OR_LINKED");
   });
 
   it("only creates a guided draft for the current taken-in-charge activity and document", async () => {

@@ -332,7 +332,15 @@ export default async function RuntimeOperationsPage({
               <div>
                 <dt className="text-slate-500">Comando richiesto dall&apos;ADMIN</dt>
                 <dd className="font-medium text-slate-900">
-                  {aiControl.requestedEnabled ? "ON" : "OFF"}
+                  {aiControl.controlEventStatus === "INVALID"
+                    ? "NON DETERMINABILE (evento non valido)"
+                    : aiControl.requestedEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Autorizzazione deployment dati reali</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.deploymentAuthorized ? "AUTORIZZATO" : "NON AUTORIZZATO"}
                 </dd>
               </div>
               <div>
@@ -341,10 +349,40 @@ export default async function RuntimeOperationsPage({
                   {aiControl.effectiveEnabled ? "ON" : "OFF"}
                 </dd>
               </div>
+              <div>
+                <dt className="text-slate-500">Provider manuali disponibili</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiEngines.filter((engine) => engine.manualEligible).length} / {aiEngines.length}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Automazione generale</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.effectiveEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Capacità automatica provider</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiEngines.some((engine) => engine.automaticEligible) ? "DISPONIBILE" : "NON DISPONIBILE"}
+                </dd>
+              </div>
             </dl>
+            {aiControl.effectiveEnabled && !automationControl.effectiveEnabled ? (
+              <p role="alert" className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
+                AI manuale operativa con automazione generale OFF: nessuna elaborazione parte spontaneamente,
+                ma un amministratore autorizzato può avviare operazioni manuali.
+              </p>
+            ) : null}
             {aiControl.requestedEnabled && !aiControl.deploymentAuthorized ? (
               <p className="text-sm font-medium text-amber-700">
                 Comando ON registrato, ma manca l&apos;autorizzazione deployment al trattamento dei dati reali.
+              </p>
+            ) : null}
+            {aiControl.controlEventStatus === "INVALID" ? (
+              <p className="text-sm font-medium text-red-700">
+                L&apos;ultimo evento di controllo AI non contiene uno stato ON/OFF valido. Il sistema resta disabilitato
+                in modo conservativo; l&apos;evento deve essere verificato nell&apos;audit.
               </p>
             ) : null}
             {aiControl.emergencyDisabled ? (
@@ -382,7 +420,32 @@ export default async function RuntimeOperationsPage({
                   {aiControl.updatedBy?.userEmail ?? "Nessuno"}
                 </dd>
               </div>
+              <div>
+                <dt className="text-slate-500">Transizione registrata</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.lastTransition
+                    ? `${aiControl.lastTransition.previousState} → ${aiControl.lastTransition.newState}`
+                    : "Nessun evento"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Motivazione</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.lastTransition?.reason ?? "Non indicata"}
+                </dd>
+              </div>
             </dl>
+            {aiControl.lastTransition ? (
+              <details className="rounded border border-slate-200 px-3 py-2 text-xs text-slate-600">
+                <summary className="cursor-pointer font-medium">Identità e conseguenze dell&apos;ultimo comando</summary>
+                <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <div><dt>Evento</dt><dd className="font-mono">{aiControl.lastTransition.eventId}</dd></div>
+                  <div><dt>Hash audit (catena non verificata in questa vista)</dt><dd className="break-all font-mono">{aiControl.lastTransition.auditHash}</dd></div>
+                  <div><dt>Job in coda annullati</dt><dd>{aiControl.lastTransition.cancelledQueuedJobs}</dd></div>
+                  <div><dt>Cancellazioni richieste</dt><dd>{aiControl.lastTransition.cancellationRequestedJobs}</dd></div>
+                </dl>
+              </details>
+            ) : null}
             <p className="text-xs text-slate-500">
               Approval dati reali, classe progetto, kill-switch, autorizzazioni provider e limiti di spesa restano sempre prioritari.
               I gate operativi legacy sono mostrati per diagnostica ma non sostituiscono il comando persistente dell&apos;amministratore.
