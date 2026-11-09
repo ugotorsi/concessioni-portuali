@@ -527,6 +527,7 @@ function resolveItemIdentity(input: {
   itemIndex: number;
   anchors: readonly StructuredKnowledgeProposalItem[];
   documented: ReadonlyMap<string, ReadonlySet<string>>;
+  allowSameDocumentAnchor: boolean;
 }): {
   readonly identity: {
     declaredKey: string | null;
@@ -541,9 +542,18 @@ function resolveItemIdentity(input: {
   if (!hint) return { identity: null, resolution: null, diagnostic: null };
   const itemEvidence = input.documented.get(input.item.localId) ?? new Set<string>();
   const authenticItemEvidence = input.item.basisRefs.filter((basisRef) => itemEvidence.has(basisRef));
+  const itemDocuments = new Set(authenticItemEvidence.map((basisRef) => (
+    basisRef.replace(/\.PAGE_\d+$/u, "")
+  )));
   const eligible = input.anchors.filter((anchor) => (
     isDocumentedAnchor(anchor, input.documented)
-    && anchor.basisRefs.some((basisRef) => authenticItemEvidence.includes(basisRef))
+    && anchor.basisRefs.some((basisRef) => (
+      authenticItemEvidence.includes(basisRef)
+      || (
+        input.allowSameDocumentAnchor
+        && itemDocuments.has(basisRef.replace(/\.PAGE_\d+$/u, ""))
+      )
+    ))
   ));
   const claimed = hint.candidateAnchorLocalId
     ? eligible.find((anchor) => anchor.localId === hint.candidateAnchorLocalId)
@@ -599,6 +609,7 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
   proposal: FascicoloDocumentKnowledgeProposal;
   evidenceSpans?: readonly FascicoloEvidenceSpan[];
   sourceTextByBasisRef?: ReadonlyMap<string, string>;
+  serverAssistedSameDocumentIdentityItemLocalIds?: ReadonlySet<string>;
 }): CompiledDocumentKnowledge {
   const adapted = adaptLegacyProposal(input);
   const proposal = adapted.proposal;
@@ -619,6 +630,8 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       itemIndex,
       anchors,
       documented,
+      allowSameDocumentAnchor:
+        input.serverAssistedSameDocumentIdentityItemLocalIds?.has(item.localId) ?? false,
     });
     if (resolved.diagnostic) diagnostics.push(resolved.diagnostic);
     const { proceedingIdentityHint: _hint, ...payload } = item.payload;

@@ -76,6 +76,34 @@ describe("runtime service center", () => {
     });
   });
 
+  it("distinguishes persistent command, deployment authorization, and effective AI state", () => {
+    const snapshot = buildServiceCenterSnapshot({
+      environment: { AI_OPENAI_API_KEY: "configured" },
+      health,
+      databaseIdentity,
+      costs: { actualLast30DaysEur: 0, actualLast7DaysEur: 0, reservedEur: 0 },
+      activeBudgetPolicyScopes: ["GLOBAL"],
+      aiControl: {
+        requestedEnabled: true,
+        effectiveEnabled: false,
+        deploymentAuthorized: false,
+        emergencyDisabled: false,
+      },
+      aiProviders: [{
+        provider: "OPENAI",
+        manualEnabled: true,
+        manualEligible: true,
+      }],
+    });
+
+    expect(snapshot.services.find((service) => service.id === "ai")).toMatchObject({
+      status: "NOT_CONFIGURED",
+      severity: "BLOCKING",
+    });
+    expect(snapshot.services.find((service) => service.id === "ai")?.summary)
+      .toContain("deployment non è autorizzato");
+  });
+
   it("does not classify optional connectors or a reachable unpinned database as blockers", () => {
     const snapshot = buildServiceCenterSnapshot({
       environment: {

@@ -23,6 +23,9 @@ describe("admin runtime AI engine timestamps", () => {
         connectionStatus: "VERIFIED",
         credentialValid: true,
         modelAvailable: true,
+        balanceSufficient: null,
+        verificationCode: "AI_PROVIDER_CONNECTION_VERIFIED",
+        verificationHttpStatus: 200,
         modelTechnicallyQualified: false,
         lastVerifiedAtLabel: "05/11/2026, 17:02:14",
         realDataAuthorized: false,
@@ -44,5 +47,46 @@ describe("admin runtime AI engine timestamps", () => {
     }));
 
     expect(markup).toContain("05/11/2026, 17:02:14");
+    expect(markup).toContain("AI_PROVIDER_CONNECTION_VERIFIED");
+    expect(markup).toContain("Solo GET amministrative");
+  });
+
+  it("renders sanitized DeepSeek balance readiness without exposing amounts", () => {
+    const markup = renderToStaticMarkup(createElement(AiEngineControls, {
+      engines: [{
+        provider: "DEEPSEEK",
+        label: "DeepSeek · V4 Pro",
+        model: "deepseek-v4-pro",
+        credentialConfigured: true,
+        connectionStatus: "VERIFIED",
+        credentialValid: true,
+        modelAvailable: true,
+        balanceSufficient: true,
+        verificationCode: "AI_PROVIDER_CONNECTION_VERIFIED",
+        verificationHttpStatus: 200,
+        modelTechnicallyQualified: false,
+        lastVerifiedAtLabel: "07/11/2026, 09:00:00",
+        realDataAuthorized: false,
+        manualEnabled: false,
+        manualEligible: false,
+        automaticSelected: false,
+        automaticEligible: false,
+        globalAiEnabled: false,
+        generalAutomationEnabled: false,
+        operational: false,
+        estimatedCostLimitEur: null,
+        billingApproval: "NOT_APPROVED",
+        status: "DISABLED",
+        error: "Provider non ancora autorizzato per fascicoli reali.",
+      }],
+      updateManualAction: noOpAction,
+      selectAutomaticAction: noOpAction,
+      verifyConnectionAction: noOpAction,
+    }));
+
+    expect(markup).toContain("Saldo API utilizzabile");
+    expect(markup).toContain(">Sì<");
+    expect(markup).not.toContain("total_balance");
+    expect(markup).not.toContain("2.00");
   });
 });

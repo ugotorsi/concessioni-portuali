@@ -25,6 +25,30 @@ vi.mock("@/lib/tenant-auth", () => ({
 vi.mock("@/server/ai/fascicoloExistingCorpusAnalysis", () => ({
   requestExistingCorpusAnalysis: mocks.requestExistingCorpusAnalysis,
 }));
+vi.mock("@/server/ai/globalAiControl", () => ({
+  getGlobalAiControlState: vi.fn(async () => ({ effectiveEnabled: true })),
+}));
+vi.mock("@/server/automation/automationControl", () => ({
+  getAutomationControlState: vi.fn(async () => ({ effectiveEnabled: false })),
+}));
+vi.mock("@/server/ai/providerControl", () => ({
+  getAiProviderControlSnapshot: vi.fn(async () => ({ providers: [] })),
+}));
+vi.mock("@/server/ai/providerReadiness", () => ({
+  getAiProviderReadiness: vi.fn(async () => [{
+    provider: "OPENAI",
+    manualEnabled: true,
+    manualEligible: true,
+  }]),
+}));
+vi.mock("@/server/ai/scopePolicy", () => ({
+  getResearchChannelAvailability: vi.fn(async () => []),
+  getEffectiveAiScopePolicy: vi.fn(async () => ({
+    aiEnabled: true,
+    primaryProvider: "OPENAI",
+    linkedResearchEnabled: false,
+  })),
+}));
 
 import {
   requestExistingCorpusAnalysisAction,
@@ -84,6 +108,12 @@ describe("existing corpus analysis action", () => {
       tenantId: "tenant-a",
       procedimentoId: "procedure-a",
       executionId: "11111111-1111-4111-8111-111111111111",
+      selection: {
+        provider: "OPENAI",
+        model: "gpt-5.6-terra",
+        selectionVersion: "AI_MODEL_SELECTION_V1",
+      },
+      withLegalResearch: false,
       actor: {
         id: "admin-a",
         email: "admin-a@example.test",

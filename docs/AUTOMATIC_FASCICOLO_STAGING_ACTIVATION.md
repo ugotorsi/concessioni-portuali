@@ -84,7 +84,8 @@ Aggiunte a `.env.example` per il percorso automatico:
 - worker: `ASYNC_WORKER_ID`, `ASYNC_WORKER_IDLE_BACKOFF_MS`,
   `ASYNC_WORKER_ERROR_BACKOFF_MS`, `ASYNC_WORKER_RETRY_DELAY_MS`,
   `ASYNC_WORKER_OPERATION_ALLOWLIST`, `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST`;
-- analisi AI: `AI_REAL_DATA_ENABLED`, `AI_REAL_DATA_APPROVAL_ID`,
+- analisi AI: `AI_REAL_DATA_ENABLED` (solo diagnostica legacy),
+  `AI_REAL_DATA_APPROVAL_ID`,
   `AI_PROVIDER_PROJECT_CLASS`, `AI_OPENAI_API_KEY`, `AI_OPENAI_REGION`,
   `AI_OPENAI_TIMEOUT_MS`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`,
   `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_OPENAI_MAX_INPUT_TOKENS`,
@@ -99,7 +100,8 @@ Aggiunte a `.env.example` per il percorso automatico:
   resta in USD; il settlement interno in EUR viene arrotondato per eccesso a
   sei decimali. Le tariffe modello sono versionate nel codice con fonte
   `https://developers.openai.com/api/docs/models/gpt-5.6-terra`;
-- ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED`,
+- ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` (fallback
+  diagnostico legacy; il comando operativo è persistito e auditato),
   `AUTOMATIC_RESEARCH_TENANT_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_ALLOWED_CAPABILITIES`, `AUTOMATIC_RESEARCH_MAX_CALLS`,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { ReviewerVerification } from "@/components/legal-research/reviewer-view-model";
 import { Button } from "@/components/ui/Button";
@@ -25,11 +25,13 @@ export function LegalApplicabilityReviewPanel({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setDraft(selected ? JSON.stringify(selected, null, 2) : "");
+  function selectReview(reviewId: string): void {
+    const nextSelected = proposals.find((review) => review.reviewId === reviewId) ?? null;
+    setSelectedId(reviewId);
+    setDraft(nextSelected ? JSON.stringify(nextSelected, null, 2) : "");
     setRationale("");
     setError(null);
-  }, [selected]);
+  }
 
   if (proposals.length === 0) return null;
 
@@ -89,7 +91,7 @@ export function LegalApplicabilityReviewPanel({
           <select
             className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm"
             value={selectedId}
-            onChange={(event) => setSelectedId(event.target.value)}
+            onChange={(event) => selectReview(event.target.value)}
           >
             {proposals.map((review) => (
               <option key={review.reviewId} value={review.reviewId}>

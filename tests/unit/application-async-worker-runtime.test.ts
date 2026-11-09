@@ -52,15 +52,16 @@ const config = {
 function harness() {
   const events: ApplicationAsyncWorkerEvent[] = [];
   const sleeps: number[] = [];
-  let runtime: ReturnType<typeof createApplicationAsyncWorkerRuntime>;
+  const runtimeRef: { current?: ReturnType<typeof createApplicationAsyncWorkerRuntime> } = {};
   const sleep = vi.fn(async (delayMs: number) => {
     sleeps.push(delayMs);
-    runtime.requestShutdown("TEST_COMPLETE");
+    runtimeRef.current?.requestShutdown("TEST_COMPLETE");
   });
-  runtime = createApplicationAsyncWorkerRuntime(config, {
+  const runtime = createApplicationAsyncWorkerRuntime(config, {
     sleep,
     report: (event) => events.push(event),
   });
+  runtimeRef.current = runtime;
   return { runtime, events, sleeps, sleep };
 }
 
@@ -121,7 +122,8 @@ describe("Block 3B.7 application async worker runtime", () => {
   it("requires a single case and operation for the bounded analysis worker", () => {
     const env = {
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
       ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
       ASYNC_WORKER_CONCURRENCY: "1",
@@ -150,7 +152,8 @@ describe("Block 3B.7 application async worker runtime", () => {
   it("requires only costs used by scoped provider workers and both costs for generic workers", () => {
     const common = {
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_WORKER_DEDICATED_MODE: "true",
       ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "case-only",
     };
@@ -172,7 +175,8 @@ describe("Block 3B.7 application async worker runtime", () => {
     })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
     expect(() => parseApplicationAsyncWorkerConfig({
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
     })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
   });
@@ -181,7 +185,8 @@ describe("Block 3B.7 application async worker runtime", () => {
     applicationWorker.drainTargetedFascicoloAnalysisJob.mockResolvedValue({ outcome: "IDLE" });
     const targeted = parseApplicationAsyncWorkerConfig({
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
       ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
       ASYNC_WORKER_CONCURRENCY: "1",
@@ -642,13 +647,15 @@ describe("Block 3B.7 application async worker runtime", () => {
   it("requires monetary estimates before provider execution can be enabled", () => {
     expect(() => parseApplicationAsyncWorkerConfig({
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     })).toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
       code: "INVALID_CONFIGURATION",
     }));
     expect(parseApplicationAsyncWorkerConfig({
       DATABASE_URL: "postgresql://server/database",
-      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
       ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
     }).providerExecutionEnabled).toBe(true);

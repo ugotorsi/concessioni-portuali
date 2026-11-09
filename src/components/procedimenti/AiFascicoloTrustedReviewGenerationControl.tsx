@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { produceAiFascicoloTrustedReviewAction } from "@/server/actions/ai-fascicolo-trusted-review";
@@ -89,7 +89,6 @@ export function AiFascicoloTrustedReviewGenerationControl({
   const submittingRef = useRef(false);
   const activeRef = useRef(true);
   const currentProcedimentoIdRef = useRef(procedimentoId);
-  currentProcedimentoIdRef.current = procedimentoId;
   const [isPending, startTransition] = useTransition();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -100,6 +99,10 @@ export function AiFascicoloTrustedReviewGenerationControl({
       activeRef.current = false;
     };
   }, []);
+
+  useLayoutEffect(() => {
+    currentProcedimentoIdRef.current = procedimentoId;
+  }, [procedimentoId]);
 
   function generateTrustedReview() {
     if (submittingRef.current) {

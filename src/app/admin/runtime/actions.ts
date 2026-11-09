@@ -25,9 +25,19 @@ import {
 import {
   getAiProviderControlSnapshot,
   setAiProviderManualEnabled,
+  setAiProvidersManualEnabled,
   setAutomaticAiProvider,
 } from "@/server/ai/providerControl";
 import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
+import {
+  aiExecutionModeSchema,
+  getEffectiveAiScopePolicy,
+  getResearchChannelAvailability,
+  parseAiScopeRequestedPolicy,
+  researchChannelSchema,
+  setAiScopePolicy,
+  toAiScopeRequestedPolicy,
+} from "@/server/ai/scopePolicy";
 import { verifyAiProviderConnection } from "@/server/ai/providerConnection";
 import {
   documentWorkerKindForOperation,
@@ -640,6 +650,116 @@ export async function updateAiProviderManualControl(formData: FormData): Promise
       userEmail: currentUser.email,
       userRole: "ADMIN",
     },
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function updateAllEligibleAiProviders(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const enabled = formData.get("enabled");
+  if (enabled !== "true" && enabled !== "false") {
+    throw new Error("INVALID_AI_PROVIDER_BULK_STATE");
+  }
+  if (formData.get("confirmation") !== "UPDATE_ALL_ELIGIBLE_AI_PROVIDERS") {
+    throw new Error("AI_PROVIDER_BULK_CONFIRMATION_REQUIRED");
+  }
+  const [globalControl, automationControl, providerControl] = await Promise.all([
+    getGlobalAiControlState(),
+    getAutomationControlState(),
+    getAiProviderControlSnapshot(),
+  ]);
+  const readiness = await getAiProviderReadiness({
+    globalAiEnabled: globalControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    control: providerControl,
+  });
+  const providers = enabled === "true"
+    ? readiness.filter((provider) => provider.manualEligible).map((provider) => provider.provider)
+    : readiness.map((provider) => provider.provider);
+  if (enabled === "true" && (!globalControl.effectiveEnabled || providers.length === 0)) {
+    throw new Error("NO_ELIGIBLE_AI_PROVIDER");
+  }
+  await setAiProvidersManualEnabled({
+    providers,
+    enabled: enabled === "true",
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+    reason: enabled === "true"
+      ? "Attivazione amministrativa di tutti i provider idonei"
+      : "Disattivazione amministrativa di tutti i provider",
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function updateTenantAiPolicy(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  if (formData.get("confirmation") !== "UPDATE_TENANT_AI_POLICY") {
+    throw new Error("TENANT_AI_POLICY_CONFIRMATION_REQUIRED");
+  }
+  const tenantId = z.string().trim().min(1).max(256).parse(formData.get("tenantId"));
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, tenantId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+  const checked = (name: string) => formData.get(name) === "true";
+  const intervalValue = formData.get("reviewIntervalHours");
+  const policy = parseAiScopeRequestedPolicy({
+    aiEnabled: checked("aiEnabled"),
+    automaticAnalysisEnabled: checked("automaticAnalysisEnabled"),
+    selectedProviders: formData.getAll("providers").map((provider) => (
+      aiProviderIdSchema.parse(provider)
+    )),
+    primaryProvider: aiProviderIdSchema.parse(formData.get("primaryProvider")),
+    executionMode: aiExecutionModeSchema.parse(formData.get("executionMode")),
+    manualResearchEnabled: checked("manualResearchEnabled"),
+    linkedResearchEnabled: checked("linkedResearchEnabled"),
+    automaticResearchEnabled: checked("automaticResearchEnabled"),
+    researchChannels: formData.getAll("researchChannels").map((channel) => (
+      researchChannelSchema.parse(channel)
+    )),
+    reviewIntervalHours: typeof intervalValue === "string" && intervalValue.trim()
+      ? Number(intervalValue)
+      : null,
+  });
+  const [globalControl, automationControl, providerControl, channels] = await Promise.all([
+    getGlobalAiControlState(),
+    getAutomationControlState(),
+    getAiProviderControlSnapshot(),
+    getResearchChannelAvailability(),
+  ]);
+  const readiness = await getAiProviderReadiness({
+    globalAiEnabled: globalControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    control: providerControl,
+  });
+  const system = await getEffectiveAiScopePolicy({
+    tenantId,
+    includePersistedScopes: false,
+    globalAiEnabled: globalControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    allowedProviders: readiness
+      .filter((provider) => provider.manualEnabled && provider.manualEligible)
+      .map((provider) => provider.provider),
+    allowedResearchChannels: channels
+      .filter((channel) => channel.available)
+      .map((channel) => channel.channel),
+  });
+  await setAiScopePolicy({
+    scope: "TENANT",
+    tenantId,
+    policy,
+    upperPolicy: toAiScopeRequestedPolicy(system),
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+    reason: "Aggiornamento policy tenant dalla console runtime",
   });
   revalidatePath("/admin/runtime");
 }

@@ -278,17 +278,21 @@ describe("AI-01A fascicolo analysis contract", () => {
       expect(Object.isFrozen(request.snapshotData.content.documents)).toBe(true);
       expect(Object.isFrozen(request.snapshotData.content.documents[0])).toBe(true);
       try {
-        (request.snapshotData.content.procedimento as any).noteIstruttorie = "poisoned";
+        Reflect.set(request.snapshotData.content.procedimento, "noteIstruttorie", "poisoned");
       } catch {
         // A frozen request may reject mutation immediately.
       }
       try {
-        (request.snapshotData.content.documents as any[]).push({ id: "poisoned" });
+        Reflect.set(
+          request.snapshotData.content.documents,
+          request.snapshotData.content.documents.length,
+          { id: "poisoned" },
+        );
       } catch {
         // A frozen request may reject mutation immediately.
       }
       try {
-        (request.snapshotData.content.documents as any[])[0] = { id: "replaced" };
+        Reflect.set(request.snapshotData.content.documents, 0, { id: "replaced" });
       } catch {
         // A frozen request may reject mutation immediately.
       }

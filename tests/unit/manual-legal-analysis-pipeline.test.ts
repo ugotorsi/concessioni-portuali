@@ -12,6 +12,11 @@ vi.mock("@/server/legal-research/automatic-research-job", () => ({
 vi.mock("@/server/legal-research/manual-research-policy", () => ({
   manualResearchPlanner: vi.fn(() => vi.fn()),
 }));
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async () => ({
+    MANUAL_RESEARCH_EXECUTION_ENABLED: "true",
+  })),
+}));
 vi.mock("@/server/async-jobs/persistence", () => ({
   AsyncJobIdempotencyConflictError: class AsyncJobIdempotencyConflictError extends Error {
     readonly code = "ASYNC_JOB_IDEMPOTENCY_CONFLICT";

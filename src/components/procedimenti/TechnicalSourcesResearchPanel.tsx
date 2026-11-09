@@ -181,8 +181,12 @@ export function TechnicalSourcesResearchPanel({
 
   useEffect(() => {
     const controller = new AbortController();
-    void load(controller.signal);
-    return () => controller.abort();
+    queueMicrotask(() => {
+      if (!controller.signal.aborted) void load(controller.signal);
+    });
+    return () => {
+      controller.abort();
+    };
   }, [load]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {

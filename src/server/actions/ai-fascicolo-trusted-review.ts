@@ -17,6 +17,11 @@ import {
   createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv,
 } from "@/server/ai/openaiRuntime";
 import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
+import {
+  assertGlobalAiExecutionAllowed,
+  GlobalAiDisabledError,
+} from "@/server/ai/globalAiControl";
+import { getAiProviderControlSnapshot } from "@/server/ai/providerControl";
 
 type ProductionErrorCode =
   | AiFascicoloAnalysisError["code"]
@@ -30,6 +35,8 @@ type ProductionErrorCode =
   | AiFascicoloTrustedReviewProductionError["code"]
   | OpenAiRuntimeConfigurationError["code"]
   | AiRealDataActivationError["code"]
+  | GlobalAiDisabledError["code"]
+  | "AI_PROVIDER_MANUAL_DISABLED"
   | "PRODUCTION_FAILURE";
 
 type ProductionSuccess = Pick<
@@ -54,6 +61,7 @@ function safeProductionErrorCode(error: unknown): ProductionErrorCode {
     || error instanceof AiFascicoloTrustedReviewProductionError
     || error instanceof OpenAiRuntimeConfigurationError
     || error instanceof AiRealDataActivationError
+    || error instanceof GlobalAiDisabledError
   ) {
     return error.code;
   }
@@ -64,6 +72,13 @@ export async function produceAiFascicoloTrustedReviewAction(
   input: unknown,
 ): Promise<AiFascicoloTrustedReviewProductionActionResult> {
   try {
+    await assertGlobalAiExecutionAllowed();
+    const providerControl = await getAiProviderControlSnapshot();
+    if (!providerControl.providers.find((provider) => (
+      provider.provider === "OPENAI"
+    ))?.manualEnabled) {
+      return { ok: false, error: { code: "AI_PROVIDER_MANUAL_DISABLED" } };
+    }
     const service = createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv();
     const result = await service.execute(input);
     return {

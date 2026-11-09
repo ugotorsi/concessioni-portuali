@@ -32,7 +32,8 @@ export type AiFascicoloLiveAnalysisErrorCode =
   | "AI_CONFIGURATION_ERROR"
   | "AI_PROVIDER_UNAVAILABLE"
   | "AI_PROVIDER_TIMEOUT"
-  | "AI_PROVIDER_RATE_LIMITED";
+  | "AI_PROVIDER_RATE_LIMITED"
+  | "INVALID_PROVIDER_OUTPUT";
 
 export class AiFascicoloLiveAnalysisError extends Error {
   constructor(readonly code: AiFascicoloLiveAnalysisErrorCode) {
@@ -108,7 +109,10 @@ function mapAdapterError(error: AiProviderAdapterError): AiFascicoloLiveAnalysis
     case "RATE_LIMITED":
       return new AiFascicoloLiveAnalysisError("AI_PROVIDER_RATE_LIMITED");
     case "CONFIGURATION":
+    case "REQUEST_REJECTED":
       return new AiFascicoloLiveAnalysisError("AI_CONFIGURATION_ERROR");
+    case "INVALID_RESPONSE":
+      return new AiFascicoloLiveAnalysisError("INVALID_PROVIDER_OUTPUT");
   }
 }
 

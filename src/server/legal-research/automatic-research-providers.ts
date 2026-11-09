@@ -80,6 +80,7 @@ async function bearer(reader: TokenReader): Promise<string | null> {
 
 export async function createAutomaticResearchProviderAdapters(options: Readonly<{
   requestTimeoutMs: number;
+  enabledProviders?: readonly ResearchOAuthProvider[];
   moonlitTokenReader?: TokenReader;
   simpliciterTokenReader?: TokenReader;
   fetch?: typeof fetch;
@@ -102,7 +103,12 @@ export async function createAutomaticResearchProviderAdapters(options: Readonly<
       ? storedTokenReader("SIMPLICITER", SIMPLICITER_MCP_URL, credentialKey)
       : new SimpliciterOAuthProvider("http://127.0.0.1/unused", rejectLogin));
   const adapters: ResearchProviderAdapter[] = [];
-  const moonlitToken = await bearer(moonlitReader);
+  const enabledProviders = new Set(
+    options.enabledProviders ?? (["MOONLIT", "SIMPLICITER"] as const),
+  );
+  const moonlitToken = enabledProviders.has("MOONLIT")
+    ? await bearer(moonlitReader)
+    : null;
   if (moonlitToken) {
     const callTool = bearerOnlyToolCaller({
       url: MOONLIT_MCP_URL,
@@ -116,7 +122,9 @@ export async function createAutomaticResearchProviderAdapters(options: Readonly<
       createMoonlitExactRetrievalAdapter(callTool),
     );
   }
-  const simpliciterToken = await bearer(simpliciterReader);
+  const simpliciterToken = enabledProviders.has("SIMPLICITER")
+    ? await bearer(simpliciterReader)
+    : null;
   if (simpliciterToken) {
     const callTool = bearerOnlyToolCaller({
       url: SIMPLICITER_MCP_URL,

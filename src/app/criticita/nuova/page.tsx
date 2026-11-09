@@ -130,7 +130,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
                   <p className="text-xs text-slate-600">
-                    Supporto istruttorio interno: la qualificazione finale resta in capo all'Autorità competente.
+                    Supporto istruttorio interno: la qualificazione finale resta in capo all&apos;Autorità competente.
                   </p>
                 </div>
 

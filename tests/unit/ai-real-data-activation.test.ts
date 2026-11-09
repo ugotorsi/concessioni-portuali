@@ -46,7 +46,7 @@ describe("AI-01C1 real-data activation policy", () => {
     ]);
   });
 
-  it("enables only when all three exact conditions are satisfied", () => {
+  it("enables when the immutable approval and project-class conditions are satisfied", () => {
     const policy = createRealDataActivationPolicy(enabledEnv({
       AI_REAL_DATA_APPROVAL_ID: `  ${APPROVAL_SENTINEL}  `,
     }));
@@ -56,17 +56,19 @@ describe("AI-01C1 real-data activation policy", () => {
     expect(policy).not.toHaveProperty("approvalId");
   });
 
-  it("fails closed when each required value is missing", () => {
-    for (const envName of AI_REAL_DATA_ACTIVATION_ENV_NAMES) {
+  it("fails closed when each immutable authorization value is missing", () => {
+    for (const envName of ["AI_REAL_DATA_APPROVAL_ID", "AI_PROVIDER_PROJECT_CLASS"] as const) {
       const env = enabledEnv();
       delete env[envName];
       expectDisabled(env);
     }
   });
 
-  it("rejects every truthy-like or disabled variant except exact lowercase true", () => {
+  it("does not use the legacy operational flag as deployment authorization", () => {
     for (const value of ["TRUE", "True", "1", "yes", "on", "enabled", "false", "0", "", " "]) {
-      expectDisabled(enabledEnv({ AI_REAL_DATA_ENABLED: value }));
+      expect(createRealDataActivationPolicy(enabledEnv({
+        AI_REAL_DATA_ENABLED: value,
+      })).enabled).toBe(true);
     }
   });
 

@@ -77,6 +77,8 @@ describe("global AI control", () => {
 
     await expect(getGlobalAiControlState({
       AI_REAL_DATA_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     })).resolves.toMatchObject({
       requestedEnabled: true,
       effectiveEnabled: true,
@@ -86,7 +88,7 @@ describe("global AI control", () => {
     });
   });
 
-  it("keeps the effective state OFF when ADMIN requests ON but all environment gates are OFF", async () => {
+  it("honors persistent ON when legacy environment gates are OFF but deployment is authorized", async () => {
     activityFindFirstMock.mockResolvedValue({
       metadata: { newState: "ON" },
       createdAt: new Date(),
@@ -97,13 +99,15 @@ describe("global AI control", () => {
 
     await expect(getGlobalAiControlState({
       AI_REAL_DATA_ENABLED: " false ",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
       ASYNC_PROVIDER_EXECUTION_ENABLED: "false",
       AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
       AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "false",
     })).resolves.toMatchObject({
       requestedEnabled: true,
-      effectiveEnabled: false,
-      environmentEnabled: false,
+      effectiveEnabled: true,
+      environmentEnabled: true,
     });
   });
 
@@ -119,6 +123,8 @@ describe("global AI control", () => {
     await expect(getGlobalAiControlState({
       AI_GLOBAL_EMERGENCY_DISABLED: "true",
       AI_REAL_DATA_ENABLED: "true",
+      AI_REAL_DATA_APPROVAL_ID: "approval-1",
+      AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     })).resolves.toMatchObject({
       requestedEnabled: true,
       effectiveEnabled: false,

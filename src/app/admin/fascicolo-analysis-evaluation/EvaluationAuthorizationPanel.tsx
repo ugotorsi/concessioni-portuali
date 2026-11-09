@@ -42,7 +42,16 @@ export function EvaluationAuthorizationPanel() {
   }, []);
 
   useEffect(() => {
-    loadState().catch((error: Error) => setMessage(error.message));
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      loadState().catch((error: Error) => {
+        if (active) setMessage(error.message);
+      });
+    });
+    return () => {
+      active = false;
+    };
   }, [loadState]);
 
   async function authorize() {
@@ -145,11 +154,11 @@ export function EvaluationAuthorizationPanel() {
           {state.state.jobStatus === "PENDING" && state.state.attemptCount === 0 ? (
             <>
               <p>
-                L'azione seguente esegue il runner una sola volta e può invocare OpenAI.
+                L&apos;azione seguente esegue il runner una sola volta e può invocare OpenAI.
                 Non sono previsti retry automatici.
               </p>
               <label className="grid gap-1 font-medium text-slate-800">
-                Digita ESEGUI TEST-LEGAL-001 per confermare l'esecuzione
+                Digita ESEGUI TEST-LEGAL-001 per confermare l&apos;esecuzione
                 <input
                   className="h-10 rounded-md border border-slate-300 bg-white px-3 font-mono text-sm"
                   value={runConfirmation}

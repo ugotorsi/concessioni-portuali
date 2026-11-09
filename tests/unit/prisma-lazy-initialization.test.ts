@@ -58,9 +58,9 @@ describe("lazy Prisma initialization", () => {
   });
 
   it("imports without DATABASE_URL and creates no database objects", async () => {
-    const module = await import("@/lib/prisma");
+    const prismaModule = await import("@/lib/prisma");
 
-    expect(module.prisma).toBeDefined();
+    expect(prismaModule.prisma).toBeDefined();
     expect(constructors.pool).not.toHaveBeenCalled();
     expect(constructors.adapter).not.toHaveBeenCalled();
     expect(constructors.client).not.toHaveBeenCalled();

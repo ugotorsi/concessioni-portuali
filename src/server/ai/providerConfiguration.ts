@@ -1,12 +1,14 @@
 import { createHmac } from "node:crypto";
 
 import type { AiProviderId } from "@/server/ai/providerCatalog";
+import { ANTHROPIC_API_VERSION } from "@/server/ai/providers/anthropicProtocol";
 
 export const AI_PROVIDER_ENVIRONMENT = {
   OPENAI: {
     credentialName: "AI_OPENAI_API_KEY",
     estimateName: "ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR",
     modelsUrl: "https://api.openai.com/v1/models",
+    balanceUrl: null,
     headers: (apiKey: string) => ({
       Authorization: "Bearer " + apiKey,
     }),
@@ -15,15 +17,17 @@ export const AI_PROVIDER_ENVIRONMENT = {
     credentialName: "AI_ANTHROPIC_API_KEY",
     estimateName: "ASYNC_COST_ANTHROPIC_ANALYSIS_ESTIMATE_EUR",
     modelsUrl: "https://api.anthropic.com/v1/models",
+    balanceUrl: null,
     headers: (apiKey: string) => ({
       "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
+      "anthropic-version": ANTHROPIC_API_VERSION,
     }),
   },
   DEEPSEEK: {
     credentialName: "AI_DEEPSEEK_API_KEY",
     estimateName: "ASYNC_COST_DEEPSEEK_ANALYSIS_ESTIMATE_EUR",
     modelsUrl: "https://api.deepseek.com/models",
+    balanceUrl: "https://api.deepseek.com/user/balance",
     headers: (apiKey: string) => ({
       Authorization: "Bearer " + apiKey,
     }),
@@ -32,6 +36,7 @@ export const AI_PROVIDER_ENVIRONMENT = {
   credentialName: string;
   estimateName: string;
   modelsUrl: string;
+  balanceUrl: string | null;
   headers(apiKey: string): Record<string, string>;
 }>;
 

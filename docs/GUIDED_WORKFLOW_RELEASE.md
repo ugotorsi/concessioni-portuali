@@ -271,8 +271,26 @@ Difetti emersi e corretti:
 4. Analisi AI del corpus: costo stimato `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR`.
 5. Ricerca reale con provider, entro i limiti di budget configurati.
 
-AUTOMAZIONE resta OFF: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` e
-`SERVER_AUTONOMOUS_RESEARCH_ENABLED` non attivato.
+AUTOMAZIONE resta OFF nei controlli persistenti di sistema, ente e fascicolo.
+`AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` e
+`SERVER_AUTONOMOUS_RESEARCH_ENABLED` restano segnali diagnostici difensivi, ma non
+sostituiscono il comando auditato. Autorizzazione deployment, kill-switch, provider
+qualificati, budget e disponibilità dei connettori continuano a prevalere.
+
+## Controlli AI persistenti e gerarchici
+
+- `/admin/runtime` governa il comando AI generale, i provider manuali, il provider
+  automatico e le policy per ente. Tutte le modifiche richiedono ADMIN + MFA e sono
+  registrate in `ActivityLog`.
+- Il fascicolo espone `Intelligenza artificiale e ricerche` per restringere provider,
+  motore principale, modalità singola/sequenziale/parallela, ricerche e intervallo.
+- La precedenza è Sistema → ente → fascicolo → esecuzione. Un livello inferiore può
+  soltanto restringere; non può riattivare AI, automazione, provider o connettori
+  disabilitati a un livello superiore.
+- OpenAI resta l'unico provider idoneo ai dati reali finché qualificazione tecnica,
+  pricing e approvazione di Anthropic e DeepSeek non risultano completi.
+- La diagnostica distingue comando persistente, autorizzazione immutabile del
+  deployment, kill-switch, credenziale, budget, provider idonei e connettori.
 
 ## Storage del worker e ripetizione autorizzata dell'estrazione
 

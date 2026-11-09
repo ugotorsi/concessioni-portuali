@@ -234,8 +234,26 @@ async function protocolHarness(
   return { client, server, service: mockService };
 }
 
+interface StructuredToolResult extends Record<string, unknown> {
+  mission: Record<string, unknown> & {
+    missionId: string;
+    referenceDate: string;
+    executionChannel: string;
+    researchQuestion: string;
+  };
+  missions: Array<Record<string, unknown>>;
+  authorityCandidateIds: string[];
+  fascicoloContext: {
+    scope: {
+      scopeId: string;
+      allowCrossFascicolo: boolean;
+      allowAccountWideMemory: boolean;
+    };
+  };
+}
+
 function structured(result: Awaited<ReturnType<Client["callTool"]>>) {
-  return result.structuredContent as Record<string, any>;
+  return result.structuredContent as StructuredToolResult;
 }
 
 describe("Block 3B.13C legal research MCP", () => {

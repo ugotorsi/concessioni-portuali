@@ -13,6 +13,7 @@ import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEv
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
+import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
 import { FascicoloActsWorkspace } from "@/components/procedimenti/FascicoloActsWorkspace";
 import { FascicoloGuidedActivities } from "@/components/procedimenti/FascicoloGuidedActivities";
 import { FascicoloProposalPreview } from "@/components/procedimenti/FascicoloProposalPreview";
@@ -938,6 +939,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         </section> : null}
 
         {activeSection === "istruttoria" ? <section className="space-y-4" aria-label="Istruttoria del fascicolo">
+          {detail.canonicalEnteId ? (
+            <FascicoloAiResearchControlPanel
+              tenantId={detail.canonicalEnteId}
+              procedimentoId={detail.procedimento.id}
+              canEdit={role === "ADMIN"}
+            />
+          ) : null}
           <div>
             <FascicoloAutomaticWorkflowPanel
               model={automaticWorkflow}

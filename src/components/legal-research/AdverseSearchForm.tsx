@@ -64,7 +64,7 @@ export function AdverseSearchForm({ verification, onSaved }: Readonly<{
   }
 
   return <section className="min-w-0 border-y border-slate-200 py-5" aria-labelledby="adverse-search-title">
-    <h2 id="adverse-search-title" className="text-base font-semibold">Ricerca di autorita' contrarie</h2>
+    <h2 id="adverse-search-title" className="text-base font-semibold">Ricerca di autorità contrarie</h2>
     {approval ? <dl className="mt-2 grid gap-1 break-words text-sm sm:grid-cols-2">
       <div><dt className="font-medium">Revisore registrato</dt><dd>{approval.reviewedByActorId}</dd></div>
       <div><dt className="font-medium">Data assegnata dal server</dt><dd>{approval.reviewedAt}</dd></div>
@@ -101,22 +101,22 @@ export function AdverseSearchForm({ verification, onSaved }: Readonly<{
         </label>)}
       </fieldset>
       <fieldset disabled={pending} className="grid min-w-0 gap-4">
-        <legend className="mb-2 text-sm font-semibold">Attivita' e ricerche eseguite</legend>
+        <legend className="mb-2 text-sm font-semibold">Attività e ricerche eseguite</legend>
         {search.researchSteps.map((step, index) => <div key={index} className="grid min-w-0 gap-3 border-b border-slate-200 pb-4 sm:grid-cols-2">
           <label className="text-sm">Metodo<Select value={step.method} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, method: event.target.value as typeof step.method } : value) })}>
             <option value="DOCUMENT_READING">Lettura documentale</option><option value="OFFICIAL_SEARCH">Ricerca su fonte ufficiale</option><option value="CITATION_FOLLOW_UP">Verifica dei rinvii citazionali</option>
           </Select></label>
-          <label className="min-w-0 text-sm">Data dell'attivita' (UTC)<Input required type="datetime-local" step="1" value={step.performedAt.slice(0, 19)} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, performedAt: event.target.value ? new Date(`${event.target.value}Z`).toISOString() : "" } : value) })} /></label>
-          <label className="text-sm sm:col-span-2">Query o attivita' effettivamente svolta<Textarea required minLength={20} maxLength={8000} value={step.queryOrActivity} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, queryOrActivity: event.target.value } : value) })} /></label>
+          <label className="min-w-0 text-sm">Data dell&apos;attività (UTC)<Input required type="datetime-local" step="1" value={step.performedAt.slice(0, 19)} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, performedAt: event.target.value ? new Date(`${event.target.value}Z`).toISOString() : "" } : value) })} /></label>
+          <label className="text-sm sm:col-span-2">Query o attività effettivamente svolta<Textarea required minLength={20} maxLength={8000} value={step.queryOrActivity} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, queryOrActivity: event.target.value } : value) })} /></label>
           {step.evidence.map((evidence, evidenceIndex) => <div key={evidenceIndex} className="grid min-w-0 gap-3 sm:col-span-2 sm:grid-cols-2">
             <label className="text-sm">Documento probatorio<Select required value={evidence.evidenceSourceId} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, evidence: value.evidence.map((reference, referenceIndex) => referenceIndex === evidenceIndex ? { ...reference, evidenceSourceId: event.target.value } : reference) } : value) })}>
               <option value="">Seleziona documento</option>{search.examinedDocuments.map(document => <option key={document.evidenceSourceId} value={document.evidenceSourceId}>{document.evidenceSourceId}</option>)}
             </Select></label>
             <label className="text-sm">Pagina, paragrafo o passaggio<Input required value={evidence.locator} onChange={event => update({ researchSteps: search.researchSteps.map((value, position) => position === index ? { ...value, evidence: value.evidence.map((reference, referenceIndex) => referenceIndex === evidenceIndex ? { ...reference, locator: event.target.value } : reference) } : value) })} /></label>
           </div>)}
-          <Button type="button" title="Rimuovi attivita'" aria-label="Rimuovi attivita'" className="h-9 w-9" onClick={() => update({ researchSteps: search.researchSteps.filter((_, position) => position !== index) })}><Trash2 className="h-4 w-4" /></Button>
+          <Button type="button" title="Rimuovi attività" aria-label="Rimuovi attività" className="h-9 w-9" onClick={() => update({ researchSteps: search.researchSteps.filter((_, position) => position !== index) })}><Trash2 className="h-4 w-4" /></Button>
         </div>)}
-        <Button type="button" className="justify-self-start gap-2" disabled={!search.examinedDocuments.length || search.researchSteps.length >= 100} onClick={() => update({ researchSteps: [...search.researchSteps, { method: "DOCUMENT_READING", performedAt: "", queryOrActivity: "", evidence: [{ evidenceSourceId: search.examinedDocuments[0].evidenceSourceId, locator: "" }] }] })}><Plus className="h-4 w-4" />Aggiungi attivita'</Button>
+        <Button type="button" className="justify-self-start gap-2" disabled={!search.examinedDocuments.length || search.researchSteps.length >= 100} onClick={() => update({ researchSteps: [...search.researchSteps, { method: "DOCUMENT_READING", performedAt: "", queryOrActivity: "", evidence: [{ evidenceSourceId: search.examinedDocuments[0].evidenceSourceId, locator: "" }] }] })}><Plus className="h-4 w-4" />Aggiungi attività</Button>
       </fieldset>
       <fieldset disabled={pending} className="grid min-w-0 gap-4">
         <legend className="mb-2 text-sm font-semibold">Candidati valutati</legend>
@@ -134,7 +134,7 @@ export function AdverseSearchForm({ verification, onSaved }: Readonly<{
         <label className="text-sm">Lacune ancora aperte<Textarea value={search.unresolvedGaps.join("\n")} onChange={event => update({ unresolvedGaps: event.target.value.split("\n") })} onBlur={() => update({ unresolvedGaps: search.unresolvedGaps.map(value => value.trim()).filter(Boolean) })} /></label>
         <label className="text-sm sm:col-span-2">Motivazione della sufficienza del perimetro<Textarea required minLength={20} maxLength={8000} value={search.sufficiencyRationale} onChange={event => update({ sufficiencyRationale: event.target.value })} /></label>
         <label className="text-sm sm:col-span-2">Esito della ricerca<Select value={search.outcome} onChange={event => update({ outcome: event.target.value as AdverseSearch["outcome"] })}>
-          <option value="INCONCLUSIVE">Ricerca inconcludente</option><option value="NO_ADVERSE_FOUND_IN_REVIEWED_SCOPE">Nessuna autorita' contraria trovata nel perimetro esaminato</option>
+          <option value="INCONCLUSIVE">Ricerca inconcludente</option><option value="NO_ADVERSE_FOUND_IN_REVIEWED_SCOPE">Nessuna autorità contraria trovata nel perimetro esaminato</option>
         </Select></label>
       </fieldset>
       <div className="flex flex-wrap gap-3">

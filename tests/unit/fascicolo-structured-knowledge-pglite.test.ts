@@ -5,6 +5,12 @@ import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async () => ({
+    AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
+  })),
+}));
+
 import {
   buildCanonicalSourceSpans,
   buildFascicoloEvidenceSpanCatalog,

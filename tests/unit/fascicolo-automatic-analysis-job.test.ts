@@ -3,6 +3,22 @@ import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async (input: {
+    tenantId: string;
+    procedimentoId: string;
+  }) => ({
+    AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
+    AUTOMATIC_RESEARCH_TENANT_ALLOWLIST: input.tenantId,
+    AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST: input.procedimentoId,
+    AUTOMATIC_RESEARCH_ALLOWED_CAPABILITIES:
+      "SEMANTIC_DISCOVERY,KEYWORD_DISCOVERY,EXACT_RETRIEVAL,FULL_TEXT_RETRIEVAL,CITATION_NETWORK,CROSS_JURISDICTION_DISCOVERY,ADVERSE_AUTHORITY_DISCOVERY",
+    AUTOMATIC_RESEARCH_MAX_CALLS: "100",
+    AUTOMATIC_RESEARCH_WORKER_ACTOR_ID: "worker-1",
+    AUTOMATIC_RESEARCH_LEASE_MS: "60000",
+    AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS: "5000",
+  })),
+}));
 
 import {
   buildFascicoloAutomaticAnalysisAdmission,
@@ -315,6 +331,7 @@ describe("automatic analysis safe diagnostics", () => {
       errorCode: "AI_CONFIGURATION_ERROR",
       httpStatus,
       providerCode,
+      providerRequestId: null,
     });
   });
 });

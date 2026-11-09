@@ -46,10 +46,20 @@ describe("AI provider connection verification", () => {
     });
   });
 
-  it("uses only the provider model-list endpoint with GET and records zero generation cost", async () => {
-    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-      data: [{ id: "deepseek-v4-pro" }],
-    }), { status: 200 }));
+  it("verifies the DeepSeek model and sufficient balance with read-only GETs", async () => {
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        data: [{ id: "deepseek-v4-pro" }],
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        is_available: true,
+        balance_infos: [{
+          currency: "USD",
+          total_balance: "5.00",
+          granted_balance: "0.00",
+          topped_up_balance: "5.00",
+        }],
+      }), { status: 200 }));
     const result = await verifyAiProviderConnection({
       provider: "DEEPSEEK",
       actor,
@@ -64,11 +74,18 @@ describe("AI provider connection verification", () => {
       "https://api.deepseek.com/models",
       expect.objectContaining({ method: "GET" }),
     );
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.deepseek.com/user/balance",
+      expect.objectContaining({ method: "GET" }),
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0]?.[1]).not.toHaveProperty("body");
+    expect(fetch.mock.calls[1]?.[1]).not.toHaveProperty("body");
     expect(result).toMatchObject({
       verified: true,
       credentialValid: true,
       modelAvailable: true,
+      balanceSufficient: true,
       modelTechnicallyQualified: false,
       generationRequested: false,
       expectedGenerationCostEur: 0,
@@ -80,7 +97,83 @@ describe("AI provider connection verification", () => {
       credentialValueLogged: false,
       expectedGenerationCostEur: 0,
       modelAvailable: true,
+      balanceSufficient: true,
     });
+  });
+
+  it.each([
+    {
+      name: "available balance response",
+      response: new Response(JSON.stringify({
+        is_available: false,
+        balance_infos: [],
+      }), { status: 200 }),
+      expectedHttpStatus: 200,
+    },
+    {
+      name: "HTTP 402",
+      response: new Response(JSON.stringify({
+        error: { type: "invalid_request_error" },
+      }), { status: 402 }),
+      expectedHttpStatus: 402,
+    },
+  ])("rejects DeepSeek verification for insufficient balance via $name", async ({
+    response,
+    expectedHttpStatus,
+  }) => {
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        data: [{ id: "deepseek-v4-pro" }],
+      }), { status: 200 }))
+      .mockResolvedValueOnce(response);
+
+    const result = await verifyAiProviderConnection({
+      provider: "DEEPSEEK",
+      actor,
+      environment: {
+        ...fingerprintEnvironment,
+        AI_DEEPSEEK_API_KEY: "secret-value",
+      },
+      fetch,
+    });
+
+    expect(result).toMatchObject({
+      verified: false,
+      credentialValid: true,
+      modelAvailable: true,
+      balanceSufficient: false,
+      httpStatus: expectedHttpStatus,
+      code: "AI_PROVIDER_BALANCE_INSUFFICIENT",
+      generationRequested: false,
+      expectedGenerationCostEur: 0,
+    });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(mocks.auditFailure).toHaveBeenCalledOnce();
+    expect(JSON.stringify(mocks.auditFailure.mock.calls)).not.toContain("secret-value");
+  });
+
+  it("classifies a model-list HTTP 402 as insufficient balance", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      error: { type: "invalid_request_error" },
+    }), { status: 402 }));
+
+    const result = await verifyAiProviderConnection({
+      provider: "DEEPSEEK",
+      actor,
+      environment: {
+        ...fingerprintEnvironment,
+        AI_DEEPSEEK_API_KEY: "secret-value",
+      },
+      fetch,
+    });
+
+    expect(result).toMatchObject({
+      verified: false,
+      balanceSufficient: false,
+      httpStatus: 402,
+      code: "AI_PROVIDER_BALANCE_INSUFFICIENT",
+    });
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("rejects a valid credential when the configured model is not listed", async () => {

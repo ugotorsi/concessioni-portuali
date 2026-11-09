@@ -37,6 +37,22 @@ interface ServiceCenterInput {
   costs: ServiceCenterCostInput;
   activeBudgetPolicyScopes?: readonly string[];
   automationEnabled?: boolean;
+  aiControl?: Readonly<{
+    requestedEnabled: boolean;
+    effectiveEnabled: boolean;
+    deploymentAuthorized: boolean;
+    emergencyDisabled: boolean;
+  }>;
+  aiProviders?: readonly Readonly<{
+    provider: string;
+    manualEnabled: boolean;
+    manualEligible: boolean;
+  }>[];
+  researchChannels?: readonly Readonly<{
+    channel: string;
+    available: boolean;
+    reason: string | null;
+  }>[];
   now?: Date;
 }
 
@@ -57,14 +73,17 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
   const environment = input.environment ?? process.env;
   const projectedMonthlyEur = input.costs.actualLast7DaysEur / 7 * 30;
   const aiConfigured = configured(environment, ["AI_OPENAI_API_KEY"]);
-  const aiExecutionRequested = [
-    "AI_REAL_DATA_ENABLED",
-    "ASYNC_PROVIDER_EXECUTION_ENABLED",
-  ].some((name) => environment[name]?.trim().toLowerCase() === "true");
-  const automaticCapabilityConfigured = [
-    "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
-    "AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED",
-  ].some((name) => environment[name]?.trim().toLowerCase() === "true");
+  const aiExecutionRequested = input.aiControl?.requestedEnabled ?? false;
+  const aiEffective = input.aiControl?.effectiveEnabled ?? false;
+  const deploymentAuthorized = input.aiControl?.deploymentAuthorized ?? false;
+  const eligibleEnabledProviders = input.aiProviders?.filter((provider) => (
+    provider.manualEnabled && provider.manualEligible
+  )) ?? [];
+  const automaticCapabilityConfigured = Boolean(
+    input.automationEnabled
+    && aiEffective
+    && eligibleEnabledProviders.length > 0,
+  );
   const globalBudgetConfigured = input.activeBudgetPolicyScopes?.includes("GLOBAL") ?? false;
   const renderConfigured = configured(environment, [
     "RENDER_APPLICATION_WORKER_SERVICE_ID",
@@ -85,7 +104,7 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
     environment.SERVER_AUTONOMOUS_RESEARCH_ENABLED?.trim().toLowerCase() === "true";
   const mcpProductionEnabled =
     environment.MCP_PRODUCTION_ENABLED?.trim().toLowerCase() === "true";
-  const connectorStates = [
+  const legacyConnectorStates = [
     {
       name: "WorkOS MCP",
       configured: configured(environment, [
@@ -118,6 +137,13 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
       required: true,
     },
   ];
+  const connectorStates = input.researchChannels
+    ? input.researchChannels.map((channel) => ({
+        name: channel.channel,
+        configured: channel.available,
+        required: false,
+      }))
+    : legacyConnectorStates;
   const missingRequiredConnectors = connectorStates
     .filter((connector) => connector.required && !connector.configured)
     .map((connector) => connector.name);
@@ -130,23 +156,38 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
       id: "ai",
       name: "AI e budget",
       status: aiExecutionRequested
-        ? aiConfigured && globalBudgetConfigured ? "STANDBY" : "NOT_CONFIGURED"
+        ? aiEffective && aiConfigured && globalBudgetConfigured
+          ? "OPERATIVE"
+          : "NOT_CONFIGURED"
         : "STANDBY",
-      severity: aiExecutionRequested && (!aiConfigured || !globalBudgetConfigured)
+      severity: aiExecutionRequested
+        && (!aiEffective || !aiConfigured || !globalBudgetConfigured)
         ? "BLOCKING"
         : "INFORMATION",
       summary: !aiExecutionRequested
-        ? "Esecuzione provider intenzionalmente disabilitata dai gate ambientali."
+        ? "Esecuzione provider disattivata dal controllo amministrativo persistente."
+        : !deploymentAuthorized
+          ? "Comando AI ON, ma il deployment non è autorizzato per dati reali."
+          : input.aiControl?.emergencyDisabled
+            ? "Comando AI ON, ma il kill-switch di emergenza è attivo."
         : !aiConfigured
           ? "Credenziale provider AI mancante."
           : !globalBudgetConfigured
             ? "Provider configurato, ma manca il limite di spesa globale obbligatorio."
-            : "Provider e limite globale configurati; restano applicabili i budget tenant e fascicolo.",
+            : eligibleEnabledProviders.length === 0
+              ? "Nessun provider abilitato e idoneo per l'esecuzione."
+              : "Comando, autorizzazione, provider e limite globale sono operativi.",
       metrics: [
         { label: "Costo effettivo 30 giorni", value: eur(input.costs.actualLast30DaysEur) },
         { label: "Riservato", value: eur(input.costs.reservedEur) },
         { label: "Proiezione a 30 giorni", value: eur(projectedMonthlyEur) },
-        { label: "Provider manuale", value: aiExecutionRequested ? "Disponibile" : "Disabilitato" },
+        { label: "Comando amministrativo", value: aiExecutionRequested ? "ON" : "OFF" },
+        { label: "Autorizzazione deployment", value: deploymentAuthorized ? "Autorizzato" : "Non autorizzato" },
+        { label: "Stato effettivo", value: aiEffective ? "ON" : "OFF" },
+        {
+          label: "Provider idonei abilitati",
+          value: eligibleEnabledProviders.map((provider) => provider.provider).join(", ") || "Nessuno",
+        },
         { label: "Capacità automatica", value: automaticCapabilityConfigured ? "Configurata" : "Disabilitata" },
         { label: "Automazione persistente", value: input.automationEnabled ? "ON" : "OFF" },
         { label: "Budget globale", value: globalBudgetConfigured ? "Configurato" : "Assente" },
@@ -158,11 +199,17 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
         ...(!globalBudgetConfigured && aiExecutionRequested
           ? ["Creare un limite di spesa globale prima di abilitare chiamate provider."]
           : []),
+        ...(!deploymentAuthorized && aiExecutionRequested
+          ? ["Il comando persistente non può superare l'autorizzazione immutabile del deployment."]
+          : []),
+        ...(eligibleEnabledProviders.length === 0 && aiExecutionRequested
+          ? ["Abilitare almeno un provider già qualificato e autorizzato."]
+          : []),
         "Crediti, rinnovi e pagamenti del provider non sono esposti da un'integrazione billing autorizzata.",
       ],
       guidedAction: aiExecutionRequested
-        ? "Completare credenziale e budget mancanti, quindi verificare il provider senza generare contenuti."
-        : "Per attivare il provider servono autorizzazione di spesa, budget, credenziale e una nuova configurazione deployment.",
+        ? "Rimuovere i blocchi indicati e verificare il provider senza generare contenuti."
+        : "Usare il controllo amministrativo dopo aver verificato autorizzazione, budget e credenziale.",
       controllable: true,
       dataSource: "Contabilità runtime NOETRA e configurazione ambiente",
     },

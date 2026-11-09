@@ -41,6 +41,9 @@ vi.mock("@/server/fascicolo-operational-proposals", () => ({
 vi.mock("@/server/legal-research/automatic-research-policy", () => ({
   evaluateAutomaticResearchPolicy: vi.fn(() => ({ authorized: false, requirementCode: "NOT_AUTHORIZED" })),
 }));
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async () => ({})),
+}));
 
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
 import { classificationReviewFingerprint } from "@/server/legal-research/question-result-attestation";

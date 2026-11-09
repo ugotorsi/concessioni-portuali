@@ -10,6 +10,22 @@ import { decryptMfaSecret, isMfaRequiredRole, verifyMfaCode } from "@/lib/mfa";
 import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
 import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import {
+  deepSeekReadOnlyVerificationOrigin,
+} from "@/server/ai/deepSeekReadOnlyVerificationDeployment";
+import {
+  liveQualificationDeploymentOrigin,
+} from "@/server/ai/qualification/liveSyntheticQualificationDeployment";
+
+const deepSeekVerificationOrigin =
+  deepSeekReadOnlyVerificationOrigin(process.env);
+const liveQualificationOrigin =
+  liveQualificationDeploymentOrigin(process.env);
+const isolatedDeploymentOrigin =
+  deepSeekVerificationOrigin ?? liveQualificationOrigin;
+if (isolatedDeploymentOrigin) {
+  process.env.NEXTAUTH_URL = isolatedDeploymentOrigin;
+}
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
 const credentialsSchema = z.object({
