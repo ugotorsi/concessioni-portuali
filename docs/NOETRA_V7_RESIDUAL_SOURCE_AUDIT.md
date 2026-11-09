@@ -119,8 +119,7 @@ Totali originari, sostituiti dalla rivalutazione delle sette fonti:
    oggetto ufficiale; senza testo integrale non sono fonti usabili dal report.
 2. Gli articoli 4 e 5 del regolamento (UE) 2017/352 restano pertinenti in
    astratto, ma non applicabili allo stato del fascicolo: occorre l'atto che
-   qualifica la polizza come requisito del prestatore di servizi portuali.ell'attività
-   passeggeri come servizio portuale e dalle esclusioni del regolamento.
+   qualifica la polizza come requisito del prestatore di servizi portuali.
 3. I due candidati `NON_VERIFICABILE` non devono essere usati a sostegno di una
    conclusione giuridica.
 4. Le verifiche sono conservate separatamente dai bundle storici per non

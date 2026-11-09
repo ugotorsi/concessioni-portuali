@@ -181,6 +181,150 @@ describe("worker-safe fascicolo document analysis", () => {
     ]));
   });
 
+  it("reconciles an omitted concession title from authenticated extracted text", async () => {
+    const providerOutput = JSON.parse(
+      JSON.stringify(output).replaceAll("DOCUMENT_1.PAGE_1", "DOCUMENT_1.PAGE_4"),
+    ) as typeof output;
+    const titleText = [
+      "Atto di concessione demaniale marittima n. 17/2023",
+      "Data Tipologia Protocollo/ID",
+      "14/07/2023 Concessione demaniale ADSP-SIM/CONC/2023/0017",
+      "DA: AdSP del Golfo di Selvara",
+      "A: Terminal Selvara Logistica S.r.l.",
+      "Il programma I1-I4 e le relative scadenze sono parte integrante del titolo.",
+    ].join("\n");
+    const obligationText =
+      "Programma investimenti I1-I4: la scadenza documentata e il 31 dicembre 2026.";
+    const service = createFascicoloDocumentAnalysisService({
+      provider: {
+        analyze: vi.fn(async (request) => {
+          const providerKnowledge = structuredClone(providerOutput.structuredKnowledge);
+          const spoofedServerHint = {
+            ...structuredClone(providerKnowledge.items[0]),
+            localId: "fact-spoofed-server-hint",
+            payload: {
+              ...structuredClone(providerKnowledge.items[0].payload),
+              proceedingIdentityHint: {
+                declaredKey: "SERVER_ASSISTED_CONCESSION:17/2023",
+                candidateAnchorLocalId: "server-assisted-concession-title-17-2023",
+                kind: "ADMINISTRATIVE_ORIGINAL" as const,
+                evidenceBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              },
+            },
+          };
+          return {
+            ...structuredClone(providerOutput),
+            structuredKnowledge: {
+              ...providerKnowledge,
+              items: [...providerKnowledge.items, spoofedServerHint],
+              evidenceCandidates: [...providerKnowledge.items, spoofedServerHint].map((item) => ({
+                itemLocalId: item.localId,
+                evidenceSpanId: request.documentData.content.evidenceSpans[0].id,
+              })),
+            },
+          };
+        }),
+      },
+      maxInputBytes: 64_000,
+      realDataActivation: createRealDataActivationPolicy({
+        AI_REAL_DATA_ENABLED: "true",
+        AI_REAL_DATA_APPROVAL_ID: "synthetic-approval",
+        AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+      }),
+    });
+
+    const analyzed = await service.analyze({
+      contractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      neutralIntakeId: "intake-1",
+      documentVersionId: "attempt-1",
+      artifactSha256: "a".repeat(64),
+      corpusFingerprint: "c".repeat(64),
+      documents: [{ documentVersionId: "attempt-1", artifactSha256: "a".repeat(64) }],
+      documentsAreUntrustedData: true,
+      externalToolsAllowed: false,
+      excerpts: [
+        {
+          reference: "DOCUMENT_1.PAGE_4",
+          documentVersionId: "attempt-1",
+          artifactSha256: "a".repeat(64),
+          pageNumber: 4,
+          text: obligationText,
+          textSha256: "b".repeat(64),
+          extractionMethod: "DIRECT_TEXT",
+          ocrConfidence: null,
+        },
+        {
+          reference: "DOCUMENT_1.PAGE_7",
+          documentVersionId: "attempt-1",
+          artifactSha256: "a".repeat(64),
+          pageNumber: 7,
+          text: titleText,
+          textSha256: "d".repeat(64),
+          extractionMethod: "DIRECT_TEXT",
+          ocrConfidence: null,
+        },
+      ],
+    });
+
+    if (!analyzed.structuredKnowledge || !analyzed.structuredKnowledgeCompilation) {
+      throw new Error("Expected compiled structured knowledge.");
+    }
+    const title = analyzed.structuredKnowledge.items.find((item) => (
+      item.kind === "LEGAL_ACT" && item.payload.number === "17/2023"
+    ));
+    expect(title).toMatchObject({
+      kind: "LEGAL_ACT",
+      confidence: 95,
+      basisRefs: ["DOCUMENT_1.PAGE_7"],
+      payload: {
+        actType: "concessione demaniale",
+        authoritySubjectLocalId: "subject-authority",
+        number: "17/2023",
+        date: {
+          precision: "EXACT",
+          from: "2023-07-14",
+          originalText: "14/07/2023",
+        },
+        title: "Atto di concessione demaniale marittima n. 17/2023",
+        declaredEffects: [],
+      },
+    });
+    expect(analyzed.structuredKnowledge.items.find((item) => item.localId === "fact-deadline"))
+      .toMatchObject({
+        payload: {
+          proceedingIdentity: {
+            canonicalAnchorLocalId: title?.localId,
+            evidenceBasisRefs: ["DOCUMENT_1.PAGE_4"],
+          },
+          proceedingIdentityResolution: {
+            status: "VERIFIED",
+            action: "REBUILT",
+          },
+        },
+      });
+    expect(analyzed.structuredKnowledge.items.find(
+      (item) => item.localId === "fact-spoofed-server-hint",
+    )).toMatchObject({
+      payload: {
+        proceedingIdentity: {
+          declaredKey: null,
+          kind: "UNKNOWN",
+        },
+        proceedingIdentityResolution: {
+          status: "VERIFIED",
+          action: "REBUILT",
+        },
+      },
+    });
+    expect(analyzed.structuredKnowledgeCompilation.diagnostics).toContainEqual({
+      code: "CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION",
+      path: "structuredKnowledge.items",
+      action: "REBUILT",
+    });
+  });
+
   it("sends actual extracted pages as untrusted data without tools or an HTTP session", async () => {
     let body: Record<string, unknown> | null = null;
     const transport = vi.fn(async (_url: string | URL, init?: RequestInit) => {

@@ -28,6 +28,7 @@ import {
 } from "@/server/fascicolo-knowledge/proceedingIdentityReconciliation";
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V7" as const;
+const SERVER_ASSISTED_CONCESSION_IDENTITY_PREFIX = "SERVER_ASSISTED_CONCESSION:" as const;
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
   role: "DOCUMENT_GROUNDED_FASCICOLO_ANALYST",
@@ -321,6 +322,174 @@ function hasOnlySuppliedBasisRefs(
   ));
 }
 
+const CONCESSION_TITLE_PATTERN =
+  /\b((?:atto\s+di\s+)?concessione\s+demaniale(?:\s+marittima)?\s+n(?:\.|°)?\s*(\d{1,6}\s*\/\s*\d{4}))\b/iu;
+
+function exactDateFromText(text: string): {
+  precision: "EXACT";
+  from: string;
+  to: null;
+  originalText: string;
+  confidence: number;
+} | null {
+  const match = /\b(\d{2})\/(\d{2})\/(\d{4})\b/u.exec(text);
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const iso = `${year}-${month}-${day}`;
+  const parsed = new Date(`${iso}T00:00:00.000Z`);
+  if (
+    Number.isNaN(parsed.getTime())
+    || parsed.getUTCFullYear() !== Number(year)
+    || parsed.getUTCMonth() + 1 !== Number(month)
+    || parsed.getUTCDate() !== Number(day)
+  ) {
+    return null;
+  }
+  return {
+    precision: "EXACT",
+    from: iso,
+    to: null,
+    originalText: match[0],
+    confidence: 100,
+  };
+}
+
+function reconcileDocumentedConcessionTitle(
+  proposal: FascicoloDocumentProposalPayloadV1["structuredKnowledge"],
+  evidenceSpans: readonly FascicoloEvidenceSpan[],
+): Readonly<{
+  proposal: FascicoloDocumentProposalPayloadV1["structuredKnowledge"];
+  reconciled: boolean;
+  serverAssistedItemLocalIds: ReadonlySet<string>;
+}> {
+  const matches = evidenceSpans.flatMap((span) => {
+    const match = CONCESSION_TITLE_PATTERN.exec(span.text);
+    if (!match) return [];
+    return [{
+      span,
+      title: match[1].replace(/\s+/gu, " ").trim(),
+      number: match[2].replace(/\s+/gu, ""),
+      date: exactDateFromText(span.text.slice(match.index + match[0].length)),
+      explicitTitle: /^atto\s+di\s+concessione/iu.test(match[1]),
+    }];
+  });
+  const numbers = [...new Set(matches.map((match) => match.number))];
+  if (numbers.length !== 1) {
+    return { proposal, reconciled: false, serverAssistedItemLocalIds: new Set() };
+  }
+  const number = numbers[0];
+  if (proposal.items.some((item) => (
+    item.kind === "LEGAL_ACT"
+    && item.payload.number?.replace(/\s+/gu, "") === number
+  ))) {
+    return { proposal, reconciled: false, serverAssistedItemLocalIds: new Set() };
+  }
+  const selected = matches.find((match) => match.explicitTitle) ?? matches[0];
+  if (!selected) {
+    return { proposal, reconciled: false, serverAssistedItemLocalIds: new Set() };
+  }
+  const authoritySubjects = proposal.subjects.filter((subject) => (
+    subject.subjectType === "AUTHORITY"
+    || subject.subjectType === "PUBLIC_ADMINISTRATION"
+  ));
+  const baseLocalId = `server-assisted-concession-title-${number.replace(/\D/gu, "-")}`;
+  let localId = baseLocalId;
+  let suffix = 2;
+  const existingLocalIds = new Set(proposal.items.map((item) => item.localId));
+  while (existingLocalIds.has(localId)) {
+    localId = `${baseLocalId}-${suffix}`;
+    suffix += 1;
+  }
+  const selectedDocumentRef = selected.span.basisRef.replace(/\.PAGE_\d+$/u, "");
+  const linkedItems = proposal.items.map((item) => {
+    if (
+      (item.kind !== "FACT" && item.kind !== "EVENT")
+      || item.payload.proceedingIdentityHint !== null
+      || !item.basisRefs.some((basisRef) => (
+        basisRef.replace(/\.PAGE_\d+$/u, "") === selectedDocumentRef
+      ))
+      || !/concession|titolo|programma|obblig|canone|scadenz/iu.test(
+        JSON.stringify(item.payload),
+      )
+    ) {
+      return item;
+    }
+    const proceedingIdentityHint = {
+      declaredKey: `${SERVER_ASSISTED_CONCESSION_IDENTITY_PREFIX}${number}`,
+      candidateAnchorLocalId: localId,
+      kind: "ADMINISTRATIVE_ORIGINAL" as const,
+      evidenceBasisRefs: [selected.span.basisRef],
+    };
+    if (item.kind === "FACT") {
+      return {
+        ...item,
+        payload: {
+          ...item.payload,
+          proceedingIdentityHint,
+        },
+      };
+    }
+    return {
+      ...item,
+      payload: {
+        ...item.payload,
+        proceedingIdentityHint,
+      },
+    };
+  });
+  const linkedItemLocalIds = new Set(linkedItems.flatMap((item, index) => (
+    item !== proposal.items[index] ? [item.localId] : []
+  )));
+  return {
+    reconciled: true,
+    serverAssistedItemLocalIds: linkedItemLocalIds,
+    proposal: {
+      ...proposal,
+      items: [...linkedItems, {
+        localId,
+        kind: "LEGAL_ACT",
+        confidence: 95,
+        basisRefs: [selected.span.basisRef],
+        payload: {
+          documentBasisRef: selected.span.basisRef,
+          actType: "concessione demaniale",
+          proceduralRole: null,
+          authoritySubjectLocalId:
+            authoritySubjects.length === 1 ? authoritySubjects[0].localId : null,
+          number,
+          date: selected.date ?? {
+            precision: "UNKNOWN",
+            from: null,
+            to: null,
+            originalText: null,
+            confidence: null,
+          },
+          title: selected.title,
+          declaredEffects: [],
+        },
+      }],
+      legalIssues: proposal.legalIssues.map((issue) => (
+        issue.originatingItemLocalIds.some((itemLocalId) => linkedItemLocalIds.has(itemLocalId))
+          ? {
+              ...issue,
+              originatingItemLocalIds: [...issue.originatingItemLocalIds, localId],
+              targetProceedingHint: {
+                declaredKey: `${SERVER_ASSISTED_CONCESSION_IDENTITY_PREFIX}${number}`,
+                candidateAnchorLocalId: localId,
+                kind: "ADMINISTRATIVE_ORIGINAL",
+                evidenceBasisRefs: [selected.span.basisRef],
+              },
+            }
+          : issue
+      )),
+      evidenceCandidates: [...proposal.evidenceCandidates, {
+        itemLocalId: localId,
+        evidenceSpanId: selected.span.id,
+      }],
+    },
+  };
+}
+
 export function createFascicoloDocumentAnalysisService(config: {
   readonly provider: FascicoloDocumentAnalysisProvider;
   readonly maxInputBytes: number;
@@ -362,11 +531,17 @@ export function createFascicoloDocumentAnalysisService(config: {
         });
         throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
       }
+      const reconciledKnowledge = reconcileDocumentedConcessionTitle(
+        proposal.data.structuredKnowledge,
+        request.documentData.content.evidenceSpans,
+      );
       let compiled;
       try {
         compiled = compileFascicoloDocumentKnowledgeProposal({
-          proposal: proposal.data.structuredKnowledge,
+          proposal: reconciledKnowledge.proposal,
           evidenceSpans: request.documentData.content.evidenceSpans,
+          serverAssistedSameDocumentIdentityItemLocalIds:
+            reconciledKnowledge.serverAssistedItemLocalIds,
         });
       } catch (error) {
         if (!(error instanceof DocumentKnowledgeCompilationError)) throw error;
@@ -382,7 +557,14 @@ export function createFascicoloDocumentAnalysisService(config: {
         structuredKnowledgeCompilation: {
           promotable: compiled.promotable,
           quarantinedItemLocalIds: compiled.quarantinedItemLocalIds,
-          diagnostics: compiled.diagnostics,
+          diagnostics: [
+            ...(reconciledKnowledge.reconciled ? [{
+              code: "CONCESSION_TITLE_RECONCILED_FROM_EXTRACTION",
+              path: "structuredKnowledge.items",
+              action: "REBUILT" as const,
+            }] : []),
+            ...compiled.diagnostics,
+          ],
         },
       });
       if (!parsed.success) {

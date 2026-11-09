@@ -218,7 +218,11 @@ export async function FascicoloAiResearchControlPanel(props: AiResearchControlPa
             </label>
           </fieldset>
 
-          {props.canEdit ? <Button type="submit">Salva policy del fascicolo</Button> : null}
+          {props.canEdit ? (
+            <Button type="submit">
+              {tenantScope ? "Salva policy dell'ente" : "Salva policy del fascicolo"}
+            </Button>
+          ) : null}
         </form>
       </CardContent>
     </Card>
