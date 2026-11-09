@@ -208,6 +208,7 @@ describe("Lotto 7 operational proposal generation", () => {
     expect(reconciliations.map((candidate) => candidate.proposedPayload)).toEqual(expect.arrayContaining([
       expect.objectContaining({
         reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
         before: null,
         after: expect.objectContaining({ numeroAtto: "17/2023" }),
         previewOnly: true,
@@ -219,8 +220,12 @@ describe("Lotto 7 operational proposal generation", () => {
         previewOnly: true,
       }),
     ]));
-    expect(reconciliations.every((candidate) =>
-      candidate.warningCodes.includes("MANUAL_ACTION_REQUIRED"))).toBe(true);
+    const concessionReconciliation = reconciliations.find((candidate) =>
+      candidate.proposalType === "CONCESSION_LINK_OR_CREATE");
+    expect(concessionReconciliation?.warningCodes).toContain("PROFESSIONAL_REVIEW_REQUIRED");
+    expect(concessionReconciliation?.warningCodes).not.toContain("MANUAL_ACTION_REQUIRED");
+    expect(reconciliations.find((candidate) => candidate.proposalType === "NOTE")?.warningCodes)
+      .toContain("MANUAL_ACTION_REQUIRED");
   });
 
   it("keeps multiple documents and does not invent dependencies from the order of activities", () => {

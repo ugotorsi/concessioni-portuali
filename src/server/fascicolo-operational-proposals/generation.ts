@@ -410,11 +410,12 @@ function metadataReconciliationCandidates(input: GenerationInput): OperationalPr
       candidates.push(buildCandidate({
         ...input,
         knowledgeRevisionId: input.report.knowledgeRevisionId,
-        proposalType: "NOTE",
+        proposalType: "CONCESSION_LINK_OR_CREATE",
         title: `Riconciliare il titolo amministrativo ${number}`,
         description: "Il titolo documentato non coincide con la relazione Concessione attualmente rappresentata nel fascicolo.",
         proposedPayload: {
           reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+          materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
           targetEntity: "CONCESSIONE",
           before,
           after: { numeroAtto: number, dataRilascio: date, title },
@@ -431,7 +432,7 @@ function metadataReconciliationCandidates(input: GenerationInput): OperationalPr
         originatingIssueSemanticKeys: issueKeysForItem(input.report, item.id),
         rationale: "Proposta documentale in sola anteprima; richiede verifica del titolo e conferma umana prima di ogni scrittura autoritativa.",
         confidence: item.confidence,
-        warningCodes: ["MANUAL_ACTION_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
+        warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
       }));
     }
     const isFinalAct = proceduralRole === "CHALLENGED_ACT"

@@ -15,6 +15,7 @@ import type { ActivitySpec } from "@/server/fascicolo-operational-activities/mod
 export type FascicoloProposalType =
   | "DEADLINE"
   | "CRITICALITY"
+  | "CONCESSION_LINK_OR_CREATE"
   | "DOCUMENT_REQUIREMENT"
   | "CHECKLIST_ITEM"
   | "ACTIVITY"
@@ -57,6 +58,7 @@ export function fascicoloProposalTypeLabel(type: FascicoloProposalType): string 
   switch (type) {
     case "DEADLINE": return "Scadenza";
     case "CRITICALITY": return "Criticità";
+    case "CONCESSION_LINK_OR_CREATE": return "Concessione da collegare o creare";
     case "DOCUMENT_REQUIREMENT": return "Documento richiesto";
     case "CHECKLIST_ITEM": return "Verifica";
     case "ACTIVITY": return "Attività";

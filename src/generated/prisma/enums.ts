@@ -124,6 +124,7 @@ export type StructuredFascicoloReportStatus = (typeof StructuredFascicoloReportS
 export const FascicoloOperationalProposalType = {
   DEADLINE: 'DEADLINE',
   CRITICALITY: 'CRITICALITY',
+  CONCESSION_LINK_OR_CREATE: 'CONCESSION_LINK_OR_CREATE',
   DOCUMENT_REQUIREMENT: 'DOCUMENT_REQUIREMENT',
   CHECKLIST_ITEM: 'CHECKLIST_ITEM',
   ACTIVITY: 'ACTIVITY',
