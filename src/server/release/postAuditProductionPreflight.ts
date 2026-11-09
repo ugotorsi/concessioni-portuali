@@ -1,7 +1,9 @@
 import {
-  verifyAuditHashRecords,
+  createHistoricalAuditHashVerificationState,
+  verifyHistoricalAuditHashRecords,
   type AuditHashChainVerification,
   type AuditHashRecord,
+  type HistoricalAuditHashAlgorithmCounts,
 } from "@/server/audit/hash";
 
 export interface ReadOnlyQueryExecutor {
@@ -30,6 +32,24 @@ type AggregateSummary = {
   concessionsWithoutTenant: number;
 };
 
+export type ProductionAuditChainBaseline = {
+  recordCount: number;
+  finalRecordId: string;
+  finalHash: string;
+  algorithmCounts: HistoricalAuditHashAlgorithmCounts;
+};
+
+export const POST_AUDIT_PRODUCTION_ACTIVITY_LOG_BASELINE: ProductionAuditChainBaseline = {
+  recordCount: 259,
+  finalRecordId: "cmvwp5nqb000accudlmukwmpu",
+  finalHash: "efc64912c6f13515d7088abc43a8e29e52b4b2fe39dbb8f2918f2cb5ea1116ab",
+  algorithmCounts: {
+    LEGACY_SEED_STRING_METADATA: 10,
+    CANONICAL_WITHOUT_ENTE_ID: 0,
+    CANONICAL_WITH_ENTE_ID: 249,
+  },
+};
+
 export type PostAuditProductionPreflightResult = {
   safeToMigrate: boolean;
   concessionCount: number;
@@ -41,6 +61,8 @@ export type PostAuditProductionPreflightResult = {
   auditChain: {
     valid: boolean;
     verifiedCount: number;
+    algorithmCounts: HistoricalAuditHashAlgorithmCounts;
+    baselineAnchorVerified: boolean;
     issueCode: NonNullable<AuditHashChainVerification["issue"]>["code"] | null;
     issueOrdinal: number | null;
     scope: "PREEXISTING_PRODUCTION_HISTORY";
@@ -66,10 +88,20 @@ async function verifyAuditChain(
   executor: ReadOnlyQueryExecutor,
   expectedCount: number,
   batchSize: number,
-): Promise<AuditHashChainVerification> {
+  baseline: ProductionAuditChainBaseline,
+): Promise<AuditHashChainVerification & {
+  algorithmCounts: HistoricalAuditHashAlgorithmCounts;
+  baselineAnchorVerified: boolean;
+}> {
   let last: { createdAt: Date; id: string } | null = null;
-  let previousHash: string | null = null;
+  let verificationState = createHistoricalAuditHashVerificationState();
+  const algorithmCounts: HistoricalAuditHashAlgorithmCounts = {
+    LEGACY_SEED_STRING_METADATA: 0,
+    CANONICAL_WITHOUT_ENTE_ID: 0,
+    CANONICAL_WITH_ENTE_ID: 0,
+  };
   let verifiedCount = 0;
+  let baselineAnchorVerified = false;
   for (;;) {
     const result: { rows: AuditHashRecord[] } = await executor.query<AuditHashRecord>(`
       SELECT
@@ -87,17 +119,49 @@ async function verifyAuditChain(
     `, [last?.createdAt ?? null, last?.id ?? "", batchSize]);
     if (result.rows.length === 0) {
       if (verifiedCount !== expectedCount) throw new Error("PRODUCTION_PREFLIGHT_AUDIT_COUNT_CHANGED");
-      return { valid: true, verifiedCount, finalHash: previousHash, issue: null };
+      return {
+        valid: true,
+        verifiedCount,
+        finalHash: verificationState.previousHash,
+        issue: null,
+        algorithmCounts,
+        baselineAnchorVerified,
+      };
     }
-    const verification = verifyAuditHashRecords(result.rows, previousHash);
+    const verification = verifyHistoricalAuditHashRecords(result.rows, verificationState);
     verifiedCount += verification.verifiedCount;
-    if (!verification.valid) return { ...verification, verifiedCount };
-    previousHash = verification.finalHash;
+    for (const algorithm of Object.keys(algorithmCounts) as (keyof HistoricalAuditHashAlgorithmCounts)[]) {
+      algorithmCounts[algorithm] += verification.algorithmCounts[algorithm];
+    }
+    if (!verification.valid) {
+      return {
+        ...verification,
+        verifiedCount,
+        algorithmCounts,
+        baselineAnchorVerified,
+      };
+    }
+    verificationState = verification.state;
+    if (
+      verifiedCount >= baseline.recordCount
+      && verifiedCount - result.rows.length < baseline.recordCount
+    ) {
+      const anchor = result.rows[baseline.recordCount - (verifiedCount - result.rows.length) - 1];
+      baselineAnchorVerified = anchor?.id === baseline.finalRecordId
+        && anchor.currentHash === baseline.finalHash;
+    }
     const tail = result.rows.at(-1)!;
     last = { createdAt: tail.createdAt, id: tail.id };
     if (result.rows.length < batchSize) {
       if (verifiedCount !== expectedCount) throw new Error("PRODUCTION_PREFLIGHT_AUDIT_COUNT_CHANGED");
-      return { valid: true, verifiedCount, finalHash: previousHash, issue: null };
+      return {
+        valid: true,
+        verifiedCount,
+        finalHash: verificationState.previousHash,
+        issue: null,
+        algorithmCounts,
+        baselineAnchorVerified,
+      };
     }
   }
 }
@@ -105,6 +169,7 @@ async function verifyAuditChain(
 export async function runPostAuditProductionPreflight(
   executor: ReadOnlyQueryExecutor,
   batchSize = 1_000,
+  auditBaseline = POST_AUDIT_PRODUCTION_ACTIVITY_LOG_BASELINE,
 ): Promise<PostAuditProductionPreflightResult> {
   if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 10_000) {
     throw new Error("PRODUCTION_PREFLIGHT_BATCH_SIZE_INVALID");
@@ -174,16 +239,33 @@ export async function runPostAuditProductionPreflight(
   `);
   const aggregate = aggregateResult.rows[0];
   if (!aggregate) throw new Error("PRODUCTION_PREFLIGHT_AGGREGATE_MISSING");
-  const auditChain = await verifyAuditChain(executor, aggregate.activityLogCount, batchSize);
+  const auditChain = await verifyAuditChain(
+    executor,
+    aggregate.activityLogCount,
+    batchSize,
+    auditBaseline,
+  );
+  const auditBaselineMatches =
+    auditChain.baselineAnchorVerified
+    && auditChain.verifiedCount >= auditBaseline.recordCount
+    && auditChain.algorithmCounts.LEGACY_SEED_STRING_METADATA
+      === auditBaseline.algorithmCounts.LEGACY_SEED_STRING_METADATA
+    && auditChain.algorithmCounts.CANONICAL_WITHOUT_ENTE_ID
+      === auditBaseline.algorithmCounts.CANONICAL_WITHOUT_ENTE_ID
+    && auditChain.algorithmCounts.CANONICAL_WITH_ENTE_ID
+      >= auditBaseline.algorithmCounts.CANONICAL_WITH_ENTE_ID;
   return {
     safeToMigrate:
       aggregate.normalizedDuplicateGroups === 0
       && aggregate.concessionsWithoutTenant === 0
-      && auditChain.valid,
+      && auditChain.valid
+      && auditBaselineMatches,
     ...aggregate,
     auditChain: {
       valid: auditChain.valid,
       verifiedCount: auditChain.verifiedCount,
+      algorithmCounts: auditChain.algorithmCounts,
+      baselineAnchorVerified: auditBaselineMatches,
       issueCode: auditChain.issue?.code ?? null,
       issueOrdinal: auditChain.issue ? auditChain.verifiedCount + 1 : null,
       scope: "PREEXISTING_PRODUCTION_HISTORY",

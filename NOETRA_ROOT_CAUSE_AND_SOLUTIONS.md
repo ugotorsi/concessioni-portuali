@@ -16,23 +16,25 @@ The investigation was read-only with respect to Production. No real database,
 fascicolo, AI control, provider, worker, automation, deployment or paid operation
 was modified or started.
 
-### Final judgment: **GO for PR review; Production remains NO-GO**
+### Final judgment: **GO CON RISERVE**
 
-The structural candidate and its isolated PostgreSQL/MFA evidence are complete
-and PR #73 is technically suitable for integration review. The remaining
-operational blockers now have fail-closed tooling and one release runbook, but
-the required human-authorized executions have not been represented as complete.
-Production promotion remains **NO-GO** until:
+PR #73 was integrated into `release/v7-integrated-services` as
+`797d09fda7d4d1690fa33b537a8a6626aa47fc8c`. Its PostgreSQL and authenticated
+Preview proofs passed, the Production backup was created and verified, and the
+read-only Production checks found zero normalized-title duplicate groups and
+zero tenantless concessions.
 
-- the protected read-only Production preflight proves normalized-title
-  uniqueness and the complete existing ActivityLog chain;
-- the migration passes on an authorized isolated Production clone;
-- the official PR Preview is bound to a synthetic database and passes the
-  authenticated MFA workflow;
-- the release manager approves backup, maintenance window, migration and
-  publication separately;
-- any later Selvara repair is executed as a new reviewed revision/proposal,
-  never as an overwrite.
+Issue #74 was a verifier compatibility defect, not evidence of altered audit
+events. A read-only repeatable-read scan verified all 259 Production records:
+10 initial seed events match the exact documented legacy seed format and the
+following 249 events match the current tenant-aware canonical format. All
+stored predecessor pointers are continuous and all 259 current hashes are
+distinct.
+
+Production promotion can resume after the version-aware verifier is reviewed
+and merged, the protected strict-role preflight is rerun with that commit, and
+only the two already identified pending migrations are applied. The official
+release procedure and disabled execution gates remain mandatory.
 
 This is a release gate, not evidence that Production is currently changing data
 spontaneously.
@@ -54,13 +56,16 @@ spontaneously.
   with four legal-research executions and one automatic fascicolo analysis.
 - The previously recorded jobs were consistent with manual requests; there is
   no evidence of spontaneous automatic execution.
+- The complete Production ActivityLog contains 259 records with continuous
+  predecessor pointers: 10 legacy-valid seed hashes and 249 current canonical
+  hashes, with no unmatched hash, fork or duplicate current hash.
+- Production contains no normalized concession-title duplicate group and no
+  concession without a tenant.
 
 ### Not verified and therefore not asserted
 
 - The exact timestamp, actor reason and full metadata of the Production
   `AI_GLOBAL_CONTROL_CHANGE` event.
-- End-to-end integrity of the complete Production ActivityLog hash chain.
-- Absence of historical normalized concession-number duplicates in Production.
 - The final tenant ownership semantics of `Concessionario`, because the current
   model has no `enteId`.
 - A Production Selvara repair, because no real-data mutation was authorized.
@@ -479,10 +484,12 @@ administrative commands.
 
 ## 12. Objective resolution criteria
 
-The branch candidate is **GO** for code review and integration into a
-non-deploying release branch. Production activation remains **NO-GO** until the
-remaining read-only Production and authenticated release-preview P0 checks
-pass. No synthetic result in this report is presented as a Production query.
+The integrated remediation candidate is **GO CON RISERVE** for Production
+activation. The former ActivityLog blocker is resolved by a read-only
+Production proof, not by rewriting historical records. Activation still
+requires review and merge of the compatible verifier, a green protected
+strict-role preflight at the release SHA, the two pending migrations and the
+official deployment procedure.
 
 The Selvara defect is resolved only when:
 
@@ -560,3 +567,66 @@ and authorized clone; repository administrator approval of the protected
 Environment; infrastructure provisioning of the synthetic Preview; a Vercel
 member session; and a synthetic MFA application account. No control can safely
 or legitimately automate those approvals.
+
+## 14. Definitive resolution of ActivityLog issue #74
+
+### Proven cause
+
+The original seed writer used insertion-order `JSON.stringify` and hashed
+metadata `{ seed: "true", message }`, while persisting
+`{ seed: true, message }`. After tenancy was introduced it also persisted
+`enteId` without adding that field to the seed hash payload. The current
+canonical verifier instead sorts keys, uses the persisted boolean metadata and
+includes `enteId`; it therefore reported `CURRENT_HASH_MISMATCH` at the first
+unchanged seed record.
+
+Git history establishes three real formats:
+
+1. initial seed format: insertion-order JSON, string `"true"`, no `enteId`;
+2. canonical application format before tenancy hashing: sorted JSON, no
+   `enteId`;
+3. current canonical format: sorted JSON with `enteId`.
+
+### Production proof
+
+A `REPEATABLE READ READ ONLY` scan classified all 259 records without emitting
+metadata:
+
+- `LEGACY_SEED_STRING_METADATA`: 10;
+- `CANONICAL_WITHOUT_ENTE_ID`: 0;
+- `CANONICAL_WITH_ENTE_ID`: 249;
+- unmatched hashes: 0;
+- predecessor mismatches: 0;
+- forks: 0;
+- duplicate current hashes: 0.
+
+The transition is a single initial 10-record seed prefix followed by the
+current format. No historical event was modified, recalculated or overwritten.
+
+### Implemented verifier policy
+
+New writes still use only `computeAuditHash`, the current tenant-aware canonical
+algorithm. Historical verification is a one-way state machine:
+
+- the seed format is accepted only in the contiguous genesis prefix and only
+  for the exact persisted `{ seed: true, message: string }` shape;
+- the canonical format without `enteId` is accepted only before the first
+  current-format event;
+- after the first current-format event, either legacy format is rejected as
+  `HASH_ALGORITHM_DOWNGRADE`;
+- predecessor continuity remains mandatory before any hash-format check;
+- an event matching no documented format remains
+  `CURRENT_HASH_MISMATCH` and blocks release.
+
+This removes the false blocker without making legacy formats valid for new
+events. Focused tests cover mixed histories, page-state propagation, tampering
+and downgrade rejection. TypeScript compilation and targeted ESLint pass.
+
+### Release criterion
+
+Issue #74 is technically resolved when the verifier change is merged and the
+protected Production preflight verifies the externally anchored 259-record
+prefix, the same 10/0 legacy counts and at least 249 current-format events.
+Later appended events must all use the current format. Any anchor failure,
+legacy-count change, pointer mismatch, unmatched hash or downgrade is a new
+release blocker and must not trigger automatic repair.

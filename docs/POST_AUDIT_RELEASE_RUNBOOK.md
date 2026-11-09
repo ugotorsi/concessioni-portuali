@@ -85,11 +85,23 @@ normalizedDuplicateGroups=0
 concessionsWithoutTenant=0
 auditChain.valid=true
 auditChain.verifiedCount=activityLogCount
+auditChain.baselineAnchorVerified=true
+auditChain.algorithmCounts.LEGACY_SEED_STRING_METADATA=10
+auditChain.algorithmCounts.CANONICAL_WITHOUT_ENTE_ID=0
+auditChain.algorithmCounts.CANONICAL_WITH_ENTE_ID>=249
 ```
 
-Una anomalia `ActivityLog` e classificata
-`PREEXISTING_PRODUCTION_HISTORY`: non e causata dal candidato, ma blocca il
-rilascio finche non viene aperto e approvato un intervento dati separato.
+Il preflight ancora i primi 259 eventi al record e all'hash finale verificati
+fuori dal database nel candidato di rilascio. Eventi successivi sono ammessi
+soltanto nel formato corrente; il conteggio corrente puo quindi aumentare, ma i
+10 seed legacy e gli zero eventi pre-tenant non possono cambiare. Il formato
+seed legacy e valido soltanto nel prefisso iniziale della catena; il formato
+senza `enteId` e valido soltanto prima del primo evento nel formato corrente.
+`CURRENT_HASH_MISMATCH`, `PREVIOUS_HASH_MISMATCH`,
+`HASH_ALGORITHM_DOWNGRADE`, anchor non valido o conteggi legacy diversi dal
+baseline bloccano il rilascio. Non ricalcolare o riscrivere gli eventi: una
+anomalia deve essere classificata come `PREEXISTING_PRODUCTION_HISTORY` e
+gestita con un intervento separato.
 
 ## 3. Preview PR isolata
 
