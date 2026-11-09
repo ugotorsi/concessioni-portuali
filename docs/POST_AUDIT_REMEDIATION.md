@@ -82,3 +82,10 @@ Le copie storiche possono essere archiviate soltanto quando:
 L'archiviazione aggiunge una versione immutabile `ARCHIVIATA` alla catena audit;
 non elimina bozze, versioni o eventi. Ripetere la stessa richiesta su una copia
 gia archiviata e un no-op idempotente.
+
+## Gate di rilascio
+
+Il canale Production read-only, l'isolamento obbligatorio della Preview, il
+rehearsal della migrazione e la procedura di pubblicazione sono definiti in
+`docs/POST_AUDIT_RELEASE_RUNBOOK.md`. I gate non riparano dati e non autorizzano
+AI, automazioni, worker o modifiche ai fascicoli reali.

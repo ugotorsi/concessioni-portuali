@@ -16,18 +16,21 @@ The investigation was read-only with respect to Production. No real database,
 fascicolo, AI control, provider, worker, automation, deployment or paid operation
 was modified or started.
 
-### Final judgment: **GO CON RISERVE for the local release candidate**
+### Final judgment: **GO for PR review; Production remains NO-GO**
 
-The three commits address the principal symptoms but, as originally committed,
-do not remove all root causes. Additional local fixes have been developed and
-validated, but remain intentionally uncommitted. The code path is now complete
-and generalizable; Production promotion remains **NO-GO** until:
+The structural candidate and its isolated PostgreSQL/MFA evidence are complete
+and PR #73 is technically suitable for integration review. The remaining
+operational blockers now have fail-closed tooling and one release runbook, but
+the required human-authorized executions have not been represented as complete.
+Production promotion remains **NO-GO** until:
 
-- the uncommitted fixes are reviewed and committed;
-- the Production data preflight proves that the new normalized concession
-  identity can be installed without conflicting historical rows;
-- the read-only verifier confirms the existing Production ActivityLog chain;
-- the migration and authenticated professional flow pass in staging;
+- the protected read-only Production preflight proves normalized-title
+  uniqueness and the complete existing ActivityLog chain;
+- the migration passes on an authorized isolated Production clone;
+- the official PR Preview is bound to a synthetic database and passes the
+  authenticated MFA workflow;
+- the release manager approves backup, maintenance window, migration and
+  publication separately;
 - any later Selvara repair is executed as a new reviewed revision/proposal,
   never as an overwrite.
 
@@ -426,9 +429,11 @@ administrative commands.
 
 ### Required before Production activation
 
-- Read-only Production duplicate preflight for normalized concession numbers.
-- Read-only Production ActivityLog full-chain verification.
-- An authenticated staging or release-preview E2E that:
+- Execute the protected read-only Production preflight now provided for
+  normalized concession numbers and the complete ActivityLog chain.
+- Execute the migration rehearsal on an authorized isolated Production clone.
+- Bind the official PR Preview to a fingerprinted synthetic database and run an
+  authenticated release-preview E2E that:
   1. generates a concession proposal from immutable evidence;
   2. professionally links or creates the concession;
   3. proves a second request is reused;
@@ -509,3 +514,49 @@ The draft defect is resolved only when:
 The structural code defects are addressed. The remaining reservations concern
 facts that cannot be established without the separately authorized Production
 read-only preflight and staging execution; they are not masked as completed.
+
+## 13. Operational blocker resolution
+
+The final blockers are addressed by reusable release controls rather than
+one-off access to credentials:
+
+- `production-readonly-preflight.yml` is manual, has `contents: read`, is
+  protected by the `production-readonly` GitHub Environment and consumes one
+  dedicated secret in one process.
+- The Production verifier opens `BEGIN READ ONLY`, rejects any role with
+  effective create/DML/sequence privileges, superuser or RLS bypass, emits only
+  aggregate results and checks the complete audit chain in bounded pages.
+- Direct PostgreSQL timestamps are normalized explicitly from Prisma's UTC
+  `timestamp without time zone`; a real PostgreSQL proof found and eliminated
+  the host-timezone false-positive before release.
+- Every Vercel Preview blocks database access unless its isolation marker is
+  present, the database is classified synthetic, Preview and Production
+  identity fingerprints differ, and AI/provider/automatic research/worker
+  execution is disabled.
+- The migration rehearsal rejects the Production database fingerprint and
+  verifies row counts, duplicates, orphan procedures, index validity and Prisma
+  migration completion on the isolated target.
+- `docs/POST_AUDIT_RELEASE_RUNBOOK.md` defines the DBA grants, GitHub/Vercel
+  boundaries, MFA flow, migration order, objective gates, abort conditions and
+  rollback procedure.
+
+### New isolated proofs
+
+- PostgreSQL 16 applied all 61 migrations and seeded 8 concessions, 8
+  procedures and a valid 10-record ActivityLog chain.
+- A dedicated `NOINHERIT`, `NOBYPASSRLS`, default-read-only login passed the
+  aggregate preflight; an attempted `INSERT` failed with
+  `cannot execute INSERT in a read-only transaction`.
+- The preflight returned zero normalized duplicate groups, zero tenantless
+  concessions and a valid 10/10 audit chain.
+- The rehearsal returned unchanged counts, zero duplicate groups, zero orphan
+  procedures, a valid unique index and a completed migration record.
+- Reusing the Production fingerprint for either Preview or rehearsal was
+  rejected before application/database work.
+
+These are synthetic isolated proofs, not Production queries. The exact minimum
+external interventions still required are: DBA creation of the read-only role
+and authorized clone; repository administrator approval of the protected
+Environment; infrastructure provisioning of the synthetic Preview; a Vercel
+member session; and a synthetic MFA application account. No control can safely
+or legitimately automate those approvals.
