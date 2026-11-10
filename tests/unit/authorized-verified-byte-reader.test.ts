@@ -377,8 +377,9 @@ describe("B2C9C1A3B1 authorized verified byte reader", () => {
 
     it("maps typed unavailable without exposing bytes", async () => {
       readDocumentFileFromProviderMock.mockRejectedValue(new DocumentStorageReadUnavailableError({
-        provider: "local",
-        code: "EACCES",
+        provider: "s3",
+        code: "InvalidAccessKeyId",
+        statusCode: 403,
       }));
 
       const result = await readAuthorizedVerifiedDocumentBytes({ documentoId: DOCUMENT_ID });
@@ -387,7 +388,11 @@ describe("B2C9C1A3B1 authorized verified byte reader", () => {
       expect(result).not.toHaveProperty("body");
       expect(readDocumentFileFromProviderMock).toHaveBeenCalledTimes(1);
       expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
-        metadata: expect.objectContaining({ outcome: "SOURCE_UNAVAILABLE" }),
+        metadata: expect.objectContaining({
+          outcome: "SOURCE_UNAVAILABLE",
+          storageErrorCode: "InvalidAccessKeyId",
+          storageStatusCode: 403,
+        }),
       }));
     });
 

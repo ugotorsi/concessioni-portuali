@@ -1,6 +1,7 @@
 import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { getS3StorageConfig } from "@/server/documents/storage/config";
+import { sanitizedS3ErrorDiagnostics } from "@/server/documents/storage/s3StorageAdapter";
 import { verifyAutomaticResearchConnectorReadiness } from "@/server/legal-research/automatic-research-readiness";
 import {
   getResearchMcpAuthConfig,
@@ -252,13 +253,18 @@ async function diagnoseR2(
       "Bucket R2 raggiungibile con una verifica non distruttiva.",
       [{ label: "Bucket", value: environment.S3_BUCKET!.trim() }],
     );
-  } catch {
+  } catch (error) {
+    const diagnostics = sanitizedS3ErrorDiagnostics(error);
     return result(
       "r2",
       "UNREACHABLE",
       "R2_BUCKET_UNREACHABLE",
       "Il bucket configurato non ha superato la verifica non distruttiva.",
-      [{ label: "Bucket", value: environment.S3_BUCKET!.trim() }],
+      [
+        { label: "Bucket", value: environment.S3_BUCKET!.trim() },
+        { label: "Codice SDK", value: diagnostics.code },
+        { label: "Stato HTTP", value: diagnostics.statusCode?.toString() ?? "non disponibile" },
+      ],
     );
   }
 }

@@ -62,6 +62,16 @@ function extractStatusCode(error: unknown): number | undefined {
   return candidate.$metadata?.httpStatusCode;
 }
 
+export function sanitizedS3ErrorDiagnostics(error: unknown): {
+  code: string;
+  statusCode?: number;
+} {
+  const statusCode = extractStatusCode(error);
+  return statusCode === undefined
+    ? { code: extractErrorCode(error) }
+    : { code: extractErrorCode(error), statusCode };
+}
+
 function isNotFoundLike(code: string, statusCode?: number): boolean {
   return code === "NotFound" || code === "NoSuchKey" || statusCode === 404;
 }

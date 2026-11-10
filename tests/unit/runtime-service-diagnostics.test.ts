@@ -154,6 +154,9 @@ describe("runtime service diagnostics", () => {
   });
 
   it("reports rejected credentials and unreachable storage explicitly", async () => {
+    const storageError = new Error("denied") as Error & { $metadata: { httpStatusCode: number } };
+    storageError.name = "AccessDenied";
+    storageError.$metadata = { httpStatusCode: 403 };
     const diagnostics = await getRuntimeServiceDiagnostics({
       AI_OPENAI_API_KEY: "invalid",
       RENDER_WORKER_API_KEY: "invalid",
@@ -166,13 +169,21 @@ describe("runtime service diagnostics", () => {
       S3_SECRET_ACCESS_KEY: "secret",
     }, {
       fetch: vi.fn().mockResolvedValue(new Response("{}", { status: 401 })) as unknown as typeof fetch,
-      probeR2: vi.fn().mockRejectedValue(new Error("denied")),
+      probeR2: vi.fn().mockRejectedValue(storageError),
     });
 
     expect(diagnostics.services).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "ai", status: "ATTENTION", code: "AI_PROVIDER_HTTP_401" }),
       expect.objectContaining({ id: "render-application", status: "ATTENTION", code: "RENDER_HTTP_401" }),
-      expect.objectContaining({ id: "r2", status: "UNREACHABLE", code: "R2_BUCKET_UNREACHABLE" }),
+      expect.objectContaining({
+        id: "r2",
+        status: "UNREACHABLE",
+        code: "R2_BUCKET_UNREACHABLE",
+        metrics: expect.arrayContaining([
+          { label: "Codice SDK", value: "AccessDenied" },
+          { label: "Stato HTTP", value: "403" },
+        ]),
+      }),
     ]));
   });
 });

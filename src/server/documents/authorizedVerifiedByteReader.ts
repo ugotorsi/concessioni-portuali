@@ -75,6 +75,8 @@ type AuditContext = {
   enteId?: string | null;
   concessioneId?: string | null;
   fileVersionId?: string | null;
+  storageErrorCode?: string;
+  storageStatusCode?: number;
 };
 
 async function writeAudit(
@@ -101,6 +103,8 @@ async function writeAudit(
         actionType: "DOCUMENT_DOWNLOAD",
         outcome,
         ...(context.fileVersionId ? { fileVersionId: context.fileVersionId } : {}),
+        ...(context.storageErrorCode ? { storageErrorCode: context.storageErrorCode } : {}),
+        ...(context.storageStatusCode !== undefined ? { storageStatusCode: context.storageStatusCode } : {}),
       },
     });
   } catch (error) {
@@ -336,7 +340,11 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
     });
   } catch (error) {
     if (error instanceof DocumentStorageReadUnavailableError) {
-      await writeAudit("SOURCE_UNAVAILABLE", auditContext);
+      await writeAudit("SOURCE_UNAVAILABLE", {
+        ...auditContext,
+        storageErrorCode: error.code,
+        storageStatusCode: error.statusCode,
+      });
       return { status: "SOURCE_UNAVAILABLE" };
     }
     if (error instanceof DocumentStorageReadCoherenceError) {
