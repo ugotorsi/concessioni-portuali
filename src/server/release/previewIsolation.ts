@@ -20,6 +20,19 @@ export function databaseIdentityFingerprint(databaseUrl: string): string {
   return createHash("sha256").update(identity).digest("hex");
 }
 
+export function assertProductionDatabaseIdentity(
+  environment: Record<string, string | undefined>,
+): void {
+  if (environment.VERCEL_ENV !== "production" && environment.NODE_ENV !== "production") return;
+  const databaseUrl = environment.DATABASE_URL;
+  if (!databaseUrl) throw new Error("PRODUCTION_DATABASE_URL_REQUIRED");
+  const expectedFingerprint = environment.NOETRA_PRODUCTION_DATABASE_FINGERPRINT?.trim();
+  if (!expectedFingerprint) throw new Error("PRODUCTION_DATABASE_IDENTITY_REQUIRED");
+  if (databaseIdentityFingerprint(databaseUrl) !== expectedFingerprint) {
+    throw new Error("PRODUCTION_DATABASE_IDENTITY_MISMATCH");
+  }
+}
+
 export function assertIsolatedPreviewEnvironment(
   environment: Record<string, string | undefined>,
 ): void {

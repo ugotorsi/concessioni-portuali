@@ -60,6 +60,11 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
   `/login` sul deployment protetto, ricontrolla configurazione e sorgente e verifica che l'alias non sia cambiato.
   Solo dopo esegue `vercel promote`, quindi verifica nuovamente alias, target, commit e `/login`.
 - Verifica in sola lettura dello stato corrente: `npm run deploy:production -- --expected-commit <SHA> --verify-only`.
+- Configurare obbligatoriamente `NOETRA_PRODUCTION_DATABASE_FINGERPRINT` con il
+  fingerprint host/porta/database prodotto dal preflight read-only sul medesimo
+  endpoint di `DATABASE_URL`. Il runtime Production crea il pool Prisma solo se
+  le due identita coincidono; `POSTGRES_NEON_PROJECT_ID` e le altre variabili
+  dell'integrazione Vercel non sostituiscono questo controllo.
 - Se il deployment e gia stato creato ma non promosso, recuperare il suo identificativo esatto e riprendere senza
   crearne un altro con `npm run deploy:production -- --expected-commit <SHA> --resume-deployment <dpl_ID>`.
   Se risulta gia promosso, usare `--verify-only` con lo SHA rilasciato.

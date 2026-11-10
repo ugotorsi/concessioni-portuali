@@ -3420,6 +3420,39 @@ model ActivityLog {
   @@index([createdAt])
 }
 
+model HistoricalActivityLogArchiveManifest {
+  id                        String                               @id
+  sourceDatabaseFingerprint String
+  sourceProjectId           String
+  sourceBranchId            String
+  sourceBackupBranchId      String
+  recordCount               Int
+  firstRecordId             String?
+  finalRecordId             String?
+  finalHash                 String
+  contentSha256             String
+  verificationMode          String
+  payloadHashVerifiedCount  Int
+  payloadHashIssueCode      String?
+  payloadHashIssueRecordId  String?
+  capturedAt                DateTime
+  records                   HistoricalActivityLogArchiveRecord[]
+}
+
+model HistoricalActivityLogArchiveRecord {
+  archiveId    String
+  ordinal      Int
+  originalId   String
+  createdAt    DateTime
+  previousHash String?
+  currentHash  String
+  payload      Json
+  archive      HistoricalActivityLogArchiveManifest @relation(fields: [archiveId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([archiveId, ordinal])
+  @@unique([archiveId, originalId])
+}
+
 model AiFascicoloTrustedReviewMaterial {
   id                              String   @id @default(cuid())
   enteId                          String

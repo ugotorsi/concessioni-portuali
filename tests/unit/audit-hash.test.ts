@@ -7,6 +7,7 @@ import {
   createHistoricalAuditHashVerificationState,
   sanitizeMetadata,
   stableStringify,
+  verifyAuditHashLinks,
   verifyAuditHashRecords,
   verifyHistoricalAuditHashRecords,
   type AuditHashRecord,
@@ -134,6 +135,15 @@ describe("audit hash helpers", () => {
       valid: false,
       verifiedCount: 1,
       issue: { recordId: "audit-2", code: "PREVIOUS_HASH_MISMATCH" },
+    });
+    expect(verifyAuditHashLinks([
+      { ...first, currentHash: "opaque-historical-hash" },
+      { ...second, previousHash: "opaque-historical-hash", currentHash: "opaque-final-hash" },
+    ])).toEqual({
+      valid: true,
+      verifiedCount: 2,
+      finalHash: "opaque-final-hash",
+      issue: null,
     });
   });
 

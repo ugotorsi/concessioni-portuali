@@ -27,6 +27,8 @@
     "runtime:verify-isolated-preview": "tsx scripts/runtime/verify-isolated-preview-environment.ts",
     "runtime:verify-post-audit-migration-rehearsal": "tsx scripts/runtime/verify-post-audit-migration-rehearsal.ts",
     "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",
+    "runtime:inventory-production-unification-storage": "tsx scripts/runtime/inventory-production-unification-storage.ts",
+    "runtime:create-production-unification-backup-manifest": "tsx scripts/runtime/create-production-unification-backup-manifest.ts",
     "runtime:diagnose-research-missions": "tsx scripts/runtime/diagnose-research-mission-scope.ts",
     "runtime:diagnose-research-auth": "tsx scripts/runtime/diagnose-research-auth-scope.ts",
     "runtime:diagnose-preview-recovery": "tsx scripts/runtime/diagnose-preview-password-recovery.ts",

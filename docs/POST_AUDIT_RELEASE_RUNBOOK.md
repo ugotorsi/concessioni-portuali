@@ -77,6 +77,27 @@ Il login read-only deve usare lo stesso host, porta e nome database del
 alternativo. Solo cosi `productionDatabaseIdentityFingerprint` rappresenta
 l'identita da escludere in Preview e rehearsal.
 
+### 2.3 Identita del database applicativo Production
+
+Ogni runtime con `VERCEL_ENV=production` o `NODE_ENV=production` richiede:
+
+```text
+NOETRA_PRODUCTION_DATABASE_FINGERPRINT=<productionDatabaseIdentityFingerprint>
+```
+
+Il valore deve provenire dal preflight read-only eseguito sulla stessa identita
+host, porta e database approvata per `DATABASE_URL`. Prisma confronta il
+fingerprint prima di creare il pool: variabile mancante, URL non valida o
+identita diversa bloccano tutte le query, incluse le operazioni mutative. Il
+controllo non usa `POSTGRES_NEON_PROJECT_ID`, che non determina la connessione
+selezionata dal client applicativo.
+
+Prima di ogni rilascio, verificare separatamente che `DATABASE_URL`, il secret
+read-only e il fingerprint descrivano la stessa identita. Una modifica a
+`DATABASE_URL` richiede un nuovo preflight e l'aggiornamento coordinato del
+fingerprint; non aggiornare il fingerprint per far passare un endpoint non
+ancora approvato.
+
 Esito richiesto:
 
 ```text
@@ -248,7 +269,53 @@ promozione e gia avvenuta e l'health check fallisce, ripromuovere il deployment
 Production precedente secondo la procedura Vercel autorizzata, quindi eseguire
 `--verify-only` sul relativo SHA.
 
-## 9. Interventi umani minimi residui
+## 9. Cutover unificazione Selvara
+
+Questa sequenza usa esclusivamente gli snapshot Neon esistenti e lo SHA completo
+del commit candidato, che deve essere pulito e gia pubblicato sul remote.
+
+1. Confermare gli snapshot `br-mute-surf-ato4730b` per il canonico e
+   `br-rough-queen-auks3axf` per lo storico; registrare conteggi e LSN.
+2. Mantenere AI, worker, provider automatici e automazioni disabilitati e
+   attivare la finestra di sola manutenzione per tutte le scritture applicative.
+3. Copiare nel bucket canonico i 5 oggetti presenti soltanto nel bucket storico,
+   conservando chiavi, dimensioni e SHA-256. Non eliminare o sovrascrivere gli
+   originali; interrompere se una destinazione preesistente ha digest diverso.
+4. Applicare sul database canonico soltanto le migrazioni pendenti del commit
+   candidato con `npx prisma migrate deploy`, quindi richiedere
+   `npx prisma migrate status`. Il ledger storico
+   `20260916_b2c14_block3b8b_official_hit_reconciliation` e gia riconciliato:
+   il primo tentativo e `rolled_back_at`, il secondo e registrato applicato e
+   lo schema effettivo contiene tutti gli oggetti previsti.
+5. Eseguire una sola importazione definitiva con scope
+   `UNIFY_CP058_2019`, URL sorgente storico, URL destinazione canonico,
+   bucket canonico, identita dello snapshot storico e
+   `NOETRA_PROMOTION_COMMIT_APPROVAL=NOETRA-PRODUCTION-DATABASE-UNIFICATION-COMMIT`.
+   Non riutilizzare l'algoritmo legacy a retry riga-per-riga.
+6. Prima di cambiare configurazione verificare: 968 righe selezionate, zero
+   residui, mapping CP-058 canonico, 89 evidenze collegate, 271 record
+   nell'archivio separato, ActivityLog canonico invariato e 10 oggetti storage
+   leggibili con dimensione e SHA-256 attesi.
+7. Aggiornare in modo coordinato `DATABASE_URL` e
+   `NOETRA_PRODUCTION_DATABASE_FINGERPRINT` verso
+   `aged-smoke-22484639 / staging-operativo`; non modificare variabili AI o
+   worker.
+8. Rilasciare lo stesso SHA con:
+
+```text
+npm run deploy:production -- --expected-commit <SHA_COMPLETO>
+```
+
+9. Eseguire verifica autenticata post-pubblicazione su login MFA, apertura
+   fascicolo Selvara, documenti, versioni, evidenze, missioni e report. Verificare
+   nuovamente identita database, alias, conteggi, ActivityLog canonico e archivio.
+10. In caso di errore prima dell'alias, lasciare invariata Production e
+    ripristinare il canonico dallo snapshot. Dopo l'alias, ripromuovere il
+    deployment precedente, ripristinare insieme `DATABASE_URL` e fingerprint e
+    usare lo snapshot canonico pre-import. I due bucket e lo storico originale
+    non devono essere eliminati durante la finestra di rollback.
+
+## 10. Interventi umani minimi residui
 
 1. DBA: ruolo read-only e, se necessario, clone isolato + backup.
 2. Repository admin: Environment GitHub, secret e reviewer.

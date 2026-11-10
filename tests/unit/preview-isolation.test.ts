@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertIsolatedPreviewEnvironment,
+  assertProductionDatabaseIdentity,
   databaseIdentityFingerprint,
 } from "@/server/release/previewIsolation";
 
@@ -24,6 +25,37 @@ function environment(databaseUrl = "postgresql://test:secret@preview.example.tes
 describe("isolated Preview guard", () => {
   it("accepts a separately identified synthetic Preview with execution disabled", () => {
     expect(() => assertIsolatedPreviewEnvironment(environment())).not.toThrow();
+  });
+
+  describe("Production database identity guard", () => {
+    const databaseUrl = "postgresql://production.example.test:5432/noetra_production";
+
+    it("accepts only the approved Production database identity", () => {
+      expect(() => assertProductionDatabaseIdentity({
+        VERCEL_ENV: "production",
+        DATABASE_URL: databaseUrl,
+        NOETRA_PRODUCTION_DATABASE_FINGERPRINT: databaseIdentityFingerprint(databaseUrl),
+      })).not.toThrow();
+    });
+
+    it("fails closed when the approved identity is missing or different", () => {
+      expect(() => assertProductionDatabaseIdentity({
+        VERCEL_ENV: "production",
+        DATABASE_URL: databaseUrl,
+      })).toThrow("PRODUCTION_DATABASE_IDENTITY_REQUIRED");
+      expect(() => assertProductionDatabaseIdentity({
+        NODE_ENV: "production",
+        DATABASE_URL: databaseUrl,
+        NOETRA_PRODUCTION_DATABASE_FINGERPRINT: "0".repeat(64),
+      })).toThrow("PRODUCTION_DATABASE_IDENTITY_MISMATCH");
+    });
+
+    it("does not constrain non-Production runtimes", () => {
+      expect(() => assertProductionDatabaseIdentity({
+        NODE_ENV: "development",
+        DATABASE_URL: databaseUrl,
+      })).not.toThrow();
+    });
   });
 
   it("rejects a Preview database that matches Production", () => {

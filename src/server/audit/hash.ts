@@ -279,6 +279,35 @@ export function verifyHistoricalAuditHashRecords(
   };
 }
 
+export function verifyAuditHashLinks(
+  records: readonly AuditHashRecord[],
+): AuditHashChainVerification {
+  let previousHash: string | null = null;
+  for (let index = 0; index < records.length; index += 1) {
+    const record = records[index];
+    if (record.previousHash !== previousHash) {
+      return {
+        valid: false,
+        verifiedCount: index,
+        finalHash: previousHash,
+        issue: {
+          recordId: record.id,
+          code: "PREVIOUS_HASH_MISMATCH",
+          expectedHash: previousHash,
+          observedHash: record.previousHash,
+        },
+      };
+    }
+    previousHash = record.currentHash;
+  }
+  return {
+    valid: true,
+    verifiedCount: records.length,
+    finalHash: previousHash,
+    issue: null,
+  };
+}
+
 export function verifyAuditHashRecords(
   records: readonly AuditHashRecord[],
   initialPreviousHash: string | null = null,
