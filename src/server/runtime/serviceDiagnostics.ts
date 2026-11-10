@@ -65,6 +65,8 @@ function result(
 function r2ConfigurationMetrics(
   environment: Readonly<Record<string, string | undefined>>,
 ): RuntimeServiceDiagnostic["metrics"] {
+  const accessKeyId = environment.S3_ACCESS_KEY_ID!.trim();
+  const secretAccessKey = environment.S3_SECRET_ACCESS_KEY!.trim();
   let endpointRoot = false;
   try {
     const endpoint = new URL(environment.S3_ENDPOINT!.trim());
@@ -79,6 +81,16 @@ function r2ConfigurationMetrics(
     {
       label: "Path-style",
       value: environment.S3_FORCE_PATH_STYLE?.trim().toLowerCase() === "false" ? "false" : "true",
+    },
+    { label: "Lunghezza Access Key", value: accessKeyId.length.toString() },
+    {
+      label: "Access Key con virgolette esterne",
+      value: /^(['"]).*\1$/.test(accessKeyId) ? "sì" : "no",
+    },
+    { label: "Lunghezza Secret Key", value: secretAccessKey.length.toString() },
+    {
+      label: "Secret Key con virgolette esterne",
+      value: /^(['"]).*\1$/.test(secretAccessKey) ? "sì" : "no",
     },
   ];
 }
