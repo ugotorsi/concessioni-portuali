@@ -1,7 +1,11 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { describe, expect, it } from "vitest";
 
-import { DocumentStorageS3Error, S3StorageAdapter } from "@/server/documents/storage/s3StorageAdapter";
+import {
+  DocumentStorageS3Error,
+  sanitizedS3ErrorDiagnostics,
+  S3StorageAdapter,
+} from "@/server/documents/storage/s3StorageAdapter";
 
 function configureS3(): void {
   process.env.DOCUMENT_STORAGE_BACKEND = "s3";
@@ -26,6 +30,17 @@ function putInput() {
 }
 
 describe("s3 storage adapter exists", () => {
+  it("extracts the AWS uppercase Code field without exposing the error payload", () => {
+    expect(sanitizedS3ErrorDiagnostics({
+      Code: "AuthorizationHeaderMalformed",
+      name: "Unknown",
+      $metadata: { httpStatusCode: 400 },
+    })).toEqual({
+      code: "AuthorizationHeaderMalformed",
+      statusCode: 400,
+    });
+  });
+
   it("returns false for not found objects", async () => {
     configureS3();
 

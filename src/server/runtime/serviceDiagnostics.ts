@@ -62,6 +62,27 @@ function result(
   return { id, status, code, summary, metrics };
 }
 
+function r2ConfigurationMetrics(
+  environment: Readonly<Record<string, string | undefined>>,
+): RuntimeServiceDiagnostic["metrics"] {
+  let endpointRoot = false;
+  try {
+    const endpoint = new URL(environment.S3_ENDPOINT!.trim());
+    endpointRoot = endpoint.pathname === "/" && endpoint.search === "" && endpoint.hash === "";
+  } catch {
+    endpointRoot = false;
+  }
+  return [
+    { label: "Bucket", value: environment.S3_BUCKET!.trim() },
+    { label: "Endpoint senza path", value: endpointRoot ? "sì" : "no" },
+    { label: "Regione auto", value: environment.S3_REGION!.trim() === "auto" ? "sì" : "no" },
+    {
+      label: "Path-style",
+      value: environment.S3_FORCE_PATH_STYLE?.trim().toLowerCase() === "false" ? "false" : "true",
+    },
+  ];
+}
+
 async function fetchWithTimeout(
   fetchImpl: typeof fetch,
   url: string,
@@ -251,7 +272,7 @@ async function diagnoseR2(
       "READY",
       "R2_BUCKET_REACHABLE",
       "Bucket R2 raggiungibile con una verifica non distruttiva.",
-      [{ label: "Bucket", value: environment.S3_BUCKET!.trim() }],
+      r2ConfigurationMetrics(environment),
     );
   } catch (error) {
     const diagnostics = sanitizedS3ErrorDiagnostics(error);
@@ -261,7 +282,7 @@ async function diagnoseR2(
       "R2_BUCKET_UNREACHABLE",
       "Il bucket configurato non ha superato la verifica non distruttiva.",
       [
-        { label: "Bucket", value: environment.S3_BUCKET!.trim() },
+        ...r2ConfigurationMetrics(environment),
         { label: "Codice SDK", value: diagnostics.code },
         { label: "Stato HTTP", value: diagnostics.statusCode?.toString() ?? "non disponibile" },
       ],

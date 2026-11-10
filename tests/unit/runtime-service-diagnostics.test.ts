@@ -54,6 +54,7 @@ describe("runtime service diagnostics", () => {
       S3_BUCKET: "documents",
       S3_ACCESS_KEY_ID: "access",
       S3_SECRET_ACCESS_KEY: "secret",
+      S3_FORCE_PATH_STYLE: "true",
       AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "true",
       SERVER_AUTONOMOUS_RESEARCH_ENABLED: "true",
       LEGAL_DATA_HUNTER_API_KEY: "secret",
@@ -180,6 +181,9 @@ describe("runtime service diagnostics", () => {
         status: "UNREACHABLE",
         code: "R2_BUCKET_UNREACHABLE",
         metrics: expect.arrayContaining([
+          { label: "Endpoint senza path", value: "sì" },
+          { label: "Regione auto", value: "sì" },
+          { label: "Path-style", value: "true" },
           { label: "Codice SDK", value: "AccessDenied" },
           { label: "Stato HTTP", value: "403" },
         ]),

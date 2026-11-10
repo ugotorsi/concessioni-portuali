@@ -46,6 +46,7 @@ export class DocumentStorageS3Error extends Error {
 interface AwsLikeError {
   name?: string;
   code?: string;
+  Code?: string;
   $metadata?: {
     httpStatusCode?: number;
   };
@@ -54,7 +55,7 @@ interface AwsLikeError {
 
 function extractErrorCode(error: unknown): string {
   const candidate = error as AwsLikeError;
-  return candidate.code ?? candidate.name ?? "UNKNOWN_S3_ERROR";
+  return candidate.code ?? candidate.Code ?? candidate.name ?? "UNKNOWN_S3_ERROR";
 }
 
 function extractStatusCode(error: unknown): number | undefined {
