@@ -31,13 +31,18 @@ function putInput() {
 
 describe("s3 storage adapter exists", () => {
   it("extracts the AWS uppercase Code field without exposing the error payload", () => {
-    expect(sanitizedS3ErrorDiagnostics({
-      Code: "AuthorizationHeaderMalformed",
-      name: "Unknown",
-      $metadata: { httpStatusCode: 400 },
-    })).toEqual({
+    const error = Object.assign(
+      new Error("Credential access key has length 40, should be 32; endpoint https://secret.invalid/token"),
+      {
+        Code: "AuthorizationHeaderMalformed",
+        name: "Unknown",
+        $metadata: { httpStatusCode: 400 },
+      },
+    );
+    expect(sanitizedS3ErrorDiagnostics(error)).toEqual({
       code: "AuthorizationHeaderMalformed",
       statusCode: 400,
+      message: "Credential access key has length 40, should be 32; endpoint [redacted-url]",
     });
   });
 

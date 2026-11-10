@@ -184,10 +184,9 @@ describe("runtime service diagnostics", () => {
           { label: "Endpoint senza path", value: "sì" },
           { label: "Regione auto", value: "sì" },
           { label: "Path-style", value: "true" },
-          { label: "Formato Access Key R2", value: "compatibile" },
-          { label: "Formato Secret Key R2", value: "compatibile" },
           { label: "Codice SDK", value: "AccessDenied" },
           { label: "Stato HTTP", value: "403" },
+          { label: "Dettaglio SDK", value: "denied" },
         ]),
       }),
     ]));

@@ -66,11 +66,19 @@ function extractStatusCode(error: unknown): number | undefined {
 export function sanitizedS3ErrorDiagnostics(error: unknown): {
   code: string;
   statusCode?: number;
+  message?: string;
 } {
   const statusCode = extractStatusCode(error);
-  return statusCode === undefined
-    ? { code: extractErrorCode(error) }
-    : { code: extractErrorCode(error), statusCode };
+  const rawMessage = error instanceof Error ? error.message.trim() : "";
+  const message = rawMessage
+    .replace(/https?:\/\/\S+/gi, "[redacted-url]")
+    .replace(/[A-Za-z0-9+/_=-]{16,}/g, "[redacted-token]")
+    .slice(0, 240);
+  return {
+    code: extractErrorCode(error),
+    ...(statusCode === undefined ? {} : { statusCode }),
+    ...(message ? { message } : {}),
+  };
 }
 
 function isNotFoundLike(code: string, statusCode?: number): boolean {

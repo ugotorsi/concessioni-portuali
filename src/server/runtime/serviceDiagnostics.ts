@@ -80,14 +80,6 @@ function r2ConfigurationMetrics(
       label: "Path-style",
       value: environment.S3_FORCE_PATH_STYLE?.trim().toLowerCase() === "false" ? "false" : "true",
     },
-    {
-      label: "Formato Access Key R2",
-      value: /^[0-9a-f]{32}$/i.test(environment.S3_ACCESS_KEY_ID!.trim()) ? "compatibile" : "incompatibile",
-    },
-    {
-      label: "Formato Secret Key R2",
-      value: /^[0-9a-f]{64}$/i.test(environment.S3_SECRET_ACCESS_KEY!.trim()) ? "compatibile" : "incompatibile",
-    },
   ];
 }
 
@@ -293,6 +285,7 @@ async function diagnoseR2(
         ...r2ConfigurationMetrics(environment),
         { label: "Codice SDK", value: diagnostics.code },
         { label: "Stato HTTP", value: diagnostics.statusCode?.toString() ?? "non disponibile" },
+        { label: "Dettaglio SDK", value: diagnostics.message ?? "non disponibile" },
       ],
     );
   }
