@@ -92,11 +92,17 @@ function diagnosticVariant(status: string): "success" | "warning" | "danger" {
 export default async function RuntimeOperationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ procedimentoId?: string | string[] }>;
+  searchParams: Promise<{ procedimentoId?: string | string[]; workbenchNotice?: string | string[] }>;
 }) {
   await requireRole(["ADMIN"]);
   const adminUser = await requireAdminWithMfa();
-  const requestedProcedimentoId = (await searchParams).procedimentoId;
+  const resolvedSearchParams = await searchParams;
+  const requestedProcedimentoId = resolvedSearchParams.procedimentoId;
+  const requestedWorkbenchNotice = resolvedSearchParams.workbenchNotice;
+  const workbenchNotice = typeof requestedWorkbenchNotice === "string"
+    && /^[A-Z0-9_]{1,80}$/.test(requestedWorkbenchNotice)
+    ? requestedWorkbenchNotice
+    : null;
   const selectedProcedimentoId = typeof requestedProcedimentoId === "string" && requestedProcedimentoId.trim()
     ? requestedProcedimentoId.trim()
     : null;
@@ -550,6 +556,7 @@ export default async function RuntimeOperationsPage({
         }))}
         selectedProcedimentoId={selectedProcedimentoId}
         snapshot={legalWorkbench}
+        notice={workbenchNotice}
         assignedActorId={adminUser.id}
         confirmReferenceDateAction={confirmResearchReferenceDate}
         recoverMissionsAction={recoverCurrentKnowledgeMissions}

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
@@ -16,7 +17,7 @@ import {
   setAutomationControlState,
   type AutomationMode,
 } from "@/server/automation/automationControl";
-import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorpusAnalysis";
+import { requestExistingCorpusAnalysis, ExistingCorpusAnalysisRequestError } from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import {
   getAiModelCatalogEntry,
   aiProviderIdSchema,
@@ -51,7 +52,7 @@ import {
   provisionDefaultProcedimentoBudgetPolicy,
   readDefaultProcedimentoBudgetAuthorization,
 } from "@/server/runtime/procedimentoBudgetPolicy";
-import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
+import { recoverCurrentKnowledgeResearchMissions, ResearchMissionRecoveryError } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-legal-analysis-pipeline";
 import { ensureAuthorizedDocumentExtractionRetryJob } from "@/server/documents/documentExtractionRetryAdmission";
@@ -1092,12 +1093,22 @@ export async function startLegalAnalysisPipeline(formData: FormData): Promise<vo
     allowWhenEnteMissing: false,
   });
 
-  const result = await runManualLegalAnalysisPipeline({
-    tenantId: procedimento.enteId,
-    procedimentoId: procedimento.id,
-    executionId,
-    actor: { id: currentUser.id, email: currentUser.email, role: "ADMIN" },
-  });
+  let result: Awaited<ReturnType<typeof runManualLegalAnalysisPipeline>>;
+  try {
+    result = await runManualLegalAnalysisPipeline({
+      tenantId: procedimento.enteId,
+      procedimentoId: procedimento.id,
+      executionId,
+      actor: { id: currentUser.id, email: currentUser.email, role: "ADMIN" },
+    });
+  } catch (error) {
+    // Known authorization/readiness gates: inform the operator in-page
+    // instead of replacing the whole screen with the error boundary.
+    if (error instanceof ExistingCorpusAnalysisRequestError) {
+      redirect(`/admin/runtime?procedimentoId=${encodeURIComponent(procedimento.id)}&workbenchNotice=${encodeURIComponent(error.code)}`);
+    }
+    throw error;
+  }
   await auditSuccess({
     azione: "FASCICOLO_LEGAL_ANALYSIS_PIPELINE_REQUEST",
     entita: "Procedimento",
@@ -1150,6 +1161,11 @@ export async function recoverCurrentKnowledgeMissions(
     procedimentoId: procedimento.id,
     candidateActorId,
     requireValidCandidate: candidateActorId !== null,
+  }).catch((error: unknown) => {
+    if (error instanceof ResearchMissionRecoveryError) {
+      redirect(`/admin/runtime?procedimentoId=${encodeURIComponent(procedimento.id)}&workbenchNotice=${encodeURIComponent(error.code)}`);
+    }
+    throw error;
   });
   await auditSuccess({
     azione: "FASCICOLO_KNOWLEDGE_MISSION_RECOVER",

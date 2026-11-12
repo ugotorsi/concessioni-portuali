@@ -114,6 +114,7 @@ interface ProcedimentoDetailPageProps {
     reconciliationError?: string | string[];
     reconciliationDone?: string | string[];
     analysisRefresh?: string | string[];
+    researchNotice?: string | string[];
   }>;
 }
 
@@ -208,7 +209,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice } = await searchParams;
+  const sanitizedResearchNotice = typeof researchNotice === "string" && /^[A-Z0-9_]{1,80}$/.test(researchNotice)
+    ? researchNotice
+    : null;
   const activeSection = resolveFascicoloSection(section);
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
@@ -558,6 +562,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
                 documentCount={documentCorpus?.documentCount ?? 0}
                 reportCount={structuredReportSnapshots.length}
+                refusalNotice={sanitizedResearchNotice}
               />
               <FascicoloResearch
                 model={baseResearchModel}
@@ -973,6 +978,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
               documentCount={documentCorpus?.documentCount ?? 0}
               reportCount={structuredReportSnapshots.length}
+              refusalNotice={sanitizedResearchNotice}
             />
             <FascicoloResearch
               model={researchModel}
