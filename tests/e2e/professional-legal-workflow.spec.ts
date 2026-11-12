@@ -11,7 +11,15 @@ test("GIURIDICO creates, versions and approves a question without starting paid 
 
   try {
     const concessione = await pool.query<{ id: string; enteId: string | null }>(
-      'SELECT "id", "enteId" FROM "Concessione" WHERE "enteId" IS NOT NULL LIMIT 1',
+      `SELECT c."id", c."enteId"
+       FROM "Concessione" c
+       WHERE c."enteId" IS NOT NULL
+         AND c."enteId" IN (
+           SELECT tm."enteId" FROM "TenantMembership" tm
+           JOIN "User" u ON u."id" = tm."userId"
+           WHERE u."email" = 'giuridico@demo.local'
+         )
+       LIMIT 1`,
     );
     const owner = concessione.rows[0];
     if (!owner?.enteId) throw new Error("Missing tenant-scoped concessione fixture.");

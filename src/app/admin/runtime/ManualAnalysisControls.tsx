@@ -28,6 +28,19 @@ export function ManualAnalysisControls(props: {
   singleAction: (formData: FormData) => Promise<void>;
   batchAction: (formData: FormData) => Promise<void>;
 }) {
+  const enabledModels = props.aiModels.filter((model) => model.enabled);
+  const hasEnabledModel = enabledModels.length > 0;
+  const effectiveDefaultModelCode = enabledModels.some(
+    (model) => model.code === props.defaultAiModelCode,
+  )
+    ? props.defaultAiModelCode
+    : enabledModels[0]?.code ?? "";
+  const noEngineNotice = (
+    <p className="text-sm text-amber-700">
+      Nessun motore AI è abilitato all&apos;uso manuale: abilitare e verificare un provider
+      nella sezione Motori AI prima di avviare un&apos;elaborazione.
+    </p>
+  );
   return (
     <div className="grid gap-5 xl:grid-cols-2">
       <form
@@ -62,7 +75,7 @@ export function ManualAnalysisControls(props: {
           <select
             className="h-10 rounded-md border border-slate-300 px-3 text-sm"
             name="aiModelSelection"
-            defaultValue={props.defaultAiModelCode}
+            defaultValue={effectiveDefaultModelCode}
             required
           >
             {props.aiModels.map((model) => (
@@ -72,7 +85,8 @@ export function ManualAnalysisControls(props: {
             ))}
           </select>
         </label>
-        <Button type="submit" disabled={!props.procedimenti.length}>
+        {hasEnabledModel ? null : noEngineNotice}
+        <Button type="submit" disabled={!props.procedimenti.length || !hasEnabledModel}>
           Avvia analisi manuale
         </Button>
       </form>
@@ -109,7 +123,7 @@ export function ManualAnalysisControls(props: {
           <select
             className="h-10 rounded-md border border-slate-300 px-3 text-sm"
             name="aiModelSelection"
-            defaultValue={props.defaultAiModelCode}
+            defaultValue={effectiveDefaultModelCode}
             required
           >
             {props.aiModels.map((model) => (
@@ -119,7 +133,8 @@ export function ManualAnalysisControls(props: {
             ))}
           </select>
         </label>
-        <Button type="submit" variant="outline" disabled={!props.tenants.length}>
+        {hasEnabledModel ? null : noEngineNotice}
+        <Button type="submit" variant="outline" disabled={!props.tenants.length || !hasEnabledModel}>
           Avvia batch manuale
         </Button>
       </form>

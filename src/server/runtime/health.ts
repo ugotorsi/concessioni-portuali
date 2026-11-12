@@ -69,6 +69,34 @@ export interface RuntimeHealthSnapshot {
   migrationState: "COMPATIBLE" | "PENDING_OR_UNKNOWN";
 }
 
+const UNDEFINED_TABLE_SQLSTATE = "42P01";
+
+function isUndefinedTableError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const candidate = error as { code?: unknown; meta?: { code?: unknown } };
+  return candidate.code === UNDEFINED_TABLE_SQLSTATE
+    || candidate.meta?.code === UNDEFINED_TABLE_SQLSTATE
+    || (error instanceof Error && error.message.includes(UNDEFINED_TABLE_SQLSTATE));
+}
+
+async function getMigrationCompatibility(executor: RuntimeSqlExecutor): Promise<boolean> {
+  try {
+    const result = await executor.query<{ migrationCompatible: boolean }>(`
+      SELECT EXISTS (
+        SELECT 1 FROM "_prisma_migrations"
+        WHERE "migration_name"='20261001_runtime_worker_cost_readiness'
+          AND "finished_at" IS NOT NULL AND "rolled_back_at" IS NULL
+      ) AS "migrationCompatible"
+    `, []);
+    return result.rows[0]?.migrationCompatible === true;
+  } catch (error) {
+    // Environments provisioned via `prisma db push` have no _prisma_migrations
+    // table: report the migration state as unknown instead of failing health.
+    if (isUndefinedTableError(error)) return false;
+    throw error;
+  }
+}
+
 export async function getRuntimeHealthSnapshot(
   staleWorkerSeconds = 60,
   executor: RuntimeSqlExecutor = defaultExecutor,
@@ -81,7 +109,6 @@ export async function getRuntimeHealthSnapshot(
     oldestPendingAgeSeconds: number | null;
     activeWorkers: number;
     lastSuccessfulJobAt: Date | null;
-    migrationCompatible: boolean;
   }>(`
     SELECT
       (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status" IN ('QUEUED','RETRY_WAIT')) AS "queueDepth",
@@ -90,14 +117,16 @@ export async function getRuntimeHealthSnapshot(
       (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status"='RUNNING' AND "leaseExpiresAt" <= CURRENT_TIMESTAMP) AS "staleLeases",
       (SELECT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP-MIN("createdAt"))::int FROM "AsyncJob" WHERE "status" IN ('QUEUED','RETRY_WAIT')) AS "oldestPendingAgeSeconds",
       (SELECT COUNT(*)::int FROM "RuntimeWorkerHeartbeat" WHERE "status"='RUNNING' AND "lastSeenAt" > CURRENT_TIMESTAMP-($1*INTERVAL '1 second')) AS "activeWorkers",
-      (SELECT MAX("completedAt") FROM "AsyncJob" WHERE "status"='SUCCEEDED') AS "lastSuccessfulJobAt",
-      EXISTS (SELECT 1 FROM "_prisma_migrations" WHERE "migration_name"='20261001_runtime_worker_cost_readiness' AND "finished_at" IS NOT NULL AND "rolled_back_at" IS NULL) AS "migrationCompatible"
+      (SELECT MAX("completedAt") FROM "AsyncJob" WHERE "status"='SUCCEEDED') AS "lastSuccessfulJobAt"
   `, [staleWorkerSeconds]);
-  const row = result.rows[0];
+  const row = result.rows[0] as (typeof result.rows[0] & { migrationCompatible?: boolean }) | undefined;
   if (!row) throw new Error("RUNTIME_HEALTH_QUERY_FAILED");
+  const migrationCompatible = typeof row.migrationCompatible === "boolean"
+    ? row.migrationCompatible
+    : await getMigrationCompatibility(executor);
   const status = row.queueDepth > 0 && row.activeWorkers === 0
     ? "WORKER_UNAVAILABLE" as const
-    : row.failedJobs > 0 || row.staleLeases > 0 || !row.migrationCompatible
+    : row.failedJobs > 0 || row.staleLeases > 0 || !migrationCompatible
       ? "DEGRADED" as const
       : "HEALTHY" as const;
   return {
@@ -110,6 +139,6 @@ export async function getRuntimeHealthSnapshot(
     oldestPendingAgeSeconds: row.oldestPendingAgeSeconds,
     activeWorkers: row.activeWorkers,
     lastSuccessfulJobAt: row.lastSuccessfulJobAt,
-    migrationState: row.migrationCompatible ? "COMPATIBLE" : "PENDING_OR_UNKNOWN",
+    migrationState: migrationCompatible ? "COMPATIBLE" : "PENDING_OR_UNKNOWN",
   };
 }

@@ -28,6 +28,7 @@ test("procedimento checklist section and update form visibility by role", async 
     "Criticità",
     "Rapporto",
     "Proposte",
+    "Atti",
   ]);
   const overview = page.locator("#panoramica");
   await expect(overview.getByText("Richiede attenzione", { exact: true })).toBeVisible();
