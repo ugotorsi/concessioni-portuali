@@ -168,6 +168,53 @@ afterEach(async () => {
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
 
+  it("re-promotes a demoted mission with the same deterministic id instead of failing", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = plan("h".repeat(64), "h".repeat(64));
+    await setCurrent(db, "revision-h1");
+    const first = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h1",
+      assignedActorId: "actor-1",
+      plans: [samePlan],
+    }, ctx);
+    expect(first[0]?.outcome).toBe("CREATED");
+
+    // A later revision without this plan demotes the mission to HISTORICAL.
+    await setCurrent(db, "revision-h2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h2",
+      assignedActorId: "actor-1",
+      plans: [],
+    }, ctx);
+    const demoted = await db.query<{ lifecycleStatus: string }>(
+      'SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [samePlan.mission!.missionId],
+    );
+    expect(demoted.rows[0]?.lifecycleStatus).toBe("HISTORICAL");
+
+    // Planning the same mission again must re-promote the demoted record.
+    await setCurrent(db, "revision-h3");
+    const again = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h3",
+      assignedActorId: "actor-1",
+      plans: [samePlan],
+    }, ctx);
+    expect(again[0]?.outcome).toBe("REUSED");
+    expect(again[0]?.lifecycleStatus).toBe("CURRENT");
+    const rows = await db.query<{ lifecycleStatus: string; count: string }>(
+      'SELECT "lifecycleStatus", COUNT(*)::text AS count FROM "ResearchMissionRecord" WHERE "id" = $1 GROUP BY "lifecycleStatus"',
+      [samePlan.mission!.missionId],
+    );
+    expect(rows.rows).toEqual([{ lifecycleStatus: "CURRENT", count: "1" }]);
+  });
+
   it("preserves current missions created from approved professional questions", async () => {
     const db = await database();
     const ctx = context(db);

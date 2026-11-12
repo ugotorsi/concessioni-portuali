@@ -126,12 +126,28 @@ export async function reconcileKnowledgeResearchMissions(input: {
           AND "lifecycleStatus" = 'CURRENT'
         FOR UPDATE
       `, [input.tenantId, input.procedimentoId, plan.missionFingerprint]);
+      let existingRow = existing.rows[0] ?? null;
+      if (!existingRow) {
+        // Mission ids are deterministic: a previously demoted (HISTORICAL)
+        // record with the same id must be re-promoted instead of re-inserted,
+        // otherwise the insert below violates the primary key.
+        const demoted = await tx.query<{
+          id: string;
+          status: ResearchMissionStatus;
+          assignedActorId: string | null;
+        }>(`
+          SELECT "id", "status", "assignedActorId" FROM "ResearchMissionRecord"
+          WHERE "id" = $1 AND "tenantId" = $2 AND "caseId" = $3
+          FOR UPDATE
+        `, [mission.missionId, input.tenantId, input.procedimentoId]);
+        existingRow = demoted.rows[0] ?? null;
+      }
       let outcome: "CREATED" | "REUSED";
       let missionId: string;
       let operationalStatus: ResearchMissionStatus;
       let assignedActorId: string | null;
-      if (existing.rows[0]) {
-        missionId = existing.rows[0].id;
+      if (existingRow) {
+        missionId = existingRow.id;
         outcome = "REUSED";
         const updated = await tx.query<{
           status: ResearchMissionStatus;
