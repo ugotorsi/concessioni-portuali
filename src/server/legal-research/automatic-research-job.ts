@@ -78,6 +78,7 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
   correlationId: string;
   now?: Date;
   env?: AutomaticResearchPolicyEnv;
+  requireWorkerActorMatch?: boolean;
 }>, dependencies: Readonly<{
   findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
   admitJob?(admission: AsyncJobAdmissionInput): Promise<{ job: { id: string } }>;
@@ -107,6 +108,7 @@ async function ensureResearchExecution(
     correlationId: string;
     now?: Date;
     env?: AutomaticResearchPolicyEnv | ManualResearchPolicyEnv;
+    requireWorkerActorMatch?: boolean;
   }>,
   dependencies: Readonly<{
     findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
@@ -137,6 +139,14 @@ async function ensureResearchExecution(
         });
   if (!decision.authorized || !decision.policyDecisionRef) {
     return { outcome: "NOT_AUTHORIZED", requirementCode: decision.requirementCode, jobId: null };
+  }
+  if (mode === "AUTOMATIC" && input.requireWorkerActorMatch
+    && decision.workerActorId !== input.actorId) {
+    return {
+      outcome: "NOT_AUTHORIZED",
+      requirementCode: "AUTOMATIC_RESEARCH_WORKER_ACTOR_MISMATCH",
+      jobId: null,
+    };
   }
   const findJob = dependencies.findJobByIdempotencyKey ?? defaultFindJobByIdempotencyKey;
   const admit = dependencies.admitJob ?? admitAsyncJob;
@@ -217,6 +227,7 @@ export async function admitCurrentKnowledgeAutonomousResearch(input: Readonly<{
       tenantId: record.tenantId,
       actorId: record.assignedActorId!,
       correlationId: input.correlationId ?? `automatic-research:${mission.missionId}`,
+      requireWorkerActorMatch: true,
     });
     admissions.push({ missionId: record.id, ...result });
   }

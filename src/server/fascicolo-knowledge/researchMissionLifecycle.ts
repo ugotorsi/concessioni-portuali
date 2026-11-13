@@ -51,6 +51,27 @@ function payloadFingerprint(value: JsonValue): string {
   return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
 }
 
+async function authorizedAssignee(
+  tx: ResearchMissionLifecycleSqlExecutor,
+  tenantId: string,
+  candidateActorId: string | null,
+): Promise<string | null> {
+  if (!candidateActorId) return null;
+  const actor = await tx.query<{ id: string }>(`
+    SELECT actor."id"
+    FROM "User" AS actor
+    INNER JOIN "TenantMembership" AS membership
+      ON membership."userId" = actor."id"
+      AND membership."enteId" = $2
+    WHERE actor."id" = $1
+      AND actor."attivo" = TRUE
+      AND actor."ruolo" IN ('ADMIN', 'OPERATORE_SOCIETA', 'GIURIDICO', 'TECNICO', 'ECONOMICO')
+    LIMIT 1
+    FOR SHARE OF actor, membership
+  `, [candidateActorId, tenantId]);
+  return actor.rows[0]?.id ?? null;
+}
+
 /**
  * A mission already executed on the current revision and deferred as incomplete is not re-queued:
  * the same question, date and corpus would repeat the same paid calls. Its wave slot passes to the
@@ -115,13 +136,24 @@ export async function reconcileKnowledgeResearchMissions(input: {
     const currentMissionIds: string[] = [];
     for (const plan of executablePlans) {
       const mission = plan.mission!;
-      const planAssignee = plan.autonomousActorId ?? input.assignedActorId;
+      const planAssignee = await authorizedAssignee(
+        tx,
+        input.tenantId,
+        plan.autonomousActorId ?? input.assignedActorId,
+      );
       const existing = await tx.query<{
         id: string;
         status: ResearchMissionStatus;
         assignedActorId: string | null;
+        lifecycleStatus: "CURRENT" | "HISTORICAL";
+        claimantId: string | null;
+        claimToken: string | null;
+        claimExpiresAt: Date | null;
+        activeExecutionId: string | null;
       }>(`
-        SELECT "id", "status", "assignedActorId" FROM "ResearchMissionRecord"
+        SELECT "id", "status", "assignedActorId", "lifecycleStatus",
+          "claimantId", "claimToken", "claimExpiresAt", "activeExecutionId"
+        FROM "ResearchMissionRecord"
         WHERE "tenantId" = $1 AND "caseId" = $2 AND "missionFingerprint" = $3
           AND "lifecycleStatus" = 'CURRENT'
         FOR UPDATE
@@ -135,8 +167,15 @@ export async function reconcileKnowledgeResearchMissions(input: {
           id: string;
           status: ResearchMissionStatus;
           assignedActorId: string | null;
+          lifecycleStatus: "CURRENT" | "HISTORICAL";
+          claimantId: string | null;
+          claimToken: string | null;
+          claimExpiresAt: Date | null;
+          activeExecutionId: string | null;
         }>(`
-          SELECT "id", "status", "assignedActorId" FROM "ResearchMissionRecord"
+          SELECT "id", "status", "assignedActorId", "lifecycleStatus",
+            "claimantId", "claimToken", "claimExpiresAt", "activeExecutionId"
+          FROM "ResearchMissionRecord"
           WHERE "id" = $1 AND "tenantId" = $2 AND "caseId" = $3
           FOR UPDATE
         `, [mission.missionId, input.tenantId, input.procedimentoId]);
@@ -147,6 +186,14 @@ export async function reconcileKnowledgeResearchMissions(input: {
       let operationalStatus: ResearchMissionStatus;
       let assignedActorId: string | null;
       if (existingRow) {
+        const rePromoting = existingRow.lifecycleStatus === "HISTORICAL";
+        if (rePromoting && (existingRow.status === "IN_PROGRESS"
+          || existingRow.claimantId !== null
+          || existingRow.claimToken !== null
+          || existingRow.claimExpiresAt !== null
+          || existingRow.activeExecutionId !== null)) {
+          throw new Error("HISTORICAL_RESEARCH_MISSION_STILL_CLAIMED");
+        }
         missionId = existingRow.id;
         outcome = "REUSED";
         const updated = await tx.query<{
@@ -158,17 +205,27 @@ export async function reconcileKnowledgeResearchMissions(input: {
               "legalIssueSemanticKey" = $5,
               "researchQuestionSemanticKey" = $6,
               "referenceDateBasis" = $7::jsonb,
-              "assignedActorId" = COALESCE("assignedActorId", $8),
+              "assignedActorId" = CASE
+                WHEN "lifecycleStatus" = 'HISTORICAL'
+                  OR "status" IN ('PENDING', 'DEFERRED')
+                THEN $8
+                ELSE "assignedActorId"
+              END,
               "status" = CASE
-                WHEN "status" = 'DEFERRED' AND COALESCE("assignedActorId", $8) IS NOT NULL
-                  AND $9 = 'ADMITTED'
-                THEN 'PENDING'::"ResearchMissionStatus"
+                WHEN "status" IN ('PENDING', 'DEFERRED') THEN
+                  CASE
+                    WHEN $8 IS NOT NULL AND $9 = 'ADMITTED'
+                    THEN 'PENDING'::"ResearchMissionStatus"
+                    ELSE 'DEFERRED'::"ResearchMissionStatus"
+                  END
                 ELSE "status"
               END,
               "deferredAt" = CASE
-                WHEN "status" = 'DEFERRED' AND COALESCE("assignedActorId", $8) IS NOT NULL
-                  AND $9 = 'ADMITTED'
-                THEN NULL
+                WHEN "status" IN ('PENDING', 'DEFERRED') THEN
+                  CASE
+                    WHEN $8 IS NOT NULL AND $9 = 'ADMITTED' THEN NULL
+                    ELSE COALESCE("deferredAt", CURRENT_TIMESTAMP)
+                  END
                 ELSE "deferredAt"
               END,
               "lifecycleStatus" = 'CURRENT',

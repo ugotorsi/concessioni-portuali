@@ -196,6 +196,26 @@ describe("automatic research queue job", () => {
     });
   });
 
+  it("fails closed when a queued autonomous mission has an obsolete worker actor", async () => {
+    const admitJob = vi.fn();
+    await expect(ensureAutomaticResearchExecution({
+      mission,
+      tenantId: "tenant-1",
+      actorId: "obsolete-worker",
+      correlationId: "correlation-1",
+      env,
+      requireWorkerActorMatch: true,
+    }, {
+      findJobByIdempotencyKey: vi.fn(),
+      admitJob,
+    })).resolves.toEqual({
+      outcome: "NOT_AUTHORIZED",
+      requirementCode: "AUTOMATIC_RESEARCH_WORKER_ACTOR_MISMATCH",
+      jobId: null,
+    });
+    expect(admitJob).not.toHaveBeenCalled();
+  });
+
   it("reuses a live job and admits a bounded new generation only after the previous job is terminal", async () => {
     const jobs = new Map<string, { id: string; status: string }>();
     const admitted: string[] = [];

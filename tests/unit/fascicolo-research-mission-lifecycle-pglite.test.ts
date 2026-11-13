@@ -100,8 +100,24 @@ async function database() {
   await db.exec(migration);
   await db.exec(versioningMigration);
   await db.exec('ALTER TABLE "ResearchMissionRecord" ADD COLUMN "professionalQuestionVersionId" TEXT;');
-  await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
-  await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
+  await db.query(`
+    INSERT INTO "User" ("id", "attivo", "ruolo") VALUES
+      ('admin-1', TRUE, 'ADMIN'),
+      ('actor-1', TRUE, 'ADMIN'),
+      ('actor-2', TRUE, 'GIURIDICO'),
+      ('worker-old', TRUE, 'ADMIN'),
+      ('worker-new', TRUE, 'ADMIN'),
+      ('viewer-1', TRUE, 'VIEWER_ADSP')
+  `);
+  await db.query(`
+    INSERT INTO "TenantMembership" ("userId", "enteId") VALUES
+      ('admin-1', 'tenant-1'),
+      ('actor-1', 'tenant-1'),
+      ('actor-2', 'tenant-2'),
+      ('worker-old', 'tenant-1'),
+      ('worker-new', 'tenant-1'),
+      ('viewer-1', 'tenant-1')
+  `);
   return db;
 }
 
@@ -213,6 +229,285 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       [samePlan.mission!.missionId],
     );
     expect(rows.rows).toEqual([{ lifecycleStatus: "CURRENT", count: "1" }]);
+  });
+
+  it("replaces a historical worker assignment with the currently authorized actor", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = {
+      ...plan("r".repeat(64), "r".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-rotation-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-1",
+      assignedActorId: null,
+      plans: [samePlan],
+    }, ctx);
+    await setCurrent(db, "revision-rotation-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-rotation-3");
+    const [rePromoted] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-3",
+      assignedActorId: null,
+      plans: [{ ...samePlan, autonomousActorId: "worker-new" }],
+    }, ctx);
+
+    expect(rePromoted).toMatchObject({
+      missionId: created.missionId,
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    const row = await db.query<{ assignedActorId: string | null; lifecycleStatus: string }>(
+      'SELECT "assignedActorId", "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [created.missionId],
+    );
+    expect(row.rows[0]).toEqual({
+      assignedActorId: "worker-new",
+      lifecycleStatus: "CURRENT",
+    });
+  });
+
+  it.each([
+    ["inactive actor", async (db: PGlite) => {
+      await db.query('UPDATE "User" SET "attivo" = FALSE WHERE "id" = $1', ["worker-old"]);
+    }],
+    ["actor without tenant membership", async (db: PGlite) => {
+      await db.query('DELETE FROM "TenantMembership" WHERE "userId" = $1 AND "enteId" = $2', ["worker-old", "tenant-1"]);
+    }],
+    ["actor without AI permission", async (db: PGlite) => {
+      await db.query('UPDATE "User" SET "ruolo" = \'VIEWER_ADSP\' WHERE "id" = $1', ["worker-old"]);
+    }],
+  ])("re-promotes fail-closed when the planned %s is no longer authorized", async (_label, revoke) => {
+    const db = await database();
+    const ctx = context(db);
+    const autonomousPlan = {
+      ...plan("v".repeat(64), "v".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-revocation-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-1",
+      assignedActorId: null,
+      plans: [autonomousPlan],
+    }, ctx);
+    await setCurrent(db, "revision-revocation-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await revoke(db);
+    await setCurrent(db, "revision-revocation-3");
+
+    const [rePromoted] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-3",
+      assignedActorId: null,
+      plans: [autonomousPlan],
+    }, ctx);
+    expect(rePromoted).toMatchObject({
+      missionId: created.missionId,
+      operationalStatus: "DEFERRED",
+      assignmentStatus: "REQUIRES_ASSIGNMENT",
+    });
+    const row = await db.query<{
+      assignedActorId: string | null;
+      status: string;
+      deferredAt: Date | null;
+    }>('SELECT "assignedActorId", "status", "deferredAt" FROM "ResearchMissionRecord" WHERE "id" = $1', [created.missionId]);
+    expect(row.rows[0]).toEqual({
+      assignedActorId: null,
+      status: "DEFERRED",
+      deferredAt: expect.any(Date),
+    });
+  });
+
+  it("does not re-promote a historical mission that still has an execution claim", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const claimedPlan = {
+      ...plan("k".repeat(64), "k".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-claim-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-1",
+      assignedActorId: null,
+      plans: [claimedPlan],
+    }, ctx);
+    await db.query(`
+      UPDATE "ResearchMissionRecord"
+      SET "status" = 'IN_PROGRESS', "claimantId" = 'worker-old',
+        "claimToken" = $2, "claimExpiresAt" = now() + interval '5 minutes',
+        "activeExecutionId" = 'execution-old'
+      WHERE "id" = $1
+    `, [created.missionId, "c".repeat(64)]);
+    await setCurrent(db, "revision-claim-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-claim-3");
+
+    await expect(reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-3",
+      assignedActorId: null,
+      plans: [{ ...claimedPlan, autonomousActorId: "worker-new" }],
+    }, ctx)).rejects.toThrow("HISTORICAL_RESEARCH_MISSION_STILL_CLAIMED");
+    const row = await db.query<{
+      assignedActorId: string | null;
+      lifecycleStatus: string;
+      status: string;
+      claimantId: string | null;
+    }>('SELECT "assignedActorId", "lifecycleStatus", "status", "claimantId" FROM "ResearchMissionRecord" WHERE "id" = $1', [created.missionId]);
+    expect(row.rows[0]).toEqual({
+      assignedActorId: "worker-old",
+      lifecycleStatus: "HISTORICAL",
+      status: "IN_PROGRESS",
+      claimantId: "worker-old",
+    });
+  });
+
+  it("switches between connector and autonomous execution without carrying assignments across modes", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const connectorPlan = plan("m".repeat(64), "m".repeat(64));
+    const autonomousPlan = {
+      ...plan("n".repeat(64), "m".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-new",
+    };
+    await setCurrent(db, "revision-mode-1");
+    const [connector] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-1",
+      assignedActorId: "actor-1",
+      plans: [connectorPlan],
+    }, ctx);
+    await setCurrent(db, "revision-mode-2");
+    const [autonomous] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-2",
+      assignedActorId: "actor-1",
+      plans: [autonomousPlan],
+    }, ctx);
+    expect(autonomous.missionId).not.toBe(connector.missionId);
+    await setCurrent(db, "revision-mode-3");
+    const [connectorAgain] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-3",
+      assignedActorId: "actor-1",
+      plans: [connectorPlan],
+    }, ctx);
+    expect(connectorAgain).toMatchObject({
+      missionId: connector.missionId,
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    const rows = await db.query<{
+      id: string;
+      assignedActorId: string | null;
+      lifecycleStatus: string;
+      executionChannel: string;
+    }>(`
+      SELECT "id", "assignedActorId", "lifecycleStatus",
+        "payload" ->> 'executionChannel' AS "executionChannel"
+      FROM "ResearchMissionRecord"
+      ORDER BY "lifecycleStatus", "id"
+    `);
+    expect(rows.rows).toEqual(expect.arrayContaining([
+      {
+        id: connector.missionId,
+        assignedActorId: "actor-1",
+        lifecycleStatus: "CURRENT",
+        executionChannel: "CHATGPT_CONNECTOR",
+      },
+      {
+        id: autonomous.missionId,
+        assignedActorId: "worker-new",
+        lifecycleStatus: "HISTORICAL",
+        executionChannel: "SERVER_AUTONOMOUS",
+      },
+    ]));
+  });
+
+  it("serializes concurrent re-planning to one current mission", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = {
+      ...plan("x".repeat(64), "x".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-new",
+    };
+    await setCurrent(db, "revision-concurrent-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-concurrent-1",
+      assignedActorId: null,
+      plans: [samePlan],
+    }, ctx);
+    await setCurrent(db, "revision-concurrent-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-concurrent-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-concurrent-3");
+
+    const results = await Promise.all([
+      reconcileKnowledgeResearchMissions({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        knowledgeRevisionId: "revision-concurrent-3",
+        assignedActorId: null,
+        plans: [samePlan],
+      }, ctx),
+      reconcileKnowledgeResearchMissions({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        knowledgeRevisionId: "revision-concurrent-3",
+        assignedActorId: null,
+        plans: [samePlan],
+      }, ctx),
+    ]);
+    expect(results.flat().map((result) => result.missionId)).toEqual([
+      created.missionId,
+      created.missionId,
+    ]);
+    const rows = await db.query<{ count: number; currentCount: number }>(`
+      SELECT count(*)::int AS "count",
+        count(*) FILTER (WHERE "lifecycleStatus" = 'CURRENT')::int AS "currentCount"
+      FROM "ResearchMissionRecord"
+      WHERE "id" = $1
+    `, [created.missionId]);
+    expect(rows.rows[0]).toEqual({ count: 1, currentCount: 1 });
   });
 
   it("preserves current missions created from approved professional questions", async () => {
