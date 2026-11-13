@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
@@ -7,21 +7,30 @@ import { prisma } from "@/lib/prisma";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import type { JsonValue } from "@/server/fascicolo-knowledge";
+import { ACTIVITY_LOCK_NAMESPACE } from "@/server/fascicolo-operational-activities/model";
+import { readFascicoloDocumentCorpusInTransaction } from "@/server/queries/fascicolo-document-corpus";
 
 import { operationalProposalCandidateSchema, type OperationalProposalCandidate } from "./contracts";
+import {
+  proposalReconciliationFingerprint,
+  proposalReconciliationStates,
+  reconciliationProposalStateSchema,
+  type ReconciliationProposalState,
+} from "./reconciliation-state";
 
 export interface OperationalProposalSqlExecutor {
   query<T>(sql: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
   audit(input: OperationalProposalAuditInput): Promise<unknown>;
+  readCorpusFingerprint(scope: { tenantId: string; procedimentoId: string; concessioneId: string | null }): Promise<string | null>;
 }
 
 export interface OperationalProposalAuditInput {
   azione: string;
   entitaId: string | null;
   enteId: string;
-  concessioneId: string;
+  concessioneId: string | null;
   metadata: JsonValue;
-  actor: { actorId: string; actorEmail: string | null; actorRole: string };
+  actor: { actorId: string | null; actorEmail: string | null; actorRole: string };
 }
 
 export interface OperationalProposalRepositoryContext {
@@ -30,21 +39,59 @@ export interface OperationalProposalRepositoryContext {
   now?: () => Date;
 }
 
-function executor(client: Pick<Prisma.TransactionClient, "$queryRawUnsafe">): OperationalProposalSqlExecutor {
+export interface ConcessionMaterializationOptions {
+  concessions: readonly {
+    id: string;
+    numeroAtto: string;
+    dataRilascio: Date;
+    concessionarioDenominazione: string;
+  }[];
+  concessionaires: readonly {
+    id: string;
+    denominazione: string;
+    codiceFiscale: string | null;
+  }[];
+}
+
+// ActivityLog.userId references User: system actors are recorded by role and metadata, never as user ids.
+export function toActivityLogAuditActor(input: Pick<OperationalProposalAuditInput, "actor" | "metadata">): {
+  actor: { userId: string | null; userEmail: string | null; userRole: string };
+  metadata: JsonValue;
+} {
+  if (input.actor.actorRole === "SYSTEM") {
+    const base = input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
+      ? input.metadata
+      : { value: input.metadata };
+    return {
+      actor: { userId: null, userEmail: null, userRole: "SYSTEM" },
+      metadata: { ...base, systemActorId: input.actor.actorId },
+    };
+  }
+  return {
+    actor: { userId: input.actor.actorId, userEmail: input.actor.actorEmail, userRole: input.actor.actorRole },
+    metadata: input.metadata,
+  };
+}
+
+function executor(client: Prisma.TransactionClient): OperationalProposalSqlExecutor {
   return {
     async query<T>(sql: string, params: readonly unknown[] = []) {
       return { rows: await client.$queryRawUnsafe<T[]>(sql, ...params) };
     },
-    audit: (input) => createAuditLogInTransaction(client as Prisma.TransactionClient, {
-      azione: input.azione,
-      entita: "FascicoloOperationalProposal",
-      entitaId: input.entitaId,
-      enteId: input.enteId,
-      concessioneId: input.concessioneId,
-      esito: "SUCCESS",
-      metadata: input.metadata as Prisma.InputJsonValue,
-      actor: { userId: input.actor.actorId, userEmail: input.actor.actorEmail, userRole: input.actor.actorRole },
-    }),
+    readCorpusFingerprint: async (scope) => (await readFascicoloDocumentCorpusInTransaction(scope, client))?.corpusFingerprint ?? null,
+    audit: (input) => {
+      const mapped = toActivityLogAuditActor(input);
+      return createAuditLogInTransaction(client, {
+        azione: input.azione,
+        entita: "FascicoloOperationalProposal",
+        entitaId: input.entitaId,
+        enteId: input.enteId,
+        concessioneId: input.concessioneId,
+        esito: "SUCCESS",
+        metadata: mapped.metadata as Prisma.InputJsonValue,
+        actor: mapped.actor,
+      });
+    },
   };
 }
 
@@ -78,12 +125,24 @@ export class OperationalProposalRepositoryError extends Error {
   constructor(readonly code:
     | "AUTHORITY_MISMATCH"
     | "CURRENT_INPUT_REQUIRED"
+    | "STALE_PREVIEW"
+    | "RECONCILIATION_NOT_FOUND"
+    | "RECONCILIATION_ALREADY_REVERSED"
+    | "RECONCILIATION_CHANGED"
+    | "RECONCILIATION_INVALID"
     | "PROPOSAL_NOT_FOUND"
     | "PROPOSAL_NOT_REVIEWABLE"
     | "STALE_REVIEW_VERSION"
     | "INVALID_AMENDMENT"
     | "PROPOSAL_NOT_APPROVED"
     | "MANUAL_ACTION_REQUIRED"
+    | "CONCESSION_REQUIRED_FOR_MATERIALIZATION"
+    | "CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED"
+    | "CONCESSION_EVIDENCE_MISMATCH"
+    | "CONCESSIONAIRE_TENANT_SCOPE_REQUIRED"
+    | "CONCESSION_TARGET_NOT_FOUND"
+    | "CONCESSION_ALREADY_LINKED"
+    | "CONCESSION_COLLISION"
     | "UNSUPPORTED_MATERIALIZATION"
     | "DEADLINE_EXACT_DATE_REQUIRED"
     | "SUBJECT_NOT_FOUND"
@@ -102,11 +161,14 @@ function deterministicId(prefix: string, identity: string): string {
   return `${prefix}_${createHash("sha256").update(identity).digest("hex")}`.slice(0, 96);
 }
 
-async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string }> {
-  const result = await tx.query<{ concessioneId: string }>(`
+// A procedimento without a concession is a valid living fascicolo; a linked concession must belong to the same tenant.
+async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string | null }> {
+  const result = await tx.query<{ concessioneId: string | null }>(`
     SELECT p."concessioneId" FROM "Procedimento" p
-    JOIN "Concessione" c ON c."id" = p."concessioneId"
-    WHERE p."id" = $1 AND c."enteId" = $2
+    LEFT JOIN "Concessione" c ON c."id" = p."concessioneId"
+    WHERE p."id" = $1
+      AND p."enteId" = $2
+      AND (p."concessioneId" IS NULL OR c."enteId" = $2)
   `, [procedimentoId, tenantId]);
   if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
   return result.rows[0];
@@ -127,20 +189,62 @@ async function assertReadAuthority(
   if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
 }
 
+async function assertProposalCurrent(tx: OperationalProposalSqlExecutor, proposal: OperationalProposalRecord): Promise<void> {
+  if (proposal.supersededAt || !proposal.structuredReportId) {
+    throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+  }
+  const result = await tx.query<{ id: string }>(`
+    SELECT r."id"
+    FROM "FascicoloKnowledgeRevision" r
+    JOIN "StructuredFascicoloReportSnapshot" s
+      ON s."tenantId" = r."tenantId" AND s."procedimentoId" = r."procedimentoId"
+      AND s."knowledgeRevisionId" = r."id"
+    WHERE r."id" = $1 AND r."tenantId" = $2 AND r."procedimentoId" = $3 AND r."status" = 'CURRENT'
+      AND s."id" = $4 AND s."reportFingerprint" = $5 AND s."status" = 'CURRENT'
+    FOR SHARE OF r, s
+  `, [proposal.knowledgeRevisionId, proposal.tenantId, proposal.procedimentoId,
+    proposal.structuredReportId, proposal.structuredReportFingerprint]);
+  if (!result.rows[0]) throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+}
+
+async function reconciliationStates(
+  tx: OperationalProposalSqlExecutor,
+  tenantId: string,
+  procedimentoId: string,
+  lock: boolean,
+): Promise<ReconciliationProposalState[]> {
+  const rows = await tx.query<Pick<OperationalProposalRecord,
+    "id" | "proposalFingerprint" | "status" | "reviewVersion" | "supersededAt" | "updatedAt">>(`
+    SELECT "id","proposalFingerprint","status","reviewVersion","supersededAt","updatedAt"
+    FROM "FascicoloOperationalProposal"
+    WHERE "tenantId" = $1 AND "procedimentoId" = $2
+    ORDER BY "id"
+    ${lock ? "FOR UPDATE" : ""}
+  `, [tenantId, procedimentoId]);
+  return proposalReconciliationStates(rows.rows);
+}
+
 export async function reconcileOperationalProposals(input: {
   tenantId: string;
   procedimentoId: string;
   knowledgeRevisionId: string;
   structuredReportId: string;
   structuredReportFingerprint: string;
+  expectedCorpusFingerprint: string;
+  expectedPreviewFingerprint: string;
   candidates: readonly OperationalProposalCandidate[];
+  actor?: OperationalProposalAuditInput["actor"];
 }, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<{
+  reconciliationId: string;
   created: number;
   reused: number;
   stale: number;
   proposals: readonly OperationalProposalRecord[];
 }> {
-  const candidates = input.candidates.map((candidate) => operationalProposalCandidateSchema.parse(candidate));
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedCorpusFingerprint);
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedPreviewFingerprint);
+  const parsed = input.candidates.map((candidate) => operationalProposalCandidateSchema.parse(candidate));
+  const candidates = [...new Map(parsed.map((candidate) => [candidate.proposalFingerprint, candidate])).values()];
   if (candidates.some((candidate) => candidate.tenantId !== input.tenantId
     || candidate.procedimentoId !== input.procedimentoId
     || candidate.knowledgeRevisionId !== input.knowledgeRevisionId
@@ -149,30 +253,71 @@ export async function reconcileOperationalProposals(input: {
     throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
   }
   const ctx = context(overrides);
+  const reconciliationId = `reconciliation_${randomUUID()}`;
   return ctx.transaction(async (tx) => {
+    await tx.query(`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(hashtext($1), hashtext($2))
+    `, [ACTIVITY_LOCK_NAMESPACE, `${input.tenantId}::${input.procedimentoId}`]);
     const { concessioneId } = await assertAuthority(tx, input.tenantId, input.procedimentoId);
-    const current = await tx.query<{ revisionId: string; reportFingerprint: string }>(`
-      SELECT r."id" AS "revisionId", s."reportFingerprint"
+    const current = await tx.query<{ revisionId: string; reportFingerprint: string; revisionCorpus: string; reportCorpus: string }>(`
+      SELECT r."id" AS "revisionId", s."reportFingerprint",
+        r."corpusFingerprint" AS "revisionCorpus", s."corpusFingerprint" AS "reportCorpus"
       FROM "FascicoloKnowledgeRevision" r
       JOIN "StructuredFascicoloReportSnapshot" s
         ON s."tenantId" = r."tenantId" AND s."procedimentoId" = r."procedimentoId"
       WHERE r."id" = $1 AND r."tenantId" = $2 AND r."procedimentoId" = $3 AND r."status" = 'CURRENT'
         AND s."id" = $4 AND s."knowledgeRevisionId" = r."id"
         AND s."reportFingerprint" = $5 AND s."status" = 'CURRENT'
+      FOR SHARE OF r, s
     `, [input.knowledgeRevisionId, input.tenantId, input.procedimentoId, input.structuredReportId, input.structuredReportFingerprint]);
     if (!current.rows[0]) throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
 
     const fingerprints = candidates.map((candidate) => candidate.proposalFingerprint);
+    const corpusFingerprint = await tx.readCorpusFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId, concessioneId,
+    });
+    if (corpusFingerprint !== input.expectedCorpusFingerprint
+      || current.rows[0].revisionCorpus !== corpusFingerprint || current.rows[0].reportCorpus !== corpusFingerprint) {
+      throw new OperationalProposalRepositoryError("CURRENT_INPUT_REQUIRED");
+    }
+    const before = await reconciliationStates(tx, input.tenantId, input.procedimentoId, true);
+    const beforeFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: input.structuredReportFingerprint, candidateFingerprints: fingerprints, states: before,
+    });
+    if (beforeFingerprint !== input.expectedPreviewFingerprint) {
+      throw new OperationalProposalRepositoryError("STALE_PREVIEW");
+    }
     const stale = await tx.query<{ id: string }>(`
       UPDATE "FascicoloOperationalProposal"
-      SET "status" = CASE
-          WHEN "status" = 'PROPOSED' THEN 'STALE'::"FascicoloOperationalProposalStatus"
-          ELSE 'SUPERSEDED'::"FascicoloOperationalProposalStatus"
-        END,
-        "supersededAt" = $4, "updatedAt" = $4
+      SET "status" = 'STALE'::"FascicoloOperationalProposalStatus", "supersededAt" = $4, "updatedAt" = $4
       WHERE "tenantId" = $1 AND "procedimentoId" = $2
-        AND "status" IN ('PROPOSED','APPROVED','AMENDED_AND_APPROVED')
+        AND "status" = 'PROPOSED'
         AND NOT ("proposalFingerprint" = ANY($3::text[]))
+      RETURNING "id"
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    const approvalsNeedingReview = await tx.query<{ id: string }>(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "supersededAt" = $4, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" IN ('APPROVED','AMENDED_AND_APPROVED') AND "supersededAt" IS NULL
+        AND NOT ("proposalFingerprint" = ANY($3::text[]))
+      RETURNING "id"
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    await tx.query(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "supersededAt" = NULL, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" IN ('APPROVED','AMENDED_AND_APPROVED') AND "supersededAt" IS NOT NULL
+        AND "proposalFingerprint" = ANY($3::text[])
+    `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
+    const reactivated = await tx.query<{ id: string }>(`
+      UPDATE "FascicoloOperationalProposal"
+      SET "status" = 'PROPOSED'::"FascicoloOperationalProposalStatus", "supersededAt" = NULL, "updatedAt" = $4
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2
+        AND "status" = 'STALE' AND "reviewVersion" = 0
+        AND "proposalFingerprint" = ANY($3::text[])
       RETURNING "id"
     `, [input.tenantId, input.procedimentoId, fingerprints, (ctx.now ?? (() => new Date()))()]);
     let created = 0;
@@ -183,9 +328,10 @@ export async function reconcileOperationalProposals(input: {
           "structuredReportFingerprint","policyVersion","proposalType","status","title","description",
           "proposedPayload","originatingKnowledgeItemIds","originatingIssueSemanticKeys",
           "originatingQuestionSemanticKeys","relevantResultIds","rationale","confidence",
-          "proposalFingerprint","warningCodes"
+          "proposalFingerprint","warningCodes","createdAt","updatedAt"
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::"FascicoloOperationalProposalType",'PROPOSED',$9,$10,
-          $11::jsonb,$12::text[],$13::text[],$14::text[],$15::text[],$16,$17,$18,$19::text[])
+          $11::jsonb,$12::text[],$13::text[],$14::text[],$15::text[],$16,$17,$18,$19::text[],
+          CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
         ON CONFLICT ("tenantId","procedimentoId","proposalFingerprint") DO NOTHING RETURNING "id"
       `, [deterministicId("operational_proposal", candidate.proposalFingerprint), candidate.tenantId,
         candidate.procedimentoId, candidate.knowledgeRevisionId, candidate.structuredReportId,
@@ -201,15 +347,212 @@ export async function reconcileOperationalProposals(input: {
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "proposalFingerprint" = ANY($3::text[])
       ORDER BY "proposalFingerprint"
     `, [input.tenantId, input.procedimentoId, fingerprints]);
+    const after = await reconciliationStates(tx, input.tenantId, input.procedimentoId, false);
+    const afterFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: input.structuredReportFingerprint, candidateFingerprints: fingerprints, states: after,
+    });
     await tx.audit({
       azione: "OPERATIONAL_PROPOSALS_RECONCILED",
-      entitaId: null,
+      entitaId: reconciliationId,
       enteId: input.tenantId,
       concessioneId,
-      metadata: { procedimentoId: input.procedimentoId, knowledgeRevisionId: input.knowledgeRevisionId, created, reused: candidates.length - created, stale: stale.rows.length },
-      actor: { actorId: "fascicolo-operational-proposal-policy", actorEmail: null, actorRole: "SYSTEM" },
+      metadata: {
+        schema: "OPERATIONAL_PROPOSALS_RECONCILIATION_V1",
+        procedimentoId: input.procedimentoId,
+        knowledgeRevisionId: input.knowledgeRevisionId,
+        reportFingerprint: input.structuredReportFingerprint,
+        candidateFingerprints: fingerprints,
+        before, after, beforeFingerprint, afterFingerprint,
+        created, reused: candidates.length - created, stale: stale.rows.length,
+        reactivated: reactivated.rows.length, approvalsNeedingReview: approvalsNeedingReview.rows.length,
+      },
+      actor: input.actor ?? { actorId: null, actorEmail: null, actorRole: "SYSTEM" },
     });
-    return { created, reused: candidates.length - created, stale: stale.rows.length, proposals: proposals.rows };
+    return { reconciliationId, created, reused: candidates.length - created, stale: stale.rows.length + approvalsNeedingReview.rows.length, proposals: proposals.rows };
+  });
+}
+
+const reconciliationAuditSchema = z.object({
+  schema: z.literal("OPERATIONAL_PROPOSALS_RECONCILIATION_V1"),
+  procedimentoId: z.string().min(1),
+  reportFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  candidateFingerprints: z.array(z.string().regex(/^[a-f0-9]{64}$/)),
+  before: z.array(reconciliationProposalStateSchema),
+  after: z.array(reconciliationProposalStateSchema),
+  beforeFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  afterFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+}).passthrough();
+
+function validatedReconciliationAudit(metadata: unknown, tenantId: string, procedimentoId: string) {
+  const parsed = reconciliationAuditSchema.safeParse(metadata);
+  if (!parsed.success || parsed.data.procedimentoId !== procedimentoId) {
+    throw new OperationalProposalRepositoryError("RECONCILIATION_INVALID");
+  }
+  const snapshot = parsed.data;
+  const fingerprint = (states: readonly ReconciliationProposalState[]) => proposalReconciliationFingerprint({
+    tenantId, procedimentoId, reportFingerprint: snapshot.reportFingerprint,
+    candidateFingerprints: snapshot.candidateFingerprints, states,
+  });
+  const before = new Map(snapshot.before.map((item) => [item.id, item]));
+  const after = new Map(snapshot.after.map((item) => [item.id, item]));
+  if (before.size !== snapshot.before.length || after.size !== snapshot.after.length
+    || snapshot.beforeFingerprint !== fingerprint(snapshot.before) || snapshot.afterFingerprint !== fingerprint(snapshot.after)
+    || [...before.values()].some((item) => {
+      const current = after.get(item.id);
+      if (!current || current.proposalFingerprint !== item.proposalFingerprint || current.reviewVersion !== item.reviewVersion) return true;
+      if (item.status === "PROPOSED" && current.status === "STALE") return current.supersededAt === null;
+      if (item.status === "STALE" && current.status === "PROPOSED") {
+        return item.reviewVersion !== 0 || current.supersededAt !== null;
+      }
+      if (item.status !== current.status) return true;
+      return !["APPROVED", "AMENDED_AND_APPROVED"].includes(item.status)
+        && item.supersededAt !== current.supersededAt;
+    })
+    || [...after.values()].some((item) => !before.has(item.id)
+      && (item.status !== "PROPOSED" || item.reviewVersion !== 0 || item.supersededAt !== null))) {
+    throw new OperationalProposalRepositoryError("RECONCILIATION_INVALID");
+  }
+  return snapshot;
+}
+
+export async function reverseOperationalProposalReconciliation(input: {
+  tenantId: string;
+  procedimentoId: string;
+  reconciliationId: string;
+  expectedAfterFingerprint: string;
+  note: string;
+  actor: { actorId: string; actorEmail: string | null; actorRole: string };
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<{
+  restored: number;
+  retainedAsHistory: number;
+}> {
+  z.string().regex(/^reconciliation_[0-9a-f-]{36}$/).parse(input.reconciliationId);
+  z.string().regex(/^[a-f0-9]{64}$/).parse(input.expectedAfterFingerprint);
+  z.string().trim().min(3).max(4_000).parse(input.note);
+  const ctx = context(overrides);
+  return ctx.transaction(async (tx) => {
+    await tx.query(`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(hashtext($1), hashtext($2))
+    `, [ACTIVITY_LOCK_NAMESPACE, `${input.tenantId}::${input.procedimentoId}`]);
+    const { concessioneId } = await assertAuthority(tx, input.tenantId, input.procedimentoId);
+    const event = await tx.query<{ metadata: unknown }>(`
+      SELECT "metadata" FROM "ActivityLog"
+      WHERE "enteId" = $1 AND "entita" = 'FascicoloOperationalProposal'
+        AND "entitaId" = $2 AND "azione" = 'OPERATIONAL_PROPOSALS_RECONCILED'
+        AND "esito" = 'SUCCESS' AND "metadata" ->> 'procedimentoId' = $3
+    `, [input.tenantId, input.reconciliationId, input.procedimentoId]);
+    if (event.rows.length !== 1) throw new OperationalProposalRepositoryError("RECONCILIATION_NOT_FOUND");
+    const previousReversal = await tx.query<{ exists: boolean }>(`
+      SELECT EXISTS (
+        SELECT 1 FROM "ActivityLog"
+        WHERE "enteId" = $1 AND "entita" = 'FascicoloOperationalProposal'
+          AND "entitaId" = $2 AND "azione" = 'OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'
+          AND "esito" = 'SUCCESS' AND "metadata" ->> 'procedimentoId' = $3
+      ) AS "exists"
+    `, [input.tenantId, input.reconciliationId, input.procedimentoId]);
+    if (previousReversal.rows[0]?.exists) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_ALREADY_REVERSED");
+    }
+    const snapshot = validatedReconciliationAudit(event.rows[0].metadata, input.tenantId, input.procedimentoId);
+    if (snapshot.afterFingerprint !== input.expectedAfterFingerprint) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_CHANGED");
+    }
+    const current = await reconciliationStates(tx, input.tenantId, input.procedimentoId, true);
+    const currentFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: current,
+    });
+    if (currentFingerprint !== snapshot.afterFingerprint) {
+      throw new OperationalProposalRepositoryError("RECONCILIATION_CHANGED");
+    }
+
+    const before = new Map(snapshot.before.map((item) => [item.id, item]));
+    const now = (ctx.now ?? (() => new Date()))();
+    let restored = 0;
+    let retainedAsHistory = 0;
+    for (const after of snapshot.after) {
+      const original = before.get(after.id);
+      if (!original) {
+        await tx.query(`
+          UPDATE "FascicoloOperationalProposal"
+          SET "status" = 'STALE'::"FascicoloOperationalProposalStatus", "supersededAt" = $4, "updatedAt" = $4
+          WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "id" = $3
+        `, [input.tenantId, input.procedimentoId, after.id, now]);
+        retainedAsHistory += 1;
+      } else if (original.status !== after.status || original.supersededAt !== after.supersededAt) {
+        await tx.query(`
+          UPDATE "FascicoloOperationalProposal"
+          SET "status" = $4::"FascicoloOperationalProposalStatus", "supersededAt" = $5::timestamptz, "updatedAt" = $6
+          WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "id" = $3
+        `, [input.tenantId, input.procedimentoId, after.id, original.status, original.supersededAt, now]);
+        restored += 1;
+      }
+    }
+    const compensated = await reconciliationStates(tx, input.tenantId, input.procedimentoId, false);
+    const compensatedFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: compensated,
+    });
+    await tx.audit({
+      azione: "OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED",
+      entitaId: input.reconciliationId,
+      enteId: input.tenantId,
+      concessioneId,
+      metadata: {
+        procedimentoId: input.procedimentoId, note: input.note.trim(), originalBeforeFingerprint: snapshot.beforeFingerprint,
+        originalAfterFingerprint: snapshot.afterFingerprint, compensatedFingerprint, compensated, restored, retainedAsHistory,
+      },
+      actor: input.actor,
+    });
+    return { restored, retainedAsHistory };
+  });
+}
+
+export interface ProposalReconciliationSummary {
+  reconciliationId: string;
+  createdAt: Date;
+  afterFingerprint: string;
+  state: "AVAILABLE" | "CHANGED" | "REVERSED";
+}
+
+export async function listProposalReconciliations(input: {
+  tenantId: string;
+  procedimentoId: string;
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<readonly ProposalReconciliationSummary[]> {
+  const ctx = context(overrides);
+  await assertReadAuthority(ctx.read, input.tenantId, input.procedimentoId);
+  const [events, current] = await Promise.all([
+    ctx.read.query<{ reconciliationId: string; metadata: unknown; createdAt: Date; reversed: boolean }>(`
+      SELECT a."entitaId" AS "reconciliationId", a."metadata", a."createdAt",
+        EXISTS (
+          SELECT 1 FROM "ActivityLog" r WHERE r."enteId" = a."enteId" AND r."entita" = a."entita"
+            AND r."entitaId" = a."entitaId" AND r."azione" = 'OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'
+            AND r."esito" = 'SUCCESS' AND r."metadata" ->> 'procedimentoId' = $2
+        ) AS "reversed"
+      FROM "ActivityLog" a
+      WHERE a."enteId" = $1 AND a."entita" = 'FascicoloOperationalProposal'
+        AND a."azione" = 'OPERATIONAL_PROPOSALS_RECONCILED' AND a."esito" = 'SUCCESS'
+        AND a."metadata" ->> 'procedimentoId' = $2
+        AND a."metadata" ->> 'schema' = 'OPERATIONAL_PROPOSALS_RECONCILIATION_V1'
+      ORDER BY a."createdAt" DESC, a."id" DESC LIMIT 5
+    `, [input.tenantId, input.procedimentoId]),
+    reconciliationStates(ctx.read, input.tenantId, input.procedimentoId, false),
+  ]);
+  return events.rows.map((event) => {
+    const snapshot = validatedReconciliationAudit(event.metadata, input.tenantId, input.procedimentoId);
+    const currentFingerprint = proposalReconciliationFingerprint({
+      tenantId: input.tenantId, procedimentoId: input.procedimentoId,
+      reportFingerprint: snapshot.reportFingerprint, candidateFingerprints: snapshot.candidateFingerprints, states: current,
+    });
+    return {
+      reconciliationId: event.reconciliationId,
+      createdAt: event.createdAt,
+      afterFingerprint: snapshot.afterFingerprint,
+      state: event.reversed ? "REVERSED" as const
+        : currentFingerprint === snapshot.afterFingerprint ? "AVAILABLE" as const : "CHANGED" as const,
+    };
   });
 }
 
@@ -247,6 +590,7 @@ export async function reviewOperationalProposal(
     if (proposal.reviewVersion !== input.expectedReviewVersion) {
       throw new OperationalProposalRepositoryError("STALE_REVIEW_VERSION");
     }
+    if (input.action !== "REJECT") await assertProposalCurrent(tx, proposal);
     const nextStatus: OperationalProposalStatus = input.action === "REJECT" ? "REJECTED"
       : input.action === "AMEND_AND_APPROVE" ? "AMENDED_AND_APPROVED" : "APPROVED";
     const approvedPayload = input.action === "REJECT" ? null
@@ -304,8 +648,190 @@ const criticalityPayloadSchema = z.object({
   rationale: z.string().trim().min(1),
 }).passthrough();
 
-async function materializeTarget(tx: OperationalProposalSqlExecutor, proposal: OperationalProposalRecord, concessioneId: string): Promise<{ entityType: string; entityId: string }> {
+const concessionEvidenceSchema = z.object({
+  basisRef: z.string().trim().min(1).max(256),
+  documentFileVersionId: z.string().trim().min(1).max(256),
+  pageNumber: z.number().int().positive(),
+  textSha256: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict();
+
+const concessionLinkPayloadSchema = z.object({
+  reconciliationType: z.literal("CONCESSIONE_LINK_OR_CREATE"),
+  materializationMode: z.literal("LINK_EXISTING"),
+  concessioneId: z.string().trim().min(1).max(256),
+  numeroAtto: z.string().trim().min(1).max(256),
+  dataRilascio: z.string().date(),
+  evidence: z.array(concessionEvidenceSchema).min(1).max(100),
+}).strict();
+
+const concessionCreatePayloadSchema = z.object({
+  reconciliationType: z.literal("CONCESSIONE_LINK_OR_CREATE"),
+  materializationMode: z.literal("CREATE"),
+  numeroAtto: z.string().trim().min(1).max(256),
+  dataRilascio: z.string().date(),
+  dataScadenza: z.string().date(),
+  concessionarioId: z.string().trim().min(1).max(256),
+  normaRiferimento: z.enum(["ART_36_COD_NAV", "ART_18_L_84_1994", "ALTRO"]),
+  tipologiaBene: z.enum(["AREA_SCOPERTA", "BANCHINA", "MOLO", "SPECCHIO_ACQUEO", "BOX", "LOCALE", "MANUFATTO", "ALTRO"]),
+  attivita: z.enum(["DIPORTO", "COMMERCIALE", "TURISTICO_RICREATIVA", "LOGISTICA", "CANTIERISTICA", "SERVIZI_PORTUALI", "PASSEGGERI", "ALTRO"]),
+  stato: z.enum(["ATTIVA", "SCADUTA", "IN_PROROGA", "SOSPESA", "REVOCATA", "DECADUTA", "ARCHIVIATA"]),
+  areaDescrizione: z.string().trim().max(10_000).nullable().optional(),
+  canoneAnnuo: z.number().nonnegative().nullable().optional(),
+  note: z.string().trim().max(10_000).nullable().optional(),
+  evidence: z.array(concessionEvidenceSchema).min(1).max(100),
+}).strict().superRefine((payload, context) => {
+  if (payload.dataScadenza < payload.dataRilascio) {
+    context.addIssue({ code: "custom", path: ["dataScadenza"], message: "CONCESSION_DATE_RANGE_INVALID" });
+  }
+});
+
+const concessionMaterializationPayloadSchema = z.discriminatedUnion("materializationMode", [
+  concessionLinkPayloadSchema,
+  concessionCreatePayloadSchema,
+]);
+
+function canonicalEvidence(value: z.output<typeof concessionEvidenceSchema>): string {
+  return `${value.basisRef}\u0000${value.documentFileVersionId}\u0000${value.pageNumber}\u0000${value.textSha256}`;
+}
+
+function assertConcessionEvidenceBoundToProposal(
+  proposal: OperationalProposalRecord,
+  approvedEvidence: readonly z.output<typeof concessionEvidenceSchema>[],
+): void {
+  const proposedPayload = proposal.proposedPayload && typeof proposal.proposedPayload === "object"
+    && !Array.isArray(proposal.proposedPayload)
+    ? proposal.proposedPayload
+    : null;
+  const proposedEvidence = z.array(concessionEvidenceSchema).min(1).max(100)
+    .safeParse(proposedPayload?.evidence);
+  if (!proposedEvidence.success) {
+    throw new OperationalProposalRepositoryError("CONCESSION_EVIDENCE_MISMATCH");
+  }
+  const expected = proposedEvidence.data.map(canonicalEvidence).sort();
+  const approved = approvedEvidence.map(canonicalEvidence).sort();
+  if (new Set(approved).size !== approved.length
+    || expected.length !== approved.length
+    || expected.some((value, index) => value !== approved[index])) {
+    throw new OperationalProposalRepositoryError("CONCESSION_EVIDENCE_MISMATCH");
+  }
+}
+
+async function materializeConcession(
+  tx: OperationalProposalSqlExecutor,
+  proposal: OperationalProposalRecord,
+  currentConcessioneId: string | null,
+): Promise<{ entityType: string; entityId: string }> {
+  const parsed = concessionMaterializationPayloadSchema.safeParse(proposal.approvedPayload);
+  if (!parsed.success) {
+    throw new OperationalProposalRepositoryError("CONCESSION_PROFESSIONAL_PAYLOAD_REQUIRED");
+  }
+  const payload = parsed.data;
+  assertConcessionEvidenceBoundToProposal(proposal, payload.evidence);
+  if (payload.materializationMode === "LINK_EXISTING") {
+    const target = await tx.query<{ id: string; numeroAtto: string; dataRilascio: Date }>(`
+      SELECT "id","numeroAtto","dataRilascio"
+      FROM "Concessione"
+      WHERE "id"=$1 AND "enteId"=$2
+      FOR UPDATE
+    `, [payload.concessioneId, proposal.tenantId]);
+    const concession = target.rows[0];
+    if (!concession
+      || concession.numeroAtto.trim() !== payload.numeroAtto
+      || concession.dataRilascio.toISOString().slice(0, 10) !== payload.dataRilascio) {
+      throw new OperationalProposalRepositoryError("CONCESSION_TARGET_NOT_FOUND");
+    }
+    if (currentConcessioneId && currentConcessioneId !== concession.id) {
+      throw new OperationalProposalRepositoryError("CONCESSION_ALREADY_LINKED");
+    }
+    const linked = await tx.query<{ id: string }>(`
+      UPDATE "Procedimento"
+      SET "concessioneId"=$3,"updatedAt"=CURRENT_TIMESTAMP
+      WHERE "id"=$1 AND "enteId"=$2
+        AND ("concessioneId" IS NULL OR "concessioneId"=$3)
+      RETURNING "id"
+    `, [proposal.procedimentoId, proposal.tenantId, concession.id]);
+    if (!linked.rows[0]) throw new OperationalProposalRepositoryError("CONCESSION_ALREADY_LINKED");
+    return { entityType: "Concessione", entityId: concession.id };
+  }
+
+  if (currentConcessioneId) {
+    throw new OperationalProposalRepositoryError("CONCESSION_ALREADY_LINKED");
+  }
+  const concessionario = await tx.query<{ id: string }>(`
+    SELECT c."id"
+    FROM "Concessionario" c
+    WHERE c."id"=$1
+      AND EXISTS (
+        SELECT 1
+        FROM "Concessione" existing
+        WHERE existing."concessionarioId"=c."id" AND existing."enteId"=$2
+      )
+    FOR SHARE
+  `, [payload.concessionarioId, proposal.tenantId]);
+  if (!concessionario.rows[0]) {
+    throw new OperationalProposalRepositoryError("CONCESSIONAIRE_TENANT_SCOPE_REQUIRED");
+  }
+  const normalizedNumber = payload.numeroAtto.replace(/\s+/gu, "").toLocaleLowerCase("it-IT");
+  const collision = await tx.query<{ id: string }>(`
+    SELECT "id"
+    FROM "Concessione"
+    WHERE "enteId"=$1
+      AND lower(regexp_replace("numeroAtto", '\\s+', '', 'g'))=$2
+    FOR UPDATE
+  `, [proposal.tenantId, normalizedNumber]);
+  if (collision.rows.length > 0) {
+    throw new OperationalProposalRepositoryError("CONCESSION_COLLISION");
+  }
+  const entityId = deterministicId("concessione", proposal.id);
+  const inserted = await tx.query<{ id: string }>(`
+    INSERT INTO "Concessione" (
+      "id","numeroAtto","dataRilascio","dataScadenza","normaRiferimento",
+      "tipologiaBene","attivita","areaDescrizione","canoneAnnuo","stato",
+      "note","concessionarioId","enteId","createdAt","updatedAt"
+    )
+    VALUES (
+      $1,$2,$3::timestamptz,$4::timestamptz,$5::"NormaRiferimento",
+      $6::"TipologiaBene",$7::"AttivitaConcessione",$8,$9,$10::"StatoConcessione",
+      $11,$12,$13,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+    )
+    ON CONFLICT DO NOTHING
+    RETURNING "id"
+  `, [
+    entityId,
+    payload.numeroAtto,
+    `${payload.dataRilascio}T00:00:00.000Z`,
+    `${payload.dataScadenza}T00:00:00.000Z`,
+    payload.normaRiferimento,
+    payload.tipologiaBene,
+    payload.attivita,
+    payload.areaDescrizione ?? null,
+    payload.canoneAnnuo ?? null,
+    payload.stato,
+    payload.note ?? null,
+    payload.concessionarioId,
+    proposal.tenantId,
+  ]);
+  if (!inserted.rows[0]) {
+    throw new OperationalProposalRepositoryError("CONCESSION_COLLISION");
+  }
+  const linked = await tx.query<{ id: string }>(`
+    UPDATE "Procedimento"
+    SET "concessioneId"=$3,"updatedAt"=CURRENT_TIMESTAMP
+    WHERE "id"=$1 AND "enteId"=$2 AND "concessioneId" IS NULL
+    RETURNING "id"
+  `, [proposal.procedimentoId, proposal.tenantId, entityId]);
+  if (!linked.rows[0]) throw new OperationalProposalRepositoryError("CONCESSION_ALREADY_LINKED");
+  return { entityType: "Concessione", entityId };
+}
+
+async function materializeTarget(tx: OperationalProposalSqlExecutor, proposal: OperationalProposalRecord, concessioneId: string | null): Promise<{ entityType: string; entityId: string }> {
   const payload = proposal.approvedPayload;
+  if (proposal.proposalType === "CONCESSION_LINK_OR_CREATE") {
+    return materializeConcession(tx, proposal, concessioneId);
+  }
+  if (!concessioneId) {
+    throw new OperationalProposalRepositoryError("CONCESSION_REQUIRED_FOR_MATERIALIZATION");
+  }
   if (proposal.proposalType === "DEADLINE") {
     const parsed = deadlinePayloadSchema.safeParse(payload);
     if (!parsed.success) throw new OperationalProposalRepositoryError("DEADLINE_EXACT_DATE_REQUIRED");
@@ -400,6 +926,7 @@ export async function materializeOperationalProposal(input: {
     if (!(["APPROVED", "AMENDED_AND_APPROVED"] as OperationalProposalStatus[]).includes(proposal.status)) {
       throw new OperationalProposalRepositoryError("PROPOSAL_NOT_APPROVED");
     }
+    await assertProposalCurrent(tx, proposal);
     if (proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED")
       || (["DOCUMENT_REQUIREMENT", "CHECKLIST_ITEM", "ACTIVITY", "NOTE"] as const).includes(proposal.proposalType as never)) {
       throw new OperationalProposalRepositoryError("MANUAL_ACTION_REQUIRED");
@@ -423,7 +950,7 @@ export async function materializeOperationalProposal(input: {
       azione: "OPERATIONAL_PROPOSAL_MATERIALIZED",
       entitaId: proposal.id,
       enteId: input.tenantId,
-      concessioneId,
+      concessioneId: target.entityType === "Concessione" ? target.entityId : concessioneId,
       metadata: { procedimentoId: input.procedimentoId, ...target },
       actor: input.actor,
     });
@@ -451,4 +978,32 @@ export async function listOperationalProposals(input: {
     ...proposal,
     reviewEvents: events.rows.filter((event) => event.proposalId === proposal.id),
   }));
+}
+
+export async function listConcessionMaterializationOptions(input: {
+  tenantId: string;
+  procedimentoId: string;
+}, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<ConcessionMaterializationOptions> {
+  const ctx = context(overrides);
+  await assertReadAuthority(ctx.read, input.tenantId, input.procedimentoId);
+  const [concessions, concessionaires] = await Promise.all([
+    ctx.read.query<ConcessionMaterializationOptions["concessions"][number]>(`
+      SELECT c."id",c."numeroAtto",c."dataRilascio",
+        holder."denominazione" AS "concessionarioDenominazione"
+      FROM "Concessione" c
+      JOIN "Concessionario" holder ON holder."id"=c."concessionarioId"
+      WHERE c."enteId"=$1
+      ORDER BY c."dataRilascio" DESC,c."numeroAtto",c."id"
+    `, [input.tenantId]),
+    ctx.read.query<ConcessionMaterializationOptions["concessionaires"][number]>(`
+      SELECT holder."id",holder."denominazione",holder."codiceFiscale"
+      FROM "Concessionario" holder
+      WHERE EXISTS (
+        SELECT 1 FROM "Concessione" c
+        WHERE c."concessionarioId"=holder."id" AND c."enteId"=$1
+      )
+      ORDER BY holder."denominazione",holder."id"
+    `, [input.tenantId]),
+  ]);
+  return { concessions: concessions.rows, concessionaires: concessionaires.rows };
 }

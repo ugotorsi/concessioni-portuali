@@ -11,10 +11,8 @@ import {
 import type { Prisma } from "@/generated/prisma/client";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 
-import {
-  DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-  isRetryableDocumentExtractionFailure,
-} from "./documentExtraction";
+import { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
+import { isRetryableDocumentExtractionFailure } from "./documentExtractionRetryability";
 
 const RETRY_PERMIT_VERSION = "DOCUMENT_EXTRACTION_RETRY_PERMIT_V1";
 const RETRY_PERMIT_ACTION = "DOCUMENT_EXTRACTION_RETRY_AUTHORIZED";
@@ -143,12 +141,16 @@ async function persistPermit(input: {
   actor: CurrentUser;
 }): Promise<PermitRecord> {
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`
-      SELECT pg_advisory_xact_lock(
+    const lockRows = await tx.$queryRaw<Array<{ acquired: boolean }>>`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(
         hashtext('document-extraction-retry-permit:v1'),
         hashtext(${input.permitRef})
       )
     `;
+    if (lockRows.length !== 1 || lockRows[0]?.acquired !== true) {
+      throw new Error("DOCUMENT_EXTRACTION_RETRY_PERMIT_LOCK_FAILED");
+    }
     const existing = await tx.activityLog.findFirst({
       where: {
         azione: RETRY_PERMIT_ACTION,

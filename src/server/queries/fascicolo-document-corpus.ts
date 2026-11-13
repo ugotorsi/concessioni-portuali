@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   getCurrentTenantContext,
@@ -39,6 +40,7 @@ export interface FascicoloDocumentCorpusDocument {
 export interface FascicoloDocumentCorpusExcerpt extends FascicoloDocumentExcerpt {
   readonly documentoId: string;
   readonly extractionAttemptId: string;
+  readonly sourceText: string;
 }
 
 export interface FascicoloDocumentCorpus {
@@ -69,6 +71,7 @@ interface CorpusAttemptRow {
   readonly failureCode: string | null;
   readonly pages: readonly {
     readonly pageNumber: number;
+    readonly text: string;
     readonly normalizedText: string;
     readonly textSha256: string;
     readonly extractionMethod: string;
@@ -143,6 +146,7 @@ export function buildFascicoloDocumentCorpus(input: {
           documentVersionId: document.currentFileVersionId,
           artifactSha256: succeeded.sourceSha256,
           text: page.normalizedText,
+          sourceText: page.text,
           textSha256: page.textSha256,
           extractionMethod: page.extractionMethod,
           ocrConfidence: page.ocrConfidence,
@@ -274,17 +278,19 @@ export interface FascicoloDocumentCorpusAsyncJobAccess extends FascicoloDocument
 
 async function readFascicoloDocumentCorpus(
   input: FascicoloDocumentCorpusScope,
+  client: Pick<Prisma.TransactionClient, "procedimento" | "documento" | "documentExtractionAttempt" | "asyncJob"> = prisma,
 ): Promise<FascicoloDocumentCorpus | null> {
-  const procedimento = await prisma.procedimento.findFirst({
+  const procedimento = await client.procedimento.findFirst({
     where: { id: input.procedimentoId, enteId: input.tenantId },
     select: { id: true },
   });
   if (!procedimento) return null;
 
-  const documents = await prisma.documento.findMany({
+  const documents = await client.documento.findMany({
     where: {
       enteId: input.tenantId,
       procedimentoId: input.procedimentoId,
+      statoDocumento: "ATTIVO",
     },
     orderBy: { id: "asc" },
     select: {
@@ -300,7 +306,7 @@ async function readFascicoloDocumentCorpus(
   );
   const attempts = versionedDocuments.length === 0
     ? []
-    : await prisma.documentExtractionAttempt.findMany({
+    : await client.documentExtractionAttempt.findMany({
         where: {
           tenantId: input.tenantId,
           procedimentoId: input.procedimentoId,
@@ -321,6 +327,7 @@ async function readFascicoloDocumentCorpus(
             orderBy: { pageNumber: "asc" },
             select: {
               pageNumber: true,
+              text: true,
               normalizedText: true,
               textSha256: true,
               extractionMethod: true,
@@ -336,7 +343,7 @@ async function readFascicoloDocumentCorpus(
   }));
   const jobs = logicalOperationIds.length === 0
     ? []
-    : await prisma.asyncJob.findMany({
+    : await client.asyncJob.findMany({
         where: {
           operation: DOCUMENT_EXTRACTION_OPERATION,
           tenantId: input.tenantId,
@@ -360,6 +367,13 @@ async function readFascicoloDocumentCorpus(
   });
 }
 
+export async function readFascicoloDocumentCorpusInTransaction(
+  input: FascicoloDocumentCorpusScope,
+  client: Prisma.TransactionClient,
+): Promise<FascicoloDocumentCorpus | null> {
+  return readFascicoloDocumentCorpus(input, client);
+}
+
 export async function getFascicoloDocumentCorpus(input: {
   tenantId: string;
   procedimentoId: string;
@@ -371,6 +385,13 @@ export async function getFascicoloDocumentCorpus(input: {
       allowWhenEnteMissing: false,
     });
   }
+  return readFascicoloDocumentCorpus(input);
+}
+
+/** Trusted backend projection. Procedure ownership is verified by the scoped read. */
+export async function getFascicoloDocumentCorpusForTenant(
+  input: FascicoloDocumentCorpusScope,
+): Promise<FascicoloDocumentCorpus | null> {
   return readFascicoloDocumentCorpus(input);
 }
 

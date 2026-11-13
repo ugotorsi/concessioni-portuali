@@ -72,6 +72,7 @@ export async function persistStructuredFascicoloReport(
   if (fingerprint(report.payload) !== report.reportFingerprint) {
     throw new StructuredReportRepositoryError("INVALID_FINGERPRINT");
   }
+
   const ctx = context(overrides);
   return ctx.transaction(async (tx) => {
     const authority = await tx.query<{ revisionId: string; corpusFingerprint: string }>(`
@@ -89,32 +90,86 @@ export async function persistStructuredFascicoloReport(
     const existing = await tx.query<StructuredReportSnapshotRecord>(`
       SELECT * FROM "StructuredFascicoloReportSnapshot" WHERE "reportFingerprint" = $1
     `, [report.reportFingerprint]);
-    if (existing.rows[0]) return { outcome: "REUSED", snapshot: existing.rows[0] };
+    const previous = existing.rows[0];
+    if (previous && (previous.tenantId !== report.payload.tenantId
+      || previous.procedimentoId !== report.payload.procedimentoId
+      || previous.knowledgeRevisionId !== report.payload.knowledgeRevisionId)) {
+      throw new StructuredReportRepositoryError("AUTHORITY_MISMATCH");
+    }
+    if (previous?.status === "CURRENT") return { outcome: "REUSED", snapshot: previous };
 
-    const id = reportId(report.reportFingerprint);
+    const id = previous?.id ?? reportId(report.reportFingerprint);
     await tx.query(`
       UPDATE "StructuredFascicoloReportSnapshot"
       SET "status" = 'STALE', "staleReasons" = ARRAY['SUPERSEDED_BY_MATERIAL_CHANGE']::TEXT[]
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "status" = 'CURRENT'
     `, [report.payload.tenantId, report.payload.procedimentoId]);
-    const inserted = await tx.query<StructuredReportSnapshotRecord>(`
-      INSERT INTO "StructuredFascicoloReportSnapshot" (
-        "id", "tenantId", "procedimentoId", "knowledgeRevisionId", "contractVersion",
-        "reportFingerprint", "corpusFingerprint", "researchStateFingerprint", "sourceStateFingerprint",
-        "status", "payload", "warnings", "generatedAt"
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'CURRENT',$10::jsonb,$11::jsonb,$12)
-      RETURNING *
-    `, [id, report.payload.tenantId, report.payload.procedimentoId, report.payload.knowledgeRevisionId,
-      report.payload.contractVersion, report.reportFingerprint, report.payload.corpusFingerprint,
-      report.payload.researchStateFingerprint, report.payload.sourceStateFingerprint,
-      JSON.stringify(report.payload), JSON.stringify(report.payload.limitations),
-      (ctx.now ?? (() => new Date()))()]);
+    const current = previous
+      ? await tx.query<StructuredReportSnapshotRecord>(`
+          UPDATE "StructuredFascicoloReportSnapshot"
+          SET "status" = 'CURRENT', "staleReasons" = ARRAY[]::TEXT[], "supersededBySnapshotId" = NULL
+          WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+          RETURNING *
+        `, [id, report.payload.tenantId, report.payload.procedimentoId])
+      : await tx.query<StructuredReportSnapshotRecord>(`
+          INSERT INTO "StructuredFascicoloReportSnapshot" (
+            "id", "tenantId", "procedimentoId", "knowledgeRevisionId", "contractVersion",
+            "reportFingerprint", "corpusFingerprint", "researchStateFingerprint", "sourceStateFingerprint",
+            "status", "payload", "warnings", "generatedAt"
+          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'CURRENT',$10::jsonb,$11::jsonb,$12)
+          RETURNING *
+        `, [id, report.payload.tenantId, report.payload.procedimentoId, report.payload.knowledgeRevisionId,
+          report.payload.contractVersion, report.reportFingerprint, report.payload.corpusFingerprint,
+          report.payload.researchStateFingerprint, report.payload.sourceStateFingerprint,
+          JSON.stringify(report.payload), JSON.stringify(report.payload.limitations),
+          (ctx.now ?? (() => new Date()))()]);
     await tx.query(`
       UPDATE "StructuredFascicoloReportSnapshot"
       SET "status" = 'SUPERSEDED', "supersededBySnapshotId" = $3
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "id" <> $3
         AND "supersededBySnapshotId" IS NULL AND "status" = 'STALE'
     `, [report.payload.tenantId, report.payload.procedimentoId, id]);
+    return { outcome: previous ? "REUSED" : "CREATED", snapshot: current.rows[0] };
+  });
+}
+
+export async function persistDraftStructuredFascicoloReport(
+  report: BuiltStructuredFascicoloReport,
+  overrides: Partial<StructuredReportRepositoryContext> = {},
+): Promise<{ outcome: "CREATED" | "REUSED"; snapshot: StructuredReportSnapshotRecord }> {
+  if (fingerprint(report.payload) !== report.reportFingerprint) {
+    throw new StructuredReportRepositoryError("INVALID_FINGERPRINT");
+  }
+  const ctx = context(overrides);
+  return ctx.transaction(async (tx) => {
+    const authority = await tx.query<{ revisionId: string; corpusFingerprint: string }>(`
+      SELECT r."id" AS "revisionId", r."corpusFingerprint"
+      FROM "Procedimento" p
+      JOIN "FascicoloKnowledgeRevision" r ON r."procedimentoId" = p."id" AND r."tenantId" = p."enteId"
+      WHERE p."id" = $1 AND p."enteId" = $2 AND r."id" = $3 AND r."status" = 'BUILDING'
+    `, [report.payload.procedimentoId, report.payload.tenantId, report.payload.knowledgeRevisionId]);
+    const draftRevision = authority.rows[0];
+    if (!draftRevision) throw new StructuredReportRepositoryError("KNOWLEDGE_NOT_CURRENT");
+    if (draftRevision.corpusFingerprint !== report.payload.corpusFingerprint) {
+      throw new StructuredReportRepositoryError("AUTHORITY_MISMATCH");
+    }
+    const existing = await tx.query<StructuredReportSnapshotRecord>(`
+      SELECT * FROM "StructuredFascicoloReportSnapshot" WHERE "reportFingerprint" = $1
+    `, [report.reportFingerprint]);
+    if (existing.rows[0]) return { outcome: "REUSED", snapshot: existing.rows[0] };
+    const id = reportId(report.reportFingerprint);
+    const inserted = await tx.query<StructuredReportSnapshotRecord>(`
+      INSERT INTO "StructuredFascicoloReportSnapshot" (
+        "id", "tenantId", "procedimentoId", "knowledgeRevisionId", "contractVersion",
+        "reportFingerprint", "corpusFingerprint", "researchStateFingerprint", "sourceStateFingerprint",
+        "status", "payload", "warnings", "staleReasons", "generatedAt"
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'STALE',$10::jsonb,$11::jsonb,$12::text[],$13)
+      RETURNING *
+    `, [id, report.payload.tenantId, report.payload.procedimentoId, report.payload.knowledgeRevisionId,
+      report.payload.contractVersion, report.reportFingerprint, report.payload.corpusFingerprint,
+      report.payload.researchStateFingerprint, report.payload.sourceStateFingerprint,
+      JSON.stringify(report.payload), JSON.stringify(report.payload.limitations),
+      ["KNOWLEDGE_DRAFT_NOT_PROMOTED"], (ctx.now ?? (() => new Date()))()]);
     return { outcome: "CREATED", snapshot: inserted.rows[0] };
   });
 }

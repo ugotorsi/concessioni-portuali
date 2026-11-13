@@ -13,15 +13,34 @@ import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEv
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
+import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
+import { FascicoloActsWorkspace } from "@/components/procedimenti/FascicoloActsWorkspace";
+import { FascicoloGuidedActivities } from "@/components/procedimenti/FascicoloGuidedActivities";
+import { FascicoloProposalPreview } from "@/components/procedimenti/FascicoloProposalPreview";
+import { listActAttachmentOptions, listActDrafts } from "@/server/fascicolo-acts/repository";
+import { buildActTemplateCatalog } from "@/server/fascicolo-acts/templates";
+import { buildActivitySpecs } from "@/server/fascicolo-operational-activities/model";
+import { listOperationalActivities } from "@/server/fascicolo-operational-activities/repository";
+import { generateOperationalProposalCandidates } from "@/server/fascicolo-operational-proposals/generation";
+import { previewOperationalProposalReconciliation } from "@/server/fascicolo-operational-proposals/preview";
+import {
+  listConcessionMaterializationOptions,
+  listProposalReconciliations,
+} from "@/server/fascicolo-operational-proposals/repository";
 import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
 } from "@/components/procedimenti/FascicoloAnalysis";
+import { mergeFascicoloAnalysisQuestions } from "@/components/procedimenti/fascicolo-analysis-questions";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
-import { FascicoloReport, OperationalPlans } from "@/components/procedimenti/FascicoloReport";
-import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
+import { ProfessionalLegalQuestionsPanel } from "@/components/procedimenti/ProfessionalLegalQuestionsPanel";
+import { FascicoloReport } from "@/components/procedimenti/FascicoloReport";
+import {
+  FascicoloResearch,
+  type FascicoloResearchSource,
+} from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
@@ -43,6 +62,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
+import {
+  isExistingCorpusAnalysisRequestEnabled,
+} from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import {
   getChecklistContraddittorioItems,
   getOrigineProcedimentoLabel,
@@ -73,6 +95,8 @@ import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicol
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
+import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
+import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
 import { listStructuredFascicoloReportSnapshots, persistStructuredFascicoloReport } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
@@ -85,6 +109,12 @@ interface ProcedimentoDetailPageProps {
     materialId?: string | string[];
     statementPath?: string | string[];
     section?: string | string[];
+    activityError?: string | string[];
+    activity?: string | string[];
+    reconciliationError?: string | string[];
+    reconciliationDone?: string | string[];
+    analysisRefresh?: string | string[];
+    researchNotice?: string | string[];
   }>;
 }
 
@@ -164,13 +194,25 @@ function analysisCorpusModel(corpus: FascicoloDocumentCorpus | null): FascicoloA
   };
 }
 
+function uniqueBy<T>(items: readonly T[], key: (item: T) => string): T[] {
+  const unique = new Map<string, T>();
+  for (const item of items) {
+    const itemKey = key(item);
+    if (!unique.has(itemKey)) unique.set(itemKey, item);
+  }
+  return [...unique.values()];
+}
+
 export default async function ProcedimentoDetailPage({ params, searchParams }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
   const canReview = canManageProcedimenti(role);
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice } = await searchParams;
+  const sanitizedResearchNotice = typeof researchNotice === "string" && /^[A-Z0-9_]{1,80}$/.test(researchNotice)
+    ? researchNotice
+    : null;
   const activeSection = resolveFascicoloSection(section);
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
@@ -198,10 +240,57 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     : null;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
+  const professionalLegalQuestions = detail.canonicalEnteId
+    ? await listProfessionalLegalQuestions({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : [];
+  const existingCorpusAnalysis = role === "ADMIN"
+    && documentCorpus?.availability === "READY"
+    && documentCorpus.documentCount > 0
+    && documentCorpus.availableDocumentCount === documentCorpus.documentCount
+    && documentCorpus.textPageCount > 0
+    ? {
+        procedimentoId: detail.procedimento.id,
+        enabled: isExistingCorpusAnalysisRequestEnabled(process.env),
+      }
+    : null;
   const structuredAnalysis = activeSection === "analysis"
     ? await getFascicoloAnalysisReadModel(detail.procedimento.id)
     : null;
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
+  const candidateResearchSources: FascicoloResearchSource[] = legalSourceCandidates.map((item) => ({
+    id: `candidato-${item.id}`,
+    title: item.resolution?.legalSource?.title ?? item.originalName ?? "Fonte acquisita",
+    identifier: item.resolution?.legalSource?.sourceNumber
+      ?? item.resolution?.legalSource?.stableKey
+      ?? item.originalName,
+    authority: item.resolution?.legalSource?.issuingBody,
+    sourceType: item.mimeType,
+    date: formatDateIT(item.admittedAt),
+    origin: "Documento acquisito al fascicolo",
+    verificationStatus: item.resolution?.outcome === "LINKED"
+      ? "Identità della fonte collegata; contenuto e applicabilità temporale da verificare."
+      : item.resolution?.outcome === "NO_MATCH"
+        ? "Nessuna fonte ufficiale corrispondente individuata."
+        : "Verifica della fonte in attesa.",
+    note: item.resolution?.reviewNote,
+    usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
+  }));
+  const baseResearchModel = buildFascicoloResearchModel(automaticWorkflow, candidateResearchSources);
+  const workflowAnalysisQuestions = baseResearchModel.questions
+  .filter((question) => question.lifecycleStatus !== "HISTORICAL")
+  .map((question) => ({
+    id: `ricerca-${question.id}`,
+    semanticKey: question.semanticKey,
+    title: question.text,
+    description: question.coverage,
+    operationalStatuses: question.status ? [question.status] : [],
+    area: "Ricerca normativa e giurisprudenziale",
+    relevance: question.needsFurtherResearch ? "Approfondimenti ancora necessari" : "Copertura registrata",
+    evidence: question.coveredAspects,
+  }));
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
@@ -235,6 +324,142 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     materialId,
     statementPath,
   });
+  const operationalDrafts = detail.canonicalEnteId
+    && ["acts", "proposals"].includes(activeSection)
+    ? await listActDrafts({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id })
+    : [];
+  const attachmentOptions = detail.canonicalEnteId && ["acts", "proposals", "reports"].includes(activeSection)
+    ? await listActAttachmentOptions(detail.procedimento.id)
+    : [];
+  const activitySpecs = ["acts", "proposals"].includes(activeSection) && automaticWorkflow?.structuredReport
+    ? buildActivitySpecs(automaticWorkflow.structuredReport.payload)
+    : [];
+  const operationalActivities = ["acts", "proposals"].includes(activeSection) && detail.canonicalEnteId
+    ? await listOperationalActivities({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+        concessioneId: detail.concessione?.id ?? null,
+      })
+    : [];
+  const concessionMaterializationOptions = activeSection === "proposals" && detail.canonicalEnteId
+    ? await listConcessionMaterializationOptions({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : { concessions: [], concessionaires: [] };
+  const guidedSection = activeSection === "proposals" && (automaticWorkflow?.structuredReport || operationalActivities.length > 0) ? (
+    <FascicoloGuidedActivities
+      procedimentoId={detail.procedimento.id}
+      payload={automaticWorkflow?.structuredReport?.payload ?? null}
+      reportFingerprint={automaticWorkflow?.structuredReport?.reportFingerprint ?? null}
+      corpusFingerprint={automaticWorkflow?.analysisUpdate.corpusFingerprint ?? null}
+      specs={activitySpecs}
+      records={operationalActivities}
+      drafts={operationalDrafts}
+      documents={attachmentOptions}
+      proposals={automaticWorkflow?.operationalProposals ?? []}
+      canManage={canReview && hasCanonicalTenant}
+      canReviewLegalSources={(role === "ADMIN" || role === "GIURIDICO") && hasCanonicalTenant}
+      reportArchived={Boolean(automaticWorkflow?.structuredReportSnapshots.some((snapshot) =>
+        snapshot.effectiveStatus === "CURRENT"
+        && snapshot.reportFingerprint === automaticWorkflow.structuredReport?.reportFingerprint))}
+      analysisCurrent={automaticWorkflow?.analysisUpdate.status === "CURRENT"}
+      analysisStatus={automaticWorkflow?.analysisUpdate.status}
+      analysisDrift={automaticWorkflow?.analysisUpdate.drift ?? null}
+      analysisRefreshNotice={analysisRefresh === "requested"
+        ? "Aggiornamento dell'analisi richiesto e registrato."
+        : analysisRefresh === "current"
+          ? "L'analisi risultava già allineata ai documenti."
+          : analysisRefresh === "error"
+            ? "Aggiornamento non avviato: i documenti sono cambiati nel frattempo o il profilo non è abilitato. Ricaricare la pagina e riprovare."
+            : undefined}
+      errorCode={typeof activityError === "string" ? activityError : undefined}
+      focusActivityKey={typeof activity === "string" && /^activity_[a-f0-9]{32}$/.test(activity) ? activity : undefined}
+    />
+  ) : null;
+  const previewReport = activeSection === "proposals" ? automaticWorkflow?.structuredReport : null;
+  const previewReportArchived = Boolean(automaticWorkflow?.structuredReportSnapshots.some((snapshot) =>
+    snapshot.reportFingerprint === previewReport?.reportFingerprint && snapshot.effectiveStatus === "CURRENT"));
+  const reconciliations = activeSection === "proposals" && detail.canonicalEnteId && canReview
+    ? await listProposalReconciliations({ tenantId: detail.canonicalEnteId, procedimentoId: detail.procedimento.id })
+    : [];
+  const proposalPreview = previewReport && detail.canonicalEnteId ? (
+    <FascicoloProposalPreview
+      procedimentoId={detail.procedimento.id}
+      issueNames={previewReport.payload.legalIssues}
+      analysisCurrent={automaticWorkflow?.analysisUpdate.status === "CURRENT"}
+      reportArchived={previewReportArchived}
+      reportFingerprint={previewReport.reportFingerprint}
+      corpusFingerprint={automaticWorkflow?.analysisUpdate.corpusFingerprint ?? ""}
+      canManage={canReview && hasCanonicalTenant}
+      reconciliations={reconciliations}
+      errorCode={typeof reconciliationError === "string" ? reconciliationError : undefined}
+      done={typeof reconciliationDone === "string" ? reconciliationDone : undefined}
+      preview={previewOperationalProposalReconciliation({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+        reportFingerprint: previewReport.reportFingerprint,
+        candidates: generateOperationalProposalCandidates({
+          tenantId: detail.canonicalEnteId,
+          procedimentoId: detail.procedimento.id,
+          structuredReportId: automaticWorkflow?.structuredReportSnapshots.find((snapshot) =>
+            snapshot.reportFingerprint === previewReport.reportFingerprint)?.snapshotId ?? null,
+          structuredReportFingerprint: previewReport.reportFingerprint,
+          report: previewReport.payload,
+        }),
+        proposals: automaticWorkflow?.operationalProposals ?? [],
+        specs: activitySpecs,
+        activities: operationalActivities,
+        drafts: operationalDrafts,
+      })}
+    />
+  ) : null;
+  const proposalHistory = activeSection === "proposals" ? (
+    <details className="rounded-lg border border-slate-200 bg-white p-4">
+      <summary className="cursor-pointer font-semibold text-slate-900">Altre proposte e storico delle revisioni</summary>
+      <div className="mt-4">
+        <FascicoloProposals
+          proposals={automaticWorkflow?.operationalProposals ?? []}
+          canManage={canReview && hasCanonicalTenant}
+          drafts={operationalDrafts}
+          activitySpecs={activitySpecs}
+          currentReportFingerprint={automaticWorkflow?.structuredReport?.reportFingerprint}
+          concessionMaterializationOptions={concessionMaterializationOptions}
+        />
+      </div>
+    </details>
+  ) : null;
+  const actsWorkspace = activeSection === "acts" && detail.canonicalEnteId
+    ? {
+        catalog: buildActTemplateCatalog({
+          payload: automaticWorkflow?.structuredReport?.payload ?? null,
+          context: {
+            procedimentoLabel: `Procedimento ${detail.procedimento.id}`,
+            responsabile: detail.procedimento.responsabileProcedimentoNome,
+            unitaOrganizzativa: detail.procedimento.unitaOrganizzativaResponsabile,
+          },
+        }),
+        drafts: operationalDrafts,
+        attachmentOptions,
+      }
+    : null;
+  const actsSection = activeSection === "acts" ? (
+    actsWorkspace ? (
+      <FascicoloActsWorkspace
+        procedimentoId={detail.procedimento.id}
+        catalog={actsWorkspace.catalog}
+        drafts={actsWorkspace.drafts}
+        attachmentOptions={actsWorkspace.attachmentOptions}
+        activitySpecs={activitySpecs}
+        activities={operationalActivities}
+        canManage={canReview}
+      />
+    ) : (
+      <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
+        Gli atti sono disponibili dopo il collegamento del fascicolo all&apos;ente competente.
+      </p>
+    )
+  ) : null;
 
   if (!detail.concessione || !detail.concessionario) {
     const overview: FascicoloOverviewModel = {
@@ -295,42 +520,72 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
           ) : null}
-          {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
+          {activeSection === "istruttoria" ? (
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
+          ) : null}
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
-              model={structuredAnalysis ? {
-                ...structuredAnalysis,
-                corpus: analysisCorpus,
-              } : {
-                questions: [],
-                evidence: detail.documentiPrincipali.map((documento) => ({
+              technicalResearchProcedureId={detail.procedimento.id}
+              model={{
+                questions: mergeFascicoloAnalysisQuestions([
+                  ...(structuredAnalysis?.questions ?? []),
+                  ...workflowAnalysisQuestions,
+                ]),
+                evidence: structuredAnalysis?.evidence ?? detail.documentiPrincipali.map((documento) => ({
                   id: documento.id,
                   title: documento.nome,
                   detail: formatEnumLabel(documento.tipologia),
                   href: documento.isFileAvailable ? documento.url : null,
                 })),
-                contradictions: [],
-                gaps: detail.documentiPrincipali.length === 0 ? [{
+                contradictions: structuredAnalysis?.contradictions ?? [],
+                gaps: structuredAnalysis?.gaps ?? (detail.documentiPrincipali.length === 0 ? [{
                   id: "documenti-mancanti",
                   title: "Documentazione da acquisire",
                   requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
-                }] : [],
-                relevantItems: [],
+                }] : []),
+                relevantItems: structuredAnalysis?.relevantItems ?? [],
+                legalSources: baseResearchModel.sources,
+                analysisStatus: structuredAnalysis?.analysisStatus,
                 corpus: analysisCorpus,
               }}
             />
           ) : null}
-          {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
+          {activeSection === "research" ? (
+            <div className="space-y-6">
+              <ProfessionalLegalQuestionsPanel
+                procedimentoId={detail.procedimento.id}
+                questions={professionalLegalQuestions}
+                canManage={role === "ADMIN" || role === "GIURIDICO"}
+                defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
+                documentCount={documentCorpus?.documentCount ?? 0}
+                reportCount={structuredReportSnapshots.length}
+                refusalNotice={sanitizedResearchNotice}
+              />
+              <FascicoloResearch
+                model={baseResearchModel}
+                technicalResearchProcedureId={detail.procedimento.id}
+              />
+            </div>
+          ) : null}
           {activeSection === "proposals" ? (
             <section aria-label="Proposte preliminari">
-              <h2 className="mb-3 text-xl font-semibold">Proposte operative preliminari</h2>
-              {automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
-                <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
-              ) : <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
+              {guidedSection ?? <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
+              <div className="mt-4">{proposalPreview}</div>
+              <div className="mt-4">{proposalHistory}</div>
               <p className="mt-4 text-sm text-slate-600">Nessun titolo concessorio viene presunto o creato automaticamente. Le proposte richiedono valutazione professionale.</p>
             </section>
           ) : null}
-          {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
+          {activeSection === "reports" ? (
+            <FascicoloReport
+              procedimentoId={detail.procedimento.id}
+              showDiagnostics={role === "ADMIN"}
+              snapshots={structuredReportSnapshots}
+              documents={attachmentOptions}
+            />
+          ) : null}
           {activeSection === "concession" ? (
             <Card>
               <CardHeader><CardTitle>Titolo concessorio non accertato</CardTitle></CardHeader>
@@ -353,7 +608,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               responsibilityHistory={[]}
             />
           ) : null}
-          {["timeline", "deadlines", "issues", "proposals", "decisione"].includes(activeSection) ? (
+          {actsSection}
+          {["timeline", "deadlines", "issues", "decisione"].includes(activeSection) ? (
             <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
               Nessun dato disponibile per questa sezione.
             </p>
@@ -382,6 +638,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     giorniRitardoContraddittorio: detail.procedimento.giorniRitardoContraddittorio,
   });
   const normeCollegate = await getNormeForProcedimento(detail.procedimento.id);
+  const researchModel = buildFascicoloResearchModel(automaticWorkflow, [
+    ...normeCollegate.map((item) => ({
+      id: `norma-${item.id}`,
+      title: item.titolo,
+      identifier: item.codice,
+      sourceType: formatEnumLabel(item.ambito),
+      origin: "Normativa collegata al fascicolo",
+      note: `${formatEnumLabel(item.severita)} · ${item.descrizione}`,
+    })),
+    ...candidateResearchSources,
+  ]);
   const decisionRules = getDecisionRulePreviewForTipologia(detail.procedimento.tipologia);
   const hasDecision = detail.procedimento.decisioneConclusiva !== null;
   const decisioneConclusiva = detail.procedimento.decisioneConclusiva;
@@ -687,45 +954,37 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         </section> : null}
 
         {activeSection === "istruttoria" ? <section className="space-y-4" aria-label="Istruttoria del fascicolo">
+          {detail.canonicalEnteId ? (
+            <FascicoloAiResearchControlPanel
+              tenantId={detail.canonicalEnteId}
+              procedimentoId={detail.procedimento.id}
+              canEdit={role === "ADMIN"}
+            />
+          ) : null}
           <div>
-            <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
           </div>
         </section> : null}
 
         {activeSection === "research" ? (
-          <FascicoloResearch
-            model={{
-              questions: [],
-              sources: [
-                ...normeCollegate.map((item) => ({
-                  id: `norma-${item.id}`,
-                  title: item.titolo,
-                  identifier: item.codice,
-                  sourceType: formatEnumLabel(item.ambito),
-                  origin: "Normativa collegata al fascicolo",
-                  note: `${formatEnumLabel(item.severita)} · ${item.descrizione}`,
-                })),
-                ...legalSourceCandidates.map((item) => ({
-                  id: `candidato-${item.id}`,
-                  title: item.resolution?.legalSource?.title ?? item.originalName ?? "Fonte acquisita",
-                  identifier: item.resolution?.legalSource?.sourceNumber
-                    ?? item.resolution?.legalSource?.stableKey
-                    ?? item.originalName,
-                  authority: item.resolution?.legalSource?.issuingBody,
-                  sourceType: item.mimeType,
-                  date: formatDateIT(item.admittedAt),
-                  origin: "Documento acquisito al fascicolo",
-                  verificationStatus: item.resolution?.outcome === "LINKED"
-                    ? "Identità della fonte collegata; contenuto e applicabilità temporale da verificare."
-                    : item.resolution?.outcome === "NO_MATCH"
-                      ? "Nessuna fonte ufficiale corrispondente individuata."
-                      : "Verifica della fonte in attesa.",
-                  note: item.resolution?.reviewNote,
-                  usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
-                })),
-              ],
-            }}
-          />
+          <div className="space-y-6">
+            <ProfessionalLegalQuestionsPanel
+              procedimentoId={detail.procedimento.id}
+              questions={professionalLegalQuestions}
+              canManage={role === "ADMIN" || role === "GIURIDICO"}
+              defaultReferenceDate={(detail.procedimento.dataAvvio ?? detail.procedimento.createdAt).toISOString().slice(0, 10)}
+              documentCount={documentCorpus?.documentCount ?? 0}
+              reportCount={structuredReportSnapshots.length}
+              refusalNotice={sanitizedResearchNotice}
+            />
+            <FascicoloResearch
+              model={researchModel}
+              technicalResearchProcedureId={detail.procedimento.id}
+            />
+          </div>
         ) : null}
 
         {activeSection === "subjects" ? (
@@ -777,8 +1036,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         {activeSection === "analysis" ? (
           <FascicoloAnalysis
+            technicalResearchProcedureId={detail.procedimento.id}
             model={{
-              questions: [
+              questions: mergeFascicoloAnalysisQuestions([
+                ...(structuredAnalysis?.questions ?? []),
+                ...workflowAnalysisQuestions,
                 ...(detail.criticitaCollegata && linkedIssueIsOpen ? [{
                   id: detail.criticitaCollegata.id,
                   title: formatEnumLabel(detail.criticitaCollegata.tipologia),
@@ -796,8 +1058,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   relevance: formatEnumLabel(item.gravita),
                   href: `/criticita/${item.id}`,
                 })),
-              ],
+              ]),
               evidence: [
+                ...(structuredAnalysis?.evidence ?? []),
                 {
                   id: `concessione-${detail.concessione.id}`,
                   title: `Titolo concessorio ${detail.concessione.numeroAtto}`,
@@ -811,8 +1074,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   href: documento.isFileAvailable ? documento.url : null,
                 })),
               ],
-              contradictions: [],
-              gaps: fascicoloDocumentRequirements.proposals
+              contradictions: structuredAnalysis?.contradictions ?? [],
+              gaps: uniqueBy([
+                ...(structuredAnalysis?.gaps ?? []),
+                ...fascicoloDocumentRequirements.proposals
                 .filter((proposal) => proposal.status !== "RIFIUTATO")
                 .map((proposal) => ({
                   id: proposal.id,
@@ -820,7 +1085,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   relevance: proposal.gapDescriptionSnapshot,
                   status: proposal.status === "VALIDATO" ? "Confermata" : "Da verificare",
                 })),
+              ], (gap) => gap.id),
               relevantItems: [
+                ...(structuredAnalysis?.relevantItems ?? []),
                 ...fascicoloObservations
                   .filter((observation) => observation.status !== "RIFIUTATO")
                   .map((observation) => ({
@@ -831,6 +1098,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     href: `/documenti/${observation.documento.id}/download`,
                   })),
               ],
+              legalSources: researchModel.sources,
+              analysisStatus: structuredAnalysis?.analysisStatus,
               corpus: analysisCorpus,
             }}
           />
@@ -863,16 +1132,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         </section> : null}
 
-        {activeSection === "proposals" && automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
-          <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
-        ) : null}
+        {guidedSection}
+        {proposalPreview}
+        {proposalHistory}
 
-        {activeSection === "proposals" ? (
-          <FascicoloProposals
-            proposals={automaticWorkflow?.operationalProposals ?? []}
-            canManage={canReview && hasCanonicalTenant}
-          />
-        ) : null}
+        {actsSection}
 
         {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>
@@ -1434,7 +1698,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
         ) : null}
 
-        {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
+        {activeSection === "reports" ? (
+          <FascicoloReport
+            procedimentoId={detail.procedimento.id}
+            showDiagnostics={role === "ADMIN"}
+            snapshots={structuredReportSnapshots}
+            documents={attachmentOptions}
+          />
+        ) : null}
       </div>
     </FascicoloShell>
   );

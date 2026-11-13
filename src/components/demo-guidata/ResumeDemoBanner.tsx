@@ -14,19 +14,26 @@ export function ResumeDemoBanner() {
       return;
     }
 
-    const raw = window.sessionStorage.getItem(GUIDED_DEMO_STATE_STORAGE_KEY);
-    if (!raw) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as GuidedDemoSessionState;
-      if (parsed.pausedForVisit) {
-        setState(parsed);
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const raw = window.sessionStorage.getItem(GUIDED_DEMO_STATE_STORAGE_KEY);
+      if (!raw) {
+        return;
       }
-    } catch {
-      setState(null);
-    }
+
+      try {
+        const parsed = JSON.parse(raw) as GuidedDemoSessionState;
+        if (parsed.pausedForVisit) {
+          setState(parsed);
+        }
+      } catch {
+        setState(null);
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!state?.pausedForVisit) {

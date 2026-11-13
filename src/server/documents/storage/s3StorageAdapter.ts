@@ -46,6 +46,7 @@ export class DocumentStorageS3Error extends Error {
 interface AwsLikeError {
   name?: string;
   code?: string;
+  Code?: string;
   $metadata?: {
     httpStatusCode?: number;
   };
@@ -54,12 +55,30 @@ interface AwsLikeError {
 
 function extractErrorCode(error: unknown): string {
   const candidate = error as AwsLikeError;
-  return candidate.code ?? candidate.name ?? "UNKNOWN_S3_ERROR";
+  return candidate.code ?? candidate.Code ?? candidate.name ?? "UNKNOWN_S3_ERROR";
 }
 
 function extractStatusCode(error: unknown): number | undefined {
   const candidate = error as AwsLikeError;
   return candidate.$metadata?.httpStatusCode;
+}
+
+export function sanitizedS3ErrorDiagnostics(error: unknown): {
+  code: string;
+  statusCode?: number;
+  message?: string;
+} {
+  const statusCode = extractStatusCode(error);
+  const rawMessage = error instanceof Error ? error.message.trim() : "";
+  const message = rawMessage
+    .replace(/https?:\/\/\S+/gi, "[redacted-url]")
+    .replace(/[A-Za-z0-9+/_=-]{16,}/g, "[redacted-token]")
+    .slice(0, 240);
+  return {
+    code: extractErrorCode(error),
+    ...(statusCode === undefined ? {} : { statusCode }),
+    ...(message ? { message } : {}),
+  };
 }
 
 function isNotFoundLike(code: string, statusCode?: number): boolean {

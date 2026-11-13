@@ -48,6 +48,7 @@ export async function getFascicoliIntakeList(input: { search?: string; concessio
 
   return prisma.fascicoloIntake.findMany({
     where: {
+      procedimentoId: null,
       ...(tenantContext.isAdmin ? {} : { enteId: { in: tenantContext.accessibleTenantIds } }),
       ...(input.concessioneId ? { concessioneId: input.concessioneId } : {}),
       ...(input.search

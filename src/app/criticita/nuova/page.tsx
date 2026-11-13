@@ -42,6 +42,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
   const concessioneId = pickString(resolvedSearch.concessioneId);
   const fonte = pickString(resolvedSearch.fonte);
   const tipologia = pickString(resolvedSearch.tipologia);
+  const errore = pickString(resolvedSearch.errore)?.slice(0, 300);
 
   return (
     <AppShell title="Nuova criticità" subtitle="Inserimento controllato per workflow demo">
@@ -51,6 +52,12 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
             <CardTitle>Nuova criticità</CardTitle>
           </CardHeader>
           <CardContent>
+            {errore ? (
+              <div role="alert" className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+                <p className="font-semibold">Dati non validi</p>
+                <p>{errore}</p>
+              </div>
+            ) : null}
             <form action={createCriticitaAction} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
@@ -130,7 +137,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
                   <p className="text-xs text-slate-600">
-                    Supporto istruttorio interno: la qualificazione finale resta in capo all'Autorità competente.
+                    Supporto istruttorio interno: la qualificazione finale resta in capo all&apos;Autorità competente.
                   </p>
                 </div>
 

@@ -10,6 +10,7 @@ import {
 } from "@/components/legal-research/reviewer-view-model";
 import { InitialVerificationForm } from "@/components/legal-research/InitialVerificationForm";
 import { AdverseSearchForm } from "@/components/legal-research/AdverseSearchForm";
+import { LegalApplicabilityReviewPanel } from "@/components/legal-research/LegalApplicabilityReviewPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -155,6 +156,8 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
   }
 
   useEffect(() => {
+    // The existing mission route resets pending and error state when loading its initial request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialMissionId) void loadVerification(initialMissionId);
     // The initial route identifier is intentionally loaded once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -349,6 +352,7 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
 
       {verification ? (
         <>
+          <LegalApplicabilityReviewPanel verification={verification} onUpdated={setVerification} />
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>
@@ -477,7 +481,8 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
               <CardTitle>Classificazione della fonte</CardTitle>
               <CardDescription>
                 La revisione qualifica il contributo della fonte al quesito. Non modifica i gate documentali,
-                temporali o di usabilità della SourceChain.
+                temporali o di usabilità della SourceChain. Motivare il rapporto tra fatti, passaggio
+                rilevante e questione, indicando differenze e limiti temporali.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">

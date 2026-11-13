@@ -53,10 +53,11 @@ async function database() {
   await db.exec(`
     CREATE TYPE "ResearchMissionStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'BUDGET_EXHAUSTED', 'DEFERRED', 'REJECTED');
     CREATE TABLE "FascicoloKnowledgeRevision" (
-      "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
+      "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, "completedAt" TIMESTAMPTZ
     );
     CREATE TABLE "User" (
-      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "role" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "ruolo" TEXT NOT NULL
     );
     CREATE TABLE "TenantMembership" (
       "userId" TEXT NOT NULL, "enteId" TEXT NOT NULL, PRIMARY KEY ("userId", "enteId")
@@ -92,18 +93,44 @@ async function database() {
     CREATE TABLE "ResearchEvidenceBundleRecord" (
       "id" TEXT PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "payload" JSONB NOT NULL
     );
+    CREATE TABLE "ResearchExecutionAttempt" (
+      "id" TEXT PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "startedAt" TIMESTAMPTZ NOT NULL, "completionState" TEXT
+    );
   `);
   await db.exec(migration);
   await db.exec(versioningMigration);
-  await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
-  await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
+  await db.exec('ALTER TABLE "ResearchMissionRecord" ADD COLUMN "professionalQuestionVersionId" TEXT;');
+  await db.query(`
+    INSERT INTO "User" ("id", "attivo", "ruolo") VALUES
+      ('admin-1', TRUE, 'ADMIN'),
+      ('actor-1', TRUE, 'ADMIN'),
+      ('actor-2', TRUE, 'GIURIDICO'),
+      ('worker-old', TRUE, 'ADMIN'),
+      ('worker-new', TRUE, 'ADMIN'),
+      ('viewer-1', TRUE, 'VIEWER_ADSP')
+  `);
+  await db.query(`
+    INSERT INTO "TenantMembership" ("userId", "enteId") VALUES
+      ('admin-1', 'tenant-1'),
+      ('actor-1', 'tenant-1'),
+      ('actor-2', 'tenant-2'),
+      ('worker-old', 'tenant-1'),
+      ('worker-new', 'tenant-1'),
+      ('viewer-1', 'tenant-1')
+  `);
   return db;
 }
 
-function plan(fingerprint: string, questionSemanticKey = "q".repeat(64), caseId = "procedure-1"): KnowledgeResearchMissionPlan {
+function plan(
+  fingerprint: string,
+  questionSemanticKey = "q".repeat(64),
+  caseId = "procedure-1",
+  executionChannel: "CHATGPT_CONNECTOR" | "SERVER_AUTONOMOUS" = "CHATGPT_CONNECTOR",
+): KnowledgeResearchMissionPlan {
   const mission = createResearchMission({
     kind: "RESEARCH_MISSION",
     version: RESEARCH_BRIDGE_VERSION,
+    executionChannel,
     caseReference: { caseId, fascicoloReference: caseId },
     legalIssueIds: ["i".repeat(64)],
     legalPropositionIds: [],
@@ -143,12 +170,450 @@ async function setCurrent(db: PGlite, id: string, tenantId = "tenant-1", procedi
   await db.query('INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'CURRENT\')', [id, tenantId, procedimentoId]);
 }
 
+async function setBuilding(db: PGlite, id: string) {
+  await db.query(
+    'INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'BUILDING\')',
+    [id, "tenant-1", "procedure-1"],
+  );
+}
+
 afterEach(async () => {
   await Promise.all(databases.splice(0).map((db) => db.close()));
 });
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("re-promotes a demoted mission with the same deterministic id instead of failing", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = plan("h".repeat(64), "h".repeat(64));
+    await setCurrent(db, "revision-h1");
+    const first = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h1",
+      assignedActorId: "actor-1",
+      plans: [samePlan],
+    }, ctx);
+    expect(first[0]?.outcome).toBe("CREATED");
+
+    // A later revision without this plan demotes the mission to HISTORICAL.
+    await setCurrent(db, "revision-h2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h2",
+      assignedActorId: "actor-1",
+      plans: [],
+    }, ctx);
+    const demoted = await db.query<{ lifecycleStatus: string }>(
+      'SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [samePlan.mission!.missionId],
+    );
+    expect(demoted.rows[0]?.lifecycleStatus).toBe("HISTORICAL");
+
+    // Planning the same mission again must re-promote the demoted record.
+    await setCurrent(db, "revision-h3");
+    const again = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-h3",
+      assignedActorId: "actor-1",
+      plans: [samePlan],
+    }, ctx);
+    expect(again[0]?.outcome).toBe("REUSED");
+    expect(again[0]?.lifecycleStatus).toBe("CURRENT");
+    const rows = await db.query<{ lifecycleStatus: string; count: string }>(
+      'SELECT "lifecycleStatus", COUNT(*)::text AS count FROM "ResearchMissionRecord" WHERE "id" = $1 GROUP BY "lifecycleStatus"',
+      [samePlan.mission!.missionId],
+    );
+    expect(rows.rows).toEqual([{ lifecycleStatus: "CURRENT", count: "1" }]);
+  });
+
+  it("replaces a historical worker assignment with the currently authorized actor", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = {
+      ...plan("r".repeat(64), "r".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-rotation-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-1",
+      assignedActorId: null,
+      plans: [samePlan],
+    }, ctx);
+    await setCurrent(db, "revision-rotation-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-rotation-3");
+    const [rePromoted] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-rotation-3",
+      assignedActorId: null,
+      plans: [{ ...samePlan, autonomousActorId: "worker-new" }],
+    }, ctx);
+
+    expect(rePromoted).toMatchObject({
+      missionId: created.missionId,
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    const row = await db.query<{ assignedActorId: string | null; lifecycleStatus: string }>(
+      'SELECT "assignedActorId", "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [created.missionId],
+    );
+    expect(row.rows[0]).toEqual({
+      assignedActorId: "worker-new",
+      lifecycleStatus: "CURRENT",
+    });
+  });
+
+  it.each([
+    ["inactive actor", async (db: PGlite) => {
+      await db.query('UPDATE "User" SET "attivo" = FALSE WHERE "id" = $1', ["worker-old"]);
+    }],
+    ["actor without tenant membership", async (db: PGlite) => {
+      await db.query('DELETE FROM "TenantMembership" WHERE "userId" = $1 AND "enteId" = $2', ["worker-old", "tenant-1"]);
+    }],
+    ["actor without AI permission", async (db: PGlite) => {
+      await db.query('UPDATE "User" SET "ruolo" = \'VIEWER_ADSP\' WHERE "id" = $1', ["worker-old"]);
+    }],
+  ])("re-promotes fail-closed when the planned %s is no longer authorized", async (_label, revoke) => {
+    const db = await database();
+    const ctx = context(db);
+    const autonomousPlan = {
+      ...plan("v".repeat(64), "v".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-revocation-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-1",
+      assignedActorId: null,
+      plans: [autonomousPlan],
+    }, ctx);
+    await setCurrent(db, "revision-revocation-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await revoke(db);
+    await setCurrent(db, "revision-revocation-3");
+
+    const [rePromoted] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-revocation-3",
+      assignedActorId: null,
+      plans: [autonomousPlan],
+    }, ctx);
+    expect(rePromoted).toMatchObject({
+      missionId: created.missionId,
+      operationalStatus: "DEFERRED",
+      assignmentStatus: "REQUIRES_ASSIGNMENT",
+    });
+    const row = await db.query<{
+      assignedActorId: string | null;
+      status: string;
+      deferredAt: Date | null;
+    }>('SELECT "assignedActorId", "status", "deferredAt" FROM "ResearchMissionRecord" WHERE "id" = $1', [created.missionId]);
+    expect(row.rows[0]).toEqual({
+      assignedActorId: null,
+      status: "DEFERRED",
+      deferredAt: expect.any(Date),
+    });
+  });
+
+  it("does not re-promote a historical mission that still has an execution claim", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const claimedPlan = {
+      ...plan("k".repeat(64), "k".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-old",
+    };
+    await setCurrent(db, "revision-claim-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-1",
+      assignedActorId: null,
+      plans: [claimedPlan],
+    }, ctx);
+    await db.query(`
+      UPDATE "ResearchMissionRecord"
+      SET "status" = 'IN_PROGRESS', "claimantId" = 'worker-old',
+        "claimToken" = $2, "claimExpiresAt" = now() + interval '5 minutes',
+        "activeExecutionId" = 'execution-old'
+      WHERE "id" = $1
+    `, [created.missionId, "c".repeat(64)]);
+    await setCurrent(db, "revision-claim-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-claim-3");
+
+    await expect(reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-claim-3",
+      assignedActorId: null,
+      plans: [{ ...claimedPlan, autonomousActorId: "worker-new" }],
+    }, ctx)).rejects.toThrow("HISTORICAL_RESEARCH_MISSION_STILL_CLAIMED");
+    const row = await db.query<{
+      assignedActorId: string | null;
+      lifecycleStatus: string;
+      status: string;
+      claimantId: string | null;
+    }>('SELECT "assignedActorId", "lifecycleStatus", "status", "claimantId" FROM "ResearchMissionRecord" WHERE "id" = $1', [created.missionId]);
+    expect(row.rows[0]).toEqual({
+      assignedActorId: "worker-old",
+      lifecycleStatus: "HISTORICAL",
+      status: "IN_PROGRESS",
+      claimantId: "worker-old",
+    });
+  });
+
+  it("switches between connector and autonomous execution without carrying assignments across modes", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const connectorPlan = plan("m".repeat(64), "m".repeat(64));
+    const autonomousPlan = {
+      ...plan("n".repeat(64), "m".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-new",
+    };
+    await setCurrent(db, "revision-mode-1");
+    const [connector] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-1",
+      assignedActorId: "actor-1",
+      plans: [connectorPlan],
+    }, ctx);
+    await setCurrent(db, "revision-mode-2");
+    const [autonomous] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-2",
+      assignedActorId: "actor-1",
+      plans: [autonomousPlan],
+    }, ctx);
+    expect(autonomous.missionId).not.toBe(connector.missionId);
+    await setCurrent(db, "revision-mode-3");
+    const [connectorAgain] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-mode-3",
+      assignedActorId: "actor-1",
+      plans: [connectorPlan],
+    }, ctx);
+    expect(connectorAgain).toMatchObject({
+      missionId: connector.missionId,
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    const rows = await db.query<{
+      id: string;
+      assignedActorId: string | null;
+      lifecycleStatus: string;
+      executionChannel: string;
+    }>(`
+      SELECT "id", "assignedActorId", "lifecycleStatus",
+        "payload" ->> 'executionChannel' AS "executionChannel"
+      FROM "ResearchMissionRecord"
+      ORDER BY "lifecycleStatus", "id"
+    `);
+    expect(rows.rows).toEqual(expect.arrayContaining([
+      {
+        id: connector.missionId,
+        assignedActorId: "actor-1",
+        lifecycleStatus: "CURRENT",
+        executionChannel: "CHATGPT_CONNECTOR",
+      },
+      {
+        id: autonomous.missionId,
+        assignedActorId: "worker-new",
+        lifecycleStatus: "HISTORICAL",
+        executionChannel: "SERVER_AUTONOMOUS",
+      },
+    ]));
+  });
+
+  it("serializes concurrent re-planning to one current mission", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const samePlan = {
+      ...plan("x".repeat(64), "x".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      autonomousActorId: "worker-new",
+    };
+    await setCurrent(db, "revision-concurrent-1");
+    const [created] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-concurrent-1",
+      assignedActorId: null,
+      plans: [samePlan],
+    }, ctx);
+    await setCurrent(db, "revision-concurrent-2");
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-concurrent-2",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+    await setCurrent(db, "revision-concurrent-3");
+
+    const results = await Promise.all([
+      reconcileKnowledgeResearchMissions({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        knowledgeRevisionId: "revision-concurrent-3",
+        assignedActorId: null,
+        plans: [samePlan],
+      }, ctx),
+      reconcileKnowledgeResearchMissions({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        knowledgeRevisionId: "revision-concurrent-3",
+        assignedActorId: null,
+        plans: [samePlan],
+      }, ctx),
+    ]);
+    expect(results.flat().map((result) => result.missionId)).toEqual([
+      created.missionId,
+      created.missionId,
+    ]);
+    const rows = await db.query<{ count: number; currentCount: number }>(`
+      SELECT count(*)::int AS "count",
+        count(*) FILTER (WHERE "lifecycleStatus" = 'CURRENT')::int AS "currentCount"
+      FROM "ResearchMissionRecord"
+      WHERE "id" = $1
+    `, [created.missionId]);
+    expect(rows.rows[0]).toEqual({ count: 1, currentCount: 1 });
+  });
+
+  it("preserves current missions created from approved professional questions", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-professional");
+    const professionalMission = plan("p".repeat(64)).mission!;
+    await db.query(`
+      INSERT INTO "ResearchMissionRecord" (
+        "id", "tenantId", "assignedActorId", "contractVersion", "caseId",
+        "referenceDate", "mode", "payload", "payloadFingerprint",
+        "missionFingerprint", "legalIssueSemanticKey", "researchQuestionSemanticKey",
+        "referenceDateBasis", "lifecycleStatus", "status", "professionalQuestionVersionId"
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13::jsonb,'CURRENT','PENDING',$14)
+    `, [
+      professionalMission.missionId,
+      "tenant-1",
+      "admin-1",
+      professionalMission.version,
+      "procedure-1",
+      professionalMission.referenceDate,
+      professionalMission.mode,
+      JSON.stringify(professionalMission),
+      "z".repeat(64),
+      "p".repeat(64),
+      "i".repeat(64),
+      "q".repeat(64),
+      JSON.stringify({ kind: "PROFESSIONAL_SELECTION" }),
+      "professional-version-1",
+    ]);
+
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-professional",
+      assignedActorId: null,
+      plans: [],
+    }, ctx);
+
+    const rows = await db.query<{ lifecycleStatus: string }>(
+      'SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1',
+      [professionalMission.missionId],
+    );
+    expect(rows.rows[0]?.lifecycleStatus).toBe("CURRENT");
+  });
+
+  it("does not re-queue research already executed on the same revision and frees its wave slot", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-wave-1");
+    await db.query('UPDATE "FascicoloKnowledgeRevision" SET "createdAt" = now() - interval \'3 hours\', "completedAt" = now() - interval \'2 hours\' WHERE "id" = $1', ["revision-wave-1"]);
+    const executed = plan("a".repeat(64), "a".repeat(64));
+    const waiting: KnowledgeResearchMissionPlan = {
+      ...plan("c".repeat(64), "c".repeat(64)),
+      execution: "DEFERRED_BY_POLICY",
+      blockReason: "EXECUTION_WAVE_LIMIT",
+    };
+    const reconcile = (knowledgeRevisionId: string) => reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId,
+      assignedActorId: "actor-1",
+      plans: [executed, waiting],
+    }, ctx);
+
+    const first = await reconcile("revision-wave-1");
+    expect(first.map((row) => row.operationalStatus)).toEqual(["PENDING", "DEFERRED"]);
+    await db.query(
+      'UPDATE "ResearchMissionRecord" SET "status" = \'DEFERRED\', "deferredAt" = now() WHERE "id" = $1',
+      [first[0].missionId],
+    );
+    await db.query(
+      'INSERT INTO "ResearchExecutionAttempt" ("id", "missionId", "startedAt", "completionState") VALUES ($1, $2, now() - interval \'1 hour\', \'DEFERRED\')',
+      ["attempt-1", first[0].missionId],
+    );
+
+    const repeated = await reconcile("revision-wave-1");
+    expect(repeated.map((row) => [row.missionId, row.operationalStatus])).toEqual([
+      [first[0].missionId, "DEFERRED"],
+      [first[1].missionId, "PENDING"],
+    ]);
+
+    await setCurrent(db, "revision-wave-2");
+    const nextRevision = await reconcile("revision-wave-2");
+    expect(nextRevision.find((row) => row.missionId === first[0].missionId)?.operationalStatus).toBe("PENDING");
+  });
+
+  it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setBuilding(db, "revision-building");
+    const input = {
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-building",
+      assignedActorId: null,
+      plans: [plan("b".repeat(64))],
+    };
+
+    await expect(reconcileKnowledgeResearchMissions(input, ctx))
+      .rejects.toThrow("KNOWLEDGE_REVISION_NOT_CURRENT");
+    await expect(reconcileKnowledgeResearchMissions({
+      ...input,
+      allowBuildingRevision: true,
+    }, ctx)).resolves.toHaveLength(1);
+  });
 
   it("keeps an unassigned system mission deferred without inventing a user", async () => {
     const db = await database();
@@ -362,7 +827,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       assignedActorId: "actor-1",
       plans: [plan("8".repeat(64))],
     }, ctx);
-    await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
+    await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
 
     await expect(versionResearchMissionBudget({
       sourceMissionId: original.missionId,
@@ -450,7 +915,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     ]);
   });
 
-  it("persists seven missions, defers two, and admits the residual wave without duplicates", async () => {
+  it("keeps deferred ChatGPT missions outside the autonomous residual wave", async () => {
     const db = await database();
     const ctx = context(db);
     await setCurrent(db, "revision-wave");
@@ -465,10 +930,38 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     const firstWave = await db.query<{ status: string; count: number }>('SELECT "status", count(*)::int AS "count" FROM "ResearchMissionRecord" GROUP BY "status" ORDER BY "status"');
     expect(firstWave.rows).toEqual(expect.arrayContaining([{ status: "DEFERRED", count: 2 }, { status: "PENDING", count: 5 }]));
     const secondWave = await admitDeferredKnowledgeResearchMissionWave({ tenantId: "tenant-1", procedimentoId: "procedure-1", limit: 5 }, ctx);
-    expect(secondWave).toHaveLength(2);
+    expect(secondWave).toHaveLength(0);
     expect(await admitDeferredKnowledgeResearchMissionWave({ tenantId: "tenant-1", procedimentoId: "procedure-1", limit: 5 }, ctx)).toHaveLength(0);
-    const final = await db.query<{ count: number }>('SELECT count(*)::int AS "count" FROM "ResearchMissionRecord" WHERE "status" = \'PENDING\'');
-    expect(final.rows[0].count).toBe(7);
+    const final = await db.query<{ status: string; count: number }>('SELECT "status", count(*)::int AS "count" FROM "ResearchMissionRecord" GROUP BY "status" ORDER BY "status"');
+    expect(final.rows).toEqual(expect.arrayContaining([{ status: "DEFERRED", count: 2 }, { status: "PENDING", count: 5 }]));
+  });
+
+  it("admits only an explicitly autonomous deferred mission", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-autonomous-wave");
+    const autonomous = {
+      ...plan("a".repeat(64), "a".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      execution: "DEFERRED_BY_POLICY" as const,
+      blockReason: "EXECUTION_WAVE_LIMIT",
+    };
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-autonomous-wave",
+      ...assignment,
+      plans: [autonomous],
+    }, ctx);
+    await expect(admitDeferredKnowledgeResearchMissionWave({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      limit: 5,
+    }, ctx)).resolves.toHaveLength(1);
+    await expect(admitDeferredKnowledgeResearchMissionWave({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      limit: 5,
+    }, ctx)).resolves.toHaveLength(0);
   });
 
   it("moves all structured missions to history when the CURRENT revision has zero questions and preserves bundles", async () => {

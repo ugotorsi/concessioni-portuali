@@ -1,8 +1,15 @@
+import { randomUUID } from "node:crypto";
+
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { humanizeProfessionalText, sourceLimitLabel } from "@/lib/professional-text";
+import {
+  requestExistingCorpusAnalysisAction,
+} from "@/server/actions/fascicolo-existing-corpus-analysis";
 import {
   generateOperationalProposalsAction,
   materializeOperationalProposalAction,
@@ -88,12 +95,12 @@ function sourceStateLabel(state: FascicoloAutomaticWorkflowReadModel["missions"]
   if (state === "IDENTITY_VERIFIED") return "Identità verificata";
   if (state === "CONTENT_VERIFIED") return "Contenuto verificato";
   if (state === "TEMPORAL_ASSESSED") return "Valutazione temporale disponibile";
-  if (state === "USABLE") return "Utilizzabilità già verificata";
+  if (state === "USABLE") return "Utilizzabilità tecnica già verificata";
   return "Fonte solo individuata";
 }
 
 function pipelineStateLabel(result: FascicoloAutomaticWorkflowReadModel["missions"][number]["results"][number]): string {
-  if (result.usable) return "Fonte utilizzabile";
+  if (result.usable) return "Fonte utilizzabile tecnicamente";
   if (result.manualReviewRequired) return "Review richiesta";
   if (result.retrievalState === "BLOCKED" || result.identityVerification === "MISMATCH" || result.contentVerification === "MISMATCH") return "Fonte bloccata";
   if (result.temporalStatus === "APPLICABLE") return "Temporalmente applicabile";
@@ -152,7 +159,14 @@ function WorkflowSummary({
 
 export function FascicoloAutomaticWorkflowPanel({
   model,
-}: { model: FascicoloAutomaticWorkflowReadModel | null }) {
+  existingCorpusAnalysis,
+}: {
+  model: FascicoloAutomaticWorkflowReadModel | null;
+  existingCorpusAnalysis?: {
+    procedimentoId: string;
+    enabled: boolean;
+  } | null;
+}) {
   if (!model) return null;
   const currentJob = model.jobs.find((job) => !job.superseded) ?? null;
   const currentReport = model.reports.find((report) => report.status !== "SUPERSEDED") ?? null;
@@ -169,6 +183,31 @@ export function FascicoloAutomaticWorkflowPanel({
       </CardHeader>
       <CardContent className="space-y-5">
         <WorkflowSummary model={model} />
+        {existingCorpusAnalysis ? (
+          <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+            <form action={requestExistingCorpusAnalysisAction}>
+              <input type="hidden" name="executionId" value={randomUUID()} />
+              <input
+                type="hidden"
+                name="procedimentoId"
+                value={existingCorpusAnalysis.procedimentoId}
+              />
+              <SubmitButtonPending
+                size="sm"
+                disabled={!existingCorpusAnalysis.enabled}
+                pendingLabel="Richiesta in corso..."
+              >
+                Prepara collaudo V7 a tentativo unico
+              </SubmitButtonPending>
+            </form>
+            {!existingCorpusAnalysis.enabled ? (
+              <p className="mt-2 text-xs text-slate-600">
+                Il comando sarà disponibile dopo l’autorizzazione real-data e
+                l’abilitazione del worker one-off dedicato.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {model.analysisUpdate.status !== "CURRENT" ? (
           <div className={`border-l-2 pl-3 text-sm ${
             model.analysisUpdate.status === "ERROR"
@@ -260,10 +299,10 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <span>Stato ricerca: {mission.researchState}</span>
                                     <span>Copertura: {mission.coverageStatus}</span>
                                     <span>Discovery: {mission.discoveryCoverageStatus}</span>
-                                    <span>Fonti utilizzabili: {mission.usableCoverageStatus}</span>
+                                    <span>Fonti utilizzabili: {mission.usableCoverageStatus} (verifica tecnica)</span>
                                     {mission.conflicting ? <Badge variant="danger">Orientamenti in conflitto</Badge> : null}
                                     {mission.conflictingUsableAuthorities ? <Badge variant="danger">Autorità utilizzabili in conflitto</Badge> : null}
-                                    {mission.historicalResultCount > 0 ? <span>Risultati storici: {mission.historicalResultCount}</span> : null}
+                                    {mission.displayedHistoricalResultCount > 0 ? <span>Risultati nelle missioni storiche visualizzate: {mission.displayedHistoricalResultCount}</span> : null}
                                   </div>
                                   {mission.adverseMission ? (
                                     <p className="text-xs text-slate-600">Ricerca contraria: {mission.adverseMission.status}</p>
@@ -293,9 +332,9 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <p className="text-xs text-amber-800">Aspetti scoperti: {mission.coverageGaps.map((gap) => gap.key).join(", ")}</p>
                                   ) : null}
                                   {mission.sourceGaps.length > 0 ? (
-                                    <p className="text-xs text-amber-800">Gap fonti: {mission.sourceGaps.join(", ")}</p>
+                                    <p className="text-xs text-amber-800">Limiti delle fonti: {mission.sourceGaps.map(sourceLimitLabel).join("; ")}</p>
                                   ) : null}
-                                  <p className="text-xs text-slate-500">La direzione del risultato non certifica la fonte e non costituisce una conclusione giuridica.</p>
+                                  <p className="text-xs text-slate-500">La direzione del risultato non certifica la fonte e non costituisce una conclusione giuridica. La verifica tecnica non conferma la pertinenza al caso: la classificazione richiede una valutazione motivata del professionista.</p>
                                 </div>
                               ) : null}
                             </div>
@@ -374,10 +413,12 @@ export function FascicoloAutomaticWorkflowPanel({
                 <Badge variant={currentStructuredSnapshot?.effectiveStatus === "STALE" ? "warning" : "success"}>
                   {currentStructuredSnapshot?.effectiveStatus === "STALE" ? "Da aggiornare" : "Aggiornato"}
                 </Badge>
-                <form action={generateOperationalProposalsAction}>
-                  <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
-                  <Button type="submit" size="sm">Genera proposte operative</Button>
-                </form>
+                <Link
+                  href={`/procedimenti/${structuredReport.payload.procedimentoId}?section=proposals#proposal-reconciliation`}
+                  className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+                >
+                  Genera proposte operative: esamina prima la simulazione
+                </Link>
                 <details>
                   <summary className="cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Altro</summary>
                   <form action={archiveStructuredFascicoloReportAction} className="mt-2">
@@ -399,6 +440,16 @@ export function FascicoloAutomaticWorkflowPanel({
                   ))}
                 </ul>
               ) : <p className="mt-1 text-sm text-slate-600">Nessun fatto corrente non respinto.</p>}
+              {(structuredReport.payload.documentedFramework.partyPositions ?? []).length > 0 ? (
+                <>
+                  <h5 className="mt-4 text-xs font-semibold uppercase text-slate-600">Posizioni e difese delle parti</h5>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                    {(structuredReport.payload.documentedFramework.partyPositions ?? []).map((position) => (
+                      <li key={position.id}>{position.normalizedText} <span className="text-xs text-slate-500">({position.evidence.map((evidence) => evidence.basisRef).filter(Boolean).join(", ")})</span></li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </div>
             {structuredReport.payload.legalIssues.map((issue) => (
               <section key={issue.knowledgeItemId} className="space-y-3 border-l-2 border-slate-300 pl-3">
@@ -572,7 +623,7 @@ export function FascicoloAutomaticWorkflowPanel({
             <div>
               <h4 className="text-xs font-semibold uppercase text-slate-600">Sintesi documentata</h4>
               <p className="mt-1 text-sm text-slate-800">{currentReport.summary.text}</p>
-              <p className="mt-1 text-xs text-slate-500">Provenienza: {currentReport.summary.basisRefs.join(", ")}</p>
+              <p className="mt-1 text-xs text-slate-500">Provenienza: {currentReport.summary.basisRefs.map(humanizeProfessionalText).join(", ")}</p>
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase text-slate-600">Fatti e date documentati</h4>
@@ -581,7 +632,7 @@ export function FascicoloAutomaticWorkflowPanel({
                   {currentReport.documentedFacts.map((fact, index) => (
                     <li key={`${currentReport.reportId}-fact-${index}`}>
                       {fact.recordedAt ? `${fact.recordedAt} · ` : ""}{fact.text}
-                      <span className="block text-xs text-slate-500">Provenienza: {fact.basisRefs.join(", ")}</span>
+                      <span className="block text-xs text-slate-500">Provenienza: {fact.basisRefs.map(humanizeProfessionalText).join(", ")}</span>
                     </li>
                   ))}
                 </ul>
@@ -595,7 +646,7 @@ export function FascicoloAutomaticWorkflowPanel({
                     <li key={`${currentReport.reportId}-signal-${index}`}>
                       <Badge variant={signal.type === "VERIFY" ? "warning" : "default"}>{signal.type}</Badge>
                       <span className="ml-2">{signal.text}</span>
-                      <span className="block text-xs text-slate-500">Provenienza: {signal.basisRefs.join(", ")}</span>
+                      <span className="block text-xs text-slate-500">Provenienza: {signal.basisRefs.map(humanizeProfessionalText).join(", ")}</span>
                     </li>
                   ))}
                 </ul>
@@ -606,7 +657,7 @@ export function FascicoloAutomaticWorkflowPanel({
                 <h4 className="text-xs font-semibold uppercase text-slate-600">Lacune documentali</h4>
                 <ul className="mt-2 space-y-1 text-sm text-slate-700">
                   {currentReport.gaps.map((gap, index) => (
-                    <li key={`${currentReport.reportId}-gap-${index}`}>{gap.text} ({gap.basisRefs.join(", ")})</li>
+                    <li key={`${currentReport.reportId}-gap-${index}`}>{gap.text} ({gap.basisRefs.map(humanizeProfessionalText).join(", ")})</li>
                   ))}
                 </ul>
               </div>
@@ -709,3 +760,4 @@ export function FascicoloAutomaticWorkflowPanel({
     </Card>
   );
 }
+import Link from "next/link";

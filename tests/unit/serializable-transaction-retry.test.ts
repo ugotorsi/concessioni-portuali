@@ -4,7 +4,10 @@ const prismaMock = vi.hoisted(() => ({ $transaction: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 
 import { Prisma } from "@/generated/prisma/client";
-import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
+import {
+  isRetryableSerializableTransactionError,
+  runSerializableTransactionWithRetry,
+} from "@/server/db/serializableTransaction";
 
 function knownError(code: string, target?: string[]) {
   return new Prisma.PrismaClientKnownRequestError(code, {
@@ -26,6 +29,26 @@ describe("serializable transaction opt-in retry", () => {
     prismaMock.$transaction.mockReset().mockRejectedValue(knownError("P2002", ["key"]));
     await expect(runSerializableTransactionWithRetry(vi.fn())).rejects.toMatchObject({ code: "P2002" });
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["40001", "40P01", "55P03"])(
+    "recognizes and retries transient PostgreSQL code %s",
+    async (code) => {
+      prismaMock.$transaction
+        .mockRejectedValueOnce({ code })
+        .mockResolvedValueOnce("ok");
+
+      await expect(runSerializableTransactionWithRetry(vi.fn())).resolves.toBe("ok");
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(2);
+      expect(isRetryableSerializableTransactionError({ code })).toBe(true);
+    },
+  );
+
+  it("recognizes a transient PostgreSQL code wrapped as a cause", () => {
+    expect(isRetryableSerializableTransactionError({
+      code: "P2010",
+      cause: { code: "40P01" },
+    })).toBe(true);
   });
 
   it("does not retry when the caller predicate rejects the error", async () => {

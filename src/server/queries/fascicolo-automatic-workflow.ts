@@ -1,15 +1,35 @@
+import { createHash } from "node:crypto";
+
 import type { AsyncJobStatus, ResearchMissionStatus } from "@/generated/prisma/enums";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
+import { stableStringify } from "@/server/audit/hash";
 import { FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION } from "@/server/ai/fascicoloAutomaticAnalysisJob";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
 import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
 import { DOCUMENT_EXTRACTION_OPERATION } from "@/server/documents/documentExtractionAdmission";
-import { buildStructuredFascicoloReport, type BuiltStructuredFascicoloReport } from "@/server/fascicolo-report";
+import {
+  buildStructuredFascicoloReport,
+  STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION,
+  type BuiltStructuredFascicoloReport,
+  type StructuredReportResearchResultInput,
+  type StructuredReportTechnicalSourceInput,
+} from "@/server/fascicolo-report";
 import { listOperationalProposals, type OperationalProposalRecord } from "@/server/fascicolo-operational-proposals";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import type { AuthorityCandidate, ResearchMission } from "@/server/legal-research/bridge";
+import {
+  CLASSIFICATION_REVIEW_ACTION,
+  CLASSIFICATION_REVIEW_ENTITY,
+  classificationReviewFingerprint,
+} from "@/server/legal-research/question-result-attestation";
+import {
+  legalAnalysisContributionSchema,
+  type LegalAnalysisContribution,
+} from "@/server/legal-research/legal-synthesis";
 import {
   deriveResearchQuestionCoverage,
   deriveResearchResultSourceState,
@@ -23,10 +43,29 @@ import {
 } from "@/server/legal-research/question-results";
 import { deriveSourceCoverage } from "@/server/legal-research/source-chain";
 import {
+  readOfficialSourceRelevance,
+  type OfficialSourceRelevance,
+} from "@/server/legal-research/official-source-relevance";
+import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
+import {
+  assistedVerificationSnapshotSchema,
+  type LegalApplicabilityReview,
+} from "@/server/legal-research/assisted-verification";
+import type { TemporalAssessmentResult } from "@/server/legal-sources/temporal";
+import {
+  OrchestrationInputError,
+  resolveApplicableLegalRules,
+} from "@/server/legal-rules/orchestrator";
+import { verifyRuleResolutionFingerprint } from "@/server/legal-research/legal-applicability-producer";
+import {
   loadCurrentStructuredKnowledge,
+  loadStructuredKnowledgeRevision,
   type StructuredKnowledgeReadModel,
 } from "@/server/queries/fascicolo-knowledge";
 import { getFascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
+import { diagnoseKnowledgeCorpusDrift, type KnowledgeCorpusDrift } from "@/server/queries/knowledge-corpus-drift";
+import { buildDocumentCoverage } from "@/lib/document-coverage";
+import { getFascicoloDocumentCorpusForTenant } from "@/server/queries/fascicolo-document-corpus";
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 
@@ -59,11 +98,338 @@ function texts(value: unknown): readonly string[] {
   return Array.isArray(value) ? value.map(text).filter((item): item is string => item !== null) : [];
 }
 
+const MISSION_READ_LIMIT = 50;
+
+const researchMissionReadSelect = {
+  id: true,
+  payload: true,
+  referenceDate: true,
+  referenceDateBasis: true,
+  missionFingerprint: true,
+  legalIssueSemanticKey: true,
+  researchQuestionSemanticKey: true,
+  professionalQuestionVersionId: true,
+  knowledgeRevisionId: true,
+  firstKnowledgeRevisionId: true,
+  mode: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  primaryAdverseRequirements: {
+    where: { status: { not: "HISTORICAL" as const } },
+    take: 1,
+    select: {
+      adverseMission: { select: { id: true, status: true, lifecycleStatus: true } },
+    },
+  },
+  questionResults: {
+    orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }],
+    select: {
+      id: true,
+      bundleId: true,
+      candidateId: true,
+      candidateSnapshot: true,
+      supportDirection: true,
+      classificationSource: true,
+      classificationConfidence: true,
+      classificationRationale: true,
+      classificationReviewStatus: true,
+      coverageElementKeys: true,
+      unresolvedAspectKeys: true,
+      researchQuestionSemanticKey: true,
+      sourceAssessments: {
+        where: { isCurrent: true },
+        orderBy: { createdAt: "desc" as const },
+        take: 1,
+        select: {
+          id: true,
+          tenantId: true,
+          caseId: true,
+          missionId: true,
+          researchQuestionSemanticKey: true,
+          missionFingerprint: true,
+          referenceDate: true,
+          referenceDateBasis: true,
+          verificationVersion: true,
+          sourceFamilyId: true,
+          sourceVersionId: true,
+          acquisitionId: true,
+          temporalAssessmentId: true,
+          chainFingerprint: true,
+          sourceIdentityKey: true,
+          contentSha256: true,
+          isCurrent: true,
+          retrievalState: true,
+          textState: true,
+          identityState: true,
+          contentState: true,
+          temporalState: true,
+          adverseState: true,
+          officiality: true,
+          citationAnchors: true,
+          blockingReasons: true,
+          manualReviewRequired: true,
+          manualReviewReason: true,
+          usable: true,
+          temporalAssessment: {
+            select: {
+              assessmentVersion: true,
+              referenceDate: true,
+              validityState: true,
+              temporalWindowState: true,
+              applicabilityState: true,
+              reasonCodes: true,
+              effectiveFromSnapshot: true,
+              effectiveToSnapshot: true,
+              humanReviewRequired: true,
+              confidence: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  assistedVerifications: {
+    orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }],
+    select: { payload: true, recordedByActorId: true },
+  },
+  executionAttempts: {
+    where: { evidenceBundles: { some: {} } },
+    orderBy: [{ completedAt: "desc" as const }, { id: "desc" as const }],
+    take: 1,
+    select: {
+      evidenceBundles: {
+        orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }],
+        take: 1,
+        select: { payload: true, completionState: true },
+      },
+    },
+  },
+} satisfies Prisma.ResearchMissionRecordSelect;
+
+type ResearchMissionReadRow = Prisma.ResearchMissionRecordGetPayload<{
+  select: typeof researchMissionReadSelect;
+}>;
+type ResearchSourceAssessmentReadRow = ResearchMissionReadRow["questionResults"][number]["sourceAssessments"][number];
+
+function projectSourceAssessment(
+  assessment: ResearchSourceAssessmentReadRow | undefined,
+): StructuredReportResearchResultInput["sourceAssessment"] {
+  if (!assessment) return null;
+  const base = {
+    assessmentId: assessment.id,
+    chainFingerprint: assessment.chainFingerprint,
+    isCurrent: assessment.isCurrent,
+    usable: assessment.usable,
+    citationAnchors: records(assessment.citationAnchors),
+    blockingReasons: assessment.blockingReasons,
+    manualReviewRequired: assessment.manualReviewRequired,
+    manualReviewReason: assessment.manualReviewReason,
+    sourceFamilyId: assessment.sourceFamilyId,
+    sourceVersionId: assessment.sourceVersionId,
+    acquisitionId: assessment.acquisitionId,
+    temporalAssessmentId: assessment.temporalAssessmentId,
+  };
+  if (!(assessment.referenceDate instanceof Date)
+    || !assessment.tenantId
+    || !assessment.caseId
+    || !assessment.missionId
+    || !assessment.researchQuestionSemanticKey
+    || !assessment.missionFingerprint
+    || !assessment.verificationVersion) return base;
+  const temporal = assessment.temporalAssessment;
+  const sourceChain: SourceChainSnapshot = {
+    resultId: assessment.id,
+    tenantId: assessment.tenantId,
+    caseId: assessment.caseId,
+    missionId: assessment.missionId,
+    researchQuestionSemanticKey: assessment.researchQuestionSemanticKey,
+    missionFingerprint: assessment.missionFingerprint,
+    referenceDate: assessment.referenceDate.toISOString(),
+    referenceDateBasis: record(assessment.referenceDateBasis) ?? {},
+    verificationVersion: assessment.verificationVersion,
+    sourceIdentityKey: assessment.sourceIdentityKey,
+    contentSha256: assessment.contentSha256,
+    retrievalState: assessment.retrievalState,
+    textState: assessment.textState,
+    identityState: assessment.identityState,
+    contentState: assessment.contentState,
+    temporalState: assessment.temporalState,
+    adverseState: assessment.adverseState,
+    officiality: assessment.officiality,
+    citationAnchors: records(assessment.citationAnchors),
+    manualReviewRequired: assessment.manualReviewRequired,
+    manualReviewReason: assessment.manualReviewReason,
+    currentMission: assessment.isCurrent,
+  };
+  const temporalAssessment = temporal ? {
+    assessmentVersion: temporal.assessmentVersion,
+    validityState: temporal.validityState,
+    temporalWindowState: temporal.temporalWindowState,
+    applicabilityState: temporal.applicabilityState,
+    reasonCodes: texts(temporal.reasonCodes),
+    referenceDate: temporal.referenceDate.toISOString(),
+    effectiveInterval: {
+      from: temporal.effectiveFromSnapshot?.toISOString() ?? null,
+      to: temporal.effectiveToSnapshot?.toISOString() ?? null,
+    },
+    humanReviewRequired: temporal.humanReviewRequired,
+    confidence: temporal.confidence,
+  } as TemporalAssessmentResult : undefined;
+  return {
+    ...base,
+    sourceChain,
+    temporalAssessment,
+  };
+}
+
+export function projectApplicabilityReviewHistory(
+  storedHistory: readonly Readonly<{ payload: unknown; recordedByActorId: string }>[],
+): Readonly<{
+  reviews: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+  }>[];
+  issues: readonly string[];
+}> {
+  const parsedHistory = storedHistory.map((stored) => {
+    const payload = record(stored.payload);
+    const parsed = assistedVerificationSnapshotSchema.safeParse(payload?.snapshot ?? stored.payload);
+    return parsed.success ? { stored, snapshot: parsed.data } : null;
+  });
+  const current = parsedHistory[0];
+  if (!current) return storedHistory.length === 0 ? { reviews: [], issues: [] } : {
+    reviews: [],
+    issues: ["PERSISTED_APPLICABILITY_REVIEW_INVALID"],
+  };
+  return {
+    reviews: (current.snapshot.legalApplicabilityReviews ?? []).map((review) => {
+      const serializedReview = JSON.stringify(review);
+      const origin = [...parsedHistory].reverse().find((entry) => entry?.snapshot.legalApplicabilityReviews?.some(
+        (historicalReview) => JSON.stringify(historicalReview) === serializedReview,
+      ));
+      return {
+        review,
+        recordedByActorId: origin?.stored.recordedByActorId === review.reviewerAttestation.reviewedByActorId
+          ? origin.stored.recordedByActorId
+          : null,
+      };
+    }),
+    issues: [],
+  };
+}
+
+function projectApplicabilityReviews(mission: ResearchMissionReadRow) {
+  return projectApplicabilityReviewHistory(mission.assistedVerifications ?? []);
+}
+export interface FascicoloResearchResultReadModel {
+  resultId: string;
+  candidateId: string;
+  missionId: string;
+  bundleId: string;
+  title: string;
+  authority: string | null;
+  sourceFamily: string | null;
+  officialIdentifier: string | null;
+  documentDate: string | null;
+  sourceUrl: string | null;
+  provider: string | null;
+  relevantPassage: string | null;
+  officialRelevance?: OfficialSourceRelevance | null;
+  supportDirection: ResearchResultSupportDirection;
+  classificationSource: ResearchResultClassificationSource;
+  classificationReviewAuditId?: string | null;
+  classificationConfidence: number | null;
+  classificationRationale: string | null;
+  classificationReviewStatus: ResearchResultReviewStatus;
+  sourceVerificationState: ResearchResultSourceState;
+  retrievalState: string;
+  acquisitionState: string;
+  identityVerification: string;
+  contentVerification: string;
+  temporalStatus: string;
+  adverseStatus: string;
+  officiality: string;
+  usable: boolean;
+  blockingReasons: readonly string[];
+  citationAnchors: readonly JsonRecord[];
+  manualReviewRequired: boolean;
+  manualReviewReason: string | null;
+  legacySource: boolean;
+  sourceAssessment: StructuredReportResearchResultInput["sourceAssessment"];
+}
+
+export interface FascicoloResearchMissionReadModel {
+  missionId: string;
+  question: string;
+  referenceDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  referenceDateBasis: JsonRecord | null;
+  missionFingerprint: string | null;
+  legalIssueSemanticKey: string | null;
+  researchQuestionSemanticKey: string | null;
+  professionalQuestionVersionId: string | null;
+  knowledgeRevisionId: string | null;
+  lifecycleOutcome: "NEW" | "REUSED" | "LEGACY";
+  lifecycleStatus: "CURRENT" | "HISTORICAL";
+  status: ResearchMissionStatus;
+  researchState: ResearchQuestionExecutionState;
+  coverageStatus: ResearchQuestionCoverageStatus;
+  coverageGaps: readonly ResearchCoverageGap[];
+  coveredElementKeys: readonly string[];
+  conflicting: boolean;
+  resultCount: number;
+  displayedHistoricalResultCount: number;
+  discoveryCoverageStatus: "NO_RESULTS" | "DISCOVERED";
+  usableCoverageStatus: "NO_USABLE_SOURCE" | "USABLE" | "CONFLICTING";
+  usableSupportsCount: number;
+  usableOpposesCount: number;
+  conflictingUsableAuthorities: boolean;
+  sourceGaps: readonly string[];
+  adverseMission: {
+    missionId: string;
+    status: ResearchMissionStatus;
+    lifecycleStatus: "CURRENT";
+  } | null;
+  results: readonly FascicoloResearchResultReadModel[];
+  sources: readonly {
+    title: string;
+    sourceUrl: string | null;
+    documentDate: string | null;
+    supportDirection: string;
+    verificationState: string;
+  }[];
+  gaps: readonly string[];
+  conflicts: readonly string[];
+  suggestions: readonly {
+    suggestionId: string;
+    kind: string;
+    description: string;
+    targetId: string | null;
+  }[];
+  completionState: string | null;
+  execution: {
+    status: AsyncJobStatus | null;
+    failureCode: string | null;
+    attemptCount: number;
+    callCount: number | null;
+  };
+  automationRequirementCode: string | null;
+  legalAnalysisContributions: readonly LegalAnalysisContribution[];
+  legalApplicabilityReviews: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+  }>[];
+  legalApplicabilityReviewIssues: readonly string[];
+}
+
 export interface FascicoloAutomaticWorkflowReadModel {
   analysisUpdate: {
     status: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
     corpusFingerprint: string;
     currentRevisionFingerprint: string | null;
+    drift: KnowledgeCorpusDrift;
   };
   knowledge: StructuredKnowledgeReadModel | null;
   structuredReport: BuiltStructuredFascicoloReport | null;
@@ -74,7 +440,10 @@ export interface FascicoloAutomaticWorkflowReadModel {
     staleReasons: readonly string[];
     generatedAt: Date;
   }[];
-  operationalProposals: readonly (OperationalProposalRecord & { reviewEvents: readonly Record<string, unknown>[] })[];
+  operationalProposals: readonly (OperationalProposalRecord & {
+    reconciliationPreview: unknown | null;
+    reviewEvents: readonly Record<string, unknown>[];
+  })[];
   automaticResearch: {
     authorized: boolean;
     requirementCode: string | null;
@@ -103,100 +472,57 @@ export interface FascicoloAutomaticWorkflowReadModel {
     failureCode: string | null;
     superseded: boolean;
   }[];
-  missions: readonly {
-    missionId: string;
-    question: string;
-    referenceDate: Date;
-    referenceDateBasis: JsonRecord | null;
-    missionFingerprint: string | null;
-    legalIssueSemanticKey: string | null;
-    researchQuestionSemanticKey: string | null;
-    knowledgeRevisionId: string | null;
-    lifecycleOutcome: "NEW" | "REUSED" | "LEGACY";
-    lifecycleStatus: "CURRENT";
-    status: ResearchMissionStatus;
-    researchState: ResearchQuestionExecutionState;
-    coverageStatus: ResearchQuestionCoverageStatus;
-    coverageGaps: readonly ResearchCoverageGap[];
-    coveredElementKeys: readonly string[];
-    conflicting: boolean;
-    resultCount: number;
-    historicalResultCount: number;
-    discoveryCoverageStatus: "NO_RESULTS" | "DISCOVERED";
-    usableCoverageStatus: "NO_USABLE_SOURCE" | "USABLE" | "CONFLICTING";
-    usableSupportsCount: number;
-    usableOpposesCount: number;
-    conflictingUsableAuthorities: boolean;
-    sourceGaps: readonly string[];
-    adverseMission: {
-      missionId: string;
-      status: ResearchMissionStatus;
-      lifecycleStatus: "CURRENT";
-    } | null;
-    results: readonly {
-      resultId: string;
-      candidateId: string;
-      missionId: string;
-      bundleId: string;
-      title: string;
-      sourceUrl: string | null;
-      provider: string | null;
-      relevantPassage: string | null;
-      supportDirection: ResearchResultSupportDirection;
-      classificationSource: ResearchResultClassificationSource;
-      classificationConfidence: number | null;
-      classificationRationale: string | null;
-      classificationReviewStatus: ResearchResultReviewStatus;
-      sourceVerificationState: ResearchResultSourceState;
-      retrievalState: string;
-      acquisitionState: string;
-      identityVerification: string;
-      contentVerification: string;
-      temporalStatus: string;
-      adverseStatus: string;
-      officiality: string;
-      usable: boolean;
-      blockingReasons: readonly string[];
-      citationAnchors: readonly JsonRecord[];
-      manualReviewRequired: boolean;
-      manualReviewReason: string | null;
-      legacySource: boolean;
-      sourceAssessment: {
-        assessmentId: string;
-        chainFingerprint: string;
-        isCurrent: boolean;
-        usable: boolean;
-        citationAnchors: readonly JsonRecord[];
-        blockingReasons: readonly string[];
-        manualReviewRequired: boolean;
-        manualReviewReason: string | null;
-      } | null;
-    }[];
-    sources: readonly {
-      title: string;
-      sourceUrl: string | null;
-      documentDate: string | null;
-      supportDirection: string;
-      verificationState: string;
-    }[];
-    gaps: readonly string[];
-    conflicts: readonly string[];
-    suggestions: readonly {
-      suggestionId: string;
-      kind: string;
-      description: string;
-      targetId: string | null;
-    }[];
-    completionState: string | null;
-    execution: {
-      status: AsyncJobStatus | null;
-      failureCode: string | null;
-      attemptCount: number;
-      callCount: number | null;
-    };
-    automationRequirementCode: string | null;
-  }[];
+  missions: readonly (FascicoloResearchMissionReadModel & { lifecycleStatus: "CURRENT" })[];
+  historicalMissions: readonly (FascicoloResearchMissionReadModel & { lifecycleStatus: "HISTORICAL" })[];
+  missionReadTruncation: {
+    limitPerLifecycle: number;
+    current: boolean;
+    historical: boolean;
+    adverse: boolean;
+  };
   historicalMissionCount: number;
+}
+
+const TECHNICAL_SOURCE_REPORT_LIMIT = 200;
+
+/**
+ * MCP acquisitions for the report. A missing table (database not yet migrated) degrades to
+ * "no technical sources" instead of breaking the whole fascicolo page; other errors propagate.
+ */
+async function loadTechnicalSourceReportRows(
+  tenantId: string,
+  procedimentoId: string,
+): Promise<readonly StructuredReportTechnicalSourceInput[]> {
+  try {
+    const rows = await prisma.technicalSourceResearchRecord.findMany({
+      where: { tenantId, procedimentoId },
+      orderBy: [{ retrievedAt: "desc" }, { id: "desc" }],
+      take: TECHNICAL_SOURCE_REPORT_LIMIT,
+      select: {
+        id: true,
+        missionId: true,
+        toolName: true,
+        questionSnapshot: true,
+        verificationStatus: true,
+        serviceVersion: true,
+        responsePayload: true,
+        retrievedAt: true,
+      },
+    });
+    return rows.map((row) => ({
+      recordId: row.id,
+      missionId: row.missionId,
+      toolName: row.toolName,
+      questionSnapshot: row.questionSnapshot,
+      verificationStatus: row.verificationStatus,
+      serviceVersion: row.serviceVersion,
+      responseDigest: createHash("sha256").update(stableStringify(row.responsePayload), "utf8").digest("hex"),
+      retrievedAt: row.retrievedAt,
+    }));
+  } catch (error) {
+    if (record(error)?.code === "P2021") return [];
+    throw error;
+  }
 }
 
 export async function getFascicoloAutomaticWorkflowReadModel(
@@ -222,15 +548,60 @@ export async function getFascicoloAutomaticWorkflowReadModel(
 export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
   tenantId: string;
   procedimentoId: string;
+  knowledgeRevisionId?: string;
 }): Promise<FascicoloAutomaticWorkflowReadModel | null> {
   const { tenantId, procedimentoId } = input;
   const owner = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { enteId: true },
+    select: {
+      enteId: true,
+      stato: true,
+      tipologia: true,
+      origineProcedimento: true,
+      dataAvvio: true,
+      dataProvvedimentoFinale: true,
+      comunicazioneAvvioInviata: true,
+      contestazioneFormaleInviata: true,
+      memorieRicevute: true,
+      audizioneSvolta: true,
+      controdeduzioniValutate: true,
+      checklistContraddittorioCompleta: true,
+      decisioneProcedimento: {
+        select: {
+          numeroAtto: true,
+          dataAtto: true,
+          motivazioneSintetica: true,
+        },
+      },
+      concessione: {
+        select: {
+          numeroAtto: true,
+          stato: true,
+          dataRilascio: true,
+        },
+      },
+      documenti: {
+        where: { statoDocumento: { not: "ARCHIVIATO" } },
+        select: { nome: true },
+        orderBy: [{ dataDocumento: "asc" }, { createdAt: "asc" }],
+      },
+    },
   });
   if (owner?.enteId !== tenantId) return null;
 
-  const [reports, structuredReportSnapshots, candidateJobs, missions, historicalMissionCount, historicalResults, knowledge, operationalProposals, documentCorpus] = await Promise.all([
+  const [
+    reports,
+    structuredReportSnapshots,
+    candidateJobs,
+    currentMissionRows,
+    currentAdverseMissionRows,
+    historicalMissionRows,
+    historicalMissionCount,
+    knowledge,
+    operationalProposals,
+    documentCorpus,
+    technicalSourceRows,
+  ] = await Promise.all([
     prisma.automaticFascicoloReport.findMany({
       where: { tenantId, procedimentoId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -247,7 +618,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     }),
     prisma.structuredFascicoloReportSnapshot.findMany({
       where: { tenantId, procedimentoId },
-      orderBy: [{ generatedAt: "desc" }, { id: "desc" }],
+      orderBy: [{ status: "asc" }, { generatedAt: "desc" }, { id: "desc" }],
       take: 50,
       select: {
         id: true,
@@ -286,92 +657,101 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       },
     }),
     prisma.researchMissionRecord.findMany({
-      where: { tenantId, caseId: procedimentoId, lifecycleStatus: "CURRENT" },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 50,
-      select: {
-        id: true,
-        payload: true,
-        referenceDate: true,
-        referenceDateBasis: true,
-        missionFingerprint: true,
-        legalIssueSemanticKey: true,
-        researchQuestionSemanticKey: true,
-        knowledgeRevisionId: true,
-        firstKnowledgeRevisionId: true,
-        mode: true,
-        status: true,
-        primaryAdverseRequirements: {
-          where: { status: { not: "HISTORICAL" } },
-          take: 1,
-          select: {
-            adverseMission: { select: { id: true, status: true, lifecycleStatus: true } },
-          },
-        },
-        questionResults: {
-          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-          select: {
-            id: true,
-            bundleId: true,
-            candidateId: true,
-            candidateSnapshot: true,
-            supportDirection: true,
-            classificationSource: true,
-            classificationConfidence: true,
-            classificationRationale: true,
-            classificationReviewStatus: true,
-            coverageElementKeys: true,
-            unresolvedAspectKeys: true,
-            sourceAssessments: {
-              where: { isCurrent: true },
-              orderBy: { createdAt: "desc" },
-              take: 1,
-              select: {
-                id: true,
-                chainFingerprint: true,
-                isCurrent: true,
-                retrievalState: true,
-                textState: true,
-                identityState: true,
-                contentState: true,
-                temporalState: true,
-                adverseState: true,
-                officiality: true,
-                citationAnchors: true,
-                blockingReasons: true,
-                manualReviewRequired: true,
-                manualReviewReason: true,
-                usable: true,
-              },
-            },
-          },
-        },
-        executionAttempts: {
-          where: { evidenceBundles: { some: {} } },
-          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-          take: 1,
-          select: {
-            evidenceBundles: {
-              orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-              take: 1,
-              select: { payload: true, completionState: true },
-            },
-          },
-        },
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "CURRENT",
+        mode: { not: "ADVERSE_SEARCH" },
       },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
+    }),
+    prisma.researchMissionRecord.findMany({
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "CURRENT",
+        mode: "ADVERSE_SEARCH",
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
+    }),
+    prisma.researchMissionRecord.findMany({
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
     }),
     prisma.researchMissionRecord.count({
-      where: { tenantId, caseId: procedimentoId, lifecycleStatus: "HISTORICAL" },
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
     }),
-    prisma.researchQuestionResultRecord.findMany({
-      where: { tenantId, caseId: procedimentoId, mission: { lifecycleStatus: "HISTORICAL" } },
-      select: { researchQuestionSemanticKey: true },
-    }),
-    loadCurrentStructuredKnowledge(tenantId, procedimentoId),
+    input.knowledgeRevisionId
+      ? loadStructuredKnowledgeRevision(
+          tenantId,
+          procedimentoId,
+          input.knowledgeRevisionId,
+        )
+      : loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
-    getFascicoloDocumentCorpus({ tenantId, procedimentoId }),
+    getFascicoloDocumentCorpusForTenant({ tenantId, procedimentoId }),
+    loadTechnicalSourceReportRows(tenantId, procedimentoId),
   ]);
   if (!documentCorpus) return null;
+
+  const missions = currentMissionRows.slice(0, MISSION_READ_LIMIT);
+  const adverseMissions = currentAdverseMissionRows.slice(0, MISSION_READ_LIMIT);
+  const historicalMissions = historicalMissionRows.slice(0, MISSION_READ_LIMIT);
+  const displayedHistoricalResults = historicalMissions.flatMap((mission) => mission.questionResults);
+  const humanResultIds = [...new Set([...missions, ...historicalMissions].flatMap((mission) => mission.questionResults
+    .filter((result) => result.classificationSource === "HUMAN_REVIEW")
+    .map((result) => result.id)))];
+  const reviewEvents = humanResultIds.length ? await prisma.activityLog.findMany({
+    where: {
+      enteId: tenantId,
+      azione: CLASSIFICATION_REVIEW_ACTION,
+      entita: CLASSIFICATION_REVIEW_ENTITY,
+      entitaId: { in: humanResultIds },
+      esito: "SUCCESS",
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { id: true, entitaId: true, userId: true, userRole: true, metadata: true },
+  }) : [];
+  const latestReviewByResult = new Map<string, typeof reviewEvents[number]>();
+  for (const event of reviewEvents) {
+    if (event.entitaId && !latestReviewByResult.has(event.entitaId)) latestReviewByResult.set(event.entitaId, event);
+  }
+  const reviewAuditId = (missionId: string, result: {
+    id: string;
+    supportDirection: string;
+    classificationReviewStatus: string;
+    classificationConfidence: number | null;
+    classificationRationale: string | null;
+  }): string | null => {
+    const event = latestReviewByResult.get(result.id);
+    if (!event?.userId || !["ADMIN", "GIURIDICO"].includes(event.userRole ?? "")) return null;
+    const fingerprint = classificationReviewFingerprint({
+      tenantId,
+      missionId,
+      resultId: result.id,
+      direction: result.supportDirection,
+      reviewStatus: result.classificationReviewStatus,
+      confidence: result.classificationConfidence,
+      rationale: result.classificationRationale,
+    });
+    return record(event.metadata)?.classificationFingerprint === fingerprint ? event.id : null;
+  };
 
   const analysisJobs = candidateJobs.filter((job) => job.operation === FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION);
   const researchJobs = candidateJobs.filter((job) => job.operation === RESEARCH_MISSION_EXECUTION_OPERATION);
@@ -419,16 +799,30 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
             : extractionFailed
               ? "ERROR" as const
               : "STALE" as const;
-  const researchPolicy = evaluateAutomaticResearchPolicy({ tenantId });
+  const researchEnvironment = await effectiveResearchPolicyEnvironment({
+    tenantId,
+    procedimentoId,
+  });
+  const researchPolicy = evaluateAutomaticResearchPolicy({
+    tenantId,
+    env: researchEnvironment,
+  });
+  let projectedHistoricalMissions: (FascicoloResearchMissionReadModel & { lifecycleStatus: "HISTORICAL" })[] = [];
 
   const readModel: Omit<FascicoloAutomaticWorkflowReadModel, "structuredReport" | "structuredReportSnapshots"> = {
     analysisUpdate: {
       status: analysisUpdateStatus,
       corpusFingerprint: documentCorpus.corpusFingerprint,
       currentRevisionFingerprint: knowledge?.revision.corpusFingerprint ?? null,
+      drift: diagnoseKnowledgeCorpusDrift(knowledge, documentCorpus),
     },
     knowledge,
-    operationalProposals: operationalProposals as FascicoloAutomaticWorkflowReadModel["operationalProposals"],
+    operationalProposals: operationalProposals.map((proposal) => ({
+      ...proposal,
+      reconciliationPreview: record(proposal.proposedPayload)?.previewOnly === true
+        ? proposal.proposedPayload
+        : null,
+    })) as FascicoloAutomaticWorkflowReadModel["operationalProposals"],
     historicalMissionCount,
     automaticResearch: {
       authorized: researchPolicy.authorized,
@@ -489,13 +883,18 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       superseded: job.corpusFingerprint !== null
         && job.corpusFingerprint !== documentCorpus.corpusFingerprint,
     })),
-    missions: missions.filter((mission) => mission.mode !== "ADVERSE_SEARCH").map((mission) => {
+    missions: (() => {
+      const projectMission = <L extends "CURRENT" | "HISTORICAL">(
+        mission: ResearchMissionReadRow,
+        lifecycleStatus: L,
+      ): FascicoloResearchMissionReadModel & { lifecycleStatus: L } => {
       const payload = record(mission.payload);
       const researchJob = researchJobs.find((job) => record(job.inputReference)?.referenceId === mission.id) ?? null;
       const resultMetadata = record(record(researchJob?.resultReference)?.metadata);
       const missionPolicy = evaluateAutomaticResearchPolicy({
         tenantId,
         mission: mission.payload as unknown as ResearchMission,
+        env: researchEnvironment,
       });
       const bundleRecord = mission.executionAttempts[0]?.evidenceBundles[0] ?? null;
       const bundle = record(bundleRecord?.payload);
@@ -521,15 +920,18 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         missionId: mission.id,
         question: text(payload?.researchQuestion) ?? "Quesito non disponibile",
         referenceDate: mission.referenceDate,
+        createdAt: mission.createdAt,
+        updatedAt: mission.updatedAt,
         referenceDateBasis: record(mission.referenceDateBasis),
         missionFingerprint: mission.missionFingerprint,
         legalIssueSemanticKey: mission.legalIssueSemanticKey,
         researchQuestionSemanticKey: mission.researchQuestionSemanticKey,
+        professionalQuestionVersionId: mission.professionalQuestionVersionId,
         knowledgeRevisionId: mission.knowledgeRevisionId,
         lifecycleOutcome: mission.firstKnowledgeRevisionId === null || mission.knowledgeRevisionId === null
           ? "LEGACY" as const
           : mission.firstKnowledgeRevisionId === mission.knowledgeRevisionId ? "NEW" as const : "REUSED" as const,
-        lifecycleStatus: "CURRENT" as const,
+        lifecycleStatus,
         status: mission.status,
         researchState: coverage.executionState,
         coverageStatus: coverage.status,
@@ -537,7 +939,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         coveredElementKeys: coverage.coveredElementKeys,
         conflicting: coverage.conflicting,
         resultCount: structuredResults.length,
-        historicalResultCount: historicalResults.filter((result) => (
+        displayedHistoricalResultCount: displayedHistoricalResults.filter((result) => (
           result.researchQuestionSemanticKey === mission.researchQuestionSemanticKey
         )).length,
         discoveryCoverageStatus: sourceCoverage.discoveryCoverage,
@@ -546,7 +948,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         usableOpposesCount: sourceCoverage.usableOpposesCount,
         conflictingUsableAuthorities: sourceCoverage.conflictingUsableAuthorities,
         sourceGaps: sourceCoverage.gaps,
-        adverseMission: adverse?.lifecycleStatus === "CURRENT" ? {
+        adverseMission: lifecycleStatus === "CURRENT" && adverse?.lifecycleStatus === "CURRENT" ? {
           missionId: adverse.id,
           status: adverse.status,
           lifecycleStatus: "CURRENT" as const,
@@ -568,16 +970,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               manualReviewRequired: assessment?.manualReviewRequired ?? true,
               manualReviewReason: assessment ? assessment.manualReviewReason : "LEGACY_SOURCE_VERIFICATION_REQUIRED",
               legacySource: assessment === undefined,
-              sourceAssessment: assessment ? {
-                assessmentId: assessment.id,
-                chainFingerprint: assessment.chainFingerprint,
-                isCurrent: assessment.isCurrent,
-                usable: assessment.usable,
-                citationAnchors: records(assessment.citationAnchors),
-                blockingReasons: assessment.blockingReasons,
-                manualReviewRequired: assessment.manualReviewRequired,
-                manualReviewReason: assessment.manualReviewReason,
-              } : null,
+              sourceAssessment: projectSourceAssessment(assessment),
             };
           })(),
           resultId: result.id,
@@ -585,11 +978,22 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           missionId: mission.id,
           bundleId: result.bundleId,
           title: result.candidateSnapshot.title ?? result.candidateSnapshot.officialIdentifier ?? "Risultato di ricerca",
+          authority: result.candidateSnapshot.courtOrBody ?? null,
+          sourceFamily: result.candidateSnapshot.sourceFamily ?? null,
+          officialIdentifier:
+            result.candidateSnapshot.officialIdentifier
+            ?? result.candidateSnapshot.ecli
+            ?? result.candidateSnapshot.celex
+            ?? null,
+          documentDate: result.candidateSnapshot.documentDate ?? null,
           sourceUrl: safeHttpUrl(result.candidateSnapshot.sourceUrl),
           provider: result.candidateSnapshot.providerId ?? result.candidateSnapshot.toolId ?? null,
-          relevantPassage: text(result.candidateSnapshot.relevantPassage),
+          relevantPassage: text((result.candidateSnapshot as unknown as JsonRecord).officialRelevantPassage)
+            ?? text(result.candidateSnapshot.relevantPassage),
+          officialRelevance: readOfficialSourceRelevance(result.candidateSnapshot),
           supportDirection: result.supportDirection,
           classificationSource: result.classificationSource,
+          classificationReviewAuditId: reviewAuditId(mission.id, result),
           classificationConfidence: result.classificationConfidence,
           classificationRationale: result.classificationRationale,
           classificationReviewStatus: result.classificationReviewStatus,
@@ -623,17 +1027,111 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           attemptCount: researchJob?.attemptCount ?? 0,
           callCount: typeof resultMetadata?.callCount === "number" ? resultMetadata.callCount : null,
         },
-        automationRequirementCode: researchJob?.failureCode ?? missionPolicy.requirementCode,
+        automationRequirementCode: lifecycleStatus === "CURRENT"
+          ? researchJob?.failureCode ?? missionPolicy.requirementCode
+          : null,
+        legalAnalysisContributions: records(bundle?.legalAnalysisContributions).flatMap((contribution) => {
+          const parsed = legalAnalysisContributionSchema.safeParse(contribution);
+          return parsed.success ? [parsed.data] : [];
+        }),
+        legalApplicabilityReviews: projectApplicabilityReviews(mission).reviews,
+        legalApplicabilityReviewIssues: projectApplicabilityReviews(mission).issues,
       };
-    }),
+      };
+      projectedHistoricalMissions = historicalMissions
+        .filter((mission) => mission.mode !== "ADVERSE_SEARCH")
+        .map((mission) => projectMission(mission, "HISTORICAL"));
+      return missions
+        .filter((mission) => mission.mode !== "ADVERSE_SEARCH")
+        .map((mission) => projectMission(mission, "CURRENT"));
+    })(),
+    historicalMissions: projectedHistoricalMissions,
+    missionReadTruncation: {
+      limitPerLifecycle: MISSION_READ_LIMIT,
+      current: currentMissionRows.length > MISSION_READ_LIMIT,
+      historical: historicalMissionRows.length > MISSION_READ_LIMIT,
+      adverse: currentAdverseMissionRows.length > MISSION_READ_LIMIT,
+    },
   };
+  const verifiedReportMissions = await Promise.all(readModel.missions.map(async (mission) => ({
+    ...mission,
+    legalApplicabilityReviews: await Promise.all(mission.legalApplicabilityReviews.map(async (envelope) => {
+      try {
+        const resolution = await resolveApplicableLegalRules(envelope.review.ruleOrchestrator.input, {
+          systemTenantId: tenantId,
+        });
+        const verification = verifyRuleResolutionFingerprint({
+            review: envelope.review,
+            resolution,
+          });
+        return {
+          ...envelope,
+          orchestratorVerification: {
+            ...verification,
+            resolvedSources: [
+              ...resolution.applicableSources,
+              ...resolution.excludedByTerritory,
+              ...resolution.excludedByDate,
+              ...resolution.historicalSources,
+              ...resolution.supersededSources,
+              ...resolution.partiallySupersededSources,
+              ...resolution.pendingValiditySources,
+              ...resolution.draftOrOngoingSources,
+              ...resolution.caseSpecificSources,
+            ],
+            matchedSourceIds: resolution.applicableRules.map((rule) => rule.source.id),
+          },
+        };
+      } catch (error) {
+        if (!(error instanceof OrchestrationInputError)) throw error;
+        return {
+          ...envelope,
+          orchestratorVerification: {
+            valid: false,
+            source: null,
+            ruleMatched: false,
+          },
+        };
+      }
+    })),
+  })));
   const structuredReport = knowledge ? buildStructuredFascicoloReport({
     tenantId,
     procedimentoId,
     knowledge,
+    documentCoverage: {
+      corpusFingerprint: documentCorpus.corpusFingerprint,
+      entries: buildDocumentCoverage(documentCorpus),
+    },
+    proceduralContext: {
+      stato: owner.stato,
+      tipologia: owner.tipologia,
+      origineProcedimento: owner.origineProcedimento,
+      dataAvvio: owner.dataAvvio?.toISOString() ?? null,
+      dataProvvedimentoFinale: owner.dataProvvedimentoFinale?.toISOString() ?? null,
+      comunicazioneAvvioInviata: owner.comunicazioneAvvioInviata,
+      contestazioneFormaleInviata: owner.contestazioneFormaleInviata,
+      memorieRicevute: owner.memorieRicevute,
+      audizioneSvolta: owner.audizioneSvolta,
+      controdeduzioniValutate: owner.controdeduzioniValutate,
+      checklistContraddittorioCompleta: owner.checklistContraddittorioCompleta,
+      finalAct: owner.decisioneProcedimento ? {
+        numeroAtto: owner.decisioneProcedimento.numeroAtto,
+        dataAtto: owner.decisioneProcedimento.dataAtto.toISOString(),
+        motivazioneSintetica: owner.decisioneProcedimento.motivazioneSintetica,
+      } : null,
+      concessione: owner.concessione ? {
+        numeroAtto: owner.concessione.numeroAtto,
+        stato: owner.concessione.stato,
+        dataRilascio: owner.concessione.dataRilascio.toISOString(),
+      } : null,
+      documentTitles: owner.documenti.map((document) => document.nome),
+    },
+    contractVersion: STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION,
+    technicalSources: technicalSourceRows,
     missions: [
-      ...readModel.missions,
-      ...missions.filter((mission) => mission.mode === "ADVERSE_SEARCH").map((mission) => {
+      ...verifiedReportMissions,
+      ...adverseMissions.map((mission) => {
         const payload = record(mission.payload);
         return {
           missionId: mission.id,
@@ -651,23 +1149,17 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
             const assessment = result.sourceAssessments[0];
             return {
               resultId: result.id,
+              candidateId: result.candidateId,
               title: candidate.title ?? candidate.officialIdentifier ?? "Risultato di ricerca contraria",
               sourceUrl: safeHttpUrl(candidate.sourceUrl),
               provider: candidate.providerId ?? candidate.toolId ?? null,
               relevantPassage: text(candidate.relevantPassage),
               supportDirection: result.supportDirection,
+              classificationSource: result.classificationSource,
+              classificationReviewAuditId: reviewAuditId(mission.id, result),
               classificationReviewStatus: result.classificationReviewStatus,
               classificationRationale: result.classificationRationale,
-              sourceAssessment: assessment ? {
-                assessmentId: assessment.id,
-                chainFingerprint: assessment.chainFingerprint,
-                isCurrent: assessment.isCurrent,
-                usable: assessment.usable,
-                citationAnchors: records(assessment.citationAnchors),
-                blockingReasons: assessment.blockingReasons,
-                manualReviewRequired: assessment.manualReviewRequired,
-                manualReviewReason: assessment.manualReviewReason,
-              } : null,
+              sourceAssessment: projectSourceAssessment(assessment),
             };
           }),
         };
@@ -682,6 +1174,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         ...(snapshot.knowledgeRevisionId === structuredReport.payload.knowledgeRevisionId ? [] : ["KNOWLEDGE_REVISION_CHANGED"]),
         ...(snapshot.researchStateFingerprint === structuredReport.payload.researchStateFingerprint ? [] : ["RESEARCH_STATE_CHANGED"]),
         ...(snapshot.sourceStateFingerprint === structuredReport.payload.sourceStateFingerprint ? [] : ["SOURCE_STATE_CHANGED"]),
+        ...(snapshot.reportFingerprint === structuredReport.reportFingerprint ? [] : ["REPORT_PROJECTION_CHANGED"]),
       ] : snapshot.staleReasons;
       return {
         snapshotId: snapshot.id,

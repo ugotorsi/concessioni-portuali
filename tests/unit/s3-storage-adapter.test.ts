@@ -1,7 +1,11 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { describe, expect, it } from "vitest";
 
-import { DocumentStorageS3Error, S3StorageAdapter } from "@/server/documents/storage/s3StorageAdapter";
+import {
+  DocumentStorageS3Error,
+  sanitizedS3ErrorDiagnostics,
+  S3StorageAdapter,
+} from "@/server/documents/storage/s3StorageAdapter";
 
 function configureS3(): void {
   process.env.DOCUMENT_STORAGE_BACKEND = "s3";
@@ -26,6 +30,22 @@ function putInput() {
 }
 
 describe("s3 storage adapter exists", () => {
+  it("extracts the AWS uppercase Code field without exposing the error payload", () => {
+    const error = Object.assign(
+      new Error("Credential access key has length 40, should be 32; endpoint https://secret.invalid/token"),
+      {
+        Code: "AuthorizationHeaderMalformed",
+        name: "Unknown",
+        $metadata: { httpStatusCode: 400 },
+      },
+    );
+    expect(sanitizedS3ErrorDiagnostics(error)).toEqual({
+      code: "AuthorizationHeaderMalformed",
+      statusCode: 400,
+      message: "Credential access key has length 40, should be 32; endpoint [redacted-url]",
+    });
+  });
+
   it("returns false for not found objects", async () => {
     configureS3();
 

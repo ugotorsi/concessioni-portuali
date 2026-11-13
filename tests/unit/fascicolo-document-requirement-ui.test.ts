@@ -190,8 +190,15 @@ function uploadFormSource() {
   );
 }
 
+function directUploadFormSource() {
+  return readFileSync(
+    resolve(process.cwd(), "src/components/documents/DirectDocumentUploadForm.tsx"),
+    "utf8",
+  );
+}
+
 function uploadActionInputSource() {
-  const source = uploadFormSource();
+  const source = directUploadFormSource();
   const start = source.indexOf("await uploadFascicoloDocumentRequirementEvidence({");
   const end = source.indexOf("      });", start);
   return source.slice(start, end);
@@ -534,7 +541,10 @@ describe("P1-C1 document requirement proposal UI", () => {
   it("55. reuses the proposal-bound upload action instead of the general upload action", () => {
     const source = evidenceSectionSource();
     expect(source).not.toContain("createDocumentoUploadAction");
-    expect(uploadFormSource()).toContain("uploadFascicoloDocumentRequirementEvidence");
+    expect(uploadFormSource()).toContain("purpose=\"REQUIREMENT_EVIDENCE\"");
+    expect(directUploadFormSource()).toMatch(
+      /if \(purpose === "DOCUMENT"\) \{\s*await createDocumentoUploadAction\(formData\);\s*\} else \{[\s\S]*await uploadFascicoloDocumentRequirementEvidence\(/,
+    );
   });
 
   it("56. uses the compact human-boundary copy without forbidden conclusions", () => {
@@ -581,12 +591,14 @@ describe("P1-C1 document requirement proposal UI", () => {
     const html = renderPanel({ proposals: [proposal("VALIDATO")] });
     const form = formContaining(html, "Carica e associa documento");
     expect(Array.from(form.matchAll(/name="([^"]+)"/g), (match) => match[1])).toEqual([
+      "proposalId",
       "file",
       "tipologia",
       "nome",
       "descrizione",
       "dataDocumento",
     ]);
+    expect(form).toContain("type=\"hidden\" name=\"proposalId\" value=\"proposal-1\"");
     expect(form).toContain("type=\"file\"");
     expect(form).toContain("required=\"\"");
   });
@@ -602,42 +614,46 @@ describe("P1-C1 document requirement proposal UI", () => {
   });
 
   it("63. generates an opaque operation ID with the browser cryptographic UUID primitive", () => {
-    const source = uploadFormSource();
+    const source = directUploadFormSource();
     expect(source).toContain("crypto.randomUUID()");
     expect(source).not.toMatch(/randomUUID\([^)]*(?:proposalId|file|tipologia)/);
   });
 
   it("64. keeps one operation ID stable for the active submission attempt", () => {
-    const source = uploadFormSource();
+    const source = directUploadFormSource();
     expect(source).toContain("const operationIdRef = useRef<string | null>(null)");
     expect(source).toContain("const operationId = operationIdRef.current ?? crypto.randomUUID();");
     expect(source).toContain("operationIdRef.current = operationId;");
     expect(source).toContain("onChange={startNewFileAttempt}");
-    expect(source).toMatch(/function startNewFileAttempt\(\)[\s\S]*if \(!submittingRef\.current\)[\s\S]*operationIdRef\.current = null;/);
+    expect(source).toMatch(/function startNewFileAttempt\([^)]*\)[\s\S]*if \(!submittingRef\.current[\s\S]*operationIdRef\.current = null;/);
   });
 
   it("65. prevents duplicate submission and disables controls while pending", () => {
-    const source = uploadFormSource();
-    expect(source).toContain("if (submittingRef.current)");
+    const source = directUploadFormSource();
+    expect(source).toContain("if (submittingRef.current) return;");
     expect(source).toContain("submittingRef.current = true;");
-    expect(source).toContain("disabled={isSubmitting}");
-    expect(source).toContain("Caricamento...");
+    expect(source).toContain("submittingRef.current = false;");
+    expect(source).toContain("disabled={pending}");
+    expect(source).toContain("Caricamento in corso...");
   });
 
   it("66. resets form and operation state after success", () => {
-    const source = uploadFormSource();
-    expect(source).toContain("form.reset();");
-    expect(source).toContain("operationIdRef.current = null;");
+    const source = directUploadFormSource();
+    const evidenceBranch = source.slice(source.indexOf("await uploadFascicoloDocumentRequirementEvidence({"));
+    expect(evidenceBranch).toMatch(/\}\);\s*operationIdRef\.current = null;\s*form\.reset\(\);/);
   });
 
   it("67. refreshes authoritative evidence data after success", () => {
-    expect(uploadFormSource()).toContain("router.refresh();");
+    const source = directUploadFormSource();
+    const evidenceBranch = source.slice(source.indexOf("await uploadFascicoloDocumentRequirementEvidence({"));
+    expect(evidenceBranch.slice(0, evidenceBranch.indexOf("return;"))).toContain("router.refresh();");
   });
 
   it("68. uses legally neutral accessible success microcopy", () => {
-    const source = uploadFormSource();
-    expect(source).toContain("Documento caricato e associato.");
-    expect(source).toContain("role=\"status\"");
+    expect(uploadFormSource()).toContain("successMessage=\"Documento caricato e associato.\"");
+    expect(directUploadFormSource()).toContain("setMessage(successMessage);");
+    expect(directUploadFormSource()).toContain("role=\"status\"");
+    const source = `${uploadFormSource()}\n${directUploadFormSource()}`;
     for (const claim of ["requisito soddisfatto", "titolo verificato", "autorizzazione valida", "conformità accertata"]) {
       expect(source.toLowerCase()).not.toContain(claim);
     }
@@ -645,8 +661,9 @@ describe("P1-C1 document requirement proposal UI", () => {
 
   it("69. sanitizes upload failure without exposing storage details", () => {
     const source = uploadFormSource();
-    expect(source).toContain("Caricamento non completato. Verificare i dati e riprovare.");
-    expect(source).toContain("role=\"alert\"");
+    expect(source).toContain("failureMessage=\"Caricamento non completato. Verificare i dati e riprovare.\"");
+    expect(directUploadFormSource()).toContain("setError(failureMessage ?? ");
+    expect(directUploadFormSource()).toContain("role=\"alert\"");
     for (const forbidden of ["storageKey", "bucket", "endpoint", "S3", "R2", "DATABASE_URL", "error.message"]) {
       expect(source).not.toContain(forbidden);
     }

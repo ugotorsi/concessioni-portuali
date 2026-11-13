@@ -324,6 +324,34 @@ describe("provider research adapters", () => {
     ]);
   });
 
+  it("derives an administrative judgment identity instead of treating an excerpt as one", () => {
+    const adapter = createSimpliciterCrossJurisdictionResearchAdapter(vi.fn());
+    const request = adapter.prepareRequests!(mission)[0];
+    const normalized = adapter.normalize({
+      structuredContent: {
+        catalog_version: "observed-version",
+        query: mission.researchQuestion,
+        source_keys: ["it.case_law.cassazione"],
+        payload: {
+          giurisprudenza: [{
+            type: "sentenza",
+            titolo: "Tribunale Amministrativo Regionale Sicilia - Catania sentenza n. 2351 del 2021",
+            citazione: "Estratto descrittivo ".repeat(40),
+            url: "https://simpliciter.ai/app/giurisprudenza/it/tarct/sentenza/2021/2351/",
+          }],
+        },
+      },
+    }, { ...context, request });
+
+    expect(normalized.authorityCandidates[0]).toMatchObject({
+      officialIdentifier: "Tribunale Amministrativo Regionale Sicilia - Catania, sentenza n. 2351/2021",
+      courtOrBody: "Tribunale Amministrativo Regionale Sicilia - Catania",
+      number: "2351",
+      year: 2021,
+    });
+    expect(normalized.authorityCandidates[0]).not.toHaveProperty("providerReceivedText");
+  });
+
   it("records an empty result as a missing-document gap", () => {
     const adapter = createSimpliciterResearchAdapter(vi.fn());
     const normalized = adapter.normalize({

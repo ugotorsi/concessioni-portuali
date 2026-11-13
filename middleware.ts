@@ -1,10 +1,40 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { isMisroutedProductionHost } from "@/lib/deployment-host-guard";
+import { resolveAuthSessionCookieName } from "@/lib/auth-session-cookie";
+import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+import {
+  isLiveQualificationDeployment,
+  isLiveQualificationRequestAllowed,
+  liveQualificationDeploymentHost,
+} from "@/server/ai/qualification/liveSyntheticQualificationDeployment";
+import {
+  assertDeepSeekReadOnlyVerificationRequest,
+  isDeepSeekReadOnlyVerificationDeployment,
+  isDeepSeekReadOnlyVerificationRequestAllowed,
+} from "@/server/ai/deepSeekReadOnlyVerificationDeployment";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const MCP_PATH = "/api/mcp";
+const MCP_PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource";
+const MCP_DEDICATED_PREVIEW_HOST = "concessioni-portuali-demo-v7-mcp-preview.vercel.app";
+const MCP_DEDICATED_ALLOWED_PATHS = new Set([
+  MCP_PATH,
+  MCP_PROTECTED_RESOURCE_METADATA_PATH,
+  "/login",
+  "/api/auth/workos/complete",
+  "/api/auth/providers",
+  "/api/auth/csrf",
+  "/api/auth/session",
+  "/api/auth/callback/credentials",
+  "/api/auth/error",
+]);
+const MCP_DEDICATED_ALLOWED_PREFIXES = [
+  "/_next/static/",
+  "/_next/image",
+];
 const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
 const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";
 const PROTECTED_PREFIXES = [
@@ -25,6 +55,10 @@ const PROTECTED_PREFIXES = [
   "/demo-guidata",
   "/ai",
   "/adsp",
+  "/admin",
+  "/audit",
+  "/legal-research",
+  "/legal-sources",
   "/mfa",
   "/export",
   "/api",
@@ -60,6 +94,10 @@ function getRateLimitPolicy(pathname: string): { limit: number; scope: string } 
 
   if (pathname === "/api/auth/mfa/enrollment") {
     return { limit: 10, scope: "mfa-enrollment" };
+  }
+
+  if (pathname === "/api/auth/password-recovery") {
+    return { limit: 10, scope: "password-recovery" };
   }
 
   if (pathname.startsWith("/export/")) {
@@ -103,8 +141,78 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
+function isDedicatedMcpHost(request: NextRequest): boolean {
+  return request.nextUrl.hostname.toLowerCase() === MCP_DEDICATED_PREVIEW_HOST;
+}
+
+function isDedicatedMcpAllowedPath(pathname: string): boolean {
+  return MCP_DEDICATED_ALLOWED_PATHS.has(pathname)
+    || pathname === "/favicon.ico"
+    || MCP_DEDICATED_ALLOWED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  if (isDeepSeekReadOnlyVerificationDeployment(process.env)) {
+    try {
+      assertDeepSeekReadOnlyVerificationRequest({
+        env: process.env,
+        requestHost: request.headers.get("host") ?? request.nextUrl.host,
+      });
+    } catch {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+    if (!isDeepSeekReadOnlyVerificationRequestAllowed({
+      pathname,
+      hasNextActionHeader: request.headers.has("next-action"),
+    })) {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+  }
+  if (isLiveQualificationDeployment(process.env)) {
+    const expectedHost = liveQualificationDeploymentHost(process.env);
+    const requestHost = request.nextUrl.hostname.toLowerCase();
+    if (!expectedHost || requestHost !== expectedHost
+      || requestHost === "app.noetra.it") {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+    if (!isLiveQualificationRequestAllowed({
+      pathname,
+      hasNextActionHeader: request.headers.has("next-action"),
+    })) {
+      return withSecurityHeaders(NextResponse.json(
+        { error: "NOT_FOUND" },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      ));
+    }
+  }
+  if (isMisroutedProductionHost(request.headers.get("host") ?? request.nextUrl.host, process.env.VERCEL_ENV)) {
+    const response = new NextResponse("Deployment non autorizzato per il dominio di produzione.", {
+      status: 421,
+      headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" },
+    });
+    return withSecurityHeaders(response);
+  }
+
+  if (isDedicatedMcpHost(request) && !isDedicatedMcpAllowedPath(pathname)) {
+    return withSecurityHeaders(NextResponse.json(
+      { error: "NOT_FOUND" },
+      {
+        status: 404,
+        headers: { "Cache-Control": "no-store" },
+      },
+    ));
+  }
+
   const rateLimitPolicy = getRateLimitPolicy(pathname);
 
   if (rateLimitPolicy) {
@@ -150,7 +258,11 @@ export async function middleware(request: NextRequest) {
 
   let token = null;
   try {
-    token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    token = await getToken({
+      req: request,
+      secret: resolveNextAuthSecret(),
+      cookieName: resolveAuthSessionCookieName(),
+    });
   } catch {
     token = null;
   }
@@ -165,8 +277,18 @@ export async function middleware(request: NextRequest) {
   }
 
   const mfaEnrollmentRequired = token?.mfaEnrollmentRequired === true;
-  if (mfaEnrollmentRequired && pathname !== "/mfa/enroll") {
+  if (mfaEnrollmentRequired) {
+    if (pathname === "/mfa/enroll") {
+      return withSecurityHeaders(NextResponse.next());
+    }
+
     return withSecurityHeaders(NextResponse.redirect(new URL("/mfa/enroll", request.url)));
+  }
+
+  if (role !== "VIEWER_ADSP" && token?.mfaVerified !== true) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
+    return withSecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   if (!mfaEnrollmentRequired && (pathname === "/mfa" || pathname.startsWith("/mfa/"))) {
@@ -186,6 +308,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    {
+      source: "/:path*",
+      has: [{
+        type: "host",
+        value: "concessioni-portuali-demo-v7-mcp-preview.vercel.app",
+      }],
+    },
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|woff|woff2)$).*)",
   ],
 };

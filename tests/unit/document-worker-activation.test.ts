@@ -45,7 +45,9 @@ vi.mock("@/server/async-jobs/documentWorkerActivation", async (importOriginal) =
 
 import {
   activateDocumentWorker,
+  activationCallerEnvironment,
   documentWorkerKindForOperation,
+  type DocumentWorkerActivationRequest,
 } from "@/server/async-jobs/documentWorkerActivation";
 import { runDocumentWorkerRecoveryProcess } from "@/server/async-jobs/documentWorkerRecoveryProcess";
 import { ensureAuthorizedDocumentOcrExtractionJob } from "@/server/documents/documentOcrJobAdmission";
@@ -82,7 +84,7 @@ describe("document worker activation", () => {
     });
     admissionMocks.requestActivation.mockResolvedValue({
       outcome: "REQUESTED",
-      jobId: "job-render-ocr",
+      renderJobId: "job-render-ocr",
     });
     runtimeActionMocks.requireRole.mockResolvedValue(undefined);
     runtimeActionMocks.getCurrentUser.mockResolvedValue({
@@ -99,13 +101,16 @@ describe("document worker activation", () => {
     expect(documentWorkerKindForOperation("DOCUMENT_OCR_COORDINATOR_V2")).toBe("DOCUMENT_OCR");
     expect(documentWorkerKindForOperation("DOCUMENT_OCR_PAGE_BATCH_V2")).toBe("DOCUMENT_OCR");
     expect(documentWorkerKindForOperation("FASCICOLO.AUTOMATIC_ANALYSIS_V1")).toBe("DOCUMENT_ANALYSIS");
-    expect(documentWorkerKindForOperation("LEGAL_RESEARCH.EXECUTE_V1")).toBeNull();
+    expect(documentWorkerKindForOperation("LEGAL_RESEARCH.EXECUTE_V1")).toBe("LEGAL_RESEARCH");
+    expect(documentWorkerKindForOperation("OTHER.OPERATION_V1")).toBeNull();
   });
 
   it("requests scoped document analysis after an audited terminal retry", async () => {
     admissionMocks.retryTerminalAsyncJob.mockResolvedValueOnce({
       outcome: "REQUEUED",
+      jobId: "canary-job-1",
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      tenantId: "tenant-1",
       procedimentoId: "procedure-1",
     });
     const formData = new FormData();
@@ -114,13 +119,17 @@ describe("document worker activation", () => {
     await retryRuntimeJob(formData);
 
     expect(admissionMocks.requestActivation).toHaveBeenCalledWith(
-      "DOCUMENT_ANALYSIS",
-      "procedure-1",
+      {
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "canary-job-1",
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+      },
     );
     expect(runtimeActionMocks.revalidatePath).toHaveBeenCalledWith("/admin/runtime");
   });
 
-  it("does not activate legal research after an audited terminal retry", async () => {
+  it("activates the scoped legal research worker after an audited terminal retry", async () => {
     admissionMocks.retryTerminalAsyncJob.mockResolvedValueOnce({
       outcome: "REQUEUED",
       operation: "LEGAL_RESEARCH.EXECUTE_V1",
@@ -131,7 +140,10 @@ describe("document worker activation", () => {
 
     await retryRuntimeJob(formData);
 
-    expect(admissionMocks.requestActivation).not.toHaveBeenCalled();
+    expect(admissionMocks.requestActivation).toHaveBeenCalledWith({
+      kind: "LEGAL_RESEARCH",
+      procedimentoId: "procedure-1",
+    });
     expect(runtimeActionMocks.revalidatePath).toHaveBeenCalledWith("/admin/runtime");
   });
 
@@ -163,10 +175,35 @@ describe("document worker activation", () => {
         { status: 201, headers: { "Content-Type": "application/json" } },
       ));
 
-    await expect(activateDocumentWorker(kind, "procedure-1", {
+    const request: DocumentWorkerActivationRequest = kind === "DOCUMENT_ANALYSIS"
+      ? {
+          kind,
+          applicationJobId: "analysis-job-1",
+          tenantId: "tenant-1",
+          procedimentoId: "procedure-1",
+        }
+      : { kind, procedimentoId: "procedure-1" };
+    const completeAnalysisActivation = vi.fn(async () => ({
+      state: "CONFIRMED" as const,
+      activationAttemptId: "a".repeat(32),
+      renderJobId: "job-render123",
+      failureCode: null,
+    }));
+
+    await expect(activateDocumentWorker(request, {
       environment,
       fetch,
-    })).resolves.toEqual({ outcome: "REQUESTED", jobId: "job-render123" });
+      beginAnalysisActivation: vi.fn(async () => ({
+        outcome: "RESERVED" as const,
+        snapshot: {
+          state: "REQUESTING" as const,
+          activationAttemptId: "a".repeat(32),
+          renderJobId: null,
+          failureCode: null,
+        },
+      })),
+      completeAnalysisActivation,
+    })).resolves.toEqual({ outcome: "REQUESTED", renderJobId: "job-render123" });
 
     const [url, init] = fetch.mock.calls[0];
     const body = JSON.parse(String(init?.body)) as { startCommand: string };
@@ -178,7 +215,92 @@ describe("document worker activation", () => {
     expect(body.startCommand).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
     if (kind === "DOCUMENT_ANALYSIS") {
       expect(body.startCommand).toContain("ASYNC_WORKER_MAX_PROCESSED_JOBS=1");
+      expect(body.startCommand).toContain("ASYNC_WORKER_TARGET_JOB_ID=analysis-job-1");
+      expect(body.startCommand).toContain("ASYNC_WORKER_TARGET_TENANT_ID=tenant-1");
+      expect(completeAnalysisActivation).toHaveBeenCalledWith(expect.objectContaining({
+        state: "CONFIRMED",
+        renderJobId: "job-render123",
+      }));
     }
+  });
+
+  it.each([
+    ["LEGAL_RESEARCH", false],
+    ["DOCUMENT_ANALYSIS", true],
+  ] as const)("scopes the %s legal research worker command", async (kind, chained) => {
+    const fetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => new Response(
+        JSON.stringify({ id: "job-render123" }),
+        { status: 201, headers: { "Content-Type": "application/json" } },
+      ));
+    const request: DocumentWorkerActivationRequest = kind === "DOCUMENT_ANALYSIS"
+      ? {
+          kind,
+          applicationJobId: "analysis-job-1",
+          tenantId: "tenant-1",
+          procedimentoId: "procedure-1",
+          withLegalResearch: true,
+        }
+      : { kind, procedimentoId: "procedure-1" };
+
+    await expect(activateDocumentWorker(request, {
+      environment,
+      fetch,
+      beginAnalysisActivation: vi.fn(async () => ({
+        outcome: "RESERVED" as const,
+        snapshot: {
+          state: "REQUESTING" as const,
+          activationAttemptId: "a".repeat(32),
+          renderJobId: null,
+          failureCode: null,
+        },
+      })),
+      completeAnalysisActivation: vi.fn(async () => ({
+        state: "CONFIRMED" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: "job-render123",
+        failureCode: null,
+      })),
+    })).resolves.toEqual({ outcome: "REQUESTED", renderJobId: "job-render123" });
+
+    const body = JSON.parse(String(fetch.mock.calls[0][1]?.body)) as { startCommand: string };
+    const segments = body.startCommand.split(" && ");
+    expect(segments).toHaveLength(chained ? 2 : 1);
+    for (const segment of segments) {
+      expect(segment.startsWith("ASYNC_WORKER_CALLER_ENVIRONMENT=unspecified ")).toBe(true);
+    }
+    const research = segments.at(-1)!;
+    expect(research).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=LEGAL_RESEARCH.EXECUTE_V1");
+    expect(research).toContain("ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST=procedure-1");
+    expect(research).toContain("ASYNC_WORKER_EXIT_ON_IDLE=true");
+    expect(research).toContain("ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false");
+    expect(research).toContain("ASYNC_PROVIDER_EXECUTION_ENABLED=true");
+    if (chained) {
+      expect(segments[0]).toContain("MANUAL_LEGAL_ANALYSIS_PIPELINE=true");
+      expect(segments[0]).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=FASCICOLO.AUTOMATIC_ANALYSIS_V1");
+      expect(segments[0]).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
+    }
+  });
+  it("stamps a sanitized caller environment on one-off worker starts", async () => {
+    expect(activationCallerEnvironment({ VERCEL_ENV: "production" })).toBe("production");
+    expect(activationCallerEnvironment({ VERCEL_ENV: "preview" })).toBe("preview");
+    expect(activationCallerEnvironment({})).toBe("unspecified");
+    expect(activationCallerEnvironment({ VERCEL_ENV: "production; rm -rf /" })).toBe("unspecified");
+    const fetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => new Response(
+        JSON.stringify({ id: "job-render123" }),
+        { status: 201, headers: { "Content-Type": "application/json" } },
+      ));
+    await activateDocumentWorker(
+      { kind: "DOCUMENT_EXTRACTION", procedimentoId: "procedure-1" },
+      { environment: { ...environment, VERCEL_ENV: "preview" }, fetch },
+    );
+    const body = JSON.parse(String(fetch.mock.calls[0][1]?.body)) as { startCommand: string };
+    expect(body.startCommand.startsWith("ASYNC_WORKER_CALLER_ENVIRONMENT=preview ")).toBe(true);
   });
 
   it("defers a rejected request without exposing credentials", async () => {
@@ -186,12 +308,237 @@ describe("document worker activation", () => {
       typeof import("@/server/async-jobs/documentWorkerActivation")
     >("@/server/async-jobs/documentWorkerActivation");
     const report = vi.fn();
-    await expect(requestDocumentWorkerActivation("DOCUMENT_OCR", "procedure-1", {
+    await expect(requestDocumentWorkerActivation({
+      kind: "DOCUMENT_OCR",
+      procedimentoId: "procedure-1",
+    }, {
       environment,
       fetch: vi.fn(async () => new Response(null, { status: 409 })),
       report,
     })).resolves.toEqual({ outcome: "DEFERRED", errorCode: "REQUEST_REJECTED" });
     expect(JSON.stringify(report.mock.calls)).not.toContain("test-render-key");
+  });
+
+  it("allows at most one external activation for simultaneous requests of the same job", async () => {
+    let snapshot:
+      | {
+          state: "REQUESTING" | "CONFIRMED";
+          activationAttemptId: string;
+          renderJobId: string | null;
+          failureCode: null;
+        }
+      | null = null;
+    const beginAnalysisActivation = vi.fn(async () => {
+      if (snapshot) return { outcome: "EXISTING" as const, snapshot: { ...snapshot } };
+      const reserved = {
+        state: "REQUESTING" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: null as null,
+        failureCode: null as null,
+      };
+      snapshot = reserved;
+      return { outcome: "RESERVED" as const, snapshot: reserved };
+    });
+    const completeAnalysisActivation = vi.fn(async () => {
+      snapshot = {
+        state: "CONFIRMED",
+        activationAttemptId: "a".repeat(32),
+        renderJobId: "job-render123",
+        failureCode: null,
+      };
+      return {
+        state: "CONFIRMED" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: "job-render123",
+        failureCode: null,
+      };
+    });
+    const fetch = vi.fn(async () => new Response(
+      JSON.stringify({ id: "job-render123" }),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    ));
+    const request = {
+      kind: "DOCUMENT_ANALYSIS" as const,
+      applicationJobId: "analysis-job-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+    };
+
+    const outcomes = await Promise.all([
+      activateDocumentWorker(request, {
+        environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+      }),
+      activateDocumentWorker(request, {
+        environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+      }),
+    ]);
+
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(outcomes.map((outcome) => outcome.outcome).sort())
+      .toEqual(["ALREADY_REQUESTED", "REQUESTED"]);
+  });
+
+  it("persists a verified Render rejection and does not retry it automatically", async () => {
+    const { requestDocumentWorkerActivation: actualRequest } = await vi.importActual<
+      typeof import("@/server/async-jobs/documentWorkerActivation")
+    >("@/server/async-jobs/documentWorkerActivation");
+    let state = "NOT_REQUESTED";
+    const beginAnalysisActivation = vi.fn(async () => state === "NOT_REQUESTED"
+      ? {
+          outcome: "RESERVED" as const,
+          snapshot: {
+            state: "REQUESTING" as const,
+            activationAttemptId: "a".repeat(32),
+            renderJobId: null,
+            failureCode: null,
+          },
+        }
+      : {
+          outcome: "EXISTING" as const,
+          snapshot: {
+            state: "FAILED_VERIFIED" as const,
+            activationAttemptId: "a".repeat(32),
+            renderJobId: null,
+            failureCode: "RENDER_HTTP_409",
+          },
+        });
+    const completeAnalysisActivation = vi.fn(async () => {
+      state = "FAILED_VERIFIED";
+      return {
+        state: "FAILED_VERIFIED" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: null,
+        failureCode: "RENDER_HTTP_409",
+      };
+    });
+    const fetch = vi.fn(async () => new Response(null, { status: 409 }));
+    const request = {
+      kind: "DOCUMENT_ANALYSIS" as const,
+      applicationJobId: "analysis-job-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+    };
+
+    await expect(actualRequest(request, {
+      environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+      report: vi.fn(),
+    })).resolves.toMatchObject({ outcome: "DEFERRED", errorCode: "REQUEST_REJECTED" });
+    await expect(activateDocumentWorker(request, {
+      environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+    })).resolves.toMatchObject({
+      outcome: "ALREADY_REQUESTED",
+      activationState: "FAILED_VERIFIED",
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it("persists an uncertain remote outcome and never retries it automatically", async () => {
+    const { requestDocumentWorkerActivation: actualRequest } = await vi.importActual<
+      typeof import("@/server/async-jobs/documentWorkerActivation")
+    >("@/server/async-jobs/documentWorkerActivation");
+    let state = "NOT_REQUESTED";
+    const beginAnalysisActivation = vi.fn(async () => state === "NOT_REQUESTED"
+      ? {
+          outcome: "RESERVED" as const,
+          snapshot: {
+            state: "REQUESTING" as const,
+            activationAttemptId: "a".repeat(32),
+            renderJobId: null,
+            failureCode: null,
+          },
+        }
+      : {
+          outcome: "EXISTING" as const,
+          snapshot: {
+            state: "REMOTE_UNKNOWN" as const,
+            activationAttemptId: "a".repeat(32),
+            renderJobId: null,
+            failureCode: "REQUEST_FAILED",
+          },
+        });
+    const completeAnalysisActivation = vi.fn(async () => {
+      state = "REMOTE_UNKNOWN";
+      return {
+        state: "REMOTE_UNKNOWN" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: null,
+        failureCode: "REQUEST_FAILED",
+      };
+    });
+    const fetch = vi.fn(async () => {
+      throw new TypeError("connection reset");
+    });
+    const request = {
+      kind: "DOCUMENT_ANALYSIS" as const,
+      applicationJobId: "analysis-job-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+    };
+
+    await expect(actualRequest(request, {
+      environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+      report: vi.fn(),
+    })).resolves.toMatchObject({ outcome: "DEFERRED", errorCode: "REQUEST_FAILED" });
+    await expect(activateDocumentWorker(request, {
+      environment, fetch, beginAnalysisActivation, completeAnalysisActivation,
+    })).resolves.toMatchObject({
+      outcome: "ALREADY_REQUESTED",
+      activationState: "REMOTE_UNKNOWN",
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it("persists a timed-out Render request as remote-unknown", async () => {
+    vi.useFakeTimers();
+    try {
+      const { requestDocumentWorkerActivation: actualRequest } = await vi.importActual<
+        typeof import("@/server/async-jobs/documentWorkerActivation")
+      >("@/server/async-jobs/documentWorkerActivation");
+      const completeAnalysisActivation = vi.fn(async (input) => ({
+        state: input.state,
+        activationAttemptId: input.activationAttemptId,
+        renderJobId: null,
+        failureCode: input.failureCode ?? null,
+      }));
+      const fetch = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => (
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+        })
+      ));
+      const pending = actualRequest({
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "analysis-job-timeout",
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+      }, {
+        environment,
+        fetch,
+        beginAnalysisActivation: vi.fn(async () => ({
+          outcome: "RESERVED" as const,
+          snapshot: {
+            state: "REQUESTING" as const,
+            activationAttemptId: "a".repeat(32),
+            renderJobId: null,
+            failureCode: null,
+          },
+        })),
+        completeAnalysisActivation,
+        report: vi.fn(),
+      });
+
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      await expect(pending).resolves.toMatchObject({
+        outcome: "DEFERRED",
+        errorCode: "REQUEST_TIMEOUT",
+      });
+      expect(completeAnalysisActivation).toHaveBeenCalledWith(expect.objectContaining({
+        state: "REMOTE_UNKNOWN",
+        failureCode: "REQUEST_TIMEOUT",
+      }));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("activates OCR only after its authorized V2 coordinator job is persisted", async () => {
@@ -202,7 +549,7 @@ describe("document worker activation", () => {
     });
     admissionMocks.requestActivation.mockImplementationOnce(async () => {
       order.push("activate");
-      return { outcome: "REQUESTED", jobId: "job-render-ocr" };
+      return { outcome: "REQUESTED", renderJobId: "job-render-ocr" };
     });
 
     await ensureAuthorizedDocumentOcrExtractionJob("attempt-failed");
@@ -213,8 +560,10 @@ describe("document worker activation", () => {
       procedimentoId: "procedure-1",
     }));
     expect(admissionMocks.requestActivation).toHaveBeenCalledWith(
-      "DOCUMENT_OCR",
-      "procedure-1",
+      {
+        kind: "DOCUMENT_OCR",
+        procedimentoId: "procedure-1",
+      },
     );
   });
 
@@ -254,23 +603,34 @@ describe("document worker activation", () => {
           },
         ],
       }),
-      select: { operation: true, procedimentoId: true },
-      distinct: ["operation", "procedimentoId"],
+      select: { id: true, operation: true, tenantId: true, procedimentoId: true },
     });
     expect(recoveryDb.disconnect).toHaveBeenCalledOnce();
   });
 
   it("coalesces due OCR operations and recovers analysis under the same procedimento scope", async () => {
-    const activate = vi.fn(async () => ({ outcome: "REQUESTED" as const, jobId: "job-render123" }));
+    const activate = vi.fn(async () => ({
+      outcome: "REQUESTED" as const,
+      renderJobId: "job-render123",
+    }));
     await runDocumentWorkerRecoveryProcess({
       environment: {
         ...environment,
         DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST: "procedure-1",
       },
       listRecoverableJobs: vi.fn(async () => [
-        { operation: "DOCUMENT_OCR_COORDINATOR_V2", procedimentoId: "procedure-1" },
-        { operation: "DOCUMENT_OCR_PAGE_BATCH_V2", procedimentoId: "procedure-1" },
-        { operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1", procedimentoId: "procedure-1" },
+        {
+          id: "ocr-coordinator-1", operation: "DOCUMENT_OCR_COORDINATOR_V2",
+          tenantId: "tenant-1", procedimentoId: "procedure-1",
+        },
+        {
+          id: "ocr-page-1", operation: "DOCUMENT_OCR_PAGE_BATCH_V2",
+          tenantId: "tenant-1", procedimentoId: "procedure-1",
+        },
+        {
+          id: "analysis-job-1", operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+          tenantId: "tenant-1", procedimentoId: "procedure-1",
+        },
       ]),
       activate,
       disconnect: vi.fn(async () => undefined),
@@ -279,13 +639,19 @@ describe("document worker activation", () => {
 
     expect(activate).toHaveBeenCalledTimes(2);
     expect(activate).toHaveBeenCalledWith(
-      "DOCUMENT_OCR",
-      "procedure-1",
+      {
+        kind: "DOCUMENT_OCR",
+        procedimentoId: "procedure-1",
+      },
       expect.any(Object),
     );
     expect(activate).toHaveBeenCalledWith(
-      "DOCUMENT_ANALYSIS",
-      "procedure-1",
+      {
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "analysis-job-1",
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+      },
       expect.any(Object),
     );
   });
@@ -293,7 +659,7 @@ describe("document worker activation", () => {
   it("continues recovering other scopes after one activation fails", async () => {
     const activate = vi.fn()
       .mockRejectedValueOnce(new Error("unavailable"))
-      .mockResolvedValueOnce({ outcome: "REQUESTED", jobId: "job-render-analysis" });
+      .mockResolvedValueOnce({ outcome: "REQUESTED", renderJobId: "job-render-analysis" });
     const markFailure = vi.fn();
     await runDocumentWorkerRecoveryProcess({
       environment: {
@@ -301,8 +667,14 @@ describe("document worker activation", () => {
         DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST: "procedure-1",
       },
       listRecoverableJobs: vi.fn(async () => [
-        { operation: "DOCUMENT_OCR_COORDINATOR_V2", procedimentoId: "procedure-1" },
-        { operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1", procedimentoId: "procedure-1" },
+        {
+          id: "ocr-job-1", operation: "DOCUMENT_OCR_COORDINATOR_V2",
+          tenantId: "tenant-1", procedimentoId: "procedure-1",
+        },
+        {
+          id: "analysis-job-1", operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+          tenantId: "tenant-1", procedimentoId: "procedure-1",
+        },
       ]),
       activate,
       disconnect: vi.fn(async () => undefined),

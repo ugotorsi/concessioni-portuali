@@ -93,6 +93,7 @@ describe("periodic legal research", () => {
         PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS: "30",
       } as unknown as NodeJS.ProcessEnv,
     }, {
+      isAutomationEnabled: vi.fn(async () => true),
       listDueTargets: vi.fn(async () => targets),
       reconcile,
     });
@@ -115,6 +116,7 @@ describe("periodic legal research", () => {
   it("is disabled by default and throttles worker reconciliation", async () => {
     const listDueTargets = vi.fn(async () => []);
     await expect(reconcilePeriodicLegalResearchMissions({}, {
+      isAutomationEnabled: vi.fn(async () => true),
       listDueTargets,
       reconcile: vi.fn(async () => undefined),
     })).resolves.toEqual({ targetCount: 0, missionCount: 0 });
@@ -133,5 +135,20 @@ describe("periodic legal research", () => {
     now = new Date("2026-10-12T01:00:00.000Z");
     await scheduled();
     expect(reconcile).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not inspect due fascicoli when persistent automation is OFF", async () => {
+    const listDueTargets = vi.fn(async () => []);
+    await expect(reconcilePeriodicLegalResearchMissions({
+      environment: {
+        PERIODIC_LEGAL_RESEARCH_ENABLED: "true",
+      } as unknown as NodeJS.ProcessEnv,
+    }, {
+      isAutomationEnabled: vi.fn(async () => false),
+      listDueTargets,
+      reconcile: vi.fn(async () => undefined),
+    })).resolves.toEqual({ targetCount: 0, missionCount: 0 });
+
+    expect(listDueTargets).not.toHaveBeenCalled();
   });
 });

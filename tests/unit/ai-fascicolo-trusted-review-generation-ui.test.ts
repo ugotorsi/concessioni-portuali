@@ -41,6 +41,9 @@ vi.mock("react", async (importOriginal) => ({
       mocks.effectCleanup = effect() ?? undefined;
     }
   },
+  useLayoutEffect: (effect: () => void | (() => void)) => {
+    effect();
+  },
   useRef: () => {
     const refs = [mocks.submitRef, mocks.activeRef, mocks.procedimentoIdRef];
     const ref = refs[mocks.refCall];

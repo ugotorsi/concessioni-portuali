@@ -10,6 +10,7 @@ import {
   fascicoloProposalTypeLabel,
   type FascicoloProposal,
 } from "@/components/procedimenti/FascicoloProposals";
+import type { ActDraft, ActDraftVersion } from "@/server/fascicolo-acts/model";
 
 function proposal(overrides: Partial<FascicoloProposal> = {}): FascicoloProposal {
   return {
@@ -27,8 +28,33 @@ function proposal(overrides: Partial<FascicoloProposal> = {}): FascicoloProposal
   };
 }
 
-function render(proposals: readonly FascicoloProposal[]): string {
-  return renderToStaticMarkup(createElement(FascicoloProposals, { proposals, canManage: false }));
+function render(proposals: readonly FascicoloProposal[], drafts: readonly ActDraft[] = []): string {
+  return renderToStaticMarkup(createElement(FascicoloProposals, { proposals, drafts, canManage: false }));
+}
+
+function legacyDraft(): ActDraft {
+  const current: ActDraftVersion = {
+    schema: "FASCICOLO_ACT_DRAFT_V1",
+    procedimentoId: "procedure-technical-id",
+    draftKey: "legacy-act-1",
+    templateKey: "PLAN:Contestazione degli addebiti",
+    issueSemanticKey: "issue-m4",
+    title: "Contestazione degli addebiti",
+    body: "Bozza legacy",
+    status: "BOZZA",
+    assignee: null,
+    dueDate: null,
+    progress: 0,
+    dependencies: [],
+    attachments: [],
+    changeNote: null,
+    version: 1,
+    bodySha256: "a".repeat(64),
+    savedAt: new Date("2026-10-01T10:00:00.000Z"),
+    savedBy: "rup@example.test",
+    auditHash: "b".repeat(64),
+  };
+  return { draftKey: current.draftKey, current, history: [current], openDependencies: [] };
 }
 
 function visibleText(html: string): string {
@@ -99,6 +125,21 @@ describe("Fascicolo proposals workspace", () => {
     expect(empty).toContain("Le proposte vengono sottoposte a revisione prima di produrre effetti sul fascicolo.");
   });
 
+  it("shows possible legacy drafts for review without implying association or execution", () => {
+    const html = render([proposal({
+      proposalType: "ACTIVITY",
+      title: "Contestazione degli addebiti per uso M4",
+      originatingIssueSemanticKeys: ["issue-m4"],
+      proposedPayload: { draft: { title: "Contestazione degli addebiti", approvalRequired: true } },
+    })], [legacyDraft()]);
+
+    expect(html).toContain("Facsimile collegato: Contestazione degli addebiti");
+    expect(html).toContain('href="/procedimenti/procedure-technical-id?section=acts#draft-legacy-act-1"');
+    expect(html).toContain("v1 · Bozza");
+    expect(html).toContain("Bozze precedenti da confrontare e associare");
+    expect(html).not.toContain("Nessuna bozza collegata");
+  });
+
   it("shares legacy and intake UX without automatic generation or materialization", () => {
     const legacy = readFileSync("src/app/procedimenti/[id]/page.tsx", "utf8");
     const intake = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");
@@ -106,11 +147,11 @@ describe("Fascicolo proposals workspace", () => {
     expect(legacy).toContain('activeSection === "proposals"');
     expect(intake).toContain('activeSection === "proposals"');
     expect(legacy).toContain("<FascicoloProposals");
+    expect(legacy.match(/\{proposalHistory\}/g)).toHaveLength(2);
     expect(intake).toContain("<FascicoloProposals");
     expect(legacy).not.toContain("<FascicoloDocumentRequirementProposalsPanel");
     expect(component).not.toContain("generateOperationalProposalsAction");
     expect(component).not.toContain("JSON.stringify");
-    expect(component).not.toContain("proposedPayload");
     expect(component).toContain("action={reviewOperationalProposalAction}");
     expect(component).toContain("action={materializeOperationalProposalAction}");
     expect(component).not.toContain("materializeOperationalProposalAction(");

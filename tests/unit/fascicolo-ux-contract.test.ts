@@ -37,6 +37,7 @@ describe("Fascicolo UX contract", () => {
     const listPage = readSource("src/app/procedimenti/page.tsx");
     const createPage = readSource("src/app/procedimenti/nuovo/page.tsx");
     const dashboardPage = readSource("src/app/dashboard/page.tsx");
+    const intakeQuery = readSource("src/server/queries/fascicolo-intake.ts");
 
     expect(sidebar).toContain('{ href: "/procedimenti", label: "Fascicoli"');
     expect(listPage).toContain('title="Fascicoli"');
@@ -71,6 +72,17 @@ describe("Fascicolo UX contract", () => {
     expect(dashboardPage).toContain("getFascicoliIntakeList()");
     expect(dashboardPage).toContain("...fascicoliIntake.map");
     expect(dashboardPage).toContain("fascicoliRecenti.map");
+    expect(intakeQuery).toContain("procedimentoId: null");
+  });
+
+  it("labels tenant and fascicolo AI policy actions consistently", () => {
+    const policyPanel = readSource(
+      "src/components/procedimenti/FascicoloAiResearchControlPanel.tsx",
+    );
+
+    expect(policyPanel).toContain(
+      '{tenantScope ? "Salva policy dell\'ente" : "Salva policy del fascicolo"}',
+    );
   });
 
   it("opens with cover data and the fixed-context attachment panel", () => {

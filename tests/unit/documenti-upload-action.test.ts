@@ -489,8 +489,10 @@ describe("createDocumentoUploadAction", () => {
       policyDecisionRef: "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1",
     }));
     expect(requestDocumentWorkerActivationMock).toHaveBeenCalledWith(
-      "DOCUMENT_EXTRACTION",
-      "procedimento-1",
+      {
+        kind: "DOCUMENT_EXTRACTION",
+        procedimentoId: "procedimento-1",
+      },
     );
   });
 

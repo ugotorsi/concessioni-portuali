@@ -98,12 +98,19 @@ export const ModelName = {
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
+  V7ProviderOutputRecoveryArtifact: 'V7ProviderOutputRecoveryArtifact',
+  ResearchProviderOAuthCredential: 'ResearchProviderOAuthCredential',
   RuntimeWorkerHeartbeat: 'RuntimeWorkerHeartbeat',
+  FascicoloAnalysisEvaluationPermit: 'FascicoloAnalysisEvaluationPermit',
+  FascicoloAnalysisEvaluationArtifact: 'FascicoloAnalysisEvaluationArtifact',
   RuntimeBudgetPolicy: 'RuntimeBudgetPolicy',
   RuntimeCostReservation: 'RuntimeCostReservation',
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  ProfessionalLegalQuestion: 'ProfessionalLegalQuestion',
+  ProfessionalLegalQuestionVersion: 'ProfessionalLegalQuestionVersion',
+  TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
   ResearchQuestionResultRecord: 'ResearchQuestionResultRecord',
@@ -132,8 +139,10 @@ export const ModelName = {
   FascicoloOperationalProposalMaterialization: 'FascicoloOperationalProposalMaterialization',
   FascicoloSubject: 'FascicoloSubject',
   FascicoloSubjectIdentifier: 'FascicoloSubjectIdentifier',
+  FascicoloKnowledgeIdentity: 'FascicoloKnowledgeIdentity',
   FascicoloKnowledgeItem: 'FascicoloKnowledgeItem',
   FascicoloKnowledgeEvidence: 'FascicoloKnowledgeEvidence',
+  FascicoloKnowledgeEvidenceSpan: 'FascicoloKnowledgeEvidenceSpan',
   FascicoloKnowledgeRelation: 'FascicoloKnowledgeRelation',
   FascicoloKnowledgeReviewEvent: 'FascicoloKnowledgeReviewEvent',
   AiFascicoloHumanReviewState: 'AiFascicoloHumanReviewState',
@@ -1241,6 +1250,38 @@ export const AsyncJobScalarFieldEnum = {
 export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
 
 
+export const V7ProviderOutputRecoveryArtifactScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  corpusFingerprint: 'corpusFingerprint',
+  approvalId: 'approvalId',
+  outputFingerprint: 'outputFingerprint',
+  encryptedPayload: 'encryptedPayload',
+  sizeBytes: 'sizeBytes',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type V7ProviderOutputRecoveryArtifactScalarFieldEnum = (typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum)[keyof typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum]
+
+
+export const ResearchProviderOAuthCredentialScalarFieldEnum = {
+  provider: 'provider',
+  encryptedPayload: 'encryptedPayload',
+  stateVersion: 'stateVersion',
+  hasRefreshToken: 'hasRefreshToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  lastRefreshedAt: 'lastRefreshedAt',
+  lastRefreshErrorCode: 'lastRefreshErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchProviderOAuthCredentialScalarFieldEnum = (typeof ResearchProviderOAuthCredentialScalarFieldEnum)[keyof typeof ResearchProviderOAuthCredentialScalarFieldEnum]
+
+
 export const RuntimeWorkerHeartbeatScalarFieldEnum = {
   id: 'id',
   workerId: 'workerId',
@@ -1254,6 +1295,47 @@ export const RuntimeWorkerHeartbeatScalarFieldEnum = {
 } as const
 
 export type RuntimeWorkerHeartbeatScalarFieldEnum = (typeof RuntimeWorkerHeartbeatScalarFieldEnum)[keyof typeof RuntimeWorkerHeartbeatScalarFieldEnum]
+
+
+export const FascicoloAnalysisEvaluationPermitScalarFieldEnum = {
+  permitRef: 'permitRef',
+  evaluationId: 'evaluationId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  corpusFingerprint: 'corpusFingerprint',
+  operation: 'operation',
+  testCaseId: 'testCaseId',
+  maxCostAmount: 'maxCostAmount',
+  authorizedByUserId: 'authorizedByUserId',
+  authorizedAt: 'authorizedAt',
+  expiresAt: 'expiresAt',
+  consumedByJobId: 'consumedByJobId',
+  consumedAt: 'consumedAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type FascicoloAnalysisEvaluationPermitScalarFieldEnum = (typeof FascicoloAnalysisEvaluationPermitScalarFieldEnum)[keyof typeof FascicoloAnalysisEvaluationPermitScalarFieldEnum]
+
+
+export const FascicoloAnalysisEvaluationArtifactScalarFieldEnum = {
+  evaluationId: 'evaluationId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  jobId: 'jobId',
+  authorizationRef: 'authorizationRef',
+  testCaseId: 'testCaseId',
+  corpusFingerprint: 'corpusFingerprint',
+  contractVersion: 'contractVersion',
+  inputFingerprint: 'inputFingerprint',
+  outputFingerprint: 'outputFingerprint',
+  providerOutput: 'providerOutput',
+  provenance: 'provenance',
+  comparison: 'comparison',
+  maxCostAmount: 'maxCostAmount',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloAnalysisEvaluationArtifactScalarFieldEnum = (typeof FascicoloAnalysisEvaluationArtifactScalarFieldEnum)[keyof typeof FascicoloAnalysisEvaluationArtifactScalarFieldEnum]
 
 
 export const RuntimeBudgetPolicyScalarFieldEnum = {
@@ -1371,6 +1453,7 @@ export const ResearchMissionRecordScalarFieldEnum = {
   missionFingerprint: 'missionFingerprint',
   knowledgeRevisionId: 'knowledgeRevisionId',
   firstKnowledgeRevisionId: 'firstKnowledgeRevisionId',
+  professionalQuestionVersionId: 'professionalQuestionVersionId',
   legalIssueSemanticKey: 'legalIssueSemanticKey',
   researchQuestionSemanticKey: 'researchQuestionSemanticKey',
   referenceDateBasis: 'referenceDateBasis',
@@ -1388,6 +1471,58 @@ export const ResearchMissionRecordScalarFieldEnum = {
 } as const
 
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  createdByUserId: 'createdByUserId',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionScalarFieldEnum = (typeof ProfessionalLegalQuestionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionScalarFieldEnum]
+
+
+export const ProfessionalLegalQuestionVersionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  version: 'version',
+  questionText: 'questionText',
+  theme: 'theme',
+  rationale: 'rationale',
+  referenceDate: 'referenceDate',
+  status: 'status',
+  semanticKey: 'semanticKey',
+  contentFingerprint: 'contentFingerprint',
+  createdByUserId: 'createdByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProfessionalLegalQuestionVersionScalarFieldEnum = (typeof ProfessionalLegalQuestionVersionScalarFieldEnum)[keyof typeof ProfessionalLegalQuestionVersionScalarFieldEnum]
+
+
+export const TechnicalSourceResearchRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  missionId: 'missionId',
+  requestedByUserId: 'requestedByUserId',
+  questionSnapshot: 'questionSnapshot',
+  toolName: 'toolName',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  serviceVersion: 'serviceVersion',
+  verificationStatus: 'verificationStatus',
+  retrievedAt: 'retrievedAt'
+} as const
+
+export type TechnicalSourceResearchRecordScalarFieldEnum = (typeof TechnicalSourceResearchRecordScalarFieldEnum)[keyof typeof TechnicalSourceResearchRecordScalarFieldEnum]
 
 
 export const ResearchExecutionAttemptScalarFieldEnum = {
@@ -1975,6 +2110,19 @@ export const FascicoloSubjectIdentifierScalarFieldEnum = {
 export type FascicoloSubjectIdentifierScalarFieldEnum = (typeof FascicoloSubjectIdentifierScalarFieldEnum)[keyof typeof FascicoloSubjectIdentifierScalarFieldEnum]
 
 
+export const FascicoloKnowledgeIdentityScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  kind: 'kind',
+  createdInRevisionId: 'createdInRevisionId',
+  creationBasis: 'creationBasis',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeIdentityScalarFieldEnum = (typeof FascicoloKnowledgeIdentityScalarFieldEnum)[keyof typeof FascicoloKnowledgeIdentityScalarFieldEnum]
+
+
 export const FascicoloKnowledgeItemScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -1989,6 +2137,10 @@ export const FascicoloKnowledgeItemScalarFieldEnum = {
   confidence: 'confidence',
   status: 'status',
   reviewVersion: 'reviewVersion',
+  identityId: 'identityId',
+  identityState: 'identityState',
+  identityBasis: 'identityBasis',
+  identityCommandFingerprint: 'identityCommandFingerprint',
   createdAt: 'createdAt',
   supersededAt: 'supersededAt'
 } as const
@@ -2014,6 +2166,20 @@ export const FascicoloKnowledgeEvidenceScalarFieldEnum = {
 } as const
 
 export type FascicoloKnowledgeEvidenceScalarFieldEnum = (typeof FascicoloKnowledgeEvidenceScalarFieldEnum)[keyof typeof FascicoloKnowledgeEvidenceScalarFieldEnum]
+
+
+export const FascicoloKnowledgeEvidenceSpanScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  evidenceId: 'evidenceId',
+  startOffset: 'startOffset',
+  endOffset: 'endOffset',
+  quoteSha256: 'quoteSha256',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeEvidenceSpanScalarFieldEnum = (typeof FascicoloKnowledgeEvidenceSpanScalarFieldEnum)[keyof typeof FascicoloKnowledgeEvidenceSpanScalarFieldEnum]
 
 
 export const FascicoloKnowledgeRelationScalarFieldEnum = {

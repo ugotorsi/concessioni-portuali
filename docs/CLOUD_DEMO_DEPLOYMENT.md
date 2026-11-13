@@ -33,13 +33,49 @@ Questo ambiente e progettato per presentazioni istituzionali e pilot preview. De
 Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localhost`.
 
 ## 5. Procedura deploy Vercel
-1. Collegare il repository GitHub a Vercel.
-2. Importare il project.
-3. Verificare framework `Next.js` rilevato automaticamente.
-4. Configurare tutte le environment variables richieste (Production e Preview secondo necessita demo).
-5. Avviare il deploy.
+1. Usare esclusivamente `npm run deploy:vercel:preview -- --expected-commit <SHA_COMPLETO>`.
+2. Il comando fissa il progetto `concessioni-portuali-demo`, l'organizzazione
+   `ugotorsis-projects`, il target `preview` e il branch
+   `release/v7-integrated-services`; rifiuta argomenti aggiuntivi,
+   override di progetto, organizzazione o ambiente e qualsiasi opzione Production.
+3. Il comando verifica che `HEAD` coincida con lo SHA completo autorizzato prima
+   di invocare Vercel e che lo stesso SHA sia la testa remota del branch fissato.
+   Il deployment viene creato dalla sorgente GitHub, non da un upload CLI, affinché
+   Vercel applichi le variabili Preview specifiche del branch. Il comando forza
+   l'esecuzione del build soltanto per il deployment richiesto, senza modificare
+   permanentemente la regola Ignored Build Step del progetto.
+4. Verificare framework `Next.js` rilevato automaticamente.
+5. Configurare le environment variables richieste esclusivamente per Preview.
 6. Controllare i build logs e risolvere eventuali env mancanti.
-7. Aprire il dominio assegnato e testare login + percorsi demo principali.
+7. Aprire soltanto il dominio Preview assegnato e testare login + percorsi demo
+   principali. Il comando non deve essere usato per `app.noetra.it`.
+
+### 5.1 Rilascio Production su app.noetra.it (obbligatorio)
+- Rilasciare esclusivamente con `npm run deploy:production -- --expected-commit <SHA completo>`
+  (`scripts/deploy/release-production.ts`). Lo script blocca il rilascio se: l'albero di lavoro non e pulito,
+  HEAD non coincide con il commit atteso o non e presente su `origin`, il dominio `app.noetra.it` e legato a un
+  branch Git, a un ambiente personalizzato o a un redirect, mancano variabili Production obbligatorie, il deployment
+  non appartiene al progetto atteso, non ha target `production`, non e `READY`, ha commit diverso o sorgente sporca.
+  Il deployment e creato con `--skip-domain`: prima della promozione lo script controlla l'identita, il commit e
+  `/login` sul deployment protetto, ricontrolla configurazione e sorgente e verifica che l'alias non sia cambiato.
+  Solo dopo esegue `vercel promote`, quindi verifica nuovamente alias, target, commit e `/login`.
+- Verifica in sola lettura dello stato corrente: `npm run deploy:production -- --expected-commit <SHA> --verify-only`.
+- Configurare obbligatoriamente `NOETRA_PRODUCTION_DATABASE_FINGERPRINT` con il
+  fingerprint host/porta/database prodotto dal preflight read-only sul medesimo
+  endpoint di `DATABASE_URL`. Il runtime Production crea il pool Prisma solo se
+  le due identita coincidono; `POSTGRES_NEON_PROJECT_ID` e le altre variabili
+  dell'integrazione Vercel non sostituiscono questo controllo.
+- Se il deployment e gia stato creato ma non promosso, recuperare il suo identificativo esatto e riprendere senza
+  crearne un altro con `npm run deploy:production -- --expected-commit <SHA> --resume-deployment <dpl_ID>`.
+  Se risulta gia promosso, usare `--verify-only` con lo SHA rilasciato.
+- Vietato `vercel alias set` manuale verso URL Preview. In ogni caso il middleware risponde 421 a qualsiasi
+  richiesta su `app.noetra.it` servita da un deployment che include la guardia e ha `VERCEL_ENV` diverso da
+  `production`. Lo script e il middleware non impediscono a un amministratore esterno di cambiare manualmente
+  l'associazione su Vercel o di usare un deployment privo della guardia: i permessi sulla configurazione restano
+  una protezione distinta da verificare.
+- Causa dell'incidente del 03/11/2026: `app.noetra.it` era configurato come dominio di branch Git
+  (`staging-operativo`), quindi assegnabile a deployment Preview. Il legame e stato rimosso; lo script ne impedisce
+  la reintroduzione silenziosa.
 
 ## 6. Procedura database
 1. Creare un database PostgreSQL gestito (Prisma Postgres/Vercel o Supabase).
@@ -118,3 +154,23 @@ Mitigazione per questa fase:
 
 Evoluzione consigliata (fase successiva): object storage dedicato (S3, Supabase Storage o Vercel Blob) con persistenza stabile.
 
+## 12. Conservazione del fascicolo DEMO CP-058/2019 (V7)
+
+Il fascicolo dimostrativo CP-058/2019 (procedimento `cmvxr3st5003920udtvom8ebv`, ente `DEMO-ENTE-ADSP`) si trasferisce dal database Preview isolato al database di pubblicazione con lo script esistente `scripts/runtime/promote-selvara-to-production-candidate.ts`, ambito `DEMO_CP058_2019`. L'ambito copia documenti, estrazioni, revisioni di conoscenza, missioni/risultati/valutazioni di ricerca e tutte le versioni dei rapporti (storico `SUPERSEDED` incluso). Non copia utenti, job asincroni, budget o prenotazioni di costo.
+
+Protezioni:
+- l'ente del procedimento deve avere `codice` con prefisso `DEMO-`;
+- il trasferimento si interrompe se trova indirizzi email con domini diversi da `.demo`, `.local`, `.example`, `.invalid`, `.test`;
+- l'esecuzione reale richiede `VERCEL_ENV=preview`, `NOETRA_PRODUCTION_PROMOTION_APPROVAL=NOETRA-V7-PRODUCTION-DEMO-CP058-2019-PRESERVATION` e database sorgente e destinazione distinti;
+- inserimenti idempotenti (`ON CONFLICT DO NOTHING`) in un'unica transazione, con verifica di una revisione e di un rapporto `CURRENT`.
+
+Verifica preliminare, solo lettura sul Preview:
+
+```powershell
+$env:NOETRA_PROMOTION_SCOPE="DEMO_CP058_2019"; $env:NOETRA_PROMOTION_DRY_RUN="true"
+npx tsx scripts/runtime/promote-selvara-to-production-candidate.ts
+```
+
+Il trasferimento verso Production richiede un'autorizzazione esplicita del titolare. Dopo l'importazione restano due passaggi operativi da autorizzare: copiare i 3 file PDF dimostrativi da R2 staging al bucket di Production (le chiavi sono elencate nel dry-run) e associare all'ente DEMO gli utenti che presenteranno la demo.
+
+Per riallineare le classificazioni delle fonti ufficiali dopo una correzione del classificatore, senza ripetere la ricerca, usare `scripts/runtime/reverify-official-sources.ts`. Lo script richiede `EXPECTED_DATABASE_HOST_PREFIX` e `--procedimento` confermato, usa solo Normattiva e archivia una nuova versione del rapporto.

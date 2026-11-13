@@ -64,6 +64,10 @@ import {
   type ResearchPersistenceClient,
   type ResearchPersistenceContext,
 } from "@/server/legal-research/persistence";
+import {
+  canonicalizeResearchEvidenceBundleInput,
+  researchEvidenceBundleInputSchema,
+} from "@/server/legal-research/mcp-write-contracts";
 
 const actor = { actorId: "user-1", tenantId: "ente-1" } as const;
 const start = new Date("2026-09-17T10:00:00.000Z");
@@ -198,24 +202,80 @@ function matchesScalar(actual: unknown, expected: unknown): boolean {
   return actual === expected;
 }
 
+interface MissionHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  tenantId: string;
+  caseId: string;
+  fascicoloReference: string | null;
+  payloadFingerprint: string;
+  assignedActorId: string | null;
+  lifecycleStatus: string;
+  status: string;
+  claimExpiresAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AttemptHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  claimantId: string;
+  leaseExpiresAt: Date;
+  finalBundleId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface BundleHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  missionId: string;
+  fingerprint: string;
+  payload: ResearchEvidenceBundle;
+  createdAt: Date;
+}
+
+interface VerificationHarnessRecord {
+  [key: string]: unknown;
+  id: string;
+  tenantId: string;
+  missionId: string;
+  fingerprint: string;
+  createdAt: Date;
+}
+
+type MissionWhere = {
+  id?: string;
+  tenantId: string;
+  assignedActorId?: string;
+  caseId?: string;
+  fascicoloReference?: string;
+  lifecycleStatus?: string;
+  status?: { in: string[] };
+  OR?: readonly [Record<string, never>, { claimExpiresAt: { lte: Date } }];
+};
+
 function createHarness() {
-  const missions = new Map<string, Record<string, any>>();
-  const attempts = new Map<string, Record<string, any>>();
-  const bundles = new Map<string, Record<string, any>>();
-  const verifications = new Map<string, Record<string, any>>();
+  const missions = new Map<string, MissionHarnessRecord>();
+  const attempts = new Map<string, AttemptHarnessRecord>();
+  const bundles = new Map<string, BundleHarnessRecord>();
+  const verifications = new Map<string, VerificationHarnessRecord>();
   const persistQuestionResults = vi.fn(async () => []);
 
   const missionDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; payloadFingerprint?: string };
+    }) => {
       if (where.id) return missions.get(where.id) ?? null;
       return [...missions.values()].find((item) => item.payloadFingerprint === where.payloadFingerprint) ?? null;
     }),
-    findUniqueOrThrow: vi.fn(async ({ where }: any) => {
+    findUniqueOrThrow: vi.fn(async ({ where }: { where: { id: string } }) => {
       const value = missions.get(where.id);
       if (!value) throw new Error("NOT_FOUND");
       return value;
     }),
-    findMany: vi.fn(async ({ where, take }: any) => {
+    findMany: vi.fn(async ({ where, take }: { where: MissionWhere; take: number }) => {
       let values = [...missions.values()].filter((item) => item.tenantId === where.tenantId);
       if (where.assignedActorId !== undefined) {
         values = values.filter((item) => item.assignedActorId === where.assignedActorId);
@@ -227,20 +287,38 @@ function createHarness() {
       if (where.lifecycleStatus !== undefined) {
         values = values.filter((item) => item.lifecycleStatus === where.lifecycleStatus);
       }
-      if (where.status?.in) values = values.filter((item) => where.status.in.includes(item.status));
-      if (where.OR) {
+      const statuses = where.status?.in;
+      if (statuses) values = values.filter((item) => statuses.includes(item.status));
+      const leaseCutoff = where.OR?.[1].claimExpiresAt.lte;
+      if (leaseCutoff) {
         values = values.filter((item) => ["PENDING", "DEFERRED"].includes(item.status)
-          || (item.status === "IN_PROGRESS" && item.claimExpiresAt <= where.OR[1].claimExpiresAt.lte));
+          || (
+            item.status === "IN_PROGRESS"
+            && item.claimExpiresAt !== null
+            && item.claimExpiresAt <= leaseCutoff
+          ));
       }
       return values
         .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
         .slice(0, take);
     }),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        tenantId: string;
+        caseId: string;
+        payloadFingerprint: string;
+      };
+    }) => {
       if (missions.has(data.id)) throw p2002("ResearchMissionRecord", "id");
       const value = {
         ...data,
-        fascicoloReference: data.fascicoloReference ?? null,
+        fascicoloReference: typeof data.fascicoloReference === "string"
+          ? data.fascicoloReference
+          : null,
+        assignedActorId: typeof data.assignedActorId === "string"
+          ? data.assignedActorId
+          : null,
         status: "PENDING",
         lifecycleStatus: "CURRENT",
         stateVersion: 0,
@@ -256,14 +334,21 @@ function createHarness() {
       missions.set(value.id, value);
       return value;
     }),
-    updateMany: vi.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: {
+      where: { id: string } & Record<string, unknown>;
+      data: Record<string, unknown>;
+    }) => {
       const value = missions.get(where.id);
       if (!value || Object.entries(where).some(([key, expected]) =>
         key !== "id" && !matchesScalar(value[key], expected))) return { count: 0 };
       const next = { ...value };
       for (const [key, update] of Object.entries(data)) {
-        next[key] = update && typeof update === "object" && "increment" in update
-          ? next[key] + (update as { increment: number }).increment
+        const increment = update && typeof update === "object" && "increment" in update
+          ? (update as { increment: unknown }).increment
+          : null;
+        const current = next[key];
+        next[key] = typeof increment === "number" && typeof current === "number"
+          ? current + increment
           : update;
       }
       next.updatedAt = now;
@@ -273,8 +358,14 @@ function createHarness() {
   };
 
   const attemptDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => attempts.get(where.id) ?? null),
-    create: vi.fn(async ({ data }: any) => {
+    findUnique: vi.fn(async ({ where }: { where: { id: string } }) => attempts.get(where.id) ?? null),
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        claimantId: string;
+        leaseExpiresAt: Date;
+      };
+    }) => {
       if (attempts.has(data.id)) throw p2002("ResearchExecutionAttempt", "id");
       const value = {
         ...data,
@@ -293,7 +384,10 @@ function createHarness() {
       attempts.set(value.id, value);
       return value;
     }),
-    updateMany: vi.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: {
+      where: { id: string } & Record<string, unknown>;
+      data: Record<string, unknown>;
+    }) => {
       const value = attempts.get(where.id);
       if (!value || Object.entries(where).some(([key, expected]) =>
         key !== "id" && !matchesScalar(value[key], expected))) return { count: 0 };
@@ -304,15 +398,27 @@ function createHarness() {
   };
 
   const bundleDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; fingerprint?: string };
+    }) => {
       if (where.id) return bundles.get(where.id) ?? null;
       return [...bundles.values()].find((item) => item.fingerprint === where.fingerprint) ?? null;
     }),
-    findMany: vi.fn(async ({ where, take }: any) => [...bundles.values()]
+    findMany: vi.fn(async ({ where, take }: {
+      where: { missionId: { in: string[] } };
+      take: number;
+    }) => [...bundles.values()]
       .filter((item) => where.missionId.in.includes(item.missionId))
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .slice(0, take)),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        missionId: string;
+        fingerprint: string;
+        payload: ResearchEvidenceBundle;
+      };
+    }) => {
       if (bundles.has(data.id)
         || [...bundles.values()].some((item) => item.fingerprint === data.fingerprint)) {
         throw p2002("ResearchEvidenceBundleRecord", "fingerprint");
@@ -324,14 +430,26 @@ function createHarness() {
   };
 
   const verificationDelegate = {
-    findUnique: vi.fn(async ({ where }: any) => {
+    findUnique: vi.fn(async ({ where }: {
+      where: { id?: string; fingerprint?: string };
+    }) => {
       if (where.id) return verifications.get(where.id) ?? null;
       return [...verifications.values()].find((item) => item.fingerprint === where.fingerprint) ?? null;
     }),
-    findFirst: vi.fn(async ({ where }: any) => [...verifications.values()]
+    findFirst: vi.fn(async ({ where }: {
+      where: { missionId: string; tenantId: string };
+    }) => [...verifications.values()]
       .filter((item) => item.missionId === where.missionId && item.tenantId === where.tenantId)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0] ?? null),
-    create: vi.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: {
+      data: Record<string, unknown> & {
+        id: string;
+        tenantId: string;
+        missionId: string;
+        fingerprint: string;
+        createdAt?: Date;
+      };
+    }) => {
       if ([...verifications.values()].some((item) => item.fingerprint === data.fingerprint)) {
         throw p2002("ResearchAssistedVerificationRecord", "fingerprint");
       }
@@ -404,6 +522,50 @@ describe("Block 3B.13B research mission persistence", () => {
     expect(result.outcome).toBe("CREATED");
     expect(result.mission.mission).toEqual(mission);
     expect(harness.missions.get(mission.missionId)?.payload).toEqual(mission);
+  });
+
+  it("allows ChatGPT to claim before submitting required documentary evidence", async () => {
+    const harness = createHarness();
+    const mission = researchMission({
+      requiredOutput: {
+        authorityCandidates: true,
+        citationObservations: true,
+        legalResearchSuggestions: true,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "chatgpt-documentary-execution",
+      executor: { kind: "CHATGPT", claimantId: "chat-session-documentary" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).resolves.toMatchObject({
+      outcome: "CLAIMED",
+      claim: {
+        execution: {
+          id: "chatgpt-documentary-execution",
+          executorKind: "CHATGPT",
+        },
+      },
+    });
+  });
+
+  it("prevents an authorized worker from claiming a ChatGPT connector mission", async () => {
+    const harness = createHarness();
+    const mission = researchMission();
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "wrong-channel-worker",
+      executor: { kind: "AUTHORIZED_WORKER", claimantId: "worker-a" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+    expect(harness.attempts).toHaveLength(0);
+    expect(harness.missions.get(mission.missionId)?.status).toBe("PENDING");
   });
 
   it("reuses the same mission idempotently", async () => {
@@ -725,6 +887,174 @@ describe("Block 3B.13B research mission persistence", () => {
     }, harness.context);
     expect(result.outcome).toBe("CREATED");
     expect(result.bundle.completionState).toBe("PARTIAL");
+  });
+
+  it("preserves successful provider sources when Moonlit validation fails and defers the mission", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const source = createAuthorityCandidate({
+      kind: "AUTHORITY_CANDIDATE",
+      executionRecordId: "simpliciter-query-1",
+      toolId: "SIMPLICITER",
+      providerId: "SIMPLICITER",
+      officialIdentifier: "TAR-TEST-2026-1",
+      title: "Synthetic administrative judgment",
+      sourceUrl: "https://official.example.test/TAR-TEST-2026-1",
+      providerDocumentId: "simpliciter:TAR-TEST-2026-1",
+      providerReceivedText: "Synthetic provider text retained for verification.",
+      supportDirection: "QUALIFIES",
+      sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      retrievalMethod: "SEMANTIC_SEARCH",
+      fullTextAvailable: true,
+      verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+    });
+    const bundle: ResearchEvidenceBundle = {
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        ...toolExecution("MOONLIT"),
+        executionRecordId: "moonlit-query-1",
+        researchQuery: mission.researchQuestion,
+        errorState: { code: "INVALID_ARGUMENT", retryable: false },
+      }, {
+        ...toolExecution("SIMPLICITER"),
+        executionRecordId: "simpliciter-query-1",
+        researchQuery: mission.researchQuestion,
+        resultIdentifiersUsed: ["TAR-TEST-2026-1"],
+        resultCount: 1,
+      }],
+      authorityCandidates: [source],
+      evidenceGaps: [{
+        gapId: "moonlit-query-invalid",
+        kind: "OFFICIAL_IDENTITY_NOT_VERIFIED",
+        targetId: source.candidateId,
+      }],
+      unresolvedQuestions: ["Repeat the Moonlit query with a schema-valid string argument."],
+    };
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    const deferred = await releaseOrDeferResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-1",
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+      disposition: "DEFER",
+      reasonCode: "MOONLIT_INVALID_ARGUMENT",
+    }, harness.context);
+
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "MOONLIT", errorState: { code: "INVALID_ARGUMENT", retryable: false } },
+        { toolId: "SIMPLICITER", resultIdentifiersUsed: ["TAR-TEST-2026-1"] },
+      ],
+      authorityCandidates: [{
+        candidateId: source.candidateId,
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-TEST-2026-1",
+        providerReceivedText: "Synthetic provider text retained for verification.",
+      }],
+    });
+    expect(deferred.operational.status).toBe("DEFERRED");
+  });
+
+  it("persists a connector bundle built from the published RESEARCH_BRIDGE_V1 shapes", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const parsed = researchEvidenceBundleInputSchema.parse({
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        role: "LEGAL_RESEARCH_STRATEGIST",
+        operationType: "SEMANTIC_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["GIUSTIZIA_AMMINISTRATIVA"],
+        resultIdentifiersUsed: ["TAR-LIGURIA-TEST-1"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }, {
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        role: "BROAD_DISCOVERY",
+        operationType: "KEYWORD_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["ITALIAN_LEGISLATION"],
+        resultIdentifiersUsed: ["COD-NAV-ART-37"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }],
+      authorityCandidates: [{
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-LIGURIA-TEST-1",
+        title: "Synthetic administrative judgment",
+        sourceUrl: "https://official.example.test/TAR-LIGURIA-TEST-1",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "QUALIFIES",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+        retrievalMethod: "SEMANTIC_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }, {
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        officialIdentifier: "COD-NAV-ART-37",
+        title: "Synthetic navigation-code source",
+        sourceUrl: "https://official.example.test/COD-NAV-ART-37",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "SUPPORT",
+        sourceFamily: "ITALIAN_LEGISLATION",
+        retrievalMethod: "KEYWORD_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      }],
+      unresolvedQuestions: ["Moonlit adverse-authority coverage remains unavailable."],
+      completionState: "PARTIAL",
+    });
+    const bundle = canonicalizeResearchEvidenceBundleInput(parsed);
+    expect(bundle).not.toBeNull();
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle: bundle!,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+
+    expect(submitted.outcome).toBe("CREATED");
+    expect(harness.bundles).toHaveLength(1);
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "SIMPLICITER", role: "LEGAL_RESEARCH_STRATEGIST" },
+        { toolId: "LEGAL_DATA_HUNTER", role: "BROAD_DISCOVERY" },
+      ],
+      authorityCandidates: [
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "TAR-LIGURIA-TEST-1" },
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "COD-NAV-ART-37" },
+      ],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+      }],
+    });
   });
 
   it("reuses an identical bundle idempotently", async () => {
@@ -1332,6 +1662,7 @@ describe("Block 3B.13B research mission persistence", () => {
     async (change) => {
       const harness = createHarness();
       const mission = researchMission({
+        executionChannel: "SERVER_AUTONOMOUS",
         mode: "ADVERSE_SEARCH", missingSourceFamilies: [],
         requiredOutput: { authorityCandidates: true, citationObservations: true, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true },
         executionPlan: { requiredCapabilities: ["FULL_TEXT_RETRIEVAL", "CITATION_NETWORK", "ADVERSE_AUTHORITY_DISCOVERY"] },
@@ -1450,9 +1781,14 @@ describe("Block 3B.13B research mission persistence", () => {
   );
 
   it.each(["complete", "missing", "tampered", "superseded", "invalidated", "lease", "budget", "exact-mismatch", "bundle-mismatch", "http-valid", "http-altered", "http-missing", "http-stale", "negative-valid", "negative-stale", "negative-absent", "negative-unreviewed", "negative-inconclusive", "negative-scope", "negative-forged", "negative-tenant", "negative-missing", "negative-altered"] as const)(
-    "runs the unchanged original mission through real services with synthetic evidence: %s", async (scenario) => {
+    "runs an explicitly autonomous mission through real services with synthetic evidence: %s", async (scenario) => {
       const harness = createHarness();
-      const mission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const acceptanceMission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const { missionId: _missionId, ...acceptanceInput } = acceptanceMission;
+      const mission = createResearchMission({
+        ...acceptanceInput,
+        executionChannel: "SERVER_AUTONOMOUS",
+      });
       const originalMission = structuredClone(mission);
       const negativeSearch = scenario.startsWith("negative-");
       const blockedSearch = negativeSearch && scenario !== "negative-valid" && scenario !== "negative-stale";
@@ -1810,7 +2146,10 @@ describe("Block 3B.13B research mission persistence", () => {
           expect(returnedErrors).toEqual([]);
           expect(mcpTools).toContain("research_complete_mission");
           expect(mcpSubmissions[0].assistedVerificationFingerprint).toBe(executorFingerprint);
-          expect(harness.bundles.get(attempt.finalBundleId)?.payload).toEqual(mcpSubmissions[0]);
+          expect(attempt.finalBundleId).not.toBeNull();
+          const finalBundleId = attempt.finalBundleId;
+          if (!finalBundleId) throw new Error("FINAL_BUNDLE_ID_MISSING");
+          expect(harness.bundles.get(finalBundleId)?.payload).toEqual(mcpSubmissions[0]);
           expect(attempt).toMatchObject({ totalCalls: 7, simpliciterCalls: 5, moonlitCalls: 2, completionState: "COMPLETE" });
           expect(harness.missions.get(mission.missionId)?.status).toBe("COMPLETED");
         } else {
@@ -1879,9 +2218,17 @@ describe("Block 3B.13B research mission persistence", () => {
 
   it("rechecks documentary evidence at completion and rejects complete bundles with gaps", async () => {
     const harness = createHarness();
-    const mission = researchMission({ missingSourceFamilies: [], requiredOutput: {
-      authorityCandidates: false, citationObservations: false, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true,
-    } });
+    const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
+      missingSourceFamilies: [],
+      requiredOutput: {
+        authorityCandidates: false,
+        citationObservations: false,
+        legalResearchSuggestions: false,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
     const source = officialSource({ fullText: { available: true, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) } });
     const readDocuments = vi.fn(async () => [{ evidenceSourceId: source.evidenceSourceId, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) }]);
     const documentContext = { ...harness.context, readAssistedDocuments: readDocuments };
@@ -1908,6 +2255,7 @@ describe("Block 3B.13B research mission persistence", () => {
   it("completes exact-source recovery after claimed connector evidence is verified and persisted", async () => {
     const harness = createHarness();
     const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
       mode: "EXACT_SOURCE_RECOVERY",
       missingSourceFamilies: [],
       requiredOutput: {

@@ -7,28 +7,47 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   FASCICOLO_OPERATIONAL_PROPOSAL_POLICY_VERSION,
   OperationalProposalRepositoryError,
+  listConcessionMaterializationOptions,
   listOperationalProposals,
+  listProposalReconciliations,
   materializeOperationalProposal,
   reconcileOperationalProposals,
+  reverseOperationalProposalReconciliation,
   reviewOperationalProposal,
+  toActivityLogAuditActor,
   type OperationalProposalCandidate,
   type OperationalProposalRepositoryContext,
   type OperationalProposalSqlExecutor,
   type OperationalProposalType,
 } from "@/server/fascicolo-operational-proposals";
+import { proposalReconciliationFingerprint, proposalReconciliationStates } from "@/server/fascicolo-operational-proposals/reconciliation-state";
 
 const migration = readFileSync(path.join(
   process.cwd(), "prisma", "migrations", "20260930_fascicolo_operational_proposals", "migration.sql",
 ), "utf8");
+const concessionProposalMigration = readFileSync(path.join(
+  process.cwd(), "prisma", "migrations", "20261109_add_concession_operational_proposal", "migration.sql",
+), "utf8");
+const concessionIdentityMigration = readFileSync(path.join(
+  process.cwd(), "prisma", "migrations", "20261110_concession_normalized_identity", "migration.sql",
+), "utf8");
 const databases: PGlite[] = [];
 const reportFingerprint = "a".repeat(64);
+const corpusFingerprint = "c".repeat(64);
 
 function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ rows: T[] }> }): OperationalProposalSqlExecutor {
   return {
     query: (query, params = []) => sql.query(query, [...params]),
-    audit: (input) => sql.query(`
-      INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata") VALUES ($1,$2,$3::jsonb)
-    `, [input.azione, input.entitaId, JSON.stringify(input.metadata)]),
+    readCorpusFingerprint: async () => corpusFingerprint,
+    audit: async (input) => {
+      await sql.query(`
+        INSERT INTO "TestAuditEvent" ("azione","entitaId","metadata","actorId") VALUES ($1,$2,$3::jsonb,$4)
+      `, [input.azione, input.entitaId, JSON.stringify(input.metadata), input.actor.actorId]);
+      return sql.query(`
+        INSERT INTO "ActivityLog" ("enteId","entita","entitaId","azione","esito","metadata")
+        VALUES ($1,'FascicoloOperationalProposal',$2,$3,'SUCCESS',$4::jsonb)
+      `, [input.enteId, input.entitaId, input.azione, JSON.stringify(input.metadata)]);
+    },
   };
 }
 
@@ -47,15 +66,39 @@ async function database() {
   databases.push(db);
   await db.exec(`
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
-    CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL);
-    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
+    CREATE TYPE "NormaRiferimento" AS ENUM ('ART_36_COD_NAV','ART_18_L_84_1994','ALTRO');
+    CREATE TYPE "TipologiaBene" AS ENUM ('AREA_SCOPERTA','BANCHINA','MOLO','SPECCHIO_ACQUEO','BOX','LOCALE','MANUFATTO','ALTRO');
+    CREATE TYPE "AttivitaConcessione" AS ENUM ('DIPORTO','COMMERCIALE','TURISTICO_RICREATIVA','LOGISTICA','CANTIERISTICA','SERVIZI_PORTUALI','PASSEGGERI','ALTRO');
+    CREATE TYPE "StatoConcessione" AS ENUM ('ATTIVA','SCADUTA','IN_PROROGA','SOSPESA','REVOCATA','DECADUTA','ARCHIVIATA');
+    CREATE TABLE "Concessionario" (
+      "id" TEXT PRIMARY KEY,
+      "denominazione" TEXT NOT NULL DEFAULT '',
+      "codiceFiscale" TEXT
+    );
+    CREATE TABLE "Concessione" (
+      "id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "numeroAtto" TEXT NOT NULL DEFAULT '',
+      "dataRilascio" TIMESTAMPTZ NOT NULL DEFAULT '2000-01-01', "dataScadenza" TIMESTAMPTZ NOT NULL DEFAULT '2000-01-02',
+      "normaRiferimento" "NormaRiferimento" NOT NULL DEFAULT 'ALTRO',
+      "tipologiaBene" "TipologiaBene" NOT NULL DEFAULT 'ALTRO',
+      "attivita" "AttivitaConcessione" NOT NULL DEFAULT 'ALTRO',
+      "areaDescrizione" TEXT, "canoneAnnuo" NUMERIC, "stato" "StatoConcessione" NOT NULL DEFAULT 'ATTIVA',
+      "note" TEXT, "concessionarioId" TEXT NOT NULL DEFAULT 'concessionaire-default',
+      "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE "Procedimento" (
+      "id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT,
+      "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
+      "corpusFingerprint" TEXT NOT NULL,
       UNIQUE ("id","tenantId","procedimentoId")
     );
     CREATE TABLE "StructuredFascicoloReportSnapshot" (
       "id" VARCHAR(96) PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL,
-      "knowledgeRevisionId" TEXT NOT NULL, "reportFingerprint" CHAR(64) NOT NULL, "status" TEXT NOT NULL
+      "knowledgeRevisionId" TEXT NOT NULL, "reportFingerprint" CHAR(64) NOT NULL, "status" TEXT NOT NULL,
+      "corpusFingerprint" TEXT NOT NULL
     );
     CREATE TYPE "TipologiaScadenza" AS ENUM ('TERMINE_PROCEDIMENTALE');
     CREATE TYPE "StatoScadenza" AS ENUM ('APERTA');
@@ -83,21 +126,37 @@ async function database() {
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "subjectId" TEXT NOT NULL,
       "identifierType" TEXT NOT NULL, "normalizedValue" TEXT NOT NULL
     );
-    CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL);
+    CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL, "actorId" TEXT);
+    CREATE TABLE "ActivityLog" (
+      "id" BIGSERIAL PRIMARY KEY, "enteId" TEXT, "entita" TEXT NOT NULL, "entitaId" TEXT,
+      "azione" TEXT NOT NULL, "esito" TEXT NOT NULL, "metadata" JSONB, "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
-    INSERT INTO "Concessione" VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
-    INSERT INTO "Procedimento" VALUES
+    INSERT INTO "Concessionario" ("id","denominazione","codiceFiscale") VALUES
+      ('concessionaire-default','Default S.p.A.','11111111111'),
+      ('concessionaire-selvara','Selvara S.p.A.','22222222222'),
+      ('concessionaire-b','Altro tenant S.p.A.','33333333333');
+    INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId") VALUES
+      ('concession-a','tenant-a','A/2000','concessionaire-default'),
+      ('concession-selvara-existing','tenant-a','S/2001','concessionaire-selvara'),
+      ('concession-b','tenant-b','B/2000','concessionaire-b');
+    INSERT INTO "Procedimento" ("id","enteId","concessioneId") VALUES
       ('procedure-a','tenant-a','concession-a'),
       ('procedure-b','tenant-b','concession-b'),
       ('procedure-neutral','tenant-a',NULL),
       ('procedure-inconsistent','tenant-a','concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
-      ('revision-a','tenant-a','procedure-a','CURRENT'),('revision-b','tenant-b','procedure-b','CURRENT');
+      ('revision-a','tenant-a','procedure-a','CURRENT','${corpusFingerprint}'),
+      ('revision-b','tenant-b','procedure-b','CURRENT','${corpusFingerprint}'),
+      ('revision-neutral','tenant-a','procedure-neutral','CURRENT','${corpusFingerprint}');
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES
-      ('report-a','tenant-a','procedure-a','revision-a','${reportFingerprint}','CURRENT'),
-      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT');
+      ('report-a','tenant-a','procedure-a','revision-a','${reportFingerprint}','CURRENT','${corpusFingerprint}'),
+      ('report-b','tenant-b','procedure-b','revision-b','${reportFingerprint}','CURRENT','${corpusFingerprint}'),
+      ('report-neutral','tenant-a','procedure-neutral','revision-neutral','${reportFingerprint}','CURRENT','${corpusFingerprint}');
   `);
   await db.exec(migration);
+  await db.exec(concessionProposalMigration);
+  await db.exec(concessionIdentityMigration);
   return db;
 }
 
@@ -130,10 +189,20 @@ function customCandidate(type: OperationalProposalType, fingerprintCharacter: st
   });
 }
 
-function reconcile(db: PGlite, candidates: readonly OperationalProposalCandidate[]) {
+async function previewFingerprint(db: PGlite, candidates: readonly OperationalProposalCandidate[], procedure = "procedure-a") {
+  const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: procedure }, repositoryContext(db));
+  return proposalReconciliationFingerprint({
+    tenantId: "tenant-a", procedimentoId: procedure, reportFingerprint,
+    candidateFingerprints: candidates.map((item) => item.proposalFingerprint),
+    states: proposalReconciliationStates(proposals),
+  });
+}
+
+async function reconcile(db: PGlite, candidates: readonly OperationalProposalCandidate[]) {
   return reconcileOperationalProposals({
     tenantId: "tenant-a", procedimentoId: "procedure-a", knowledgeRevisionId: "revision-a",
     structuredReportId: "report-a", structuredReportFingerprint: reportFingerprint, candidates,
+    expectedCorpusFingerprint: corpusFingerprint, expectedPreviewFingerprint: await previewFingerprint(db, candidates),
   }, repositoryContext(db));
 }
 
@@ -152,6 +221,26 @@ afterEach(async () => {
 });
 
 describe("Lotto 7 operational proposal persistence", () => {
+  it("never writes a system policy actor into the User-referencing ActivityLog.userId", () => {
+    const system = toActivityLogAuditActor({
+      actor: { actorId: "fascicolo-operational-proposal-policy", actorEmail: null, actorRole: "SYSTEM" },
+      metadata: { procedimentoId: "procedure-a", created: 1 },
+    });
+    expect(system.actor).toEqual({ userId: null, userEmail: null, userRole: "SYSTEM" });
+    expect(system.metadata).toEqual({
+      procedimentoId: "procedure-a",
+      created: 1,
+      systemActorId: "fascicolo-operational-proposal-policy",
+    });
+
+    const human = toActivityLogAuditActor({
+      actor: { actorId: "user-1", actorEmail: "giuridico@example.test", actorRole: "GIURIDICO" },
+      metadata: { procedimentoId: "procedure-a" },
+    });
+    expect(human.actor).toEqual({ userId: "user-1", userEmail: "giuridico@example.test", userRole: "GIURIDICO" });
+    expect(human.metadata).toEqual({ procedimentoId: "procedure-a" });
+  });
+
   it("allows tenant-scoped reads without a concession while preserving tenant and concession authority", async () => {
     const db = await database();
     await expect(listOperationalProposals({
@@ -172,20 +261,246 @@ describe("Lotto 7 operational proposal persistence", () => {
     }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
   });
 
-  it("keeps write authority restricted to procedimenti with a tenant-consistent concession", async () => {
+  it("allows preview and review without a concession but keeps non-materializable notes blocked", async () => {
     const db = await database();
-    const neutralCandidate = candidate("DEADLINE", { procedimentoId: "procedure-neutral" });
-    await expect(reconcileOperationalProposals({
+    const neutralCandidate = candidate("NOTE", {
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      proposalFingerprint: "9".repeat(64),
+      proposedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        before: null,
+        after: { numeroAtto: "17/2023" },
+        previewOnly: true,
+      },
+      warningCodes: ["MANUAL_ACTION_REQUIRED", "AUTHORITATIVE_DATA_CHANGE_PREVIEW"],
+    });
+    const reconciled = await reconcileOperationalProposals({
       tenantId: "tenant-a",
       procedimentoId: "procedure-neutral",
-      knowledgeRevisionId: "revision-a",
-      structuredReportId: "report-a",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
       structuredReportFingerprint: reportFingerprint,
       candidates: [neutralCandidate],
-    }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+      expectedCorpusFingerprint: corpusFingerprint,
+      expectedPreviewFingerprint: await previewFingerprint(db, [neutralCandidate], "procedure-neutral"),
+    }, repositoryContext(db));
+    expect(reconciled).toMatchObject({ created: 1, reused: 0 });
+    expect(reconciled.proposals[0].createdAt).toBeInstanceOf(Date);
+    expect(reconciled.proposals[0].updatedAt).toBeInstanceOf(Date);
+    const reconciliationAudit = await db.query<{ actorId: string | null }>(
+      `SELECT "actorId" FROM "TestAuditEvent" WHERE "azione"='OPERATIONAL_PROPOSALS_RECONCILED'`,
+    );
+    expect(reconciliationAudit.rows[0].actorId).toBeNull();
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: reconciled.proposals[0].id,
+      action: "APPROVE",
+      expectedReviewVersion: 0,
+      reviewNote: "Anteprima verificata",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "RESPONSABILE_UFFICIO" },
+    }, repositoryContext(db));
+    expect(approved.status).toBe("APPROVED");
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "MANUAL_ACTION_REQUIRED" });
   });
 
-  it("reuses an unchanged proposal with its review and supersedes an approved changed proposal", async () => {
+  it("creates and links a reviewed concession once while preserving evidence and blocking collisions", async () => {
+    const db = await database();
+    const immutableEvidence = {
+      basisRef: "DOCUMENT_1.PAGE_7",
+      documentFileVersionId: "version-1",
+      pageNumber: 7,
+      textSha256: "f".repeat(64),
+    };
+    const proposalCandidate = candidate("CONCESSION_LINK_OR_CREATE", {
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      proposalFingerprint: "e".repeat(64),
+      proposedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
+        after: { numeroAtto: "17/2023", dataRilascio: "2023-07-14" },
+        evidence: [immutableEvidence],
+      },
+      warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED"],
+    });
+    const reconciled = await reconcileOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      structuredReportFingerprint: reportFingerprint,
+      candidates: [proposalCandidate],
+      expectedCorpusFingerprint: corpusFingerprint,
+      expectedPreviewFingerprint: await previewFingerprint(db, [proposalCandidate], "procedure-neutral"),
+    }, repositoryContext(db));
+    const approvedPayload = {
+      reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+      materializationMode: "CREATE",
+      numeroAtto: "17/2023",
+      dataRilascio: "2023-07-14",
+      dataScadenza: "2035-07-31",
+      concessionarioId: "concessionaire-selvara",
+      normaRiferimento: "ART_18_L_84_1994",
+      tipologiaBene: "BANCHINA",
+      attivita: "LOGISTICA",
+      stato: "ATTIVA",
+      areaDescrizione: "Banchina B4, piazzale R4 e magazzino M4",
+      canoneAnnuo: 192000,
+      note: "Materializzazione validata professionalmente.",
+      evidence: [immutableEvidence],
+    };
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: reconciled.proposals[0].id,
+      action: "AMEND_AND_APPROVE",
+      expectedReviewVersion: 0,
+      approvedPayload,
+      reviewNote: "Titolo ed evidenze verificati professionalmente.",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "RESPONSABILE_UFFICIO" },
+    }, repositoryContext(db));
+    const first = await materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
+    }, repositoryContext(db));
+    const second = await materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
+    }, repositoryContext(db));
+    expect(first).toMatchObject({ outcome: "MATERIALIZED", entityType: "Concessione" });
+    expect(second).toEqual({ outcome: "REUSED", entityType: "Concessione", entityId: first.entityId });
+    const linked = await db.query<{ concessioneId: string }>(
+      `SELECT "concessioneId" FROM "Procedimento" WHERE "id"='procedure-neutral'`,
+    );
+    expect(linked.rows[0].concessioneId).toBe(first.entityId);
+    const concession = await db.query<{ numeroAtto: string; canoneAnnuo: string }>(
+      `SELECT "numeroAtto","canoneAnnuo" FROM "Concessione" WHERE "id"=$1`,
+      [first.entityId],
+    );
+    expect(concession.rows[0]).toMatchObject({ numeroAtto: "17/2023", canoneAnnuo: "192000" });
+  });
+
+  it("rejects professional concession evidence that differs from the immutable proposal", async () => {
+    const db = await database();
+    await db.query(`
+      UPDATE "Concessione"
+      SET "numeroAtto"='99/2020',"dataRilascio"='2020-01-02'
+      WHERE "id"='concession-a'
+    `);
+    const evidence = {
+      basisRef: "DOCUMENT_1.PAGE_7",
+      documentFileVersionId: "version-1",
+      pageNumber: 7,
+      textSha256: "f".repeat(64),
+    };
+    const proposalCandidate = candidate("CONCESSION_LINK_OR_CREATE", {
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      proposalFingerprint: "1".repeat(64),
+      proposedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
+        evidence: [evidence],
+      },
+      warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED"],
+    });
+    const reconciled = await reconcileOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-neutral",
+      structuredReportId: "report-neutral",
+      structuredReportFingerprint: reportFingerprint,
+      candidates: [proposalCandidate],
+      expectedCorpusFingerprint: corpusFingerprint,
+      expectedPreviewFingerprint: await previewFingerprint(db, [proposalCandidate], "procedure-neutral"),
+    }, repositoryContext(db));
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: reconciled.proposals[0].id,
+      action: "AMEND_AND_APPROVE",
+      expectedReviewVersion: 0,
+      approvedPayload: {
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "LINK_EXISTING",
+        concessioneId: "concession-a",
+        numeroAtto: "99/2020",
+        dataRilascio: "2020-01-02",
+        evidence: [{ ...evidence, documentFileVersionId: "foreign-version" }],
+      },
+      actor: materializationActor,
+    }, repositoryContext(db));
+
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      proposalId: approved.id,
+      actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "CONCESSION_EVIDENCE_MISMATCH" });
+  });
+
+  it("keeps write authority tenant-scoped and rejects concessions of another tenant", async () => {
+    const db = await database();
+    for (const [tenantId, procedimentoId] of [["tenant-b", "procedure-neutral"], ["tenant-a", "procedure-inconsistent"], ["tenant-b", "procedure-a"]]) {
+      await expect(reconcileOperationalProposals({
+        tenantId,
+        procedimentoId,
+        knowledgeRevisionId: "revision-a",
+        structuredReportId: "report-a",
+        structuredReportFingerprint: reportFingerprint,
+        candidates: [candidate("DEADLINE", { tenantId, procedimentoId })],
+        expectedCorpusFingerprint: corpusFingerprint,
+        expectedPreviewFingerprint: "0".repeat(64),
+      }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+    }
+  });
+
+  it("lists only tenant-scoped concession materialization choices", async () => {
+    const db = await database();
+    const options = await listConcessionMaterializationOptions({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+    }, repositoryContext(db));
+
+    expect(options.concessions.map((item) => item.id).sort()).toEqual([
+      "concession-a",
+      "concession-selvara-existing",
+    ]);
+    expect(options.concessionaires.map((item) => item.id).sort()).toEqual([
+      "concessionaire-default",
+      "concessionaire-selvara",
+    ]);
+    expect(options.concessions).not.toContainEqual(expect.objectContaining({ id: "concession-b" }));
+    expect(options.concessionaires).not.toContainEqual(expect.objectContaining({ id: "concessionaire-b" }));
+  });
+
+  it("enforces normalized concession identity in the database across concurrent writers", async () => {
+    const db = await database();
+    await expect(db.query(`
+      INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId")
+      VALUES ('duplicate-a','tenant-a',' a / 2000 ','concessionaire-default')
+    `)).rejects.toThrow();
+    await expect(db.query(`
+      INSERT INTO "Concessione" ("id","enteId","numeroAtto","concessionarioId")
+      VALUES ('same-number-other-tenant','tenant-b','A/2000','concessionaire-b')
+    `)).resolves.toBeDefined();
+  });
+
+  it("preserves approved history but prevents materializing an outdated proposal", async () => {
     const db = await database();
     const first = await reconcile(db, [candidate()]);
     expect(first).toMatchObject({ created: 1, reused: 0, stale: 0 });
@@ -203,8 +518,16 @@ describe("Lotto 7 operational proposal persistence", () => {
     const next = await reconcile(db, [changed]);
     expect(next).toMatchObject({ created: 1, reused: 0, stale: 1 });
     expect(next.proposals[0]).toMatchObject({ status: "PROPOSED", reviewVersion: 0 });
-    const old = await db.query<{ status: string }>(`SELECT "status" FROM "FascicoloOperationalProposal" WHERE "id"=$1`, [approved.id]);
-    expect(old.rows[0].status).toBe("SUPERSEDED");
+    const old = await db.query<{ status: string; supersededAt: Date | null; reviewVersion: number }>(
+      `SELECT "status","supersededAt","reviewVersion" FROM "FascicoloOperationalProposal" WHERE "id"=$1`, [approved.id],
+    );
+    expect(old.rows[0]).toMatchObject({ status: "APPROVED", reviewVersion: 1 });
+    expect(old.rows[0].supersededAt).toBeInstanceOf(Date);
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", proposalId: approved.id, actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "CURRENT_INPUT_REQUIRED" });
+    const events = await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`, [approved.id]);
+    expect(events.rows).toHaveLength(1);
   });
 
   it("records immutable review history and allows only one concurrent decision for a review version", async () => {
@@ -225,6 +548,81 @@ describe("Lotto 7 operational proposal persistence", () => {
     `);
     expect(events.rows).toHaveLength(1);
     expect(events.rows[0].proposedPayload).toEqual(candidate().proposedPayload);
+  });
+
+  it("reactivates an identical unreviewed stale proposal without changing its identity or review history", async () => {
+    const db = await database();
+    const original = (await reconcile(db, [candidate()])).proposals[0];
+    await reconcile(db, [candidate("CRITICALITY")]);
+    const stale = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(stale.find((item) => item.id === original.id)).toMatchObject({ status: "STALE", reviewVersion: 0 });
+
+    const restored = await reconcile(db, [candidate()]);
+    expect(restored).toMatchObject({ created: 0, reused: 1 });
+    expect(restored.proposals[0]).toMatchObject({ id: original.id, status: "PROPOSED", supersededAt: null, reviewVersion: 0 });
+    const approved = await approve(db, original.id);
+    expect(approved).toMatchObject({ id: original.id, status: "APPROVED", reviewVersion: 1 });
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposal" WHERE "proposalFingerprint"=$1`,
+      [original.proposalFingerprint])).rows).toHaveLength(1);
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`,
+      [original.id])).rows).toHaveLength(1);
+  });
+
+  it("reverses an unchanged reconciliation while retaining new proposals as history and preserving approval", async () => {
+    const db = await database();
+    const original = (await reconcile(db, [candidate()])).proposals[0];
+    await approve(db, original.id);
+    const next = await reconcile(db, [candidate("CRITICALITY")]);
+    const summary = (await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === next.reconciliationId);
+    expect(summary).toMatchObject({ state: "AVAILABLE" });
+    const input = {
+      tenantId: "tenant-a", procedimentoId: "procedure-a", reconciliationId: next.reconciliationId,
+      expectedAfterFingerprint: summary!.afterFingerprint, note: "Ripristino verificato del collaudo.",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "ADMIN" },
+    };
+    await expect(reverseOperationalProposalReconciliation(input, repositoryContext(db)))
+      .resolves.toEqual({ restored: 1, retainedAsHistory: 1 });
+    const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(proposals.find((item) => item.id === original.id)).toMatchObject({
+      status: "APPROVED", reviewVersion: 1, supersededAt: null,
+    });
+    expect(proposals.find((item) => item.id === next.proposals[0].id)).toMatchObject({
+      status: "STALE", reviewVersion: 0,
+    });
+    expect((await db.query(`SELECT "id" FROM "FascicoloOperationalProposalReviewEvent" WHERE "proposalId"=$1`,
+      [original.id])).rows).toHaveLength(1);
+    expect((await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === next.reconciliationId)?.state).toBe("REVERSED");
+    await expect(reverseOperationalProposalReconciliation(input, repositoryContext(db)))
+      .rejects.toMatchObject({ code: "RECONCILIATION_ALREADY_REVERSED" });
+  });
+
+  it("rejects a stale preview and refuses reversal after a later human review", async () => {
+    const db = await database();
+    const first = await reconcile(db, [candidate()]);
+    const nextCandidates = [candidate("CRITICALITY")];
+    const staleFingerprint = await previewFingerprint(db, nextCandidates);
+    const summary = (await listProposalReconciliations(
+      { tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db),
+    )).find((item) => item.reconciliationId === first.reconciliationId)!;
+    await approve(db, first.proposals[0].id);
+    await expect(reconcileOperationalProposals({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", knowledgeRevisionId: "revision-a",
+      structuredReportId: "report-a", structuredReportFingerprint: reportFingerprint, candidates: nextCandidates,
+      expectedCorpusFingerprint: corpusFingerprint, expectedPreviewFingerprint: staleFingerprint,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "STALE_PREVIEW" });
+    await expect(reverseOperationalProposalReconciliation({
+      tenantId: "tenant-a", procedimentoId: "procedure-a", reconciliationId: first.reconciliationId,
+      expectedAfterFingerprint: summary.afterFingerprint, note: "Tentativo dopo approvazione.",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "ADMIN" },
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "RECONCILIATION_CHANGED" });
+    const proposals = await listOperationalProposals({ tenantId: "tenant-a", procedimentoId: "procedure-a" }, repositoryContext(db));
+    expect(proposals).toHaveLength(1);
+    expect(proposals[0]).toMatchObject({ id: first.proposals[0].id, status: "APPROVED", reviewVersion: 1 });
+    expect((await db.query(`SELECT "id" FROM "ActivityLog" WHERE "azione"='OPERATIONAL_PROPOSALS_RECONCILIATION_REVERSED'`)).rows).toHaveLength(0);
   });
 
   it("never materializes before approval and materializes one Scadenza exactly once", async () => {

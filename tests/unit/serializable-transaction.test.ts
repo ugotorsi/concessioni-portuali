@@ -7,10 +7,11 @@ vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 import { Prisma } from "@/generated/prisma/client";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
-function knownError(code: string) {
+function knownError(code: string, meta?: Record<string, unknown>) {
   return new Prisma.PrismaClientKnownRequestError(code, {
     code,
     clientVersion: "7.8.0",
+    meta,
   });
 }
 
@@ -27,6 +28,18 @@ describe("runSerializableTransactionWithRetry", () => {
     expect(callback).toHaveBeenCalledTimes(1);
     expect(prismaMock.$transaction).toHaveBeenCalledWith(callback, {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    });
+  });
+
+  it("passes a bounded timeout override to Prisma", async () => {
+    const callback = vi.fn().mockResolvedValue("done");
+
+    await expect(runSerializableTransactionWithRetry(callback, {
+      timeoutMs: 30_000,
+    })).resolves.toBe("done");
+    expect(prismaMock.$transaction).toHaveBeenCalledWith(callback, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      timeout: 30_000,
     });
   });
 
@@ -62,8 +75,23 @@ describe("runSerializableTransactionWithRetry", () => {
   });
 
   it.each([
+    { code: "40001" },
+    { driverAdapterError: { cause: { kind: "TransactionWriteConflict", originalCode: "40001" } } },
+  ])("retries PostgreSQL serialization conflicts reported by raw queries", async (meta) => {
+    prismaMock.$transaction
+      .mockRejectedValueOnce(knownError("P2010", meta))
+      .mockResolvedValueOnce("done");
+    await expect(runSerializableTransactionWithRetry(vi.fn())).resolves.toBe("done");
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
     ["an unknown error", new Error("unknown")],
     ["P2002", knownError("P2002")],
+    ["P2010 with another SQL error", knownError("P2010", { code: "23505" })],
+    ["P2010 with unrelated adapter error", knownError("P2010", {
+      driverAdapterError: { cause: { kind: "UniqueConstraintViolation", originalCode: "23505" } },
+    })],
   ])("does not retry %s", async (_label, error) => {
     prismaMock.$transaction.mockImplementation(async (callback) => {
       await callback({ attempt: 1 });

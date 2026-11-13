@@ -109,6 +109,22 @@ export async function persistSourceChainAssessment(input: SourceChainSnapshot & 
   });
 }
 
+export async function retireUsableSourceAssessments(
+  resultIds: readonly string[],
+  overrides: Partial<SourceChainPersistenceContext> = {},
+): Promise<number> {
+  if (resultIds.length === 0) return 0;
+  const context = { ...defaultContext, ...overrides };
+  return context.transaction(async (tx) => {
+    const retired = await tx.query<{ id: string }>(
+      `UPDATE "ResearchSourceAssessmentRecord" SET "isCurrent" = false
+       WHERE "resultId" = ANY($1::text[]) AND "isCurrent" = true AND "usable" = true RETURNING "id"`,
+      [resultIds],
+    );
+    return retired.rows.length;
+  });
+}
+
 export async function initializeDiscoveredSourceAssessment(input: {
   resultId: string;
   candidate: AuthorityCandidate;

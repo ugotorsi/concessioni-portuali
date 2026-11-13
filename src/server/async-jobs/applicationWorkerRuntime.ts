@@ -5,6 +5,7 @@ import {
   registerRuntimeWorker,
   setRuntimeWorkerStatus,
 } from "@/server/runtime/health";
+import { isRealDataDeploymentAuthorized } from "@/server/runtime/realDataAuthorization";
 import { RuntimeCostConfigurationError, runtimeCostEstimate } from "@/server/runtime/costConfig";
 
 import type { DrainOneAsyncJobOutcome } from "./worker";
@@ -28,6 +29,8 @@ export interface ApplicationAsyncWorkerConfig {
   readonly maxProcessedJobs?: number;
   readonly bootstrapTimeWatches: boolean;
   readonly providerExecutionEnabled?: boolean;
+  readonly targetJobId?: string;
+  readonly targetTenantId?: string;
 }
 
 export type ApplicationAsyncWorkerEvent =
@@ -51,7 +54,9 @@ export type ApplicationAsyncWorkerEvent =
     };
 
 export class ApplicationAsyncWorkerConfigurationError extends Error {
-  constructor(readonly code: "DATABASE_URL_REQUIRED" | "INVALID_CONFIGURATION") {
+  constructor(
+    readonly code: "DATABASE_URL_REQUIRED" | "INVALID_CONFIGURATION" | "CALLER_ENVIRONMENT_MISMATCH",
+  ) {
     super(code);
     this.name = "ApplicationAsyncWorkerConfigurationError";
   }
@@ -63,6 +68,8 @@ type Drain = (input: {
   operationAllowlist: readonly string[];
   procedimentoAllowlist: readonly string[];
   providerExecutionEnabled?: boolean;
+  targetJobId?: string;
+  targetTenantId?: string;
 }) => Promise<DrainOneAsyncJobOutcome>;
 
 interface ApplicationAsyncWorkerDependencies {
@@ -102,6 +109,15 @@ function allowlist(value: string | undefined): readonly string[] {
   if (value === undefined || value.trim() === "") return [];
   const parsed = [...new Set(value.split(/[,\r\n]+/).map((item) => item.trim()).filter(Boolean))];
   if (parsed.some((item) => item.length > 256)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
+  return parsed;
+}
+
+function targetIdentifier(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const parsed = value.trim();
+  if (!/^[A-Za-z0-9_-]{1,256}$/.test(parsed)) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   return parsed;
@@ -175,6 +191,16 @@ const defaultDrain: Drain = async (input) => {
       diagnosticSource: applicationWorkerLoadErrorSource(error),
     });
   }
+  if (input.targetJobId && input.targetTenantId) {
+    return applicationWorker.drainTargetedFascicoloAnalysisJob({
+      jobId: input.targetJobId,
+      tenantId: input.targetTenantId,
+      procedimentoId: input.procedimentoAllowlist[0]!,
+      workerId: input.workerId,
+      retryDelayMs: input.retryDelayMs,
+      providerExecutionEnabled: input.providerExecutionEnabled,
+    });
+  }
   return applicationWorker.drainOneApplicationAsyncJob(input);
 };
 
@@ -184,16 +210,45 @@ export function parseApplicationAsyncWorkerConfig(
   if (!environment.DATABASE_URL?.trim()) {
     throw new ApplicationAsyncWorkerConfigurationError("DATABASE_URL_REQUIRED");
   }
+  // A worker bound to one environment (e.g. Production database and storage) refuses any start
+  // that does not declare the same caller environment, so Preview deployments sharing the Render
+  // service id cannot make it claim jobs. Starts without the declaration are refused as well.
+  const requiredCallerEnvironment = environment.ASYNC_WORKER_REQUIRED_CALLER_ENVIRONMENT?.trim();
+  if (
+    requiredCallerEnvironment
+    && environment.ASYNC_WORKER_CALLER_ENVIRONMENT?.trim() !== requiredCallerEnvironment
+  ) {
+    throw new ApplicationAsyncWorkerConfigurationError("CALLER_ENVIRONMENT_MISMATCH");
+  }
   const workerId = environment.ASYNC_WORKER_ID?.trim() || defaultWorkerId();
   if (workerId.length > 256) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
-  const providerExecutionEnabled = enabled(environment.ASYNC_PROVIDER_EXECUTION_ENABLED);
+  const providerExecutionEnabled =
+    environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
+    && isRealDataDeploymentAuthorized(environment);
   const dedicatedMode = enabled(environment.ASYNC_WORKER_DEDICATED_MODE);
+  const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
+  const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
   if (providerExecutionEnabled) {
+    const hasUnknownOrUnscopedOperation = operationAllowlist.length === 0
+      || operationAllowlist.some((operation) => (
+        operation !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+        && operation !== "LEGAL_RESEARCH.EXECUTE_V1"
+      ));
     try {
-      runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR", environment);
-      runtimeCostEstimate("ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR", environment);
+      if (
+        hasUnknownOrUnscopedOperation
+        || operationAllowlist.includes("FASCICOLO.AUTOMATIC_ANALYSIS_V1")
+      ) {
+        runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR", environment);
+      }
+      if (
+        hasUnknownOrUnscopedOperation
+        || operationAllowlist.includes("LEGAL_RESEARCH.EXECUTE_V1")
+      ) {
+        runtimeCostEstimate("ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR", environment);
+      }
     } catch (error) {
       if (error instanceof RuntimeCostConfigurationError) {
         throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
@@ -201,18 +256,34 @@ export function parseApplicationAsyncWorkerConfig(
       throw error;
     }
   }
-  const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
-  const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
+  const targetJobId = targetIdentifier(environment.ASYNC_WORKER_TARGET_JOB_ID);
+  const targetTenantId = targetIdentifier(environment.ASYNC_WORKER_TARGET_TENANT_ID);
+  if ((targetJobId === undefined) !== (targetTenantId === undefined)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
   if (environment.ASYNC_WORKER_MAX_PROCESSED_JOBS !== undefined
     && (!dedicatedMode || !providerExecutionEnabled
       || operationAllowlist.length !== 1
       || operationAllowlist[0] !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
       || procedimentoAllowlist.length !== 1
+      || targetJobId === undefined
+      || targetTenantId === undefined
       || environment.ASYNC_WORKER_CONCURRENCY !== "1"
       || !enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE))) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   if (dedicatedMode && (operationAllowlist.length === 0 || procedimentoAllowlist.length === 0)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
+  if (
+    targetJobId !== undefined
+    && (
+      !dedicatedMode
+      || operationAllowlist.length !== 1
+      || operationAllowlist[0] !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+      || procedimentoAllowlist.length !== 1
+    )
+  ) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   return Object.freeze({
@@ -252,6 +323,7 @@ export function parseApplicationAsyncWorkerConfig(
       ? true
       : enabled(environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES),
     providerExecutionEnabled,
+    ...(targetJobId === undefined ? {} : { targetJobId, targetTenantId: targetTenantId! }),
   });
 }
 
@@ -318,6 +390,8 @@ export function createApplicationAsyncWorkerRuntime(
             operationAllowlist: config.operationAllowlist,
             procedimentoAllowlist: config.procedimentoAllowlist,
             providerExecutionEnabled: config.providerExecutionEnabled,
+            targetJobId: config.targetJobId,
+            targetTenantId: config.targetTenantId,
           });
           if (result.outcome === "IDLE") {
             if (!idleReported) {

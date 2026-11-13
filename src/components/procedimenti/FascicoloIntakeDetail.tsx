@@ -275,7 +275,7 @@ export function FascicoloIntakeDetail({
 
         {activeSection === "issues" ? <FascicoloIssues model={{ issues: [] }} /> : null}
 
-        {activeSection === "reports" ? <FascicoloReport snapshots={[]} /> : null}
+        {activeSection === "reports" ? <FascicoloReport procedimentoId={fascicolo.id} snapshots={[]} /> : null}
 
         {activeSection === "proposals" ? <FascicoloProposals proposals={[]} canManage={false} /> : null}
 

@@ -45,6 +45,8 @@ describe("lazy Prisma initialization", () => {
     vi.resetModules();
     vi.clearAllMocks();
     delete process.env.DATABASE_URL;
+    delete process.env.VERCEL_ENV;
+    delete process.env.NOETRA_PRODUCTION_DATABASE_FINGERPRINT;
     delete (globalThis as { prisma?: unknown }).prisma;
   });
 
@@ -58,9 +60,9 @@ describe("lazy Prisma initialization", () => {
   });
 
   it("imports without DATABASE_URL and creates no database objects", async () => {
-    const module = await import("@/lib/prisma");
+    const prismaModule = await import("@/lib/prisma");
 
-    expect(module.prisma).toBeDefined();
+    expect(prismaModule.prisma).toBeDefined();
     expect(constructors.pool).not.toHaveBeenCalled();
     expect(constructors.adapter).not.toHaveBeenCalled();
     expect(constructors.client).not.toHaveBeenCalled();
@@ -89,5 +91,37 @@ describe("lazy Prisma initialization", () => {
     expect(constructors.transaction.mock.calls[0]?.[0]).toBe(
       (globalThis as { prisma?: unknown }).prisma,
     );
+  });
+
+  it("refuses a DATABASE_URL whose host does not match EXPECTED_DATABASE_HOST_PREFIX", async () => {
+    process.env.DATABASE_URL = "postgresql://u:p@ep-other-host.example.test/db";
+    process.env.EXPECTED_DATABASE_HOST_PREFIX = "ep-expected.";
+    const { prisma } = await import("@/lib/prisma");
+
+    expect(() => Reflect.get(prisma, "user")).toThrow("DATABASE_HOST_GUARD_REJECTED");
+    expect(constructors.pool).not.toHaveBeenCalled();
+    delete process.env.EXPECTED_DATABASE_HOST_PREFIX;
+  });
+
+  it("accepts a DATABASE_URL whose host matches EXPECTED_DATABASE_HOST_PREFIX", async () => {
+    process.env.DATABASE_URL = "postgresql://u:p@ep-expected.example.test/db";
+    process.env.EXPECTED_DATABASE_HOST_PREFIX = "ep-expected.";
+    const { prisma } = await import("@/lib/prisma");
+
+    expect(prisma.user).toBeDefined();
+    expect(constructors.pool).toHaveBeenCalledOnce();
+    delete process.env.EXPECTED_DATABASE_HOST_PREFIX;
+  });
+
+  it("creates no client when Production DATABASE_URL differs from the approved identity", async () => {
+    process.env.VERCEL_ENV = "production";
+    process.env.DATABASE_URL = "postgresql://ep-actual.example.test/noetra";
+    process.env.NOETRA_PRODUCTION_DATABASE_FINGERPRINT = "0".repeat(64);
+    const { prisma } = await import("@/lib/prisma");
+
+    expect(() => Reflect.get(prisma, "user")).toThrow("PRODUCTION_DATABASE_IDENTITY_MISMATCH");
+    expect(constructors.pool).not.toHaveBeenCalled();
+    expect(constructors.adapter).not.toHaveBeenCalled();
+    expect(constructors.client).not.toHaveBeenCalled();
   });
 });

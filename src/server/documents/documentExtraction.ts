@@ -31,18 +31,11 @@ export {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
   DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
 } from "./documentExtractionPolicy";
+import { isRetryableDocumentExtractionFailure } from "./documentExtractionRetryability";
+
+export { isRetryableDocumentExtractionFailure };
 
 const identifier = z.string().trim().min(1).max(256);
-const RETRYABLE_DOCUMENT_EXTRACTION_FAILURES = new Set([
-  "STORAGE_READ_FAILURE",
-  "INTERNAL_EXTRACTION_FAILURE",
-]);
-
-export function isRetryableDocumentExtractionFailure(
-  failureCode: string | null | undefined,
-): boolean {
-  return Boolean(failureCode && RETRYABLE_DOCUMENT_EXTRACTION_FAILURES.has(failureCode));
-}
 
 type Actor = {
   userId: string | null;
@@ -68,6 +61,8 @@ type LoadedDocument = {
   enteId: string | null;
   procedimentoId: string | null;
   currentFileVersionId: string | null;
+  /** Omitted only by legacy loaders; the production loader always selects it. */
+  statoDocumento?: string;
   procedimento: { enteId: string } | null;
   currentFileVersion: {
     id: string;
@@ -132,7 +127,8 @@ export class DocumentExtractionAuthorityError extends Error {
       | "VERSION_MANIFEST_MISMATCH"
       | "EXECUTION_IDENTITY_MISMATCH"
       | "RETRY_AUTHORIZATION_MISMATCH"
-      | "OCR_AUTHORIZATION_REQUIRED",
+      | "OCR_AUTHORIZATION_REQUIRED"
+      | "DOCUMENT_NOT_ACTIVE",
   ) {
     super(code);
     this.name = "DocumentExtractionAuthorityError";
@@ -192,6 +188,10 @@ function sourceManifest(
 ): DocumentExtractionSourceManifest {
   if (document.enteId !== input.tenantId) {
     throw new DocumentExtractionAuthorityError("TENANT_MISMATCH");
+  }
+  // An archived document is outside the active corpus: queued jobs must not extract it.
+  if (document.statoDocumento !== undefined && document.statoDocumento !== "ATTIVO") {
+    throw new DocumentExtractionAuthorityError("DOCUMENT_NOT_ACTIVE");
   }
   if (
     !document.procedimentoId
@@ -467,6 +467,7 @@ function defaultDependencies(
       enteId: true,
       procedimentoId: true,
       currentFileVersionId: true,
+      statoDocumento: true,
       procedimento: { select: { enteId: true } },
       currentFileVersion: {
         select: {

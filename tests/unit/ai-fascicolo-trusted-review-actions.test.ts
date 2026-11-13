@@ -15,6 +15,15 @@ vi.mock("@/server/ai/openaiRuntime", async (importOriginal) => {
     createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv: mocks.createRuntime,
   };
 });
+vi.mock("@/server/ai/globalAiControl", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/server/ai/globalAiControl")>()),
+  assertGlobalAiExecutionAllowed: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/server/ai/providerControl", () => ({
+  getAiProviderControlSnapshot: vi.fn().mockResolvedValue({
+    providers: [{ provider: "OPENAI", manualEnabled: true }],
+  }),
+}));
 
 import { produceAiFascicoloTrustedReviewAction } from "@/server/actions/ai-fascicolo-trusted-review";
 import { AiFascicoloAnalysisError } from "@/server/ai/fascicoloAnalysis";

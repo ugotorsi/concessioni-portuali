@@ -3,8 +3,6 @@ import { hostname } from "node:os";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
-import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
-import { admitAsyncJob } from "@/server/async-jobs/persistence";
 import {
   AsyncJobHandlerRegistry,
   type AsyncJobHandler,
@@ -14,18 +12,12 @@ import { AsyncJobExecutionError, drainAsyncJobById } from "@/server/async-jobs/w
 
 import {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  DocumentExtractionAuthorityError,
   extractDocumentFileVersion,
   type DocumentExtractionRetryAuthorization,
 } from "./documentExtraction";
-import {
-  DOCUMENT_EXTRACTION_OPERATION,
-  DOCUMENT_EXTRACTION_PURPOSE,
-} from "./documentExtractionAdmission";
-import {
-  issueDocumentExtractionRetryPermit,
-  verifyDocumentExtractionRetryPermit,
-  type DocumentExtractionRetryPermit,
-} from "./documentExtractionRetryPermit";
+import { DOCUMENT_EXTRACTION_OPERATION } from "./documentExtractionAdmission";
+import { verifyDocumentExtractionRetryPermit } from "./documentExtractionRetryPermit";
 
 export {
   DOCUMENT_EXTRACTION_OPERATION,
@@ -54,64 +46,7 @@ const referenceSchema = z.object({
 
 type DocumentExtractionReference = z.output<typeof referenceSchema>;
 
-function buildAuthorizedRetryAdmission(
-  permit: DocumentExtractionRetryPermit,
-): AsyncJobAdmissionInput {
-  return {
-    operation: DOCUMENT_EXTRACTION_OPERATION,
-    logicalOperationId: [
-      permit.documentoId,
-      permit.documentFileVersionId,
-      DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-      `retry:${permit.failedAttemptId}:${permit.permitRef}`,
-    ].join(":"),
-    purpose: DOCUMENT_EXTRACTION_PURPOSE,
-    correlationId: `document-extraction-retry:${permit.permitRef}`,
-    procedimentoId: permit.procedimentoId,
-    policyDecisionRef: permit.permitRef,
-    inputReference: {
-      referenceType: "DOCUMENT_FILE_VERSION",
-      referenceId: permit.documentFileVersionId,
-      referenceVersion: "V1",
-      metadata: {
-        documentoId: permit.documentoId,
-        procedimentoId: permit.procedimentoId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-        retryAttemptId: permit.failedAttemptId,
-        retryPermitRef: permit.permitRef,
-      },
-    },
-    maxAttempts: 1,
-    availableAt: permit.createdAt,
-    admission: {
-      admissionType: "AUTHENTICATED_USER",
-      tenantId: permit.tenantId,
-      initiatingUserId: permit.actor.userId,
-      actor: {
-        actorId: permit.actor.userId,
-        actorEmail: permit.actor.userEmail,
-        actorRole: permit.actor.userRole,
-      },
-    },
-  };
-}
-
-export async function ensureAuthorizedDocumentExtractionRetryJob(
-  failedAttemptId: string,
-) {
-  const permit = await issueDocumentExtractionRetryPermit(failedAttemptId);
-  await verifyDocumentExtractionRetryPermit({
-    permitRef: permit.permitRef,
-    failedAttemptId: permit.failedAttemptId,
-    documentoId: permit.documentoId,
-    documentFileVersionId: permit.documentFileVersionId,
-    tenantId: permit.tenantId,
-    procedimentoId: permit.procedimentoId,
-    actorUserId: permit.actor.userId,
-    actorRole: permit.actor.userRole,
-  });
-  return admitAsyncJob(buildAuthorizedRetryAdmission(permit));
-}
+export { ensureAuthorizedDocumentExtractionRetryJob } from "./documentExtractionRetryAdmission";
 
 export interface DocumentExtractionHandlerDependencies {
   loadJob(jobId: string): Promise<{
@@ -212,6 +147,15 @@ export function createDocumentExtractionHandler(
           userEmail: job.actorEmail,
           userRole: job.actorRole,
         },
+      }).catch((error: unknown) => {
+        if (error instanceof DocumentExtractionAuthorityError) {
+          throw new AsyncJobExecutionError(
+            "AUTHORIZATION",
+            `DOCUMENT_EXTRACTION_${error.code}`,
+            false,
+          );
+        }
+        throw error;
       });
       if (result.attempt.outcome !== "SUCCEEDED") {
         throw new AsyncJobExecutionError(

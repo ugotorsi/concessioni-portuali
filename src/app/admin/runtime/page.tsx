@@ -1,21 +1,69 @@
+import { randomUUID } from "node:crypto";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { requireRole } from "@/lib/auth";
+import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
+import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
 import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
+import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
+import { getRuntimeServiceDiagnostics } from "@/server/runtime/serviceDiagnostics";
+import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
+import { getAutomationControlState } from "@/server/automation/automationControl";
+import { getAiProviderControlSnapshot } from "@/server/ai/providerControl";
+import { getAiProviderReadiness } from "@/server/ai/providerReadiness";
+import { getResearchChannelAvailability } from "@/server/ai/scopePolicy";
+import { getLegalWorkbenchSnapshot } from "@/server/runtime/legalWorkbench";
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
+  configureLegalDataHunterCredential,
+  synchronizeResearchProviderCredentialKey,
+  confirmResearchReferenceDate,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  cancelArchivedDocumentExtraction,
+  retryFailedDocumentExtraction,
+  runManualFascicoloAnalysis,
+  runManualTenantBatchAnalysis,
+  setRenderWorkerState,
+  startLegalAnalysisPipeline,
+  upsertRuntimeBudgetPolicy,
+  updateAutomationControl,
+  updateAllEligibleAiProviders,
+  updateAiProviderManualControl,
+  updateGlobalAiControl,
+  selectAutomaticAiProvider,
+  verifyAiProviderConnectionAction,
+  verifyRuntimeService,
 } from "./actions";
+import { GlobalAiControlForm } from "./GlobalAiControlForm";
+import { AutomationControlForm } from "./AutomationControlForm";
+import { ManualAnalysisControls } from "./ManualAnalysisControls";
+import { AiEngineControls } from "./AiEngineControls";
+import { formatAdminRuntimeDateTime } from "./formatAdminRuntimeDateTime";
+import { LegalWorkbenchSection } from "./LegalWorkbenchSection";
+import {
+  AI_MODEL_CATALOG,
+  aiModelSelectionCode,
+  DEFAULT_AI_MODEL_SELECTION,
+} from "@/server/ai/providerCatalog";
 
 export const dynamic = "force-dynamic";
+
+const AI_GATE_LABELS = {
+  AI_REAL_DATA_ENABLED: "Dati reali AI",
+  ASYNC_PROVIDER_EXECUTION_ENABLED: "Provider asincroni",
+  AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "Ricerca automatica",
+  AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "Verifica automatica fonti",
+} as const;
 
 function healthVariant(status: string): "success" | "warning" | "danger" {
   if (status === "HEALTHY") return "success";
@@ -29,20 +77,152 @@ function healthLabel(status: string) {
   return "Non operativo";
 }
 
-export default async function RuntimeOperationsPage() {
+function databaseIdentityVariant(outcome: string): "success" | "warning" | "danger" {
+  if (outcome === "MATCH") return "success";
+  if (outcome === "MISMATCH") return "danger";
+  return "warning";
+}
+
+function diagnosticVariant(status: string): "success" | "warning" | "danger" {
+  if (status === "READY") return "success";
+  if (status === "DISABLED" || status === "NOT_CONFIGURED") return "warning";
+  return "danger";
+}
+
+export default async function RuntimeOperationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ procedimentoId?: string | string[]; workbenchNotice?: string | string[] }>;
+}) {
   await requireRole(["ADMIN"]);
+  const adminUser = await requireAdminWithMfa();
+  const resolvedSearchParams = await searchParams;
+  const requestedProcedimentoId = resolvedSearchParams.procedimentoId;
+  const requestedWorkbenchNotice = resolvedSearchParams.workbenchNotice;
+  const workbenchNotice = typeof requestedWorkbenchNotice === "string"
+    && /^[A-Z0-9_]{1,80}$/.test(requestedWorkbenchNotice)
+    ? requestedWorkbenchNotice
+    : null;
+  const selectedProcedimentoId = typeof requestedProcedimentoId === "string" && requestedProcedimentoId.trim()
+    ? requestedProcedimentoId.trim()
+    : null;
+  const legalWorkbench = selectedProcedimentoId
+    ? await getLegalWorkbenchSnapshot(selectedProcedimentoId)
+    : null;
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
-  const [health, workers, failedJobs, policies, costs] = await Promise.all([
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const [automationControl, aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, pendingExtractionJobs, policies, costs, cost30Days, cost7Days, reservedCosts, activeProcedimenti] = await Promise.all([
+    getAutomationControlState(),
+    getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
+    getDatabaseIdentityDiagnostic(),
+    getRuntimeServiceDiagnostics(),
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
     prisma.asyncJob.findMany({
       where: { status: "TERMINAL_FAILED" },
       select: { id: true, operation: true, tenantId: true, procedimentoId: true, attemptCount: true, failureCode: true, completedAt: true },
       orderBy: { completedAt: "desc" }, take: 25,
     }),
+    prisma.asyncJob.findMany({
+      where: { operation: "DOCUMENT_EXTRACTION_V1", status: { in: ["QUEUED", "RETRY_WAIT"] } },
+      select: { id: true, procedimentoId: true, attemptCount: true, status: true, createdAt: true, inputReference: true },
+      orderBy: { createdAt: "asc" }, take: 25,
+    }),
     prisma.runtimeBudgetPolicy.findMany({ where: { enabled: true }, orderBy: [{ scope: "asc" }, { effectiveFrom: "desc" }] }),
     prisma.runtimeCostReservation.findMany({ orderBy: { createdAt: "desc" }, take: 25 }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "SETTLED", settledAt: { gte: thirtyDaysAgo } },
+      _sum: { actualAmount: true },
+    }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "SETTLED", settledAt: { gte: sevenDaysAgo } },
+      _sum: { actualAmount: true },
+    }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "RESERVED" },
+      _sum: { reservedAmount: true },
+    }),
+    prisma.procedimento.findMany({
+      where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
+      orderBy: [
+        { ente: { nome: "asc" } },
+        { updatedAt: "desc" },
+        { id: "asc" },
+      ],
+      take: 500,
+      select: {
+        id: true,
+        tipologia: true,
+        stato: true,
+        ente: { select: { id: true, nome: true } },
+      },
+    }),
   ]);
+  const tenantOptions = Array.from(new Map(activeProcedimenti.map((procedimento) => [
+    procedimento.ente.id,
+    { id: procedimento.ente.id, label: procedimento.ente.nome },
+  ])).values());
+  const providerControl = await getAiProviderControlSnapshot();
+  const aiEngines = await getAiProviderReadiness({
+    globalAiEnabled: aiControl.effectiveEnabled,
+    generalAutomationEnabled: automationControl.effectiveEnabled,
+    control: providerControl,
+  });
+  const researchChannels = await getResearchChannelAvailability();
+  const serviceCenter = buildServiceCenterSnapshot({
+    health,
+    databaseIdentity,
+    costs: {
+      actualLast30DaysEur: cost30Days._sum.actualAmount?.toNumber() ?? 0,
+      actualLast7DaysEur: cost7Days._sum.actualAmount?.toNumber() ?? 0,
+      reservedEur: reservedCosts._sum.reservedAmount?.toNumber() ?? 0,
+    },
+    activeBudgetPolicyScopes: policies.map((policy) => policy.scope),
+    automationEnabled: automationControl.effectiveEnabled,
+    aiControl,
+    aiProviders: aiEngines,
+    researchChannels,
+  });
+  const renderApplicationWorkerConfigured = Boolean(
+    process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
+  );
+  const pendingExtractionDocumentIds = pendingExtractionJobs.map((job) => {
+    const reference = job.inputReference as { metadata?: { documentoId?: unknown } } | null;
+    return typeof reference?.metadata?.documentoId === "string" ? reference.metadata.documentoId : null;
+  });
+  const pendingExtractionDocuments = new Map(
+    (await prisma.documento.findMany({
+      where: { id: { in: pendingExtractionDocumentIds.filter((id): id is string => Boolean(id)) } },
+      select: { id: true, nome: true, statoDocumento: true },
+    })).map((document) => [document.id, document]),
+  );
+  const recentExtractionAttempts = await prisma.documentExtractionAttempt.findMany({
+    where: { documento: { statoDocumento: "ATTIVO" } },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    select: {
+      id: true,
+      outcome: true,
+      failureCode: true,
+      failureMessage: true,
+      procedimentoId: true,
+      documentFileVersionId: true,
+      createdAt: true,
+      documento: { select: { nome: true, currentFileVersionId: true } },
+    },
+  });
+  const latestAttemptByVersion = new Map<string, (typeof recentExtractionAttempts)[number]>();
+  for (const attempt of recentExtractionAttempts) {
+    if (!latestAttemptByVersion.has(attempt.documentFileVersionId)) {
+      latestAttemptByVersion.set(attempt.documentFileVersionId, attempt);
+    }
+  }
+  const retryableExtractionFailures = [...latestAttemptByVersion.values()].filter((attempt) =>
+    attempt.outcome === "FAILED"
+    && attempt.documento.currentFileVersionId === attempt.documentFileVersionId
+    && isRetryableDocumentExtractionFailure(attempt.failureCode));
 
   return (
     <AppShell title="Stato dei servizi" subtitle="Controllo delle elaborazioni automatiche e degli eventuali interventi richiesti">
@@ -55,6 +235,336 @@ export default async function RuntimeOperationsPage() {
         </details>
       </div>
 
+      {databaseIdentity.available ? (
+        <section aria-labelledby="database-identity-title" className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle id="database-identity-title">Identità database attiva</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant={databaseIdentityVariant(databaseIdentity.outcome)}>
+                  {databaseIdentity.outcome === "NON_VERIFICABILE"
+                    ? databaseIdentity.databaseConnected
+                      ? "CONNESSIONE VERIFICATA"
+                      : "NON VERIFICABILE"
+                    : databaseIdentity.outcome}
+                </Badge>
+                <span className="text-sm text-slate-700">
+                  PostgreSQL {databaseIdentity.databaseConnected ? "raggiungibile" : "non raggiungibile"}
+                </span>
+              </div>
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-slate-500">Endpoint Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.endpointId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Progetto Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.neonProjectId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Branch Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.neonBranchId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Database</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.databaseName ?? "Non identificabile"}</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-slate-500">
+                La diagnostica esegue esclusivamente letture di identità della connessione attiva e non mostra credenziali o contenuti applicativi.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
+
+      <section aria-labelledby="automation-control-title" className="mb-4">
+        <Card>
+          <CardHeader>
+            <CardTitle id="automation-control-title">MODALITÀ DI FUNZIONAMENTO</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={automationControl.effectiveEnabled ? "warning" : "success"}>
+                AUTOMAZIONE {automationControl.mode}
+              </Badge>
+              <p className="text-sm text-slate-700">
+                {automationControl.effectiveEnabled
+                  ? "Modalità commerciale: trigger periodici e post-documento sono autorizzati entro i budget."
+                  : "Modalità dimostrativa: nessuna analisi AI parte spontaneamente; i comandi manuali restano disponibili."}
+              </p>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Ultima modifica</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.updatedAt ? formatDateIT(automationControl.updatedAt) : "Mai (default persistente OFF)"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Amministratore</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.updatedBy?.userEmail ?? "Nessuno"}
+                </dd>
+              </div>
+            </dl>
+            <AutomationControlForm
+              enabled={automationControl.effectiveEnabled}
+              action={updateAutomationControl}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section aria-labelledby="global-ai-control-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="global-ai-control-title">CONTROLLO INTELLIGENZA ARTIFICIALE</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={aiControl.effectiveEnabled ? "success" : "danger"}>
+                {aiControl.effectiveEnabled ? "AI OPERATIVE" : "AI NON OPERATIVE"}
+              </Badge>
+              <p className="text-sm text-slate-700">
+                {aiControl.effectiveEnabled
+                  ? "Le elaborazioni intelligenti autorizzate sono disponibili."
+                  : "Non possono partire nuove elaborazioni intelligenti."}
+              </p>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Comando richiesto dall&apos;ADMIN</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.controlEventStatus === "INVALID"
+                    ? "NON DETERMINABILE (evento non valido)"
+                    : aiControl.requestedEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Autorizzazione deployment dati reali</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.deploymentAuthorized ? "AUTORIZZATO" : "NON AUTORIZZATO"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Stato effettivo</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.effectiveEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Provider manuali disponibili</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiEngines.filter((engine) => engine.manualEligible).length} / {aiEngines.length}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Automazione generale</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.effectiveEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Capacità automatica provider</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiEngines.some((engine) => engine.automaticEligible) ? "DISPONIBILE" : "NON DISPONIBILE"}
+                </dd>
+              </div>
+            </dl>
+            {aiControl.effectiveEnabled && !automationControl.effectiveEnabled ? (
+              <p role="alert" className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
+                AI manuale operativa con automazione generale OFF: nessuna elaborazione parte spontaneamente,
+                ma un amministratore autorizzato può avviare operazioni manuali.
+              </p>
+            ) : null}
+            {aiControl.requestedEnabled && !aiControl.deploymentAuthorized ? (
+              <p className="text-sm font-medium text-amber-700">
+                Comando ON registrato, ma manca l&apos;autorizzazione deployment al trattamento dei dati reali.
+              </p>
+            ) : null}
+            {aiControl.controlEventStatus === "INVALID" ? (
+              <p className="text-sm font-medium text-red-700">
+                L&apos;ultimo evento di controllo AI non contiene uno stato ON/OFF valido. Il sistema resta disabilitato
+                in modo conservativo; l&apos;evento deve essere verificato nell&apos;audit.
+              </p>
+            ) : null}
+            {aiControl.emergencyDisabled ? (
+              <p className="text-sm font-medium text-red-700">
+                Kill-switch ambientale attivo: il comando amministrativo non può abilitarle.
+              </p>
+            ) : null}
+            <div>
+              <p className="text-sm font-medium text-slate-700">Stato legacy dei gate deployment</p>
+              <ul className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                {Object.entries(AI_GATE_LABELS).map(([name, label]) => {
+                  const enabled =
+                    aiControl.environmentGates[name as keyof typeof AI_GATE_LABELS];
+                  return (
+                    <li key={name} className="flex items-center justify-between gap-3 rounded border border-slate-200 px-3 py-2">
+                      <span>{label}</span>
+                      <Badge variant={enabled ? "success" : "danger"}>
+                        {enabled ? "ON" : "OFF"}
+                      </Badge>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Ultima modifica</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.updatedAt ? formatDateIT(aiControl.updatedAt) : "Mai (stato iniziale OFF)"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Amministratore</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.updatedBy?.userEmail ?? "Nessuno"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Transizione registrata</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.lastTransition
+                    ? `${aiControl.lastTransition.previousState} → ${aiControl.lastTransition.newState}`
+                    : "Nessun evento"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Motivazione</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.lastTransition?.reason ?? "Non indicata"}
+                </dd>
+              </div>
+            </dl>
+            {aiControl.lastTransition ? (
+              <details className="rounded border border-slate-200 px-3 py-2 text-xs text-slate-600">
+                <summary className="cursor-pointer font-medium">Identità e conseguenze dell&apos;ultimo comando</summary>
+                <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <div><dt>Evento</dt><dd className="font-mono">{aiControl.lastTransition.eventId}</dd></div>
+                  <div><dt>Hash audit (catena non verificata in questa vista)</dt><dd className="break-all font-mono">{aiControl.lastTransition.auditHash}</dd></div>
+                  <div><dt>Job in coda annullati</dt><dd>{aiControl.lastTransition.cancelledQueuedJobs}</dd></div>
+                  <div><dt>Cancellazioni richieste</dt><dd>{aiControl.lastTransition.cancellationRequestedJobs}</dd></div>
+                </dl>
+              </details>
+            ) : null}
+            <p className="text-xs text-slate-500">
+              Approval dati reali, classe progetto, kill-switch, autorizzazioni provider e limiti di spesa restano sempre prioritari.
+              I gate operativi legacy sono mostrati per diagnostica ma non sostituiscono il comando persistente dell&apos;amministratore.
+              Le chiamate già inviate al provider potrebbero non essere annullabili immediatamente.
+            </p>
+            <GlobalAiControlForm
+              enabled={aiControl.requestedEnabled}
+              action={updateGlobalAiControl}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6" aria-labelledby="ai-engines-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="ai-engines-title">Motori AI</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              OpenAI resta il motore principale. L&apos;abilitazione manuale e la selezione
+              automatica sono indipendenti dal comando generale AI e non attivano da sole
+              alcuna automazione o trasferimento di dati.
+            </p>
+            <AiEngineControls
+              engines={aiEngines.map(({ lastVerifiedAt, ...engine }) => ({
+                ...engine,
+                lastVerifiedAtLabel: lastVerifiedAt
+                  ? formatAdminRuntimeDateTime(lastVerifiedAt)
+                  : null,
+              }))}
+              updateManualAction={updateAiProviderManualControl}
+              updateAllAction={updateAllEligibleAiProviders}
+              selectAutomaticAction={selectAutomaticAiProvider}
+              verifyConnectionAction={verifyAiProviderConnectionAction}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6 space-y-4" aria-labelledby="tenant-ai-policy-title">
+        <h2 id="tenant-ai-policy-title" className="text-lg font-semibold text-slate-900">
+          Policy AI per ente
+        </h2>
+        <p className="text-sm text-slate-600">
+          Ogni ente può solo restringere i limiti di sistema; i fascicoli possono restringere
+          ulteriormente la policy dell&apos;ente.
+        </p>
+        {tenantOptions.map((tenant) => (
+          <FascicoloAiResearchControlPanel
+            key={tenant.id}
+            scope="TENANT"
+            tenantId={tenant.id}
+            tenantLabel={tenant.label}
+            canEdit
+          />
+        ))}
+      </section>
+
+      <section className="mt-6" aria-labelledby="manual-analysis-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="manual-analysis-title">Elaborazioni manuali</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Disponibili anche con AUTOMAZIONE OFF. Ogni richiesta richiede conferma, MFA,
+              autorizzazione tenant, corpus pronto e budget compatibili.
+            </p>
+            <ManualAnalysisControls
+              singleExecutionId={randomUUID()}
+              batchExecutionId={randomUUID()}
+              defaultAiModelCode={aiModelSelectionCode(DEFAULT_AI_MODEL_SELECTION)}
+              aiModels={AI_MODEL_CATALOG.map((entry) => ({
+                code: aiModelSelectionCode(entry.selection),
+                label: entry.label,
+                enabled: Boolean(
+                  aiEngines.find(
+                    (engine) => engine.provider === entry.selection.provider,
+                  )?.manualEnabled
+                  && aiEngines.find(
+                    (engine) => engine.provider === entry.selection.provider,
+                  )?.manualEligible,
+                ),
+              }))}
+              procedimenti={activeProcedimenti.map((procedimento) => ({
+                id: procedimento.id,
+                label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,
+              }))}
+              tenants={tenantOptions}
+              singleAction={runManualFascicoloAnalysis}
+              batchAction={runManualTenantBatchAnalysis}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <LegalWorkbenchSection
+        procedimenti={activeProcedimenti.map((procedimento) => ({
+          id: procedimento.id,
+          label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,
+        }))}
+        selectedProcedimentoId={selectedProcedimentoId}
+        snapshot={legalWorkbench}
+        notice={workbenchNotice}
+        assignedActorId={adminUser.id}
+        confirmReferenceDateAction={confirmResearchReferenceDate}
+        recoverMissionsAction={recoverCurrentKnowledgeMissions}
+        startLegalAnalysisAction={startLegalAnalysisPipeline}
+        configureLegalDataHunterAction={configureLegalDataHunterCredential}
+        synchronizeProviderCredentialKeyAction={synchronizeResearchProviderCredentialKey}
+      />
+
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">
         <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div><dt className="text-xs text-slate-500">Unità attive</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.activeWorkers}</dd></div>
@@ -62,6 +572,135 @@ export default async function RuntimeOperationsPage() {
           <div><dt className="text-xs text-slate-500">In elaborazione</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.runningJobs}</dd></div>
           <div><dt className="text-xs text-slate-500">Da recuperare</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.staleLeases}</dd></div>
         </dl>
+      </section>
+
+      <section className="mt-6" aria-labelledby="live-diagnostics-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="live-diagnostics-title">Diagnostica live non distruttiva</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Le verifiche usano i backend configurati senza generare contenuti AI, modificare oggetti R2,
+              avviare worker o acquistare servizi.
+            </p>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {serviceDiagnostics.services.map((service) => (
+                <article key={service.id} className="rounded-lg border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold text-slate-900">{service.id}</h3>
+                    <Badge variant={diagnosticVariant(service.status)}>{service.status}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">{service.summary}</p>
+                  <p className="mt-1 font-mono text-xs text-slate-500">{service.code}</p>
+                  {service.metrics.length ? (
+                    <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                      {service.metrics.map((metric) => (
+                        <div key={metric.label}>
+                          <dt className="text-slate-500">{metric.label}</dt>
+                          <dd className="font-medium text-slate-900">{metric.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+                  <form action={verifyRuntimeService} className="mt-3">
+                    <input type="hidden" name="serviceId" value={service.id} />
+                    <Button type="submit" size="sm" variant="outline">Verifica ora</Button>
+                  </form>
+                </article>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              Ultimo aggiornamento: {formatDateIT(serviceDiagnostics.checkedAt)}. Ogni verifica manuale viene registrata nell&apos;audit.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6" aria-labelledby="service-center-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="service-center-title">Centro gestione infrastruttura</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Badge variant={serviceCenter.blockingCount ? "danger" : "success"}>
+                {serviceCenter.blockingCount} problemi bloccanti
+              </Badge>
+              <Badge variant={serviceCenter.actionRequiredCount ? "warning" : "success"}>
+                {serviceCenter.actionRequiredCount} interventi necessari
+              </Badge>
+              <span className="text-slate-500">Aggiornato {formatDateIT(serviceCenter.generatedAt)}</span>
+            </div>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {serviceCenter.services.map((service) => (
+                <article key={service.id} className="rounded-lg border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold text-slate-900">{service.name}</h3>
+                    <Badge variant={service.severity === "BLOCKING" ? "danger" : service.severity === "ACTION_REQUIRED" ? "warning" : "success"}>
+                      {service.severity === "BLOCKING" ? "Bloccante" : service.severity === "ACTION_REQUIRED" ? "Intervento necessario" : "Informazione"}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">{service.summary}</p>
+                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                    {service.metrics.map((metric) => (
+                      <div key={metric.label}>
+                        <dt className="text-slate-500">{metric.label}</dt>
+                        <dd className="font-medium text-slate-900">{metric.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {service.alerts.length ? (
+                    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-amber-800">
+                      {service.alerts.map((alert) => <li key={alert}>{alert}</li>)}
+                    </ul>
+                  ) : null}
+                  {service.guidedAction ? <p className="mt-3 text-sm font-medium text-slate-700">Azione guidata: {service.guidedAction}</p> : null}
+                  <p className="mt-3 text-xs text-slate-500">Fonte: {service.dataSource}</p>
+                  {service.id === "render" && service.controllable ? (
+                    <div className="mt-4 space-y-4">
+                      {renderApplicationWorkerConfigured ? (
+                        <fieldset className="rounded border border-slate-200 p-3">
+                          <legend className="px-1 text-sm font-medium text-slate-700">Worker applicativo persistente</legend>
+                          <form action={setRenderWorkerState} className="space-y-2">
+                            <input type="hidden" name="workerKind" value="APPLICATION" />
+                            <input type="hidden" name="desiredState" value="RUNNING" />
+                            <input type="hidden" name="confirmation" value="RESUME_RENDER_APPLICATION_WORKER" />
+                            <label className="flex items-start gap-2 text-xs text-slate-600">
+                              <input
+                                type="checkbox"
+                                name="costAcknowledgement"
+                                value="EXISTING_SERVICE_COSTS_AUTHORIZED"
+                                required
+                              />
+                              Autorizzo l&apos;avvio del servizio esistente e i relativi costi già previsti dal suo piano.
+                              Non autorizzo acquisti o cambi di piano.
+                            </label>
+                            <Button type="submit" size="sm">Attiva worker applicativo</Button>
+                          </form>
+                          <form action={setRenderWorkerState} className="mt-2">
+                            <input type="hidden" name="workerKind" value="APPLICATION" />
+                            <input type="hidden" name="desiredState" value="SUSPENDED" />
+                            <input type="hidden" name="confirmation" value="SUSPEND_RENDER_APPLICATION_WORKER" />
+                            <Button type="submit" size="sm" variant="outline">Sospendi worker applicativo</Button>
+                          </form>
+                        </fieldset>
+                      ) : null}
+                      <p className="text-xs text-slate-600">
+                        Il servizio OCR è un template per job one-off: deve restare sospeso e viene avviato soltanto
+                        per la singola elaborazione autorizzata. La console ne verifica configurazione e stato senza
+                        offrire un avvio persistente.
+                      </p>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              NOETRA non acquista, rinnova o amplia abbonamenti. I dati non disponibili tramite API autorizzate sono indicati come non verificabili e richiedono un controllo guidato.
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-2">
@@ -82,10 +721,143 @@ export default async function RuntimeOperationsPage() {
 
       <section className="mt-6">
         <Card>
+          <CardHeader><CardTitle>Gestione limiti di spesa</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Crea o aggiorna un limite interno. Questa operazione non acquista crediti e non modifica piani provider.
+              Le elaborazioni restano bloccate se manca anche uno degli ambiti richiesti.
+            </p>
+            <form action={upsertRuntimeBudgetPolicy} className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Ambito
+                <select name="scope" className="h-10 rounded-md border border-slate-300 px-3" required defaultValue="GLOBAL">
+                  <option value="GLOBAL">Globale</option>
+                  <option value="TENANT">Ente</option>
+                  <option value="PROCEDIMENTO">Fascicolo</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID ente, se richiesto
+                <input name="tenantId" className="h-10 rounded-md border border-slate-300 px-3" />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID fascicolo, se richiesto
+                <input name="procedimentoId" className="h-10 rounded-md border border-slate-300 px-3" />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Cap EUR
+                <input name="hardCapAmount" inputMode="decimal" className="h-10 rounded-md border border-slate-300 px-3" required />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Finestra in secondi
+                <input name="windowSeconds" inputMode="numeric" className="h-10 rounded-md border border-slate-300 px-3" required />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Stato
+                <select name="desiredState" className="h-10 rounded-md border border-slate-300 px-3" required defaultValue="ENABLED">
+                  <option value="ENABLED">Attivo</option>
+                  <option value="DISABLED">Disattivo</option>
+                </select>
+              </label>
+              <label className="flex items-start gap-2 text-sm text-slate-600 md:col-span-2 xl:col-span-3">
+                <input type="checkbox" name="confirmation" value="AUTHORIZE_RUNTIME_BUDGET_POLICY" required />
+                Confermo esplicitamente importo, finestra e ambito. Il cap limita la spesa ma non costituisce acquisto o credito provider.
+              </label>
+              <div className="md:col-span-2 xl:col-span-3">
+                <Button type="submit">Registra policy auditata</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
           <CardHeader><CardTitle>Elaborazioni non completate</CardTitle></CardHeader>
           <CardContent><Table><TableHeader><TableRow><TableHead>Operazione</TableHead><TableHead>Ambito</TableHead><TableHead>Tentativi</TableHead><TableHead>Codice</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
             {failedJobs.map((job) => <TableRow key={job.id}><TableCell>{job.operation}</TableCell><TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell><TableCell>{job.attemptCount}</TableCell><TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell><TableCell><form action={retryRuntimeJob}><input type="hidden" name="jobId" value={job.id} /><Button size="sm" variant="outline" type="submit">Riprova</Button></form></TableCell></TableRow>)}
           </TableBody></Table></CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Estrazioni documentali in attesa</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-slate-600">
+              Un&apos;estrazione mai tentata può essere chiusa senza esecuzione soltanto se il documento è stato archiviato
+              (escluso dal corpus attivo). Documento, versioni e audit restano conservati.
+            </p>
+            <Table><TableHeader><TableRow><TableHead>Documento</TableHead><TableHead>Stato documento</TableHead><TableHead>Fascicolo</TableHead><TableHead>Job</TableHead><TableHead>In coda dal</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
+              {pendingExtractionJobs.length === 0 ? (
+                <TableRow><TableCell colSpan={6}>Nessuna estrazione in attesa.</TableCell></TableRow>
+              ) : pendingExtractionJobs.map((job, index) => {
+                const documentoId = pendingExtractionDocumentIds[index];
+                const document = documentoId ? pendingExtractionDocuments.get(documentoId) : undefined;
+                const closable = document?.statoDocumento === "ARCHIVIATO" && job.attemptCount === 0;
+                return (
+                  <TableRow key={job.id}>
+                    <TableCell>{document?.nome ?? documentoId ?? "Non identificato"}</TableCell>
+                    <TableCell>{document?.statoDocumento ?? "Non trovato"}</TableCell>
+                    <TableCell>{job.procedimentoId ?? "—"}</TableCell>
+                    <TableCell><code className="text-xs">{job.id}</code> · {job.status} · tentativi {job.attemptCount}</TableCell>
+                    <TableCell>{formatDateIT(job.createdAt)}</TableCell>
+                    <TableCell>
+                      {closable ? (
+                        <form action={cancelArchivedDocumentExtraction} className="grid gap-2">
+                          <input type="hidden" name="jobId" value={job.id} />
+                          <input name="reason" required minLength={10} placeholder="Motivazione" className="h-9 rounded-md border border-slate-300 px-2 text-sm" />
+                          <label className="flex items-start gap-2 text-xs text-slate-600">
+                            <input type="checkbox" name="confirmation" value="CANCEL_ARCHIVED_DOCUMENT_EXTRACTION" required />
+                            Chiudi senza eseguire
+                          </label>
+                          <Button size="sm" variant="outline" type="submit">Chiudi estrazione</Button>
+                        </form>
+                      ) : (
+                        <span className="text-xs text-slate-500">Documento attivo: l&apos;estrazione resta in coda.</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody></Table>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Estrazioni documentali non riuscite</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-slate-600">
+              Dopo aver rimosso la causa (ad esempio la configurazione dello storage del worker), un amministratore può
+              autorizzare un nuovo tentativo di estrazione locale del testo, senza provider e senza costi. Il permesso è
+              registrato nell&apos;audit, vale per un solo tentativo e i controlli di coerenza vengono ripetuti.
+            </p>
+            <Table><TableHeader><TableRow><TableHead>Documento</TableHead><TableHead>Fascicolo</TableHead><TableHead>Tentativo</TableHead><TableHead>Errore</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
+              {retryableExtractionFailures.length === 0 ? (
+                <TableRow><TableCell colSpan={5}>Nessuna estrazione non riuscita da ripetere.</TableCell></TableRow>
+              ) : retryableExtractionFailures.map((attempt) => (
+                <TableRow key={attempt.id}>
+                  <TableCell>{attempt.documento.nome}<br /><code className="text-xs">{attempt.documentFileVersionId}</code></TableCell>
+                  <TableCell>{attempt.procedimentoId}</TableCell>
+                  <TableCell><code className="text-xs">{attempt.id}</code> · {formatDateIT(attempt.createdAt)}</TableCell>
+                  <TableCell>{attempt.failureCode}</TableCell>
+                  <TableCell>
+                    <form action={retryFailedDocumentExtraction} className="grid gap-2">
+                      <input type="hidden" name="attemptId" value={attempt.id} />
+                      <input name="reason" required minLength={10} placeholder="Motivazione" className="h-9 rounded-md border border-slate-300 px-2 text-sm" />
+                      <label className="flex items-start gap-2 text-xs text-slate-600">
+                        <input type="checkbox" name="confirmation" value="RETRY_DOCUMENT_EXTRACTION" required />
+                        Autorizzo un nuovo tentativo di estrazione locale
+                      </label>
+                      <Button size="sm" variant="outline" type="submit">Ripeti estrazione</Button>
+                    </form>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody></Table>
+          </CardContent>
         </Card>
       </section>
 

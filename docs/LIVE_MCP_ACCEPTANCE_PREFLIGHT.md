@@ -260,6 +260,8 @@ For both paths:
 2. Confirm persistence status `PENDING` and record mission ID without manually transferring the payload to ChatGPT.
 3. In ChatGPT, call `research_list_pending`; the mission must appear through MCP.
 4. Call `research_get_mission`, then `research_claim_mission` with a unique execution ID and bounded lease.
+   The mission must report `executionChannel=CHATGPT_CONNECTOR`; documentary evidence
+   is intentionally collected after the claim.
 5. Execute Simpliciter, Moonlit, and LDH plans within the mission budget. Record every call in `researchToolExecutions`.
 6. Assemble provider results as candidates, raw citation observations, suggestions, gaps, conflicts, and unresolved questions.
 7. Preserve citation edges as observations; do not synthesize treatment assessments.

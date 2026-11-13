@@ -1,3 +1,6 @@
+import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
+import type { ResearchMission } from "@/server/legal-research/bridge";
+import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import { prisma } from "@/lib/prisma";
 
 import {
@@ -12,6 +15,7 @@ import {
   reconcileKnowledgeResearchMissions,
   type KnowledgeMissionLifecycleResult,
 } from "./researchMissionLifecycle";
+import { loadReferenceDateConfirmations } from "./referenceDateConfirmation";
 
 export class ResearchMissionRecoveryError extends Error {
   constructor(readonly code:
@@ -56,6 +60,10 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
   requireValidCandidate?: boolean;
   revision?: KnowledgeRevisionSnapshot;
   maxQuestionsPerWave?: number;
+  autonomousResearch?: (mission: ResearchMission) => Readonly<{
+    authorized: boolean;
+    workerActorId: string | null;
+  }>;
 }): Promise<KnowledgeMissionRecoveryResult> {
   const revision = input.revision ?? await getCurrentKnowledgeRevision({
     tenantId: input.tenantId,
@@ -80,11 +88,24 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
     throw new ResearchMissionRecoveryError("ASSIGNED_ACTOR_INVALID");
   }
 
+  const referenceDateConfirmations = await loadReferenceDateConfirmations({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+  });
+  const autonomousResearch = input.autonomousResearch ?? autonomousResearchPlanner(
+    input.tenantId,
+    await effectiveResearchPolicyEnvironment({
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+    }),
+  );
   let plans;
   try {
     plans = buildKnowledgeResearchMissionPlans(revision, {
       maxQuestionsPerWave:
         input.maxQuestionsPerWave ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+      referenceDateConfirmations,
+      autonomousResearch,
     });
   } catch {
     throw new ResearchMissionRecoveryError("RESEARCH_MISSION_PLANNING_FAILED");

@@ -3,6 +3,12 @@
 Data di preparazione: 28 settembre 2026. Questo documento non autorizza
 operazioni remote.
 
+> Questo runbook riguarda soltanto missioni create esplicitamente con
+> `executionChannel=SERVER_AUTONOMOUS`. Non e il preflight Selvara ChatGPT-side.
+> Le missioni `CHATGPT_CONNECTOR`, incluse quelle legacy prive del campo, sono escluse
+> dal worker anche se tutti i gate autonomi fossero abilitati. Selvara non richiede
+> credenziali provider backend ne storage OAuth del worker.
+
 > Nota per il primo rilascio operativo: la ricerca giuridica automatica descritta in
 > questo documento storico non fa parte del canary. Usare la procedura event-driven in
 > `APPLICATION_ASYNC_WORKER.md`, con la sola analisi
@@ -78,20 +84,57 @@ Aggiunte a `.env.example` per il percorso automatico:
 - worker: `ASYNC_WORKER_ID`, `ASYNC_WORKER_IDLE_BACKOFF_MS`,
   `ASYNC_WORKER_ERROR_BACKOFF_MS`, `ASYNC_WORKER_RETRY_DELAY_MS`,
   `ASYNC_WORKER_OPERATION_ALLOWLIST`, `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST`;
-- analisi AI: `AI_REAL_DATA_ENABLED`, `AI_REAL_DATA_APPROVAL_ID`,
+- analisi AI: `AI_REAL_DATA_ENABLED` (solo diagnostica legacy),
+  `AI_REAL_DATA_APPROVAL_ID`,
   `AI_PROVIDER_PROJECT_CLASS`, `AI_OPENAI_API_KEY`, `AI_OPENAI_REGION`,
   `AI_OPENAI_TIMEOUT_MS`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`,
-  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_MAX_INPUT_BYTES`;
-- ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED`,
+  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_OPENAI_MAX_INPUT_TOKENS`,
+  `AI_MAX_INPUT_BYTES`;
+- regione OpenAI: NOETRA usa esclusivamente `AI_OPENAI_REGION=GLOBAL`, con
+  endpoint `https://api.openai.com/v1/responses`. Se la variabile non e
+  definita il runtime applica `GLOBAL`; qualsiasi altro valore, incluso `EU`,
+  viene rifiutato prima della costruzione del provider;
+- accounting OpenAI: `AI_OPENAI_USD_TO_EUR_RATE` e
+  `AI_OPENAI_USD_TO_EUR_RATE_DATE` (`YYYY-MM-DD`). Il tasso deve essere il
+  cambio di riferimento BCE USD/EUR della data indicata. Il costo provider
+  resta in USD; il settlement interno in EUR viene arrotondato per eccesso a
+  sei decimali. Le tariffe modello sono versionate nel codice con fonte
+  `https://developers.openai.com/api/docs/models/gpt-5.6-terra`;
+- ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` (fallback
+  diagnostico legacy; il comando operativo è persistito e auditato),
   `AUTOMATIC_RESEARCH_TENANT_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_ALLOWED_CAPABILITIES`, `AUTOMATIC_RESEARCH_MAX_CALLS`,
   `AUTOMATIC_RESEARCH_WORKER_ACTOR_ID`, `AUTOMATIC_RESEARCH_LEASE_MS`,
   `AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS`,
+  che limita ogni richiesta sia degli adapter MCP sia di Legal Data Hunter,
   `AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED` (abilita il pass bounded di
-  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery);
-- provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
-  `SIMPLICITER_OAUTH_STORAGE_PATH`.
+  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery),
+  `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS` (limite intero obbligatorio quando
+  la verifica ufficiale e abilitata e incluso nel fingerprint della policy).
+  Ogni risultato riceve in `candidateSnapshot.officialRelevance` una
+  classificazione `PERTINENTE_VERIFICATA`, `NON_PERTINENTE` o `NON_VERIFICABILE`
+  (testo Normattiva acquisito alla data di riferimento; URL Gazzetta Ufficiale
+  ELI Serie Generale convertiti in Normattiva; atti regionali e serie speciali
+  non verificabili). Le fonti pertinenti restano non utilizzabili finche il
+  professionista non ne conferma l'orientamento nella verifica assistita;
+- guardia database: `EXPECTED_DATABASE_HOST_PREFIX` (facoltativa) fa rifiutare
+  l'avvio di Prisma se l'host di `DATABASE_URL` non inizia con il prefisso atteso
+  (es. l'endpoint Neon del branch Preview), evitando l'uso di un database errato;
+- estrazione PDF: `PDF_DIRECT_TEXT_SUBPROCESS=true` sui worker che girano con
+  `tsx` esegue pdf.js in un processo Node separato (circa 90 MB invece di circa
+  450 MB), evitando che le istanze da 512 MB vengano terminate senza log durante
+  l'estrazione dei documenti caricati;
+- provider: `LEGAL_DATA_HUNTER_API_KEY` e
+  `RESEARCH_PROVIDER_CREDENTIAL_KEY`. Le credenziali OAuth Moonlit e Simpliciter
+  sono cifrate nel database tramite lo script di grant dedicato; non usare file
+  token locali sul worker.
+
+Prima di abilitare la ricerca automatica, eseguire sul worker persistente
+`npm run runtime:verify-automatic-research-connectors`. Il controllo non effettua
+chiamate provider e non stampa credenziali; verifica nel database la presenza
+di credenziali OAuth rinnovabili per Moonlit e Simpliciter, oltre alla presenza
+della credenziale Legal Data Hunter.
 
 OCR e parsing PDF usano le dipendenze incluse nella release (`tesseract.js`,
 dati italiani e `pdfjs-dist`): non leggono credenziali o variabili OCR.
@@ -101,10 +144,11 @@ checkout legge `DATABASE_URL`; non e una dipendenza del runtime applicativo.
 La presenza remota delle variabili sensitive non ne prova il valore o lo scope.
 Sono da verificare live: database effettivamente staging, bucket isolato,
 permessi S3, chiave AI e progetto approvato, entitlement provider, log del
-worker e file OAuth montati. I file `.local-storage/moonlit/oauth.json` e
-`.local-storage/simpliciter/oauth.json` del computer non sono disponibili sul
-server. Il worker accetta ora percorsi server espliciti, ma il servizio di host
-deve fornire file protetti e persistenti. Non esegue login interattivi.
+worker e stato delle credenziali OAuth cifrate. Il login OAuth iniziale avviene
+interattivamente sulla workstation dell'operatore; il worker usa esclusivamente
+il grant persistito e puo rinnovarlo senza avviare login interattivi.
+Il grant dedicato si registra con
+`tsx scripts/legal-research/grant-provider-oauth-credential.ts --provider <MOONLIT|SIMPLICITER> --expected-db-host <prefisso-host-preview>`.
 
 ## Canary su un solo fascicolo
 
@@ -141,6 +185,37 @@ dell'iterazione attiva, lasciare il servizio a zero istanze e mantenere
 mantenere `AI_REAL_DATA_ENABLED=false`. Le variabili modificate richiedono un
 nuovo processo per diventare effettive. Non cancellare job, rapporti, missioni o
 bundle gia persistiti.
+
+## Valutazione isolata TEST-LEGAL-001
+
+`FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1` e un percorso di collaudo
+separato. Non e registrato nel worker applicativo generico e puo essere
+reclamato soltanto per ID tramite `runFascicoloAnalysisEvaluationJobById`.
+
+L'autorizzazione deve essere emessa da
+`authorizeFascicoloAnalysisEvaluation` per un amministratore autenticato e
+persistita in `FascicoloAnalysisEvaluationPermit`. Il permit e vincolato a
+`evaluationId`, tenant, procedimento, fingerprint, operazione, test case,
+scadenza e limite fisso di 0,50 EUR. `admitFascicoloAnalysisEvaluation` lo
+consuma per un solo job; lo stesso permit non puo autorizzare un secondo
+`evaluationId` o job. Il runner verifica nuovamente permit, consumo, tenant,
+procedimento, fingerprint, stato `READY` e presenza degli otto documenti prima
+di inviare il corpus V5 al provider. Ricerca automatica, knowledge revision,
+missioni e snapshot non sono richiamati.
+
+L'output validato e il confronto post-generazione sono conservati in
+`FascicoloAnalysisEvaluationArtifact`, insieme a fingerprint di input/output e
+provenienza documento/pagina. L'artefatto e append-only e idempotente per
+`evaluationId` e job. La migrazione
+`20261020_fascicolo_analysis_evaluation` deve essere applicata soltanto al
+database di collaudo autorizzato prima della prova.
+
+La preparazione non autorizza l'esecuzione. Prima del singolo one-off occorre
+verificare il budget per una nuova prenotazione da 0,50 EUR, emettere un nuovo
+permit persistito con `authorizeFascicoloAnalysisEvaluation`, ammettere un solo job con
+`admitFascicoloAnalysisEvaluation` ed eseguirne l'ID con i gate AI abilitati
+soltanto nel processo one-off. `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` deve
+rimanere `false`.
 
 ## Prova di accettazione successiva
 

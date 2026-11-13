@@ -10,6 +10,13 @@ import {
   type CitationObservationProvenance,
 } from "@/server/legal-reasoning/authority-treatment";
 import type {
+  ApplicabilityCheckOutcome,
+  ApplicabilityFactRole,
+  ProceedingIdentityReference,
+  TransitionalException,
+} from "@/server/legal-reasoning/applicability";
+import type { EvaluatedSourceResult, RuleResolutionInput } from "@/server/legal-rules/types";
+import type {
   AuthorityCandidate,
   LegalResearchSuggestion,
   ResearchCapability,
@@ -99,6 +106,81 @@ export type HumanResearchSuggestion = Readonly<{
   reviewedAt: string;
 }>;
 
+export const LEGAL_APPLICABILITY_REVIEW_VERSION = "LEGAL_APPLICABILITY_REVIEW_V1" as const;
+
+export type LegalApplicabilityReview = Readonly<{
+  version: typeof LEGAL_APPLICABILITY_REVIEW_VERSION;
+  reviewId: string;
+  applicationId: string;
+  knowledgeRevisionId: string;
+  legalIssueSemanticKey: string;
+  candidateEvidenceSourceId: string;
+  candidateSourceVersionId: string;
+  candidateProvisionReference: string;
+  legalAuthorityKind: "LEGISLATION" | "CASE_LAW" | "ADMINISTRATIVE_REGULATION" | "ADMINISTRATIVE_ACT" | "AUTHORITY_PRACTICE" | "OTHER_LEGAL_AUTHORITY";
+  targetProceedingIdentity?: ProceedingIdentityReference | null;
+  factBindings: readonly Readonly<{
+    knowledgeItemId: string;
+    role: ApplicabilityFactRole;
+    value?: "PENDING" | "COMPLETED" | "UNKNOWN";
+    proceedingIdentity?: ProceedingIdentityReference | null;
+  }>[];
+  factualApplicability: Readonly<{
+    outcome: ApplicabilityCheckOutcome;
+    rationale: string;
+    decisiveKnowledgeItemIds: readonly string[];
+  }>;
+  ruleOrchestrator: Readonly<{
+    input: RuleResolutionInput;
+    source: EvaluatedSourceResult;
+    ruleMatched: boolean;
+    resolutionFingerprint: string;
+  }>;
+  normRelationship: Readonly<{
+    outcome: "CANDIDATE_IS_SPECIAL" | "NO_SPECIALITY_CONFLICT" | "CANDIDATE_DISPLACED_BY_SPECIAL_RULE" | "UNRESOLVED";
+    rationale: string;
+    competingEvidenceSourceId: string | null;
+  }>;
+  transitionalDiscipline:
+    | Readonly<{
+        status: "VERIFIED_PRESENT";
+        evidenceSourceId: string;
+        provisionReference: string;
+        effectiveFrom: string;
+        effect: "EXCLUDES_PENDING_PROCEEDINGS" | "EXPRESSLY_RETROACTIVE" | "PRESERVES_PREVIOUS_REGIME" | "PROSPECTIVE_ONLY" | "REQUIRES_INTERPRETATION";
+        determiningFactRole: ApplicabilityFactRole;
+        previousRegimeEvidenceSourceId: string | null;
+        exceptions: readonly TransitionalException[];
+        interpretationRationale: string;
+      }>
+    | Readonly<{
+        status: "VERIFIED_ABSENT";
+        evidenceSourceId: string;
+        absenceAttestation: Readonly<{
+          sourceContentSha256: string;
+          reviewScope: "COMPLETE_OFFICIAL_TEXT";
+          examinedProvisions: readonly string[];
+          examinedAnnexes: readonly string[];
+          linkedActsChecked: readonly string[];
+          reviewedByActorId: string;
+          reviewedAt: string;
+          rationale: string;
+        }>;
+        rationale: string;
+      }>
+    | Readonly<{
+        status: "UNAVAILABLE" | "AMBIGUOUS";
+        expectedProvisionReference: string | null;
+        rationale: string;
+      }>;
+  reviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED";
+  reviewerAttestation: Readonly<{
+    reviewedByActorId: string;
+    reviewedAt: string;
+    rationale: string;
+  }>;
+}>;
+
 export type AssistedVerificationSnapshot = Readonly<{
   kind: "ASSISTED_VERIFICATION_SNAPSHOT";
   version: typeof ASSISTED_VERIFICATION_VERSION;
@@ -110,6 +192,7 @@ export type AssistedVerificationSnapshot = Readonly<{
   adverseSearchReview?: AdverseSearchReview;
   researchSuggestions?: readonly HumanResearchSuggestion[];
   gapResolutions?: readonly AssistedGapResolution[];
+  legalApplicabilityReviews?: readonly LegalApplicabilityReview[];
 }>;
 
 export type VerifiedFullTextEvidence = Readonly<{
@@ -207,11 +290,177 @@ const officialSourceSchema = z.object({
     fileVersionId: nonblank.optional(),
   }).strict(),
 }).strict();
+const applicabilityFactRoleSchema = z.enum([
+  "APPLICATION_SUBMITTED",
+  "PROCEEDING_STARTED",
+  "PROCEEDING_STATUS",
+  "LEGAL_RELATIONSHIP_ESTABLISHED",
+  "RELEVANT_CONDUCT",
+  "CHALLENGED_ACT_ADOPTED",
+  "DECISION_ADOPTED",
+  "OTHER",
+]);
+const applicabilityOutcomeSchema = z.enum(["SATISFIED", "NOT_SATISFIED", "TO_VERIFY"]);
+const evaluatedSourceSchema = z.object({
+  id: nonblank,
+  stableKey: nonblank,
+  title: nonblank,
+  documentType: nonblank,
+  legalRank: z.string().nullable(),
+  territorialScope: z.string().nullable(),
+  sourceNumber: z.string().nullable(),
+  sourceDate: z.string().nullable(),
+  issuingBody: z.string().nullable(),
+  status: nonblank,
+  role: nonblank,
+  confidence: z.enum(["HIGH", "MEDIUM", "LOW", "INSUFFICIENT"]),
+  humanReviewRequired: z.literal(true),
+  isConformative: z.boolean(),
+  isExtractable: z.boolean(),
+  relativePath: z.string().nullable(),
+  effectiveFrom: z.string().nullable(),
+  effectiveTo: z.string().nullable(),
+  applicable: z.boolean(),
+  exclusionReasons: z.array(z.enum([
+    "NOT_CURRENT", "AUTHORITY_MISMATCH", "PORT_MISMATCH", "PORT_AREA_MISMATCH",
+    "EFFECTIVE_FROM_FUTURE", "EFFECTIVE_TO_EXPIRED", "STATUS_HISTORICAL",
+    "STATUS_SUPERSEDED", "STATUS_PARTIALLY_SUPERSEDED", "STATUS_PENDING_VALIDITY",
+    "STATUS_DRAFT_OR_ONGOING", "STATUS_CASE_SPECIFIC", "STATUS_MISSING_SOURCE",
+    "NOT_CONFORMATIVE_SUPPORT",
+  ])),
+}).strict();
+const ruleResolutionInputSchema = z.object({
+  enteId: z.string().nullable().optional(),
+  referenceDate: z.string().optional(),
+  authorityKey: z.string().optional(),
+  authorityId: z.string().optional(),
+  portKey: z.string().optional(),
+  portId: z.string().optional(),
+  portArea: z.string().optional(),
+  domain: z.string().optional(),
+  institution: z.string().optional(),
+  procedureType: z.string().optional(),
+  titleType: z.string().optional(),
+  includeHistorical: z.boolean().optional(),
+  includePending: z.boolean().optional(),
+  concessionVertical: z.string().optional(),
+  concessionObjectType: z.string().optional(),
+  attivita: z.string().optional(),
+  awardingProcedureType: z.string().optional(),
+  feeRegime: z.string().optional(),
+  comparativeProcedureStatus: z.string().optional(),
+  rilevanzaArt47: z.boolean().optional(),
+  letteraArt47: z.string().optional(),
+  hasMorosita: z.boolean().optional(),
+  polizzaValida: z.boolean().optional(),
+}).strict();
+const absenceAttestationSchema = z.object({
+  sourceContentSha256: z.string().regex(/^[a-f0-9]{64}$/i),
+  reviewScope: z.literal("COMPLETE_OFFICIAL_TEXT"),
+  examinedProvisions: z.array(nonblank).min(1),
+  examinedAnnexes: z.array(nonblank),
+  linkedActsChecked: z.array(nonblank),
+  reviewedByActorId: nonblank,
+  reviewedAt: isoDate,
+  rationale: z.string().trim().min(20),
+}).strict();
+const transitionalExceptionSchema = z.object({
+  id: nonblank,
+  description: nonblank,
+  match: z.enum(["MATCHED", "NOT_MATCHED", "UNCERTAIN"]),
+  effect: z.enum(["APPLY_NEW_REGIME", "PRESERVE_PREVIOUS_REGIME", "REQUIRE_REVIEW"]),
+  decisiveFactClaimIds: z.array(nonblank),
+}).strict();
+const proceedingIdentityReferenceSchema = z.object({
+  canonicalAnchorSemanticKey: z.string().regex(/^[a-f0-9]{64}$/i),
+  kind: z.enum([
+    "ADMINISTRATIVE_ORIGINAL",
+    "ADMINISTRATIVE_OTHER",
+    "JUDICIAL_REVIEW",
+    "JUDICIAL_APPEAL",
+    "CRIMINAL",
+    "INTERNAL_INSTRUCTION",
+    "INCIDENTAL",
+    "UNKNOWN",
+  ]),
+  verification: z.literal("DOCUMENTED"),
+  evidenceLinkIds: z.array(nonblank).min(1),
+}).strict();
+export const legalApplicabilityReviewSchema = z.object({
+  version: z.literal(LEGAL_APPLICABILITY_REVIEW_VERSION),
+  reviewId: nonblank,
+  applicationId: nonblank,
+  knowledgeRevisionId: nonblank,
+  legalIssueSemanticKey: nonblank,
+  candidateEvidenceSourceId: nonblank,
+  candidateSourceVersionId: nonblank,
+  candidateProvisionReference: nonblank,
+  legalAuthorityKind: z.enum(["LEGISLATION", "CASE_LAW", "ADMINISTRATIVE_REGULATION", "ADMINISTRATIVE_ACT", "AUTHORITY_PRACTICE", "OTHER_LEGAL_AUTHORITY"]),
+  targetProceedingIdentity: proceedingIdentityReferenceSchema.nullable().optional(),
+  factBindings: z.array(z.object({
+    knowledgeItemId: nonblank,
+    role: applicabilityFactRoleSchema,
+    value: z.enum(["PENDING", "COMPLETED", "UNKNOWN"]).optional(),
+    proceedingIdentity: proceedingIdentityReferenceSchema.nullable().optional(),
+  }).strict()).min(1),
+  factualApplicability: z.object({
+    outcome: applicabilityOutcomeSchema,
+    rationale: nonblank,
+    decisiveKnowledgeItemIds: z.array(nonblank).min(1),
+  }).strict(),
+  ruleOrchestrator: z.object({
+    input: ruleResolutionInputSchema,
+    source: evaluatedSourceSchema,
+    ruleMatched: z.boolean(),
+    resolutionFingerprint: z.string().regex(/^[a-f0-9]{64}$/i),
+  }).strict(),
+  normRelationship: z.object({
+    outcome: z.enum(["CANDIDATE_IS_SPECIAL", "NO_SPECIALITY_CONFLICT", "CANDIDATE_DISPLACED_BY_SPECIAL_RULE", "UNRESOLVED"]),
+    rationale: nonblank,
+    competingEvidenceSourceId: nonblank.nullable(),
+  }).strict(),
+  transitionalDiscipline: z.discriminatedUnion("status", [
+    z.object({
+      status: z.literal("VERIFIED_PRESENT"),
+      evidenceSourceId: nonblank,
+      provisionReference: nonblank,
+      effectiveFrom: isoDate,
+      effect: z.enum(["EXCLUDES_PENDING_PROCEEDINGS", "EXPRESSLY_RETROACTIVE", "PRESERVES_PREVIOUS_REGIME", "PROSPECTIVE_ONLY", "REQUIRES_INTERPRETATION"]),
+      determiningFactRole: applicabilityFactRoleSchema,
+      previousRegimeEvidenceSourceId: nonblank.nullable(),
+      exceptions: z.array(transitionalExceptionSchema),
+      interpretationRationale: nonblank,
+    }).strict(),
+    z.object({
+      status: z.literal("VERIFIED_ABSENT"),
+      evidenceSourceId: nonblank,
+      absenceAttestation: absenceAttestationSchema,
+      rationale: nonblank,
+    }).strict(),
+    z.object({
+      status: z.literal("UNAVAILABLE"),
+      expectedProvisionReference: nonblank.nullable(),
+      rationale: nonblank,
+    }).strict(),
+    z.object({
+      status: z.literal("AMBIGUOUS"),
+      expectedProvisionReference: nonblank.nullable(),
+      rationale: nonblank,
+    }).strict(),
+  ]),
+  reviewStatus: z.enum(["AI_PROPOSED", "HUMAN_CONFIRMED"]),
+  reviewerAttestation: z.object({
+    reviewedByActorId: nonblank,
+    reviewedAt: isoDate,
+    rationale: z.string().trim().min(20),
+  }).strict(),
+}).strict();
 export const assistedVerificationSnapshotSchema = z.object({
   kind: z.literal("ASSISTED_VERIFICATION_SNAPSHOT"),
   version: z.literal(ASSISTED_VERIFICATION_VERSION),
   missionId: nonblank.max(96),
   sources: z.array(officialSourceSchema),
+  legalApplicabilityReviews: z.array(legalApplicabilityReviewSchema).optional(),
   adverseSearch: adverseSearchSchema.optional(),
   adverseSearchReview: adverseSearchReviewSchema.optional(),
   gapResolutions: z.array(z.object({
@@ -254,7 +503,19 @@ export const assistedVerificationSnapshotSchema = z.object({
     reviewedByActorId: nonblank,
     reviewedAt: isoDate,
   }).strict()).optional(),
-}).strict();
+}).strict().superRefine((value, context) => {
+  const reviews = value.legalApplicabilityReviews ?? [];
+  for (const field of ["reviewId", "applicationId"] as const) {
+    const identities = reviews.map((review) => review[field]);
+    if (new Set(identities).size !== identities.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["legalApplicabilityReviews"],
+        message: `DUPLICATE_${field === "reviewId" ? "REVIEW" : "APPLICATION"}_ID`,
+      });
+    }
+  }
+});
 
 export const submittedDocumentEvidenceSchema = z.object({
   evidenceSourceId: nonblank,

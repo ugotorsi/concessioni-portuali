@@ -124,6 +124,7 @@ export type StructuredFascicoloReportStatus = (typeof StructuredFascicoloReportS
 export const FascicoloOperationalProposalType = {
   DEADLINE: 'DEADLINE',
   CRITICALITY: 'CRITICALITY',
+  CONCESSION_LINK_OR_CREATE: 'CONCESSION_LINK_OR_CREATE',
   DOCUMENT_REQUIREMENT: 'DOCUMENT_REQUIREMENT',
   CHECKLIST_ITEM: 'CHECKLIST_ITEM',
   ACTIVITY: 'ACTIVITY',
@@ -163,6 +164,16 @@ export const FascicoloKnowledgeItemStatus = {
 } as const
 
 export type FascicoloKnowledgeItemStatus = (typeof FascicoloKnowledgeItemStatus)[keyof typeof FascicoloKnowledgeItemStatus]
+
+
+export const FascicoloKnowledgeIdentityState = {
+  VERIFIED_NEW: 'VERIFIED_NEW',
+  VERIFIED_CONTINUATION: 'VERIFIED_CONTINUATION',
+  AMBIGUOUS: 'AMBIGUOUS',
+  LEGACY_UNVERIFIED: 'LEGACY_UNVERIFIED'
+} as const
+
+export type FascicoloKnowledgeIdentityState = (typeof FascicoloKnowledgeIdentityState)[keyof typeof FascicoloKnowledgeIdentityState]
 
 
 export const FascicoloKnowledgeRelationType = {
@@ -1323,3 +1334,13 @@ export const ResearchCompletionState = {
 } as const
 
 export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typeof ResearchCompletionState]
+
+
+export const ProfessionalLegalQuestionVersionStatus = {
+  DRAFT: 'DRAFT',
+  APPROVED: 'APPROVED',
+  SUPERSEDED: 'SUPERSEDED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ProfessionalLegalQuestionVersionStatus = (typeof ProfessionalLegalQuestionVersionStatus)[keyof typeof ProfessionalLegalQuestionVersionStatus]

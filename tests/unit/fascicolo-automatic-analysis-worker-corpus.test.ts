@@ -6,6 +6,9 @@ const mocks = vi.hoisted(() => ({
   getCurrentKnowledgeRevision: vi.fn(),
   admitAsyncJob: vi.fn(),
   requestDocumentWorkerActivation: vi.fn(),
+  isAutomationEnabled: vi.fn(),
+  getGlobalAiControlState: vi.fn(),
+  getAutomaticAiSelectionForAdmission: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -22,6 +25,16 @@ vi.mock("@/server/async-jobs/persistence", () => ({
 }));
 vi.mock("@/server/async-jobs/documentWorkerActivation", () => ({
   requestDocumentWorkerActivation: mocks.requestDocumentWorkerActivation,
+}));
+vi.mock("@/server/automation/automationControl", () => ({
+  isAutomationEnabled: mocks.isAutomationEnabled,
+}));
+vi.mock("@/server/ai/globalAiControl", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/server/ai/globalAiControl")>(),
+  getGlobalAiControlState: mocks.getGlobalAiControlState,
+}));
+vi.mock("@/server/ai/providerReadiness", () => ({
+  getAutomaticAiSelectionForAdmission: mocks.getAutomaticAiSelectionForAdmission,
 }));
 vi.mock("@/server/fascicolo-knowledge", async (importOriginal) => ({
   ...await importOriginal<typeof import("@/server/fascicolo-knowledge")>(),
@@ -56,7 +69,18 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
     mocks.admitAsyncJob.mockResolvedValue({ outcome: "CREATED", job: { id: "analysis-job" } });
     mocks.requestDocumentWorkerActivation.mockResolvedValue({
       outcome: "REQUESTED",
-      jobId: "job-render-analysis",
+      renderJobId: "job-render-analysis",
+    });
+    mocks.isAutomationEnabled.mockResolvedValue(true);
+    mocks.getGlobalAiControlState.mockResolvedValue({ effectiveEnabled: true });
+    mocks.getAutomaticAiSelectionForAdmission.mockResolvedValue({
+      workflow: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      selection: {
+        provider: "OPENAI",
+        model: "gpt-5.6-terra",
+        selectionVersion: "AI_MODEL_SELECTION_V1",
+      },
+      authorizationRef: "REAL_DATA_APPROVAL",
     });
   });
 
@@ -82,10 +106,21 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
     expect(mocks.admitAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
       operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
       procedimentoId: "procedure-a",
+      inputReference: expect.objectContaining({
+        metadata: expect.objectContaining({
+          providerKind: "OPENAI",
+          modelCode: "gpt-5.6-terra",
+          approvalRef: "REAL_DATA_APPROVAL",
+        }),
+      }),
     }));
     expect(mocks.requestDocumentWorkerActivation).toHaveBeenCalledWith(
-      "DOCUMENT_ANALYSIS",
-      "procedure-a",
+      {
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "analysis-job",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+      },
     );
   });
 
@@ -105,6 +140,51 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
       policyDecisionRef: "OCR_PERMIT_A",
       actorId: "ocr-worker",
     });
+  });
+
+  it("does not admit or activate analysis when automation is OFF", async () => {
+    mocks.isAutomationEnabled.mockResolvedValue(false);
+
+    await expect(ensureFascicoloDocumentCorpusUpdateJob({
+      sourceJobId: "ocr-job-a",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      extractionAttemptId: "attempt-a",
+    })).resolves.toEqual({ outcome: "AUTOMATION_OFF", job: null });
+
+    expect(mocks.asyncJobFindUnique).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJob).not.toHaveBeenCalled();
+    expect(mocks.requestDocumentWorkerActivation).not.toHaveBeenCalled();
+  });
+
+  it("does not load or admit work when the automatic provider is blocked", async () => {
+    mocks.getAutomaticAiSelectionForAdmission.mockResolvedValue(null);
+
+    await expect(ensureFascicoloDocumentCorpusUpdateJob({
+      sourceJobId: "ocr-job-a",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      extractionAttemptId: "attempt-a",
+    })).resolves.toEqual({ outcome: "AI_PROVIDER_BLOCKED", job: null });
+
+    expect(mocks.asyncJobFindUnique).not.toHaveBeenCalled();
+    expect(mocks.getCorpusForAsyncJob).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJob).not.toHaveBeenCalled();
+  });
+
+  it("does not resolve a provider or admit work when the global AI gate is off", async () => {
+    mocks.getGlobalAiControlState.mockResolvedValue({ effectiveEnabled: false });
+
+    await expect(ensureFascicoloDocumentCorpusUpdateJob({
+      sourceJobId: "ocr-job-a",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      extractionAttemptId: "attempt-a",
+    })).resolves.toEqual({ outcome: "AI_OFF", job: null });
+
+    expect(mocks.getAutomaticAiSelectionForAdmission).not.toHaveBeenCalled();
+    expect(mocks.asyncJobFindUnique).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJob).not.toHaveBeenCalled();
   });
 
   it("uses the analysis job identity and authorization while executing the corpus analysis", async () => {

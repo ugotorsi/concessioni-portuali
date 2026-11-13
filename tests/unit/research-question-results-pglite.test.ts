@@ -12,7 +12,9 @@ import {
   persistResearchQuestionResults,
   reviewResearchQuestionResult,
   type ResearchQuestionResultContext,
+  type ResearchQuestionResultSnapshot,
   type ResearchQuestionResultSqlExecutor,
+  type ResearchResultSupportDirection,
 } from "@/server/legal-research/question-results";
 
 const migration = readFileSync(path.join(process.cwd(), "prisma", "migrations", "20260929_research_question_results", "migration.sql"), "utf8");
@@ -25,7 +27,13 @@ function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ 
 function context(db: PGlite): ResearchQuestionResultContext {
   return {
     read: executor(db),
-    transaction: (operation) => db.transaction((tx) => operation(executor(tx))),
+    transaction: (operation) => db.transaction((tx) => operation({
+      ...executor(tx),
+      auditClassificationReview: async ({ values, actor }) => {
+        await tx.query('INSERT INTO "TestReviewAudit" ("resultId", "actorId", "role", "values") VALUES ($1,$2,$3,$4)',
+          [values.resultId, actor.userId, actor.role, JSON.stringify(values)]);
+      },
+    })),
     initializeSourceAssessment: async () => undefined,
   };
 }
@@ -56,6 +64,9 @@ async function database() {
     CREATE TABLE "StructuredFascicoloReportSnapshot" (
       "id" TEXT PRIMARY KEY
     );
+    CREATE TABLE "TestReviewAudit" (
+      "resultId" TEXT NOT NULL, "actorId" TEXT NOT NULL, "role" TEXT NOT NULL, "values" JSONB NOT NULL
+    );
   `);
   await db.exec(migration);
   return db;
@@ -76,7 +87,7 @@ describe("Lotto 4 research question results", () => {
     const input = { missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("candidate-1")] };
     expect(await persistResearchQuestionResults(input, context(db))).toMatchObject([{ outcome: "CREATED" }]);
     expect(await persistResearchQuestionResults(input, context(db))).toMatchObject([{ outcome: "REUSED" }]);
-    const rows = await db.query<any>('SELECT * FROM "ResearchQuestionResultRecord"');
+    const rows = await db.query<ResearchQuestionResultSnapshot>('SELECT * FROM "ResearchQuestionResultRecord"');
     expect(rows.rows).toHaveLength(1);
     expect(rows.rows[0]).toMatchObject({ tenantId: "tenant-1", caseId: "case-1", missionId: "mission-1", bundleId: "bundle-mission-1", candidateId: "candidate-1", researchQuestionSemanticKey: "q".repeat(64), missionFingerprint: "f".repeat(64) });
   });
@@ -88,10 +99,10 @@ describe("Lotto 4 research question results", () => {
     await persistResearchQuestionResults({ missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("same")] }, context(db));
     await persistResearchQuestionResults({ missionId: "mission-2", bundleId: "bundle-mission-2", candidates: [candidate("same")] }, context(db));
     await db.query(`UPDATE "ResearchMissionRecord" SET "lifecycleStatus"='HISTORICAL' WHERE "id"='mission-1'`);
-    const current = await db.query<any>(`SELECT r.* FROM "ResearchQuestionResultRecord" r JOIN "ResearchMissionRecord" m ON m."id"=r."missionId" WHERE m."tenantId"=$1 AND m."caseId"=$2 AND m."lifecycleStatus"='CURRENT'`, ["tenant-2", "case-2"]);
+    const current = await db.query<ResearchQuestionResultSnapshot>(`SELECT r.* FROM "ResearchQuestionResultRecord" r JOIN "ResearchMissionRecord" m ON m."id"=r."missionId" WHERE m."tenantId"=$1 AND m."caseId"=$2 AND m."lifecycleStatus"='CURRENT'`, ["tenant-2", "case-2"]);
     expect(current.rows).toHaveLength(1);
     expect(current.rows[0].missionId).toBe("mission-2");
-    const historical = await db.query<any>(`SELECT r.* FROM "ResearchQuestionResultRecord" r JOIN "ResearchMissionRecord" m ON m."id"=r."missionId" WHERE m."lifecycleStatus"='HISTORICAL'`);
+    const historical = await db.query<ResearchQuestionResultSnapshot>(`SELECT r.* FROM "ResearchQuestionResultRecord" r JOIN "ResearchMissionRecord" m ON m."id"=r."missionId" WHERE m."lifecycleStatus"='HISTORICAL'`);
     expect(historical.rows).toHaveLength(1);
   });
 
@@ -99,13 +110,17 @@ describe("Lotto 4 research question results", () => {
     const db = await database();
     await seed(db);
     const [created] = await persistResearchQuestionResults({ missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("candidate-1", "UNKNOWN")] }, context(db));
-    const confirmed = await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "HUMAN_CONFIRMED", confidence: 0.9, rationale: "Passaggio pertinente verificato." }, context(db));
+    const actor = { userId: "reviewer-1", role: "GIURIDICO" as const };
+    const confirmed = await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "HUMAN_CONFIRMED", confidence: 0.9, rationale: "Passaggio pertinente verificato.", actor }, context(db));
     expect(confirmed).toMatchObject({ supportDirection: "SUPPORTS", classificationSource: "HUMAN_REVIEW", classificationReviewStatus: "HUMAN_CONFIRMED" });
-    await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "REJECTED", confidence: 0.2, rationale: "Classificazione non affidabile." }, context(db));
+    await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "REJECTED", confidence: 0.2, rationale: "Classificazione non affidabile.", actor }, context(db));
     const count = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM "ResearchQuestionResultRecord"');
     expect(count.rows[0].count).toBe(1);
     const reports = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM "StructuredFascicoloReportSnapshot"');
     expect(reports.rows[0].count).toBe(0);
+    const audit = await db.query<{ actorId: string; role: string; values: { reviewStatus: string } }>('SELECT "actorId", "role", "values" FROM "TestReviewAudit"');
+    expect(audit.rows.map((row) => [row.actorId, row.role, row.values.reviewStatus]))
+      .toEqual([["reviewer-1", "GIURIDICO", "HUMAN_CONFIRMED"], ["reviewer-1", "GIURIDICO", "REJECTED"]]);
   });
 
   it("rejects a review outside the exact mission scope or without a rationale", async () => {
@@ -120,6 +135,7 @@ describe("Lotto 4 research question results", () => {
       reviewStatus: "HUMAN_CONFIRMED",
       confidence: null,
       rationale: "Passaggio pertinente verificato dal revisore.",
+      actor: { userId: "reviewer-1", role: "GIURIDICO" },
     }, context(db))).rejects.toThrow("RESEARCH_QUESTION_RESULT_NOT_FOUND");
     await expect(reviewResearchQuestionResult({
       resultId: created.id,
@@ -129,7 +145,30 @@ describe("Lotto 4 research question results", () => {
       reviewStatus: "HUMAN_CONFIRMED",
       confidence: null,
       rationale: "Breve",
+      actor: { userId: "reviewer-1", role: "GIURIDICO" },
     }, context(db))).rejects.toThrow("INVALID_CLASSIFICATION_RATIONALE");
+  });
+
+  it("rolls back the classification if its audit record cannot be written", async () => {
+    const db = await database();
+    await seed(db);
+    const [created] = await persistResearchQuestionResults({ missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("candidate-1")] }, context(db));
+    const failingContext: ResearchQuestionResultContext = {
+      ...context(db),
+      transaction: (operation) => db.transaction((tx) => operation({
+        ...executor(tx),
+        auditClassificationReview: async () => { throw new Error("AUDIT_UNAVAILABLE"); },
+      })),
+    };
+    await expect(reviewResearchQuestionResult({
+      resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS",
+      reviewStatus: "HUMAN_CONFIRMED", confidence: null, rationale: "Passaggio pertinente verificato dal revisore.",
+      actor: { userId: "reviewer-1", role: "GIURIDICO" },
+    }, failingContext)).rejects.toThrow("AUDIT_UNAVAILABLE");
+    const result = await db.query<{ classificationReviewStatus: string }>(
+      'SELECT "classificationReviewStatus" FROM "ResearchQuestionResultRecord" WHERE "id"=$1', [created.id],
+    );
+    expect(result.rows[0].classificationReviewStatus).toBe("AI_PROPOSED");
   });
 
   it("keeps support direction separate from source verification state", () => {
@@ -164,13 +203,23 @@ describe("Lotto 4 research question results", () => {
   });
 
   it("derives conservative no-results, unassessed, partial, covered, conflicting, deferred, and pending states", () => {
-    const base = (direction: any, overrides: any = {}) => ({ candidateId: direction, candidateSnapshot: candidate(direction, "UNKNOWN", overrides.candidate ?? {}), supportDirection: direction, classificationReviewStatus: "AI_PROPOSED" as const, coverageElementKeys: overrides.elements ?? [], unresolvedAspectKeys: overrides.unresolved ?? [] });
+    const base = (direction: ResearchResultSupportDirection, overrides: {
+      candidate?: Partial<AuthorityCandidate>; elements?: string[]; unresolved?: string[];
+    } = {}) => ({ candidateId: direction, candidateSnapshot: candidate(direction, "UNKNOWN", overrides.candidate ?? {}), supportDirection: direction, classificationReviewStatus: "AI_PROPOSED" as const, coverageElementKeys: overrides.elements ?? [], unresolvedAspectKeys: overrides.unresolved ?? [] });
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [] }).status).toBe("NO_RESULTS");
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("UNASSESSED")] }).status).toBe("RESULTS_UNASSESSED");
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("SUPPORTS")] }).status).toBe("PARTIAL");
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("SUPPORTS", { candidate: { fullTextAvailable: true }, elements: ["competenza"] })] }).status).toBe("COVERED");
     expect(deriveResearchQuestionCoverage({ missionStatus: "COMPLETED", results: [base("SUPPORTS", { candidate: { fullTextAvailable: true } }), base("OPPOSES", { candidate: { fullTextAvailable: true } })] }).status).toBe("CONFLICTING");
     expect(deriveResearchQuestionCoverage({ missionStatus: "DEFERRED", results: [] }).status).toBe("NOT_RESEARCHED");
+    expect(deriveResearchQuestionCoverage({ missionStatus: "DEFERRED", results: [base("UNASSESSED")] })).toMatchObject({
+      executionState: "DEFERRED",
+      status: "RESULTS_UNASSESSED",
+    });
+    expect(deriveResearchQuestionCoverage({
+      missionStatus: "DEFERRED",
+      results: [base("SUPPORTS", { candidate: { fullTextAvailable: true }, elements: ["competenza"] })],
+    })).toMatchObject({ executionState: "DEFERRED", status: "COVERED" });
     expect(deriveResearchQuestionCoverage({ missionStatus: "PENDING", results: [] }).executionState).toBe("PENDING");
   });
 

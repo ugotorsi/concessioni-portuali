@@ -24,11 +24,7 @@ export class AiRealDataActivationError extends Error {
 }
 
 export function createRealDataActivationPolicy(env: RealDataActivationEnv): RealDataActivationPolicy {
-  const approvalId = env.AI_REAL_DATA_APPROVAL_ID;
-  const enabled = env.AI_REAL_DATA_ENABLED === "true"
-    && typeof approvalId === "string"
-    && approvalId.trim().length > 0
-    && env.AI_PROVIDER_PROJECT_CLASS === "REAL_DATA_APPROVED";
+  const enabled = isRealDataDeploymentAuthorized(env);
 
   return Object.freeze({
     enabled,
@@ -43,3 +39,6 @@ export function assertRealDataActivation(
     throw new AiRealDataActivationError();
   }
 }
+import { isRealDataDeploymentAuthorized } from "@/server/runtime/realDataAuthorization";
+
+export { isRealDataDeploymentAuthorized } from "@/server/runtime/realDataAuthorization";

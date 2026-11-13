@@ -1,6 +1,13 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
+import {
+  computeAuditHash,
+  createHistoricalAuditHashVerificationState,
+  sanitizeMetadata,
+  verifyHistoricalAuditHashRecords,
+  type AuditHashRecord,
+  type AuditHashChainVerification,
+} from "@/server/audit/hash";
 import { getAuditRequestContext, type AuditRequestContext } from "@/server/audit/requestContext";
 
 interface AuditActor {
@@ -65,13 +72,14 @@ async function createAuditLogRecord(
   context: AuditRequestContext,
 ) {
   const metadata = sanitizeMetadata(input.metadata);
-  const createdAt = new Date();
   await acquireActivityLogHashChainTransactionLock(tx);
   const previous = await tx.activityLog.findFirst({
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    select: { currentHash: true },
+    select: { currentHash: true, createdAt: true },
   });
 
+  // The chain is read by timestamp; concurrent writes and clock skew must not reorder it.
+  const createdAt = new Date(Math.max(Date.now(), (previous?.createdAt.getTime() ?? -1) + 1));
   const previousHash = previous?.currentHash ?? null;
   const currentHash = computeAuditHash({
     previousHash,
@@ -123,4 +131,59 @@ export function auditSuccess(input: Omit<CreateAuditLogInput, "esito">) {
 
 export function auditFailure(input: Omit<CreateAuditLogInput, "esito">) {
   return createAuditLog({ ...input, esito: "FAILURE" });
+}
+
+export async function verifyCompleteAuditLogChain(
+  batchSize = 1_000,
+): Promise<AuditHashChainVerification> {
+  if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 10_000) {
+    throw new Error("AUDIT_HASH_CHAIN_BATCH_SIZE_INVALID");
+  }
+  let last: { createdAt: Date; id: string } | null = null;
+  let verificationState = createHistoricalAuditHashVerificationState();
+  let verifiedCount = 0;
+  for (;;) {
+    const rows: AuditHashRecord[] = await prisma.activityLog.findMany({
+      where: last
+        ? {
+            OR: [
+              { createdAt: { gt: last.createdAt } },
+              { createdAt: last.createdAt, id: { gt: last.id } },
+            ],
+          }
+        : undefined,
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      take: batchSize,
+      select: {
+        id: true,
+        createdAt: true,
+        userId: true,
+        userEmail: true,
+        userRole: true,
+        azione: true,
+        entita: true,
+        entitaId: true,
+        enteId: true,
+        concessioneId: true,
+        esito: true,
+        metadata: true,
+        previousHash: true,
+        currentHash: true,
+      },
+    });
+    if (rows.length === 0) {
+      return { valid: true, verifiedCount, finalHash: verificationState.previousHash, issue: null };
+    }
+    const result = verifyHistoricalAuditHashRecords(rows, verificationState);
+    verifiedCount += result.verifiedCount;
+    if (!result.valid) {
+      return { ...result, verifiedCount };
+    }
+    verificationState = result.state;
+    const tail: AuditHashRecord = rows.at(-1)!;
+    last = { createdAt: tail.createdAt, id: tail.id };
+    if (rows.length < batchSize) {
+      return { valid: true, verifiedCount, finalHash: verificationState.previousHash, issue: null };
+    }
+  }
 }

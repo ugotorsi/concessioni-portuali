@@ -61,9 +61,9 @@ export async function ensureAuthorizedDocumentOcrExtractionJob(
       },
     },
   });
-  await requestDocumentWorkerActivation(
-    "DOCUMENT_OCR",
-    authorization.procedimentoId,
-  );
+  await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_OCR",
+    procedimentoId: authorization.procedimentoId,
+  });
   return admission;
 }

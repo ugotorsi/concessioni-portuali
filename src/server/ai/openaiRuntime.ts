@@ -12,14 +12,22 @@ import {
 } from "@/server/ai/fascicoloDocumentAnalysis";
 import {
   createOpenAiAnalysisProvider,
+  OPENAI_DEFAULT_REGION,
   type OpenAiFetch,
+  type OpenAiProviderTelemetry,
   type OpenAiRegion,
+  type OpenAiTokenCounter,
 } from "@/server/ai/providers/openai";
 import {
   assertRealDataActivation,
   createRealDataActivationPolicy,
   type RealDataActivationEnv,
 } from "@/server/ai/realDataActivation";
+import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
+import {
+  assertSelvaraPilotScopeForConfiguredApproval,
+  type SelvaraPilotAuthorizationScope,
+} from "@/server/ai/selvaraPilotAuthorization";
 
 export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_API_KEY",
@@ -27,19 +35,23 @@ export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_TIMEOUT_MS",
   "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
   "AI_OPENAI_MAX_OUTPUT_TOKENS",
+  "AI_OPENAI_MAX_INPUT_TOKENS",
   "AI_MAX_INPUT_BYTES",
 ] as const;
 
 export { AI_REAL_DATA_ACTIVATION_ENV_NAMES } from "@/server/ai/realDataActivation";
 
 type OpenAiRuntimeEnvName = (typeof AI_OPENAI_RUNTIME_ENV_NAMES)[number];
+type OpenAiConfigurationEnvName =
+  | OpenAiRuntimeEnvName
+  | "AI_OPENAI_USD_TO_EUR_RATE";
 export type OpenAiRuntimeEnv = Partial<Record<OpenAiRuntimeEnvName, string | undefined>>
   & RealDataActivationEnv;
 
 export class OpenAiRuntimeConfigurationError extends Error {
   readonly code = "AI_CONFIGURATION_ERROR" as const;
 
-  constructor(readonly envName: OpenAiRuntimeEnvName) {
+  constructor(readonly envName: OpenAiConfigurationEnvName) {
     super(`AI_CONFIGURATION_ERROR: ${envName} is invalid`);
     this.name = "OpenAiRuntimeConfigurationError";
   }
@@ -51,6 +63,7 @@ interface ParsedOpenAiRuntimeConfig {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   maxInputBytes: number;
 }
 
@@ -83,8 +96,12 @@ function positiveSafeInteger(env: OpenAiRuntimeEnv, envName: OpenAiRuntimeEnvNam
 }
 
 function parseRegion(env: OpenAiRuntimeEnv): OpenAiRegion {
-  const value = requiredTrimmedString(env, "AI_OPENAI_REGION");
-  if (value !== "GLOBAL" && value !== "EU") {
+  const configured = env.AI_OPENAI_REGION;
+  if (configured === undefined) {
+    return OPENAI_DEFAULT_REGION;
+  }
+  const value = configured.trim();
+  if (value !== OPENAI_DEFAULT_REGION) {
     return invalid("AI_OPENAI_REGION");
   }
   return value;
@@ -97,24 +114,37 @@ function parseRuntimeConfig(env: OpenAiRuntimeEnv): ParsedOpenAiRuntimeConfig {
     timeoutMs: positiveSafeInteger(env, "AI_OPENAI_TIMEOUT_MS"),
     maxRawResponseBytes: positiveSafeInteger(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
     maxOutputTokens: positiveSafeInteger(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+    maxInputTokens: positiveSafeInteger(env, "AI_OPENAI_MAX_INPUT_TOKENS"),
     maxInputBytes: positiveSafeInteger(env, "AI_MAX_INPUT_BYTES"),
   };
 }
 
+interface OpenAiRuntimeDependencies {
+  transport?: OpenAiFetch;
+  tokenCounter?: OpenAiTokenCounter;
+  telemetry?: OpenAiProviderTelemetry;
+}
+
 function createOpenAiFascicoloServiceConfig(
   env: OpenAiRuntimeEnv,
-  dependencies: { transport?: OpenAiFetch },
+  dependencies: OpenAiRuntimeDependencies,
+  authorizationScope?: SelvaraPilotAuthorizationScope,
 ) {
   const realDataActivation = createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
+  assertSelvaraPilotScopeForConfiguredApproval(env, authorizationScope);
   const config = parseRuntimeConfig(env);
   const provider = createOpenAiAnalysisProvider({
     apiKey: config.apiKey,
     timeoutMs: config.timeoutMs,
     maxRawResponseBytes: config.maxRawResponseBytes,
     maxOutputTokens: config.maxOutputTokens,
+    maxInputTokens: config.maxInputTokens,
     region: config.region,
+    authorizeRequest: assertGlobalAiExecutionAllowed,
     ...(dependencies.transport ? { transport: dependencies.transport } : {}),
+    ...(dependencies.tokenCounter ? { tokenCounter: dependencies.tokenCounter } : {}),
+    ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {}),
   });
   return {
     provider,
@@ -129,14 +159,14 @@ function defaultOpenAiRuntimeEnv(): OpenAiRuntimeEnv {
 
 export function createOpenAiFascicoloRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
 ): FascicoloLiveAnalysisService {
   return createFascicoloLiveAnalysisService(createOpenAiFascicoloServiceConfig(env, dependencies));
 }
 
 export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
 ): FascicoloTrustedReviewProductionService {
   return createFascicoloTrustedReviewProductionService(
     createOpenAiFascicoloServiceConfig(env, dependencies),
@@ -145,9 +175,10 @@ export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
 
 export function createOpenAiFascicoloDocumentRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
+  authorizationScope?: SelvaraPilotAuthorizationScope,
 ) {
-  const config = createOpenAiFascicoloServiceConfig(env, dependencies);
+  const config = createOpenAiFascicoloServiceConfig(env, dependencies, authorizationScope);
   return createFascicoloDocumentAnalysisService({
     provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
     maxInputBytes: config.maxInputBytes,

@@ -31,13 +31,61 @@ Configurare nell'ambiente applicativo:
 WORKOS_AUTHKIT_ISSUER="https://<authkit-domain>"
 WORKOS_API_KEY="<secret>"
 MCP_RESOURCE_URI="https://<app-host>/api/mcp"
+MCP_FASCICOLO_GRANT_SECRET="<secret-interno-almeno-32-byte>"
 ```
 
 Requisiti:
 
 - `WORKOS_AUTHKIT_ISSUER` e `MCP_RESOURCE_URI` devono essere URL HTTPS senza query, frammenti o credenziali.
 - `MCP_RESOURCE_URI` deve coincidere esattamente con il resource indicator configurato in WorkOS e richiesto da ChatGPT.
+- `MCP_FASCICOLO_GRANT_SECRET` firma i grant fascicolo-bound e deve essere disponibile
+  nello stesso ambiente del runtime MCP; non deve essere copiato nei client.
+- L'alias dedicato NOETRA Preview
+  `concessioni-portuali-demo-v7-mcp-preview.vercel.app` consente esclusivamente
+  `/api/mcp` e `/.well-known/oauth-protected-resource`; qualsiasi altro percorso,
+  incluse pagine, API applicative e asset statici, risponde `404` senza redirect.
+- L'hostname dedicato non sostituisce OAuth: `/api/mcp` continua a richiedere un token
+  WorkOS valido e le autorizzazioni locali su attore, tenant e missione.
 - Non committare valori reali.
+
+Il valore esatto di `MCP_RESOURCE_URI` deve essere registrato anche in WorkOS AuthKit,
+Connect -> Configuration -> Resource Indicators. La registrazione Preview protetta usa:
+
+```powershell
+npm run runtime:configure-workos-mcp-resource -- --resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp --apply --confirm-resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp
+```
+
+Il comando accetta soltanto tale URI esatto, rifiuta wildcard e ambienti AuthKit non
+Staging, conserva tutti gli indicatori esistenti e verifica la postcondizione mediante
+una nuova lettura API.
+
+## Recupero password Preview
+
+Il recupero password locale e disponibile soltanto su Vercel Preview e resta disabilitato
+per default:
+
+```dotenv
+PREVIEW_PASSWORD_RECOVERY_ENABLED="true"
+WORKOS_CLIENT_ID="<client-id-non-production>"
+```
+
+`WORKOS_API_KEY` deve appartenere allo stesso ambiente non-production del `WORKOS_CLIENT_ID`.
+Le email automatiche Magic Auth devono essere abilitate in WorkOS. Production non deve
+ricevere queste variabili con il recupero attivo.
+
+La procedura:
+
+1. trova l'utente locale esistente tramite email, senza creare account;
+2. richiede a WorkOS l'utente con `external_id` uguale all'immutabile `User.id`;
+3. richiede email verificata e corrispondenza esatta dell'indirizzo;
+4. invia un codice Magic Auth monouso tramite WorkOS;
+5. verifica nuovamente email ed `external_id` quando il codice viene presentato;
+6. aggiorna soltanto hash password, timestamp password e stato lockout;
+7. conserva `User.id`, membership, tenant, ruolo, MFA, recovery codes e assegnazioni;
+8. invalida le sessioni JWT emesse prima del cambio password.
+
+Gli account con MFA non configurata non sono recuperabili da questa superficie. Dopo il
+reset, il normale login continua a richiedere il TOTP gia associato all'utente.
 
 ## Binding server-side attore-missione
 
@@ -46,6 +94,30 @@ OAuth identifica l'attore e il tenant; l'accesso a una missione richiede inoltre
 La superficie admin di creazione assegna la missione a un attore attivo e deriva il tenant dalla sua membership predefinita. Le missioni legacy senza assegnatario restano invisibili. `research_list_pending` filtra per tenant e attore assegnato; get, claim, submit, defer e complete ripetono lo stesso controllo sulla missione persistita prima di operare. Il modello non puo fornire o sovrascrivere `tenantId`, `actorId`, `caseId` o `fascicoloScopeId` come selettori di autorizzazione.
 
 Il percorso operativo e: Concessioni Portuali crea e assegna la missione -> ChatGPT personale la prende tramite MCP -> ChatGPT usa i propri connettori autorizzati -> ChatGPT restituisce e completa il bundle tramite MCP. Non sono richiesti client provider programmatici nel backend.
+
+`research_get_mission` restituisce anche `connectorExecutionGuidance`. Per Moonlit,
+`query` e sempre la stringa indicata da NOETRA: non deve essere trasformata in un
+oggetto o in un array, e gli argomenti opzionali non supportati dallo schema live del
+connettore vanno omessi. Nel bundle le chiamate provider fallite restano tracciate
+tramite `errorState`, mentre le fonti valide restituite dagli altri provider devono
+essere conservate. Il client puo omettere `candidateId`: NOETRA lo genera e lo
+restituisce in forma canonica dopo aver validato la fonte.
+
+La stessa risposta espone una guida strutturata `evidenceBundle` per
+`RESEARCH_BRIDGE_V1`. La guida indica i campi obbligatori delle esecuzioni, il ruolo
+canonico di ogni provider, i tipi di operazione ammessi, le alternative di identita
+stabile per una fonte e lo schema esatto delle lacune. Ogni `authorityCandidate`
+deve riferirsi a un `executionRecordId` incluso nel bundle. Una lacuna usa
+`{ gapId, kind, targetId?, sourceFamily? }`; se il `candidateId` canonico non e
+ancora disponibile, `targetId` deve essere omesso. Le proprieta opzionali sconosciute
+si omettono invece di valorizzarle a `null`, mentre le collezioni richieste senza
+elementi si inviano come array vuoti.
+
+Le missioni create per questo percorso hanno `executionChannel=CHATGPT_CONNECTOR`.
+L'assenza del campo nelle missioni legacy equivale allo stesso valore. Soltanto una
+missione creata esplicitamente con `executionChannel=SERVER_AUTONOMOUS` puo essere
+ammessa dagli scheduler di ricerca automatica. I gate ambientali non possono
+convertire una missione ChatGPT in una missione autonoma.
 
 Il `fascicoloScopeId` continua a essere derivato dal server usando tenant e case reference della missione persistita. La separazione delle conversazioni ChatGPT per fascicolo resta difesa in profondita e non sostituisce l'assegnazione applicativa.
 
@@ -71,10 +143,16 @@ Il worker applicativo puo creare missioni di controllo periodico senza eseguire 
 
 ```dotenv
 PERIODIC_LEGAL_RESEARCH_ENABLED="true"
-PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS="30"
+PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS="7"
 ```
 
-L'opzione e disabilitata per default. L'intervallo ammesso e 1-365 giorni. Il worker riconcilia al massimo una volta l'ora e crea nuove missioni soltanto quando l'ultima missione corrente del fascicolo e antecedente alla soglia. Ogni missione conserva `tenantId`, `procedimentoId`, revisione e attore assegnato; un fascicolo di rinnovo usa un `procedimentoId` autonomo e non eredita missioni o conclusioni dal fascicolo precedente.
+L'opzione e una capacita ambientale, ma l'esecuzione resta bloccata finche il controllo
+persistente `AUTOMATION_MODE_CHANGE` non e `ON`; in assenza di eventi il default e
+sempre `OFF`, anche dopo riavvii e deployment. L'intervallo ammesso e 1-365 giorni.
+Il worker riconcilia al massimo una volta l'ora e crea nuove missioni soltanto quando
+l'ultima missione corrente del fascicolo e antecedente alla soglia. Ogni missione
+conserva `tenantId`, `procedimentoId`, revisione e attore assegnato; un fascicolo di
+rinnovo usa un `procedimentoId` autonomo e non eredita missioni o conclusioni dal fascicolo precedente.
 
 ## Configurazione WorkOS
 

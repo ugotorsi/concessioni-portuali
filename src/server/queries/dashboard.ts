@@ -142,9 +142,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
   const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
-  let dashboardRows: any = null;
-
-  try {
+  const dashboardRows = await (async () => {
+    try {
     const [
       totaleConcessioni,
       concessioniAttive,
@@ -351,30 +350,31 @@ export async function getDashboardData(): Promise<DashboardData> {
       }),
     ]);
 
-    dashboardRows = {
-      totaleConcessioni,
-      concessioniAttive,
-      concessioniInScadenza90,
-      criticitaAperte,
-      criticitaUrgenti,
-      morositaAperte,
-      pagamentiCritici,
-      procedimentiInCorsoCount,
-      garanziePolizzeCritiche,
-      fontiNormative,
-      versioniNormativeInConsultazione,
-      criticitaPrioritarieRows,
-      scadenzeImminentiRows,
-      pagamentiCriticiRows,
-      procedimentiRows,
-    };
-  } catch (error) {
-    if (isRecoverableDashboardQueryError(error) || process.env.NODE_ENV !== "production") {
-      return buildFallbackDashboardData();
-    }
+      return {
+        totaleConcessioni,
+        concessioniAttive,
+        concessioniInScadenza90,
+        criticitaAperte,
+        criticitaUrgenti,
+        morositaAperte,
+        pagamentiCritici,
+        procedimentiInCorsoCount,
+        garanziePolizzeCritiche,
+        fontiNormative,
+        versioniNormativeInConsultazione,
+        criticitaPrioritarieRows,
+        scadenzeImminentiRows,
+        pagamentiCriticiRows,
+        procedimentiRows,
+      };
+    } catch (error) {
+      if (isRecoverableDashboardQueryError(error) || process.env.NODE_ENV !== "production") {
+        return null;
+      }
 
-    throw error;
-  }
+      throw error;
+    }
+  })();
 
   if (!dashboardRows) {
     return buildFallbackDashboardData();
@@ -398,21 +398,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     procedimentiRows,
   } = dashboardRows;
 
-  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item: {
-    id: string;
-    gravita: string;
-    tipologia: string;
-    descrizione: string;
-    riferimentoNormativo: string | null;
-    stato: string;
-    dataRilevazione: Date;
-    procedimenti: Array<{ id: string }>;
-    concessione: {
-      numeroAtto: string;
-      procedimenti: Array<{ id: string }>;
-      fascicoliIntake: Array<{ id: string }>;
-    };
-  }) => ({
+  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item) => ({
     id: item.id,
     fascicoloId: item.procedimenti[0]?.id
       ?? item.concessione.procedimenti[0]?.id
@@ -427,17 +413,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     dataRilevazione: item.dataRilevazione,
   }));
 
-  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item: {
-    id: string;
-    dataScadenza: Date;
-    tipologia: string;
-    stato: string;
-    concessione: {
-      numeroAtto: string;
-      procedimenti: Array<{ id: string }>;
-      fascicoliIntake: Array<{ id: string }>;
-    };
-  }) => ({
+  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item) => ({
     id: item.id,
     fascicoloId: item.concessione.procedimenti[0]?.id
       ?? item.concessione.fascicoliIntake[0]?.id
@@ -449,19 +425,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     giorniDelta: differenceInCalendarDays(item.dataScadenza, oggi),
   }));
 
-  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item: {
-    id: string;
-    annoRiferimento: number;
-    importoDovuto: number;
-    importoVersato: number;
-    stato: string;
-    dataScadenza: Date;
-    concessione: {
-      numeroAtto: string;
-      procedimenti: Array<{ id: string }>;
-      fascicoliIntake: Array<{ id: string }>;
-    };
-  }) => {
+  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item) => {
     const dovuto = Number(item.importoDovuto);
     const versato = Number(item.importoVersato);
 
@@ -480,15 +444,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     };
   });
 
-  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item: {
-    id: string;
-    tipologia: string;
-    stato: string;
-    riferimentoNormativo: string | null;
-    dataScadenzaContraddittorio: Date | null;
-    updatedAt: Date;
-    concessione: { numeroAtto: string } | null;
-  }) => ({
+  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item) => ({
     id: item.id,
     tipologia: item.tipologia,
     concessione: item.concessione?.numeroAtto ?? "Titolo concessorio non accertato",

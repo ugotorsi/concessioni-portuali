@@ -6,6 +6,7 @@ import {
   documentWorkerKindForOperation,
   DocumentWorkerActivationError,
   DOCUMENT_WORKER_OPERATIONS,
+  type DocumentWorkerActivationRequest,
   type DocumentWorkerKind,
 } from "./documentWorkerActivation";
 
@@ -17,7 +18,9 @@ const RECOVERABLE_OPERATIONS = [
 ] as const;
 
 interface RecoverableJob {
+  readonly id: string;
   readonly operation: string;
+  readonly tenantId: string | null;
   readonly procedimentoId: string | null;
 }
 
@@ -67,8 +70,7 @@ async function defaultListRecoverableJobs(
         },
       ],
     },
-    select: { operation: true, procedimentoId: true },
-    distinct: ["operation", "procedimentoId"],
+    select: { id: true, operation: true, tenantId: true, procedimentoId: true },
   });
 }
 
@@ -82,27 +84,46 @@ export async function runDocumentWorkerRecoveryProcess(
     const jobs = await (dependencies.listRecoverableJobs ?? defaultListRecoverableJobs)(
       allowedProcedimenti,
     );
-    const activations = new Map<string, { kind: DocumentWorkerKind; procedimentoId: string }>();
+    const activations = new Map<string, DocumentWorkerActivationRequest>();
     for (const job of jobs) {
       const kind = documentWorkerKindForOperation(job.operation);
       if (!kind || !job.procedimentoId || !allowedProcedimenti.includes(job.procedimentoId)) continue;
-      activations.set(`${kind}:${job.procedimentoId}`, {
-        kind,
-        procedimentoId: job.procedimentoId,
-      });
+      if (kind === "DOCUMENT_ANALYSIS") {
+        if (!job.tenantId) {
+          failed = true;
+          report({
+            event: "DOCUMENT_WORKER_RECOVERY_FAILED",
+            kind,
+            procedimentoId: job.procedimentoId,
+            applicationJobId: job.id,
+            errorCode: "TARGET_AUTHORITY_MISMATCH",
+          });
+          continue;
+        }
+        activations.set(`${kind}:${job.id}`, {
+          kind,
+          applicationJobId: job.id,
+          tenantId: job.tenantId,
+          procedimentoId: job.procedimentoId,
+        });
+        continue;
+      }
+      activations.set(`${kind}:${job.procedimentoId}`, { kind, procedimentoId: job.procedimentoId });
     }
     for (const activation of activations.values()) {
       try {
         const result = await (dependencies.activate ?? activateDocumentWorker)(
-          activation.kind,
-          activation.procedimentoId,
+          activation,
           { environment: dependencies.environment },
         );
-        if (result.outcome === "REQUESTED") {
+        if (result.outcome === "REQUESTED" || result.outcome === "ALREADY_REQUESTED") {
           report({
             event: "DOCUMENT_WORKER_RECOVERY_REQUESTED",
             kind: activation.kind,
             procedimentoId: activation.procedimentoId,
+            ...("applicationJobId" in activation
+              ? { applicationJobId: activation.applicationJobId }
+              : {}),
           });
           continue;
         }

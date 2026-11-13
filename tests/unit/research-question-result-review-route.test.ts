@@ -104,6 +104,7 @@ describe("research question result review route", () => {
       reviewStatus: "HUMAN_CONFIRMED",
       confidence: null,
       rationale: "La disposizione sostiene il punto controverso.",
+      actor: { userId: "reviewer-1", role: "GIURIDICO" },
     });
     expect(deps.list).toHaveBeenCalledTimes(1);
   });

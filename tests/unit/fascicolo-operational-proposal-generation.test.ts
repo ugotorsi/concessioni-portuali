@@ -89,4 +89,260 @@ describe("Lotto 7 operational proposal generation", () => {
     empty.legalIssues = [];
     expect(generate(empty)).toEqual([]);
   });
+
+  it("aggregates page-level extraction gaps into one coverage review per document instead of document requests", () => {
+    const value = report();
+    const pageGap = (page: number, document = 1) => ({
+      ...item(`coverage-${document}-${page}`, "GAP", {
+        gapType: "DOCUMENT_INTERPRETATION_GAP",
+        description: `Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_${document}.PAGE_${page}.`,
+        impact: "Pagina non utilizzata",
+      }),
+      normalizedText: `Nessuna informazione interpretativa verificata e stata estratta da DOCUMENT_${document}.PAGE_${page}.`,
+    });
+    const notificationDate = item("missing-date", "GAP", {
+      gapType: "MISSING_EVIDENCE",
+      description: "Nessuna data di notifica è stata rilevata in DOCUMENT_1.PAGE_3",
+      impact: "Decorrenza non verificabile",
+    });
+    value.gaps = [
+      ...[1, 2, 3, 4, 5, 6, 9, 10, 25].map((page) => pageGap(page)),
+      pageGap(7, 2),
+      value.gaps[0],
+      notificationDate,
+    ] as never;
+
+    const candidates = generate(value);
+    const requests = candidates.filter((candidate) => candidate.proposalType === "DOCUMENT_REQUIREMENT");
+    expect(requests.map((candidate) => candidate.originatingKnowledgeItemIds)).toEqual(expect.arrayContaining([["gap-1"], ["missing-date"]]));
+    expect(requests).toHaveLength(2);
+
+    const coverage = candidates.filter((candidate) => candidate.warningCodes.includes("EXTRACTION_COVERAGE_REVIEW"));
+    expect(coverage).toHaveLength(2);
+    const first = coverage.find((candidate) => (candidate.proposedPayload as { documentRef: string }).documentRef === "DOCUMENT_1")!;
+    expect(first.proposalType).toBe("NOTE");
+    expect(first.title).toBe("Verificare la copertura della lettura: documento 1");
+    expect(first.description).toContain("9 pagine (pag. 1-6, 9-10, 25) del documento 1");
+    expect(first.description).toContain("Non è richiesta nuova documentazione.");
+    expect(first.originatingKnowledgeItemIds).toHaveLength(9);
+    expect(first.proposedPayload).toMatchObject({ reviewType: "EXTRACTION_COVERAGE", requestsNewDocumentation: false, pageNumbers: [1, 2, 3, 4, 5, 6, 9, 10, 25] });
+    expect(first.warningCodes).toContain("MANUAL_ACTION_REQUIRED");
+    expect(candidates.every((candidate) => operationalProposalCandidateSchema.safeParse(candidate).success)).toBe(true);
+
+    const reordered = report();
+    reordered.gaps = [...(value.gaps as never[])].reverse() as never;
+    expect(generate(reordered).map((candidate) => candidate.proposalFingerprint))
+      .toEqual(candidates.map((candidate) => candidate.proposalFingerprint));
+  });
+
+  it("creates phase-aware activities and preview-only metadata reconciliations with rollback evidence", () => {
+    const value = report();
+    const concession = item("concession-act", "LEGAL_ACT", {
+      documentBasisRef: "DOCUMENT_1.PAGE_1",
+      actType: "Atto di concessione demaniale",
+      proceduralRole: null,
+      authoritySubjectIds: [],
+      number: "17/2023",
+      date: { precision: "EXACT", from: "2023-04-03", to: null, originalText: null, confidence: 95 },
+      title: "Atto di concessione demaniale n. 17/2023",
+      declaredEffects: [],
+    });
+    const decision = item("final-act", "LEGAL_ACT", {
+      documentBasisRef: "DOCUMENT_1.PAGE_2",
+      actType: "Determinazione di decadenza",
+      proceduralRole: "CHALLENGED_ACT",
+      authoritySubjectIds: [],
+      number: "149/2026",
+      date: { precision: "EXACT", from: "2026-10-08", to: null, originalText: null, confidence: 95 },
+      title: "Determinazione di decadenza n. 149/2026",
+      declaredEffects: ["Decadenza"],
+    });
+    value.documentedFramework.legalActs = [concession, decision] as never;
+    value.legalIssues[0].originatingItemIds = [
+      ...value.legalIssues[0].originatingItemIds,
+      concession.id,
+      decision.id,
+    ];
+    value.proceduralContext = {
+      stato: "DA_AVVIARE",
+      tipologia: "ALTRO",
+      origineProcedimento: "ALTRO",
+      dataAvvio: null,
+      dataProvvedimentoFinale: null,
+      comunicazioneAvvioInviata: false,
+      contestazioneFormaleInviata: false,
+      memorieRicevute: false,
+      audizioneSvolta: false,
+      controdeduzioniValutate: false,
+      checklistContraddittorioCompleta: false,
+      finalAct: null,
+      concessione: null,
+      documentTitles: ["Istanza di riesame"],
+    };
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Tenuta della decisione",
+      sourceDocumentRefs: ["DOCUMENT_1.PAGE_2"],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Istruire il riesame",
+      steps: [{
+        title: "Istruire il riesame",
+        action: "Confrontare motivi, decisione e prove.",
+        office: "Ufficio legale",
+        requiredDocuments: ["Istanza", "Provvedimento"],
+        completionGate: "Ogni motivo è valutato",
+        draftTitle: "Riscontro al riesame",
+        draftTemplate: "Bozza soggetta ad approvazione umana.",
+      }],
+      alternatives: [],
+      deadlineReview: "Non creare termini senza fonte.",
+    }];
+
+    const candidates = generate(value);
+    expect(candidates.filter((candidate) => candidate.proposalType === "ACTIVITY")).toHaveLength(1);
+    const reconciliations = candidates.filter((candidate) =>
+      candidate.warningCodes.includes("AUTHORITATIVE_DATA_CHANGE_PREVIEW"));
+    expect(reconciliations).toHaveLength(2);
+    expect(reconciliations.map((candidate) => candidate.proposedPayload)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        reconciliationType: "CONCESSIONE_LINK_OR_CREATE",
+        materializationMode: "PROFESSIONAL_REVIEW_REQUIRED",
+        before: null,
+        after: expect.objectContaining({ numeroAtto: "17/2023" }),
+        evidence: [{
+          basisRef: "DOCUMENT_1.PAGE_1",
+          documentFileVersionId: "version-1",
+          pageNumber: 1,
+          textSha256: sha("e"),
+        }],
+        previewOnly: true,
+      }),
+      expect.objectContaining({
+        reconciliationType: "PROCEDIMENTO_FINAL_ACT",
+        before: expect.objectContaining({ stato: "DA_AVVIARE" }),
+        after: expect.objectContaining({ stato: "CONCLUSO" }),
+        previewOnly: true,
+      }),
+    ]));
+    const concessionReconciliation = reconciliations.find((candidate) =>
+      candidate.proposalType === "CONCESSION_LINK_OR_CREATE");
+    expect(concessionReconciliation?.warningCodes).toContain("PROFESSIONAL_REVIEW_REQUIRED");
+    expect(concessionReconciliation?.warningCodes).not.toContain("MANUAL_ACTION_REQUIRED");
+    expect(reconciliations.find((candidate) => candidate.proposalType === "NOTE")?.warningCodes)
+      .toContain("MANUAL_ACTION_REQUIRED");
+
+    value.proceduralContext.concessione = {
+      numeroAtto: " 17/2023 ",
+      stato: "ATTIVA",
+      dataRilascio: "2022-04-03T00:00:00.000Z",
+    };
+    expect(generate(value).filter((candidate) => candidate.proposalType === "CONCESSION_LINK_OR_CREATE"))
+      .toHaveLength(1);
+
+    value.proceduralContext.concessione.dataRilascio = "2023-04-03T00:00:00.000Z";
+    expect(generate(value).filter((candidate) => candidate.proposalType === "CONCESSION_LINK_OR_CREATE"))
+      .toHaveLength(0);
+  });
+
+  it("keeps multiple documents and does not invent dependencies from the order of activities", () => {
+    const value = report();
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Valutare le iniziative",
+      sourceDocumentRefs: [],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Esaminare",
+      steps: [
+        {
+          activityCode: "ASSESS",
+          title: "Esaminare gli atti",
+          action: "Esaminare.",
+          office: "Ufficio",
+          requiredDocuments: [],
+          completionGate: "Esame effettuato",
+          draftTitle: "Relazione",
+          documentCode: "REPORT",
+          draftTemplate: "Relazione da completare",
+          additionalDrafts: [{ documentCode: "NOTICE", title: "Comunicazione", template: "Comunicazione da completare" }],
+        },
+        {
+          activityCode: "OPTIONAL",
+          necessity: "CONDITIONAL",
+          title: "Valutare una soluzione alternativa",
+          action: "Verificare i presupposti.",
+          office: "Ufficio",
+          requiredDocuments: [],
+          completionGate: "Valutazione motivata",
+        },
+      ],
+      alternatives: [{
+        title: "Alternativa", whenApplicable: "Se pertinente", practicalRoute: "Valutare",
+        riskOrLimit: "Non cumulativa",
+      }],
+      deadlineReview: "Non presumere scadenze.",
+    }];
+    const activities = generate(value).filter((candidate) => candidate.proposalType === "ACTIVITY");
+    expect(activities).toHaveLength(2);
+    expect(activities.find((candidate) => candidate.title === "Esaminare gli atti")?.proposedPayload)
+      .toMatchObject({
+        dependencies: [],
+        draft: { documentCode: "REPORT", title: "Relazione" },
+        additionalDrafts: [{ documentCode: "NOTICE", title: "Comunicazione", template: "Comunicazione da completare" }],
+      });
+    expect(activities.find((candidate) => candidate.title === "Valutare una soluzione alternativa")?.proposedPayload)
+      .toMatchObject({ dependencies: [], necessity: "CONDITIONAL" });
+  });
+
+  it("does not propose initiatives judged not justified and prioritises the first required step", () => {
+    const value = report();
+    const step = (activityCode: string, necessity: "REQUIRED" | "CONDITIONAL" | "NOT_JUSTIFIED") => ({
+      activityCode, necessity, title: activityCode, action: "Azione.", office: "Ufficio", requiredDocuments: [], completionGate: "Esito",
+    });
+    value.operationalPlans = [{
+      issueSemanticKey: value.legalIssues[0].semanticKey,
+      issueText: "Questione",
+      sourceDocumentRefs: [],
+      outstandingEvidence: [],
+      legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Verificare",
+      steps: [step("OPTIONAL_CHECK", "CONDITIONAL"), step("VERIFY", "REQUIRED"), step("REVOCATION", "NOT_JUSTIFIED")],
+      alternatives: [],
+      deadlineReview: "Non presumere scadenze.",
+    }];
+    const activities = generate(value).filter((candidate) => candidate.proposalType === "ACTIVITY");
+    expect(activities.map((candidate) => candidate.title)).toEqual(["OPTIONAL_CHECK", "VERIFY"]);
+    expect(activities.find((candidate) => candidate.title === "VERIFY")?.proposedPayload).toMatchObject({ priority: "HIGH" });
+    expect(activities.find((candidate) => candidate.title === "OPTIONAL_CHECK")?.proposedPayload).toMatchObject({ priority: "MEDIUM" });
+  });
+
+  it("turns MCP technical acquisitions into a non-probative TECNICA verification proposal", () => {
+    const withTechnical = report();
+    withTechnical.technicalSources = [{
+      recordId: "tech-1", missionId: "mission-1", questionSemanticKey: sha("q"), toolName: "wms_feature_info",
+      question: "Vincoli?", verificationStatus: "RISPOSTA_VUOTA_NON_PROBATORIA", probative: false,
+      serviceVersion: "1.0.0", responseDigest: sha("d"), retrievedAt: "2026-10-18T08:00:00.000Z",
+      requiredVerification: "Verificare presso l'ente competente.",
+    }, {
+      recordId: "tech-orphan", missionId: "mission-x", questionSemanticKey: sha("unknown"), toolName: "search",
+      question: "Altro", verificationStatus: "DA_VERIFICARE_SU_FONTE_ORIGINALE", probative: false,
+      serviceVersion: "1.0.0", responseDigest: sha("e"), retrievedAt: "2026-10-18T08:00:00.000Z",
+      requiredVerification: "Consultare la fonte originale.",
+    }];
+    const technical = generate(withTechnical).filter((candidate) => candidate.warningCodes.includes("TECHNICAL_SOURCE_NOT_PROBATIVE"));
+    expect(technical).toHaveLength(1);
+    expect(technical[0]).toMatchObject({
+      proposalType: "CRITICALITY",
+      originatingQuestionSemanticKeys: [sha("q")],
+      originatingIssueSemanticKeys: [sha("i")],
+      relevantResultIds: [],
+      proposedPayload: { category: "TECNICA", severity: "MEDIA", technicalSourceRecordIds: ["tech-1"] },
+    });
+    expect(operationalProposalCandidateSchema.safeParse(technical[0]).success).toBe(true);
+    expect(generate(withTechnical)).toHaveLength(generate().length + 1);
+  });
 });

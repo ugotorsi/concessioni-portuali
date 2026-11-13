@@ -20,6 +20,7 @@ export async function GET(request: Request) {
   }
 
   const cookieStore = await cookies();
+  cookieStore.delete("__Secure-noetra-preview.session-token");
   cookieStore.delete("next-auth.session-token");
   cookieStore.delete("__Secure-next-auth.session-token");
   cookieStore.delete("next-auth.callback-url");

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { discoverItalianLegalReferences } from "@/server/intake/legal-reference-discovery/parser";
 import {
   NORMATTIVA_PROVIDER,
   createNormattivaOfficialProvider,
@@ -13,13 +13,21 @@ import { persistTemporalAssessment } from "@/server/legal-sources/temporal/persi
 
 import type { AuthorityCandidate } from "./bridge";
 import {
+  type OfficialSourceRelevance,
+  type OfficialSourceRelevanceReason,
+  officialNormattivaUrl,
+  officialSourceRelevance,
+  parseProviderLegislationReference,
+  selectRelevantArticle,
+} from "./official-source-relevance";
+import {
   SOURCE_CHAIN_VERIFICATION_VERSION,
   evaluateContentVerification,
   evaluateExactRetrieval,
   evaluateIdentityVerification,
   temporalStateFromAssessment,
 } from "./source-chain";
-import { persistSourceChainAssessment } from "./source-chain-persistence";
+import { persistSourceChainAssessment, retireUsableSourceAssessments } from "./source-chain-persistence";
 
 const MAX_OFFICIAL_DOCUMENT_BYTES = 2 * 1024 * 1024;
 const NORMATTIVA_AKN_ENDPOINT = "https://www.normattiva.it/do/atto/caricaAKN";
@@ -46,8 +54,14 @@ type AknEvidence = Readonly<{
   contentSha256: string;
   expressionDate: string;
   expressionKey: string;
-  citationAnchor: Readonly<{ section: string; anchor: string }>;
+  citationAnchor: Readonly<{ section: string; anchor: string }> | null;
+  relevantText: string | null;
   sourceUrl: string;
+}>;
+
+type PertinentAknEvidence = AknEvidence & Readonly<{
+  citationAnchor: Readonly<{ section: string; anchor: string }>;
+  relevantText: string;
 }>;
 
 export type OfficialSourceVerificationResult = Readonly<{
@@ -59,10 +73,6 @@ export type OfficialSourceVerificationResult = Readonly<{
 
 function sha256(value: Uint8Array | string): string {
   return createHash("sha256").update(value).digest("hex");
-}
-
-function normalized(value: string): string {
-  return value.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase("it-IT");
 }
 
 function xmlText(value: string): string {
@@ -77,27 +87,26 @@ function xmlText(value: string): string {
     .trim();
 }
 
-function citationAnchor(xml: string, researchQuestion: string) {
-  const terms = normalized(researchQuestion)
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((term) => term.length >= 6)
-    .map((term) => term.slice(0, 7));
+function citationAnchor(xml: string, researchQuestion: string, actTitle: string | null) {
   const articles = [...xml.matchAll(/<article\b[^>]*\beId="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)]
     .map((match) => {
-      const text = normalized(xmlText(match[2]));
-      const score = terms.reduce((sum, term) => sum + (text.includes(term) ? 1 : 0), 0)
-        + (text.includes("concession") ? 2 : 0)
-        + (/(efficacia|scadenza|termine)/.test(text) ? 1 : 0);
-      return { anchor: match[1], text, score };
-    })
-    .filter((article) => article.text.includes("concession"));
-  const selected = articles.sort((left, right) => right.score - left.score)[0];
-  if (!selected || selected.score < 3) return null;
-  const articleNumber = /^art_(.+)$/.exec(selected.anchor)?.[1]?.replace(/_/g, "-");
-  return {
-    section: articleNumber ? `Art. ${articleNumber}` : selected.anchor,
-    anchor: selected.anchor,
-  };
+      // Normattiva editorial notes cite unrelated acts and must not drive pertinence.
+      const body = match[2].replace(/<authorialNote\b[\s\S]*?<\/authorialNote>/g, " ");
+      const heading = /<heading\b[^>]*>([\s\S]*?)<\/heading>/.exec(body)?.[1];
+      const paragraphs = [...body.matchAll(/<(paragraph|point)\b[^>]*>([\s\S]*?)<\/\1>/g)]
+        .map((paragraph) => xmlText(paragraph[2]));
+      return {
+        anchor: match[1],
+        text: xmlText(body),
+        segments: [heading ? xmlText(heading) : "", ...paragraphs].filter(Boolean),
+      };
+    });
+  const docTitle = /<docTitle\b[^>]*>([\s\S]*?)<\/docTitle>/.exec(xml)?.[1];
+  return selectRelevantArticle({
+    articles,
+    researchQuestion,
+    actTitle: [actTitle, docTitle ? xmlText(docTitle) : null].filter(Boolean).join(" ") || null,
+  });
 }
 
 async function readBoundedBytes(response: Response): Promise<Uint8Array> {
@@ -142,12 +151,13 @@ function cookieHeader(response: Response): string {
     .join("; ");
 }
 
-async function acquireNormattivaAkn(input: {
+export async function acquireNormattivaAkn(input: {
   candidateUrl: string;
   providerRecordId: string;
   publicationDate: Date | null;
   referenceDate: Date;
   researchQuestion: string;
+  actTitle: string | null;
 }): Promise<AknEvidence> {
   if (!input.publicationDate) throw new Error("NORMATTIVA_PUBLICATION_DATE_MISSING");
   const detailUrl = new URL(input.candidateUrl);
@@ -192,14 +202,14 @@ async function acquireNormattivaAkn(input: {
     }
     const expression = /<FRBRExpression>[\s\S]*?<FRBRuri\s+value="([^"]+)"[\s\S]*?<FRBRdate\s+date="(\d{4}-\d{2}-\d{2})"/.exec(xml);
     if (!expression) throw new Error("NORMATTIVA_AKN_EXPRESSION_MISSING");
-    const anchor = citationAnchor(xml, input.researchQuestion);
-    if (!anchor) throw new Error("NORMATTIVA_RELEVANT_CITATION_ANCHOR_MISSING");
+    const anchor = citationAnchor(xml, input.researchQuestion, input.actTitle);
     return {
       bytes,
       contentSha256: sha256(bytes),
       expressionDate: expression[2],
       expressionKey: expression[1],
-      citationAnchor: anchor,
+      citationAnchor: anchor ? { section: anchor.section, anchor: anchor.anchor } : null,
+      relevantText: anchor?.relevantText ?? null,
       sourceUrl: aknUrl.toString(),
     };
   } finally {
@@ -207,23 +217,17 @@ async function acquireNormattivaAkn(input: {
   }
 }
 
-function candidate(value: unknown): AuthorityCandidate | null {
+type IdentifiedCandidate = AuthorityCandidate & { officialIdentifier: string };
+
+function candidate(value: unknown): IdentifiedCandidate | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const item = value as Partial<AuthorityCandidate>;
   return typeof item.candidateId === "string"
     && typeof item.toolId === "string"
     && typeof item.sourceUrl === "string"
     && typeof item.officialIdentifier === "string"
-    ? item as AuthorityCandidate
+    ? item as IdentifiedCandidate
     : null;
-}
-
-function normattivaReference(item: AuthorityCandidate) {
-  const references = discoverItalianLegalReferences([
-    item.officialIdentifier,
-    item.title,
-  ].filter((value): value is string => Boolean(value)).join(" "));
-  return references.find((reference) => reference.kind === "LEGISLATION") ?? null;
 }
 
 async function persistVerifiedNormattivaSource(input: {
@@ -240,7 +244,8 @@ async function persistVerifiedNormattivaSource(input: {
     title: string | null;
     publishedAt: Date | null;
   };
-  evidence: AknEvidence;
+  evidence: PertinentAknEvidence;
+  officialUrl: string;
 }): Promise<boolean> {
   const sourceKey = `official:normattiva:${input.providerHit.providerRecordId}`;
   const title = input.providerHit.title ?? input.candidate.title ?? sourceKey;
@@ -459,6 +464,26 @@ async function persistVerifiedNormattivaSource(input: {
       : identity.reason,
     currentMission: input.mission.lifecycleStatus === "CURRENT",
   });
+  await prisma.researchQuestionResultRecord.update({
+    where: { id: input.resultId },
+    data: {
+      candidateSnapshot: {
+        ...input.candidate,
+        officialRelevantPassage: input.evidence.relevantText,
+        officialCitationReference: input.evidence.citationAnchor.section,
+        officialContentSha256: input.evidence.contentSha256,
+        officialRelevance: officialSourceRelevance({
+          status: assessment.usable ? "PERTINENTE_VERIFICATA" : "NON_VERIFICABILE",
+          reason: assessment.usable
+            ? "OFFICIAL_TEXT_ACQUIRED_RELEVANT_ARTICLE"
+            : "OFFICIAL_SOURCE_TEMPORAL_OR_IDENTITY_REVIEW_REQUIRED",
+          checkedAt: new Date(),
+          officialUrl: input.officialUrl,
+          citation: input.evidence.citationAnchor.section,
+        }),
+      } as unknown as Prisma.InputJsonValue,
+    },
+  });
   return assessment.usable;
 }
 
@@ -467,7 +492,13 @@ export async function verifyOfficialResearchSources(input: {
   tenantId: string;
   caseId: string;
   actorId: string;
+  maxAcquisitions: number;
 }): Promise<OfficialSourceVerificationResult> {
+  if (!Number.isSafeInteger(input.maxAcquisitions)
+    || input.maxAcquisitions < 0
+    || input.maxAcquisitions > 100) {
+    throw new Error("OFFICIAL_SOURCE_ACQUISITION_LIMIT_INVALID");
+  }
   const missionRecord = await prisma.researchMissionRecord.findUnique({
     where: { id: input.missionId },
     select: {
@@ -509,44 +540,114 @@ export async function verifyOfficialResearchSources(input: {
     select: { id: true, candidateSnapshot: true },
     orderBy: { createdAt: "asc" },
   });
-  const normattivaCandidates = resultRows.flatMap((row) => {
+  const checkedAt = new Date();
+  const markRows = async (rows: readonly CandidateRow[], relevance: OfficialSourceRelevance) => {
+    if (relevance.status !== "PERTINENTE_VERIFICATA") {
+      await retireUsableSourceAssessments(rows.map((row) => row.id));
+    }
+    for (const row of rows) {
+      await prisma.researchQuestionResultRecord.update({
+        where: { id: row.id },
+        data: {
+          candidateSnapshot: {
+            ...(row.candidateSnapshot as Record<string, unknown>),
+            officialRelevance: relevance,
+          } as unknown as Prisma.InputJsonValue,
+        },
+      });
+    }
+  };
+  const groups = new Map<string, { item: IdentifiedCandidate; rows: CandidateRow[] }>();
+  const unrecognized: CandidateRow[] = [];
+  for (const row of resultRows) {
     const item = candidate(row.candidateSnapshot);
-    if (!item || new URL(item.sourceUrl!).hostname !== "www.normattiva.it") return [];
-    const reference = normattivaReference(item);
-    return reference ? [{ row, item, reference }] : [];
-  });
-  const uniqueCandidates = [...new Map(normattivaCandidates.map((entry) => (
-    [entry.item.officialIdentifier, entry] as const
-  ))).values()];
+    if (!item) {
+      unrecognized.push(row);
+      continue;
+    }
+    const group = groups.get(item.officialIdentifier);
+    if (group) group.rows.push(row);
+    else groups.set(item.officialIdentifier, { item, rows: [row] });
+  }
+  await markRows(unrecognized, officialSourceRelevance({
+    status: "NON_VERIFICABILE",
+    reason: "LEGISLATIVE_REFERENCE_NOT_RECOGNIZED",
+    checkedAt,
+  }));
   const provider = createNormattivaOfficialProvider();
+  let acquisitions = 0;
+  let checked = 0;
   let verified = 0;
   let usable = 0;
-  for (const entry of uniqueCandidates) {
-    if (!provider.supports(entry.reference)) continue;
-    const lookup = await provider.lookup(entry.reference);
-    if (lookup.status !== "FOUND_UNIQUE") continue;
-    const hit = lookup.hits[0];
-    if (hit.documentKind !== "LEGISLATION"
-      || hit.providerRecordId !== entry.item.officialIdentifier) continue;
-    const evidence = await acquireNormattivaAkn({
-      candidateUrl: entry.item.sourceUrl!,
-      providerRecordId: hit.providerRecordId,
-      publicationDate: hit.publishedAt,
-      referenceDate: mission.referenceDate,
-      researchQuestion: mission.researchQuestion,
-    });
-    verified += 1;
-    if (await persistVerifiedNormattivaSource({
-      mission,
-      resultId: entry.row.id,
-      candidate: entry.item,
-      actorId: input.actorId,
-      providerHit: hit,
-      evidence,
-    })) usable += 1;
+  for (const { item, rows } of groups.values()) {
+    const notVerifiable = (reason: OfficialSourceRelevanceReason, extra: { officialUrl?: string; failureCode?: string } = {}) => (
+      markRows(rows, officialSourceRelevance({ status: "NON_VERIFICABILE", reason, checkedAt, ...extra }))
+    );
+    const official = officialNormattivaUrl(item);
+    if ("reason" in official) {
+      await notVerifiable(official.reason);
+      continue;
+    }
+    const reference = parseProviderLegislationReference(item);
+    if (!reference || !provider.supports(reference)) {
+      await notVerifiable("LEGISLATIVE_REFERENCE_NOT_RECOGNIZED", { officialUrl: official.url });
+      continue;
+    }
+    if (acquisitions >= input.maxAcquisitions) {
+      await notVerifiable("OFFICIAL_ACQUISITION_LIMIT_REACHED", { officialUrl: official.url });
+      continue;
+    }
+    acquisitions += 1;
+    checked += 1;
+    try {
+      const lookup = await provider.lookup(reference);
+      if (lookup.status !== "FOUND_UNIQUE") {
+        await notVerifiable("OFFICIAL_LOOKUP_NOT_UNIQUE", { officialUrl: official.url });
+        continue;
+      }
+      const hit = lookup.hits[0];
+      if (hit.documentKind !== "LEGISLATION" || hit.providerRecordId !== item.officialIdentifier) {
+        await notVerifiable("OFFICIAL_IDENTITY_MISMATCH", { officialUrl: official.url });
+        continue;
+      }
+      const evidence = await acquireNormattivaAkn({
+        candidateUrl: official.url,
+        providerRecordId: hit.providerRecordId,
+        publicationDate: hit.publishedAt,
+        referenceDate: mission.referenceDate,
+        researchQuestion: mission.researchQuestion,
+        actTitle: hit.title ?? item.title ?? null,
+      });
+      verified += 1;
+      if (!evidence.citationAnchor || !evidence.relevantText) {
+        await markRows(rows, officialSourceRelevance({
+          status: "NON_PERTINENTE",
+          reason: "OFFICIAL_TEXT_ACQUIRED_NO_RELEVANT_ARTICLE",
+          checkedAt,
+          officialUrl: official.url,
+        }));
+        continue;
+      }
+      for (const row of rows) {
+        if (await persistVerifiedNormattivaSource({
+          mission,
+          resultId: row.id,
+          candidate: row.candidateSnapshot as AuthorityCandidate,
+          actorId: input.actorId,
+          providerHit: hit,
+          evidence: evidence as PertinentAknEvidence,
+          officialUrl: official.url,
+        })) usable += 1;
+      }
+    } catch (error) {
+      await notVerifiable("OFFICIAL_ACQUISITION_FAILED", {
+        officialUrl: official.url,
+        failureCode: error instanceof Error ? error.message : "UNKNOWN",
+      });
+    }
   }
   return {
-    checked: uniqueCandidates.length,
+    checked,
     verified,
     usable,
     providersUsed: verified > 0 ? [NORMATTIVA_PROVIDER] : [],

@@ -1,15 +1,21 @@
 import { CheckCircle2, CircleDot, Lightbulb, ShieldCheck, XCircle } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/Button";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { humanizeProfessionalText } from "@/lib/professional-text";
 import {
   materializeOperationalProposalAction,
   reviewOperationalProposalAction,
 } from "@/server/actions/fascicolo-operational-proposals";
+import { actDraftMatchesTemplate, ACT_DRAFT_STATUS_LABELS, type ActDraft } from "@/server/fascicolo-acts/model";
+import { reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
+import type { ActivitySpec } from "@/server/fascicolo-operational-activities/model";
 
 export type FascicoloProposalType =
   | "DEADLINE"
   | "CRITICALITY"
+  | "CONCESSION_LINK_OR_CREATE"
   | "DOCUMENT_REQUIREMENT"
   | "CHECKLIST_ITEM"
   | "ACTIVITY"
@@ -33,6 +39,7 @@ export interface FascicoloProposal {
   title: string;
   description: string;
   rationale: string;
+  reconciliationPreview?: unknown;
   reviewVersion: number;
   reviewNote?: string | null;
   warningCodes: readonly string[];
@@ -40,12 +47,32 @@ export interface FascicoloProposal {
   reviewedAt?: Date | null;
   materializedAt?: Date | null;
   materializedEntityType?: string | null;
+  originatingIssueSemanticKeys?: readonly string[];
+  proposedPayload?: unknown;
+  approvedPayload?: unknown;
+  structuredReportFingerprint?: string;
+  supersededAt?: Date | null;
+}
+
+interface ConcessionMaterializationOptions {
+  concessions: readonly {
+    id: string;
+    numeroAtto: string;
+    dataRilascio: Date;
+    concessionarioDenominazione: string;
+  }[];
+  concessionaires: readonly {
+    id: string;
+    denominazione: string;
+    codiceFiscale: string | null;
+  }[];
 }
 
 export function fascicoloProposalTypeLabel(type: FascicoloProposalType): string {
   switch (type) {
     case "DEADLINE": return "Scadenza";
     case "CRITICALITY": return "Criticità";
+    case "CONCESSION_LINK_OR_CREATE": return "Concessione da collegare o creare";
     case "DOCUMENT_REQUIREMENT": return "Documento richiesto";
     case "CHECKLIST_ITEM": return "Verifica";
     case "ACTIVITY": return "Attività";
@@ -80,9 +107,185 @@ function present(value: string | null | undefined): value is string {
   return Boolean(value?.trim());
 }
 
-function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
-  if (!canManage) return null;
+function reconciliationPayload(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const payload = value as Record<string, unknown>;
+  return payload.previewOnly === true ? payload : null;
+}
+
+function concessionProposalDefaults(value: unknown): { numeroAtto: string; dataRilascio: string } {
+  const payload = reconciliationPayload(value);
+  const after = payload?.after && typeof payload.after === "object" && !Array.isArray(payload.after)
+    ? payload.after as Record<string, unknown>
+    : null;
+  return {
+    numeroAtto: typeof after?.numeroAtto === "string" ? after.numeroAtto : "",
+    dataRilascio: typeof after?.dataRilascio === "string" ? after.dataRilascio : "",
+  };
+}
+
+function isReviewedConcessionPayload(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const payload = value as Record<string, unknown>;
+  return payload.reconciliationType === "CONCESSIONE_LINK_OR_CREATE"
+    && (payload.materializationMode === "LINK_EXISTING" || payload.materializationMode === "CREATE");
+}
+
+export function PreviewValue({ value }: { value: unknown }) {
+  if (value === null || value === undefined) return <span className="text-slate-500">Non presente</span>;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return <span>{String(value)}</span>;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0 ? <span className="text-slate-500">Nessun elemento</span> : (
+      <ul className="list-disc space-y-1 pl-5">
+        {value.map((item, index) => <li key={index}><PreviewValue value={item} /></li>)}
+      </ul>
+    );
+  }
+  if (typeof value === "object") {
+    return (
+      <dl className="grid gap-2 rounded-md bg-white p-3">
+        {Object.entries(value).map(([key, item]) => (
+          <div key={key}>
+            <dt className="text-xs font-medium text-slate-500">{formatEnumLabel(key)}</dt>
+            <dd className="mt-0.5 text-xs leading-5 text-slate-700"><PreviewValue value={item} /></dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  return <span>{String(value)}</span>;
+}
+
+function ProposalActions({
+  proposal, canManage, isCurrent, concessionMaterializationOptions,
+}: {
+  proposal: FascicoloProposal;
+  canManage: boolean;
+  isCurrent: boolean;
+  concessionMaterializationOptions: ConcessionMaterializationOptions;
+}) {
+  if (!canManage || !isCurrent) return null;
   if (proposal.status === "PROPOSED") {
+    if (proposal.proposalType === "CONCESSION_LINK_OR_CREATE") {
+      const defaults = concessionProposalDefaults(proposal.reconciliationPreview);
+      const common = (
+        <>
+          <input type="hidden" name="procedimentoId" value={proposal.procedimentoId} />
+          <input type="hidden" name="proposalId" value={proposal.id} />
+          <input type="hidden" name="reviewVersion" value={proposal.reviewVersion} />
+          <input type="hidden" name="action" value="AMEND_AND_APPROVE" />
+        </>
+      );
+      const inputClassName = "w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm";
+      return (
+        <div className="mt-4 grid gap-3 border-t border-slate-200 pt-3">
+          <p className="text-sm text-slate-700">
+            La verifica professionale deve scegliere se collegare un titolo esistente o crearne uno nuovo.
+            Le prove documentali restano quelle immutabili della proposta.
+          </p>
+          <details className="rounded-md border border-slate-200 p-3">
+            <summary className="cursor-pointer text-sm font-semibold text-slate-800">Collega una concessione esistente</summary>
+            <form action={reviewOperationalProposalAction} className="mt-3 grid gap-3 sm:grid-cols-2">
+              {common}
+              <input type="hidden" name="concessionMaterializationMode" value="LINK_EXISTING" />
+              <label className="text-sm">Concessione verificata
+                <select className={inputClassName} name="concessioneId" required>
+                  <option value="">Seleziona</option>
+                  {concessionMaterializationOptions.concessions.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.numeroAtto} · {formatDateIT(item.dataRilascio)} · {item.concessionarioDenominazione}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">Numero atto verificato
+                <input className={inputClassName} name="numeroAtto" defaultValue={defaults.numeroAtto} required />
+              </label>
+              <label className="text-sm">Data rilascio
+                <input className={inputClassName} type="date" name="dataRilascio" defaultValue={defaults.dataRilascio} required />
+              </label>
+              <label className="text-sm sm:col-span-2">Nota di revisione
+                <textarea className={inputClassName} name="reviewNote" rows={2} />
+              </label>
+              <Button type="submit" size="sm" variant="outline">Verifica, modifica e approva il collegamento</Button>
+            </form>
+          </details>
+          <details className="rounded-md border border-slate-200 p-3">
+            <summary className="cursor-pointer text-sm font-semibold text-slate-800">Crea e collega una nuova concessione</summary>
+            <form action={reviewOperationalProposalAction} className="mt-3 grid gap-3 sm:grid-cols-2">
+              {common}
+              <input type="hidden" name="concessionMaterializationMode" value="CREATE" />
+              <label className="text-sm">Numero atto verificato
+                <input className={inputClassName} name="numeroAtto" defaultValue={defaults.numeroAtto} required />
+              </label>
+              <label className="text-sm">Concessionario verificato
+                <select className={inputClassName} name="concessionarioId" required>
+                  <option value="">Seleziona</option>
+                  {concessionMaterializationOptions.concessionaires.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.denominazione}{item.codiceFiscale ? ` · CF ${item.codiceFiscale}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">Data rilascio
+                <input className={inputClassName} type="date" name="dataRilascio" defaultValue={defaults.dataRilascio} required />
+              </label>
+              <label className="text-sm">Data scadenza
+                <input className={inputClassName} type="date" name="dataScadenza" required />
+              </label>
+              <label className="text-sm">Norma
+                <select className={inputClassName} name="normaRiferimento" required>
+                  <option value="ART_36_COD_NAV">Art. 36 Cod. nav.</option>
+                  <option value="ART_18_L_84_1994">Art. 18 L. 84/1994</option>
+                  <option value="ALTRO">Altro</option>
+                </select>
+              </label>
+              <label className="text-sm">Tipologia bene
+                <select className={inputClassName} name="tipologiaBene" required>
+                  {["AREA_SCOPERTA", "BANCHINA", "MOLO", "SPECCHIO_ACQUEO", "BOX", "LOCALE", "MANUFATTO", "ALTRO"]
+                    .map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">Attività
+                <select className={inputClassName} name="attivita" required>
+                  {["DIPORTO", "COMMERCIALE", "TURISTICO_RICREATIVA", "LOGISTICA", "CANTIERISTICA", "SERVIZI_PORTUALI", "PASSEGGERI", "ALTRO"]
+                    .map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">Stato
+                <select className={inputClassName} name="stato" required>
+                  {["ATTIVA", "SCADUTA", "IN_PROROGA", "SOSPESA", "REVOCATA", "DECADUTA", "ARCHIVIATA"]
+                    .map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">Canone annuo
+                <input className={inputClassName} type="number" min="0" step="0.01" name="canoneAnnuo" />
+              </label>
+              <label className="text-sm">Descrizione area
+                <input className={inputClassName} name="areaDescrizione" />
+              </label>
+              <label className="text-sm sm:col-span-2">Note
+                <textarea className={inputClassName} name="note" rows={2} />
+              </label>
+              <label className="text-sm sm:col-span-2">Nota di revisione
+                <textarea className={inputClassName} name="reviewNote" rows={2} />
+              </label>
+              <Button type="submit" size="sm" variant="outline">Verifica, modifica e approva la creazione</Button>
+            </form>
+          </details>
+          <form action={reviewOperationalProposalAction}>
+            <input type="hidden" name="procedimentoId" value={proposal.procedimentoId} />
+            <input type="hidden" name="proposalId" value={proposal.id} />
+            <input type="hidden" name="reviewVersion" value={proposal.reviewVersion} />
+            <input type="hidden" name="action" value="REJECT" />
+            <Button type="submit" size="sm" variant="outline">Rifiuta</Button>
+          </form>
+        </div>
+      );
+    }
     return (
       <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3">
         <form action={reviewOperationalProposalAction}>
@@ -103,7 +306,9 @@ function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal;
     );
   }
   const canMaterialize = (proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED")
-    && !proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED");
+    && !proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED")
+    && (proposal.proposalType !== "CONCESSION_LINK_OR_CREATE"
+      || isReviewedConcessionPayload(proposal.approvedPayload));
   return canMaterialize ? (
     <form action={materializeOperationalProposalAction} className="mt-4 border-t border-slate-200 pt-3">
       <input type="hidden" name="procedimentoId" value={proposal.procedimentoId} />
@@ -113,13 +318,69 @@ function ProposalActions({ proposal, canManage }: { proposal: FascicoloProposal;
   ) : null;
 }
 
-function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; canManage: boolean }) {
+function activityDraftDetails(payload: unknown): { title: string; activityCode?: string; documentCode?: string } | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const record = payload as Record<string, unknown>;
+  const draft = record.draft;
+  if (!draft || typeof draft !== "object" || Array.isArray(draft)) return null;
+  const draftRecord = draft as Record<string, unknown>;
+  const title = draftRecord.title;
+  if (typeof title !== "string" || !title.trim()) return null;
+  return {
+    title,
+    activityCode: typeof record.activityCode === "string" ? record.activityCode : undefined,
+    documentCode: typeof draftRecord.documentCode === "string" ? draftRecord.documentCode : undefined,
+  };
+}
+
+function ProposalCard({
+  proposal, canManage, drafts, activitySpecs, currentReportFingerprint, concessionMaterializationOptions,
+}: {
+  proposal: FascicoloProposal;
+  canManage: boolean;
+  drafts: readonly ActDraft[];
+  activitySpecs: readonly ActivitySpec[];
+  currentReportFingerprint?: string;
+  concessionMaterializationOptions: ConcessionMaterializationOptions;
+}) {
+  const reconciliation = reconciliationPayload(proposal.reconciliationPreview);
+  const draftDetails = proposal.proposalType === "ACTIVITY" ? activityDraftDetails(proposal.proposedPayload) : null;
+  const draftTitle = draftDetails?.title ?? null;
+  const issueSemanticKey = proposal.originatingIssueSemanticKeys?.length === 1
+    ? proposal.originatingIssueSemanticKeys[0]
+    : null;
+  const calculatedTemplateKey = draftTitle && issueSemanticKey
+    ? reportPlanTemplateKey(issueSemanticKey, proposal.title, draftTitle, draftDetails?.activityCode, draftDetails?.documentCode)
+    : null;
+  const matchingSpecs = activitySpecs.filter((spec) =>
+    spec.issueSemanticKey === issueSemanticKey
+    && (draftDetails?.activityCode ? spec.activityCode === draftDetails.activityCode : spec.title === proposal.title));
+  const activitySpec = matchingSpecs.length === 1 ? matchingSpecs[0] : undefined;
+  const sameTitleDocuments = activitySpec?.documents.filter((document) => document.title === draftTitle) ?? [];
+  const activityDocument = activitySpec?.documents.find((document) => document.templateKey === calculatedTemplateKey)
+    ?? (sameTitleDocuments.length === 1 ? sameTitleDocuments[0] : undefined);
+  const activityTemplateKey = activityDocument?.templateKey ?? calculatedTemplateKey;
+  const linkedDrafts = activityTemplateKey && issueSemanticKey
+    ? drafts.filter((draft) => actDraftMatchesTemplate(draft, {
+        templateKey: activityTemplateKey,
+        issueSemanticKey,
+        legacyTemplateKeys: activityDocument?.legacyTemplateKeys,
+      }))
+    : [];
+  const possibleLegacyDrafts = draftTitle && issueSemanticKey && !linkedDrafts.length
+    ? drafts.filter((draft) => actDraftMatchesTemplate(draft, {
+        templateKey: `PLAN:${draftTitle}`, issueSemanticKey,
+      }))
+    : [];
+  const isCurrent = !proposal.supersededAt
+    && (!currentReportFingerprint || !proposal.structuredReportFingerprint
+      || proposal.structuredReportFingerprint === currentReportFingerprint);
   return (
     <article className="min-w-0 rounded-md border border-slate-200 bg-white p-4">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-500">{fascicoloProposalTypeLabel(proposal.proposalType)}</p>
-          <h4 className="mt-1 font-semibold text-slate-950 [overflow-wrap:anywhere]">{proposal.title}</h4>
+          <h4 className="mt-1 font-semibold text-slate-950 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.title)}</h4>
           <p className="mt-1 text-xs text-slate-500">Proposta del {formatDateIT(proposal.createdAt)}</p>
         </div>
         <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${statusTone[proposal.status]}`}>
@@ -127,14 +388,73 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
         </span>
       </div>
 
-      <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{proposal.description}</p>
+      <p className="mt-3 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.description)}</p>
+
+      {draftTitle ? (
+        <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm">
+          <p className="font-medium text-slate-800">Facsimile collegato: {draftTitle}</p>
+          {linkedDrafts.length ? (
+            <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              {linkedDrafts.map((draft) => (
+                <li key={draft.draftKey}>
+                  <Link className="text-sky-700 underline" href={`/procedimenti/${proposal.procedimentoId}?section=acts#draft-${draft.draftKey}`}>
+                    {draft.current.title} · v{draft.current.version} · {ACT_DRAFT_STATUS_LABELS[draft.current.status]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : possibleLegacyDrafts.length ? (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-amber-900">Bozze precedenti da confrontare e associare all&apos;attività soltanto dopo verifica.</p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                {possibleLegacyDrafts.map((draft) => (
+                  <li key={draft.draftKey}>
+                    <Link className="text-sky-700 underline" href={`/procedimenti/${proposal.procedimentoId}?section=acts#draft-${draft.draftKey}`}>
+                      {draft.current.title} · v{draft.current.version} · {ACT_DRAFT_STATUS_LABELS[draft.current.status]}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-slate-600">
+                Nessuna bozza collegata; crearne una non segna l&apos;attività come eseguita.
+              </p>
+              {activitySpec && !["REJECTED", "SUPERSEDED", "STALE"].includes(proposal.status) ? (
+                <Link
+                  className="text-xs font-medium text-sky-700 underline"
+                  href={`/procedimenti/${proposal.procedimentoId}?section=proposals#activity-${activitySpec.activityKey}`}
+                >
+                  Apri l&apos;attività nel percorso operativo
+                </Link>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {reconciliation ? (
+        <details className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
+          <summary className="cursor-pointer font-semibold text-amber-950">
+            Simulazione di riconciliazione — nessun dato autoritativo modificato
+          </summary>
+          <div className="mt-3 grid gap-3">
+            <div><p className="font-medium text-slate-800">Valori precedenti</p><PreviewValue value={reconciliation.before} /></div>
+            <div><p className="font-medium text-slate-800">Valori proposti</p><PreviewValue value={reconciliation.after} /></div>
+            <div><p className="font-medium text-slate-800">Prove documentali</p><PreviewValue value={reconciliation.evidence} /></div>
+            <div><p className="font-medium text-slate-800">Verifiche di integrità</p><PreviewValue value={reconciliation.integrityChecks} /></div>
+            <div><p className="font-medium text-slate-800">Piano di rollback</p><PreviewValue value={reconciliation.rollback} /></div>
+          </div>
+        </details>
+      ) : null}
 
       <details className="mt-3 border-t border-slate-200 pt-3 text-sm">
         <summary className="cursor-pointer font-medium text-slate-700">Dettagli</summary>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <dt className="text-xs font-medium text-slate-500">Motivazione</dt>
-            <dd className="mt-1 leading-6 text-slate-700 [overflow-wrap:anywhere]">{proposal.rationale}</dd>
+            <dd className="mt-1 leading-6 text-slate-700 [overflow-wrap:anywhere]">{humanizeProfessionalText(proposal.rationale)}</dd>
           </div>
           {proposal.reviewedAt ? (
             <div><dt className="text-xs font-medium text-slate-500">Revisionata il</dt><dd className="mt-1 text-slate-700">{formatDateIT(proposal.reviewedAt)}</dd></div>
@@ -151,11 +471,19 @@ function ProposalCard({ proposal, canManage }: { proposal: FascicoloProposal; ca
         </dl>
       </details>
 
+      {!isCurrent && (proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED") ? (
+        <p className="mt-3 text-sm text-amber-900">Approvazione conservata, ma il quadro è cambiato: non è attuabile senza una nuova valutazione.</p>
+      ) : null}
       {(proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED")
         && proposal.warningCodes.includes("MANUAL_ACTION_REQUIRED") ? (
           <p className="mt-3 text-sm text-slate-600">Approvata; l’attuazione richiede un intervento manuale separato.</p>
         ) : null}
-      <ProposalActions proposal={proposal} canManage={canManage} />
+      <ProposalActions
+        proposal={proposal}
+        canManage={canManage}
+        isCurrent={isCurrent}
+        concessionMaterializationOptions={concessionMaterializationOptions}
+      />
     </article>
   );
 }
@@ -174,7 +502,17 @@ const groups: readonly {
   { key: "past", title: "Non più attuali", statuses: ["STALE", "SUPERSEDED"], icon: Lightbulb, iconClassName: "text-amber-700" },
 ];
 
-export function FascicoloProposals({ proposals, canManage }: { proposals: readonly FascicoloProposal[]; canManage: boolean }) {
+export function FascicoloProposals({
+  proposals, canManage, drafts = [], activitySpecs = [], currentReportFingerprint,
+  concessionMaterializationOptions = { concessions: [], concessionaires: [] },
+}: {
+  proposals: readonly FascicoloProposal[];
+  canManage: boolean;
+  drafts?: readonly ActDraft[];
+  activitySpecs?: readonly ActivitySpec[];
+  currentReportFingerprint?: string;
+  concessionMaterializationOptions?: ConcessionMaterializationOptions;
+}) {
   const reviewCount = proposals.filter((proposal) => proposal.status === "PROPOSED").length;
   const approvedCount = proposals.filter((proposal) => proposal.status === "APPROVED" || proposal.status === "AMENDED_AND_APPROVED").length;
   const materializedCount = proposals.filter((proposal) => proposal.status === "MATERIALIZED").length;
@@ -216,7 +554,17 @@ export function FascicoloProposals({ proposals, canManage }: { proposals: readon
               <h3 id={`proposal-group-${group.key}`} className="text-base font-semibold text-slate-950">{group.title}</h3>
             </div>
             <div className="mt-3 grid min-w-0 gap-3 xl:grid-cols-2">
-              {groupProposals.map((proposal) => <ProposalCard key={proposal.id} proposal={proposal} canManage={canManage} />)}
+              {groupProposals.map((proposal) => (
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  canManage={canManage}
+                  drafts={drafts}
+                  activitySpecs={activitySpecs}
+                  currentReportFingerprint={currentReportFingerprint}
+                  concessionMaterializationOptions={concessionMaterializationOptions}
+                />
+              ))}
             </div>
           </section>
         );

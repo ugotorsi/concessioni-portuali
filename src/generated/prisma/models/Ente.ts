@@ -221,6 +221,7 @@ export type EnteWhereInput = {
   fascicoloSignals?: Prisma.FascicoloSignalListRelationFilter
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandListRelationFilter
   researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionListRelationFilter
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportListRelationFilter
@@ -230,6 +231,7 @@ export type EnteWhereInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionListRelationFilter
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityListRelationFilter
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemListRelationFilter
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
@@ -238,6 +240,9 @@ export type EnteWhereInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
 }
 
 export type EnteOrderByWithRelationInput = {
@@ -271,6 +276,7 @@ export type EnteOrderByWithRelationInput = {
   fascicoloSignals?: Prisma.FascicoloSignalOrderByRelationAggregateInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandOrderByRelationAggregateInput
   researchMissions?: Prisma.ResearchMissionRecordOrderByRelationAggregateInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionOrderByRelationAggregateInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordOrderByRelationAggregateInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialOrderByRelationAggregateInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportOrderByRelationAggregateInput
@@ -280,6 +286,7 @@ export type EnteOrderByWithRelationInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateOrderByRelationAggregateInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventOrderByRelationAggregateInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionOrderByRelationAggregateInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityOrderByRelationAggregateInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemOrderByRelationAggregateInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceOrderByRelationAggregateInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationOrderByRelationAggregateInput
@@ -288,6 +295,9 @@ export type EnteOrderByWithRelationInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalOrderByRelationAggregateInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyOrderByRelationAggregateInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitOrderByRelationAggregateInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactOrderByRelationAggregateInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordOrderByRelationAggregateInput
 }
 
 export type EnteWhereUniqueInput = Prisma.AtLeast<{
@@ -324,6 +334,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   fascicoloSignals?: Prisma.FascicoloSignalListRelationFilter
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandListRelationFilter
   researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionListRelationFilter
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportListRelationFilter
@@ -333,6 +344,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionListRelationFilter
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityListRelationFilter
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemListRelationFilter
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
@@ -341,6 +353,9 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitListRelationFilter
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
 }, "id" | "codice">
 
 export type EnteOrderByWithAggregationInput = {
@@ -400,6 +415,7 @@ export type EnteCreateInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -409,6 +425,7 @@ export type EnteCreateInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -417,6 +434,9 @@ export type EnteCreateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateInput = {
@@ -450,6 +470,7 @@ export type EnteUncheckedCreateInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -459,6 +480,7 @@ export type EnteUncheckedCreateInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -467,6 +489,9 @@ export type EnteUncheckedCreateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUpdateInput = {
@@ -500,6 +525,7 @@ export type EnteUpdateInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -509,6 +535,7 @@ export type EnteUpdateInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -517,6 +544,9 @@ export type EnteUpdateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateInput = {
@@ -550,6 +580,7 @@ export type EnteUncheckedUpdateInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -559,6 +590,7 @@ export type EnteUncheckedUpdateInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -567,6 +599,9 @@ export type EnteUncheckedUpdateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateManyInput = {
@@ -901,6 +936,34 @@ export type EnteUpdateOneWithoutAsyncJobsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutAsyncJobsInput, Prisma.EnteUpdateWithoutAsyncJobsInput>, Prisma.EnteUncheckedUpdateWithoutAsyncJobsInput>
 }
 
+export type EnteCreateNestedOneWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationPermitsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutFascicoloAnalysisEvaluationPermitsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationPermitsInput
+  upsert?: Prisma.EnteUpsertWithoutFascicoloAnalysisEvaluationPermitsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationPermitsInput>, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput>
+}
+
+export type EnteCreateNestedOneWithoutFascicoloAnalysisEvaluationsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutFascicoloAnalysisEvaluationsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput
+  upsert?: Prisma.EnteUpsertWithoutFascicoloAnalysisEvaluationsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationsInput>, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
 export type EnteCreateNestedOneWithoutRuntimeBudgetPoliciesInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutRuntimeBudgetPoliciesInput, Prisma.EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutRuntimeBudgetPoliciesInput
@@ -975,6 +1038,34 @@ export type EnteUpdateOneWithoutResearchMissionsNestedInput = {
   delete?: Prisma.EnteWhereInput | boolean
   connect?: Prisma.EnteWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutResearchMissionsInput, Prisma.EnteUpdateWithoutResearchMissionsInput>, Prisma.EnteUncheckedUpdateWithoutResearchMissionsInput>
+}
+
+export type EnteCreateNestedOneWithoutProfessionalLegalQuestionsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutProfessionalLegalQuestionsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutProfessionalLegalQuestionsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutProfessionalLegalQuestionsInput
+  upsert?: Prisma.EnteUpsertWithoutProfessionalLegalQuestionsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutProfessionalLegalQuestionsInput, Prisma.EnteUpdateWithoutProfessionalLegalQuestionsInput>, Prisma.EnteUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+}
+
+export type EnteCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutTechnicalSourceResearchRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  upsert?: Prisma.EnteUpsertWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput>, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
 }
 
 export type EnteCreateNestedOneWithoutResearchAssistedVerificationsInput = {
@@ -1181,6 +1272,20 @@ export type EnteUpdateOneRequiredWithoutFascicoloSubjectsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutFascicoloSubjectsInput, Prisma.EnteUpdateWithoutFascicoloSubjectsInput>, Prisma.EnteUncheckedUpdateWithoutFascicoloSubjectsInput>
 }
 
+export type EnteCreateNestedOneWithoutFascicoloKnowledgeIdentitiesInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloKnowledgeIdentitiesInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutFascicoloKnowledgeIdentitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloKnowledgeIdentitiesInput
+  upsert?: Prisma.EnteUpsertWithoutFascicoloKnowledgeIdentitiesInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUpdateWithoutFascicoloKnowledgeIdentitiesInput>, Prisma.EnteUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput>
+}
+
 export type EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloKnowledgeItemsInput, Prisma.EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloKnowledgeItemsInput
@@ -1281,6 +1386,7 @@ export type EnteCreateWithoutPortsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -1290,6 +1396,7 @@ export type EnteCreateWithoutPortsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -1298,6 +1405,9 @@ export type EnteCreateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutPortsInput = {
@@ -1330,6 +1440,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -1339,6 +1450,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -1347,6 +1459,9 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutPortsInput = {
@@ -1395,6 +1510,7 @@ export type EnteUpdateWithoutPortsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -1404,6 +1520,7 @@ export type EnteUpdateWithoutPortsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -1412,6 +1529,9 @@ export type EnteUpdateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutPortsInput = {
@@ -1444,6 +1564,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -1453,6 +1574,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1461,6 +1583,9 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutImportRunsInput = {
@@ -1493,6 +1618,7 @@ export type EnteCreateWithoutImportRunsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -1502,6 +1628,7 @@ export type EnteCreateWithoutImportRunsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -1510,6 +1637,9 @@ export type EnteCreateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutImportRunsInput = {
@@ -1542,6 +1672,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -1551,6 +1682,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -1559,6 +1691,9 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutImportRunsInput = {
@@ -1607,6 +1742,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -1616,6 +1752,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -1624,6 +1761,9 @@ export type EnteUpdateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutImportRunsInput = {
@@ -1656,6 +1796,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -1665,6 +1806,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1673,6 +1815,9 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourcesInput = {
@@ -1705,6 +1850,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -1714,6 +1860,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -1722,6 +1869,9 @@ export type EnteCreateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourcesInput = {
@@ -1754,6 +1904,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -1763,6 +1914,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -1771,6 +1923,9 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourcesInput = {
@@ -1819,6 +1974,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -1828,6 +1984,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -1836,6 +1993,9 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
@@ -1868,6 +2028,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -1877,6 +2038,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1885,6 +2047,9 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
@@ -1917,6 +2082,7 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -1926,6 +2092,7 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -1934,6 +2101,9 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
@@ -1966,6 +2136,7 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -1975,6 +2146,7 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -1983,6 +2155,9 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourceAcquisitionsInput = {
@@ -2031,6 +2206,7 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -2040,6 +2216,7 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -2048,6 +2225,9 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
@@ -2080,6 +2260,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -2089,6 +2270,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -2097,6 +2279,9 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalRulesInput = {
@@ -2129,6 +2314,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -2138,6 +2324,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -2146,6 +2333,9 @@ export type EnteCreateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalRulesInput = {
@@ -2178,6 +2368,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -2187,6 +2378,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -2195,6 +2387,9 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalRulesInput = {
@@ -2243,6 +2438,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -2252,6 +2448,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -2260,6 +2457,9 @@ export type EnteUpdateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalRulesInput = {
@@ -2292,6 +2492,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -2301,6 +2502,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -2309,6 +2511,9 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentGapsInput = {
@@ -2341,6 +2546,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -2350,6 +2556,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -2358,6 +2565,9 @@ export type EnteCreateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentGapsInput = {
@@ -2390,6 +2600,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -2399,6 +2610,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -2407,6 +2619,9 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentGapsInput = {
@@ -2455,6 +2670,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -2464,6 +2680,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -2472,6 +2689,9 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
@@ -2504,6 +2724,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -2513,6 +2734,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -2521,6 +2743,9 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutMembershipsInput = {
@@ -2553,6 +2778,7 @@ export type EnteCreateWithoutMembershipsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -2562,6 +2788,7 @@ export type EnteCreateWithoutMembershipsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -2570,6 +2797,9 @@ export type EnteCreateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutMembershipsInput = {
@@ -2602,6 +2832,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -2611,6 +2842,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -2619,6 +2851,9 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutMembershipsInput = {
@@ -2667,6 +2902,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -2676,6 +2912,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -2684,6 +2921,9 @@ export type EnteUpdateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutMembershipsInput = {
@@ -2716,6 +2956,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -2725,6 +2966,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -2733,6 +2975,9 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutConcessioniInput = {
@@ -2765,6 +3010,7 @@ export type EnteCreateWithoutConcessioniInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -2774,6 +3020,7 @@ export type EnteCreateWithoutConcessioniInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -2782,6 +3029,9 @@ export type EnteCreateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioniInput = {
@@ -2814,6 +3064,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -2823,6 +3074,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -2831,6 +3083,9 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioniInput = {
@@ -2879,6 +3134,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -2888,6 +3144,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -2896,6 +3153,9 @@ export type EnteUpdateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioniInput = {
@@ -2928,6 +3188,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -2937,6 +3198,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -2945,6 +3207,9 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutProcedimentiInput = {
@@ -2978,6 +3243,7 @@ export type EnteCreateWithoutProcedimentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -2986,6 +3252,7 @@ export type EnteCreateWithoutProcedimentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -2994,6 +3261,9 @@ export type EnteCreateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutProcedimentiInput = {
@@ -3027,6 +3297,7 @@ export type EnteUncheckedCreateWithoutProcedimentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -3035,6 +3306,7 @@ export type EnteUncheckedCreateWithoutProcedimentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -3043,6 +3315,9 @@ export type EnteUncheckedCreateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutProcedimentiInput = {
@@ -3092,6 +3367,7 @@ export type EnteUpdateWithoutProcedimentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -3100,6 +3376,7 @@ export type EnteUpdateWithoutProcedimentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -3108,6 +3385,9 @@ export type EnteUpdateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutProcedimentiInput = {
@@ -3141,6 +3421,7 @@ export type EnteUncheckedUpdateWithoutProcedimentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -3149,6 +3430,7 @@ export type EnteUncheckedUpdateWithoutProcedimentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -3157,6 +3439,9 @@ export type EnteUncheckedUpdateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoliIntakeInput = {
@@ -3190,6 +3475,7 @@ export type EnteCreateWithoutFascicoliIntakeInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -3198,6 +3484,7 @@ export type EnteCreateWithoutFascicoliIntakeInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -3206,6 +3493,9 @@ export type EnteCreateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
@@ -3239,6 +3529,7 @@ export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -3247,6 +3538,7 @@ export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -3255,6 +3547,9 @@ export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoliIntakeInput = {
@@ -3304,6 +3599,7 @@ export type EnteUpdateWithoutFascicoliIntakeInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -3312,6 +3608,7 @@ export type EnteUpdateWithoutFascicoliIntakeInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -3320,6 +3617,9 @@ export type EnteUpdateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
@@ -3353,6 +3653,7 @@ export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -3361,6 +3662,7 @@ export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -3369,6 +3671,9 @@ export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentiInput = {
@@ -3401,6 +3706,7 @@ export type EnteCreateWithoutDocumentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -3410,6 +3716,7 @@ export type EnteCreateWithoutDocumentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -3418,6 +3725,9 @@ export type EnteCreateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentiInput = {
@@ -3450,6 +3760,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -3459,6 +3770,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -3467,6 +3779,9 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentiInput = {
@@ -3515,6 +3830,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -3524,6 +3840,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -3532,6 +3849,9 @@ export type EnteUpdateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentiInput = {
@@ -3564,6 +3884,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -3573,6 +3894,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -3581,6 +3903,9 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentFileVersionsInput = {
@@ -3613,6 +3938,7 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -3622,6 +3948,7 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -3630,6 +3957,9 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
@@ -3662,6 +3992,7 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -3671,6 +4002,7 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -3679,6 +4011,9 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentFileVersionsInput = {
@@ -3727,6 +4062,7 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -3736,6 +4072,7 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -3744,6 +4081,9 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
@@ -3776,6 +4116,7 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -3785,6 +4126,7 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -3793,6 +4135,9 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3826,6 +4171,7 @@ export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -3834,6 +4180,7 @@ export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -3842,6 +4189,9 @@ export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3875,6 +4225,7 @@ export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -3883,6 +4234,7 @@ export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -3891,6 +4243,9 @@ export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentExtractionAttemptsInput = {
@@ -3940,6 +4295,7 @@ export type EnteUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -3948,6 +4304,7 @@ export type EnteUpdateWithoutDocumentExtractionAttemptsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -3956,6 +4313,9 @@ export type EnteUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
@@ -3989,6 +4349,7 @@ export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -3997,6 +4358,7 @@ export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -4005,6 +4367,9 @@ export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutNeutralIntakesInput = {
@@ -4037,6 +4402,7 @@ export type EnteCreateWithoutNeutralIntakesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -4046,6 +4412,7 @@ export type EnteCreateWithoutNeutralIntakesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -4054,6 +4421,9 @@ export type EnteCreateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
@@ -4086,6 +4456,7 @@ export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -4095,6 +4466,7 @@ export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -4103,6 +4475,9 @@ export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutNeutralIntakesInput = {
@@ -4151,6 +4526,7 @@ export type EnteUpdateWithoutNeutralIntakesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -4160,6 +4536,7 @@ export type EnteUpdateWithoutNeutralIntakesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -4168,6 +4545,9 @@ export type EnteUpdateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
@@ -4200,6 +4580,7 @@ export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -4209,6 +4590,7 @@ export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -4217,6 +4599,9 @@ export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4249,6 +4634,7 @@ export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -4258,6 +4644,7 @@ export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -4266,6 +4653,9 @@ export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4298,6 +4688,7 @@ export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -4307,6 +4698,7 @@ export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -4315,6 +4707,9 @@ export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4363,6 +4758,7 @@ export type EnteUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -4372,6 +4768,7 @@ export type EnteUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -4380,6 +4777,9 @@ export type EnteUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4412,6 +4812,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -4421,6 +4822,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -4429,6 +4831,9 @@ export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAsyncJobsInput = {
@@ -4461,6 +4866,7 @@ export type EnteCreateWithoutAsyncJobsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -4470,6 +4876,7 @@ export type EnteCreateWithoutAsyncJobsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -4478,6 +4885,9 @@ export type EnteCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAsyncJobsInput = {
@@ -4510,6 +4920,7 @@ export type EnteUncheckedCreateWithoutAsyncJobsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -4519,6 +4930,7 @@ export type EnteUncheckedCreateWithoutAsyncJobsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -4527,6 +4939,9 @@ export type EnteUncheckedCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAsyncJobsInput = {
@@ -4575,6 +4990,7 @@ export type EnteUpdateWithoutAsyncJobsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -4584,6 +5000,7 @@ export type EnteUpdateWithoutAsyncJobsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -4592,6 +5009,9 @@ export type EnteUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
@@ -4624,6 +5044,7 @@ export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -4633,6 +5054,7 @@ export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -4641,6 +5063,473 @@ export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput>
+}
+
+export type EnteUpsertWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationPermitsInput, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput>
+}
+
+export type EnteUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutFascicoloAnalysisEvaluationsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
+export type EnteUpsertWithoutFascicoloAnalysisEvaluationsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloAnalysisEvaluationsInput, Prisma.EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput>
+}
+
+export type EnteUpdateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -4674,6 +5563,7 @@ export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -4683,6 +5573,7 @@ export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -4690,6 +5581,9 @@ export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -4723,6 +5617,7 @@ export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -4732,6 +5627,7 @@ export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -4739,6 +5635,9 @@ export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutRuntimeBudgetPoliciesInput = {
@@ -4788,6 +5687,7 @@ export type EnteUpdateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -4797,6 +5697,7 @@ export type EnteUpdateWithoutRuntimeBudgetPoliciesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -4804,6 +5705,9 @@ export type EnteUpdateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
@@ -4837,6 +5741,7 @@ export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -4846,6 +5751,7 @@ export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -4853,6 +5759,9 @@ export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutRuntimeCostReservationsInput = {
@@ -4886,6 +5795,7 @@ export type EnteCreateWithoutRuntimeCostReservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -4895,6 +5805,7 @@ export type EnteCreateWithoutRuntimeCostReservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -4902,6 +5813,9 @@ export type EnteCreateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
@@ -4935,6 +5849,7 @@ export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -4944,6 +5859,7 @@ export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -4951,6 +5867,9 @@ export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutRuntimeCostReservationsInput = {
@@ -5000,6 +5919,7 @@ export type EnteUpdateWithoutRuntimeCostReservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -5009,6 +5929,7 @@ export type EnteUpdateWithoutRuntimeCostReservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -5016,6 +5937,9 @@ export type EnteUpdateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
@@ -5049,6 +5973,7 @@ export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -5058,6 +5983,7 @@ export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -5065,6 +5991,9 @@ export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloSignalsInput = {
@@ -5097,6 +6026,7 @@ export type EnteCreateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -5106,6 +6036,7 @@ export type EnteCreateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -5114,6 +6045,9 @@ export type EnteCreateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
@@ -5146,6 +6080,7 @@ export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -5155,6 +6090,7 @@ export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -5163,6 +6099,9 @@ export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloSignalsInput = {
@@ -5211,6 +6150,7 @@ export type EnteUpdateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -5220,6 +6160,7 @@ export type EnteUpdateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -5228,6 +6169,9 @@ export type EnteUpdateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
@@ -5260,6 +6204,7 @@ export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -5269,6 +6214,7 @@ export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -5277,6 +6223,9 @@ export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5309,6 +6258,7 @@ export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -5318,6 +6268,7 @@ export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -5326,6 +6277,9 @@ export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5358,6 +6312,7 @@ export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -5367,6 +6322,7 @@ export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -5375,6 +6331,9 @@ export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5423,6 +6382,7 @@ export type EnteUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -5432,6 +6392,7 @@ export type EnteUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -5440,6 +6401,9 @@ export type EnteUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5472,6 +6436,7 @@ export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -5481,6 +6446,7 @@ export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -5489,6 +6455,9 @@ export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutResearchMissionsInput = {
@@ -5521,6 +6490,7 @@ export type EnteCreateWithoutResearchMissionsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -5530,6 +6500,7 @@ export type EnteCreateWithoutResearchMissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -5538,6 +6509,9 @@ export type EnteCreateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutResearchMissionsInput = {
@@ -5570,6 +6544,7 @@ export type EnteUncheckedCreateWithoutResearchMissionsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -5579,6 +6554,7 @@ export type EnteUncheckedCreateWithoutResearchMissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -5587,6 +6563,9 @@ export type EnteUncheckedCreateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutResearchMissionsInput = {
@@ -5635,6 +6614,7 @@ export type EnteUpdateWithoutResearchMissionsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -5644,6 +6624,7 @@ export type EnteUpdateWithoutResearchMissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -5652,6 +6633,9 @@ export type EnteUpdateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
@@ -5684,6 +6668,7 @@ export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -5693,6 +6678,7 @@ export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -5701,6 +6687,473 @@ export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutProfessionalLegalQuestionsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutProfessionalLegalQuestionsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutProfessionalLegalQuestionsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+}
+
+export type EnteUpsertWithoutProfessionalLegalQuestionsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedCreateWithoutProfessionalLegalQuestionsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutProfessionalLegalQuestionsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutProfessionalLegalQuestionsInput, Prisma.EnteUncheckedUpdateWithoutProfessionalLegalQuestionsInput>
+}
+
+export type EnteUpdateWithoutProfessionalLegalQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutProfessionalLegalQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type EnteUpsertWithoutTechnicalSourceResearchRecordsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type EnteUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutResearchAssistedVerificationsInput = {
@@ -5734,6 +7187,7 @@ export type EnteCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
@@ -5742,6 +7196,7 @@ export type EnteCreateWithoutResearchAssistedVerificationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -5750,6 +7205,9 @@ export type EnteCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
@@ -5783,6 +7241,7 @@ export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -5791,6 +7250,7 @@ export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -5799,6 +7259,9 @@ export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutResearchAssistedVerificationsInput = {
@@ -5848,6 +7311,7 @@ export type EnteUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
@@ -5856,6 +7320,7 @@ export type EnteUpdateWithoutResearchAssistedVerificationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -5864,6 +7329,9 @@ export type EnteUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
@@ -5897,6 +7365,7 @@ export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5905,6 +7374,7 @@ export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -5913,6 +7383,9 @@ export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloObservationsInput = {
@@ -5945,6 +7418,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -5954,6 +7428,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -5962,6 +7437,9 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
@@ -5994,6 +7472,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -6003,6 +7482,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -6011,6 +7491,9 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloObservationsInput = {
@@ -6059,6 +7542,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -6068,6 +7552,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -6076,6 +7561,9 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
@@ -6108,6 +7596,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -6117,6 +7606,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -6125,6 +7615,9 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutChecklistEvidenceInput = {
@@ -6157,6 +7650,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -6166,6 +7660,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -6174,6 +7669,9 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
@@ -6206,6 +7704,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -6215,6 +7714,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -6223,6 +7723,9 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutChecklistEvidenceInput = {
@@ -6271,6 +7774,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -6280,6 +7784,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -6288,6 +7793,9 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
@@ -6320,6 +7828,7 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -6329,6 +7838,7 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -6337,6 +7847,9 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentRequirementProposalsInput = {
@@ -6369,6 +7882,7 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -6378,6 +7892,7 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -6386,6 +7901,9 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
@@ -6418,6 +7936,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -6427,6 +7946,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -6435,6 +7955,9 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentRequirementProposalsInput = {
@@ -6483,6 +8006,7 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -6492,6 +8016,7 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -6500,6 +8025,9 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
@@ -6532,6 +8060,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -6541,6 +8070,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -6549,6 +8079,9 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
@@ -6581,6 +8114,7 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -6590,6 +8124,7 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -6598,6 +8133,9 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
@@ -6630,6 +8168,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -6639,6 +8178,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -6647,6 +8187,9 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentRequirementEvidenceInput = {
@@ -6695,6 +8238,7 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -6704,6 +8248,7 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -6712,6 +8257,9 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
@@ -6744,6 +8292,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -6753,6 +8302,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -6761,6 +8311,9 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDecisioniProcedimentoInput = {
@@ -6793,6 +8346,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -6802,6 +8356,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -6810,6 +8365,9 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
@@ -6842,6 +8400,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -6851,6 +8410,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -6859,6 +8419,9 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDecisioniProcedimentoInput = {
@@ -6907,6 +8470,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -6916,6 +8480,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -6924,6 +8489,9 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
@@ -6956,6 +8524,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -6965,6 +8534,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -6973,6 +8543,9 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutReportInput = {
@@ -7005,6 +8578,7 @@ export type EnteCreateWithoutReportInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -7014,6 +8588,7 @@ export type EnteCreateWithoutReportInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -7022,6 +8597,9 @@ export type EnteCreateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutReportInput = {
@@ -7054,6 +8632,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -7063,6 +8642,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -7071,6 +8651,9 @@ export type EnteUncheckedCreateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutReportInput = {
@@ -7119,6 +8702,7 @@ export type EnteUpdateWithoutReportInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -7128,6 +8712,7 @@ export type EnteUpdateWithoutReportInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -7136,6 +8721,9 @@ export type EnteUpdateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutReportInput = {
@@ -7168,6 +8756,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -7177,6 +8766,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -7185,6 +8775,9 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutActivityLogInput = {
@@ -7217,6 +8810,7 @@ export type EnteCreateWithoutActivityLogInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -7226,6 +8820,7 @@ export type EnteCreateWithoutActivityLogInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -7234,6 +8829,9 @@ export type EnteCreateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutActivityLogInput = {
@@ -7266,6 +8864,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -7275,6 +8874,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -7283,6 +8883,9 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutActivityLogInput = {
@@ -7331,6 +8934,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -7340,6 +8944,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -7348,6 +8953,9 @@ export type EnteUpdateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutActivityLogInput = {
@@ -7380,6 +8988,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -7389,6 +8998,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -7397,6 +9007,9 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7430,6 +9043,7 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
@@ -7438,6 +9052,7 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -7446,6 +9061,9 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7479,6 +9097,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7487,6 +9106,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -7495,6 +9115,9 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7544,6 +9167,7 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
@@ -7552,6 +9176,7 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -7560,6 +9185,9 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7593,6 +9221,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7601,6 +9230,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -7609,6 +9239,9 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
@@ -7642,6 +9275,7 @@ export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
@@ -7650,6 +9284,7 @@ export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -7658,6 +9293,9 @@ export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
@@ -7691,6 +9329,7 @@ export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7699,6 +9338,7 @@ export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -7707,6 +9347,9 @@ export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAutomaticFascicoloReportsInput = {
@@ -7756,6 +9399,7 @@ export type EnteUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
@@ -7764,6 +9408,7 @@ export type EnteUpdateWithoutAutomaticFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -7772,6 +9417,9 @@ export type EnteUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
@@ -7805,6 +9453,7 @@ export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7813,6 +9462,7 @@ export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -7821,6 +9471,9 @@ export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7854,6 +9507,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -7862,6 +9516,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -7870,6 +9525,9 @@ export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7903,6 +9561,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -7911,6 +9570,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -7919,6 +9579,9 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7968,6 +9631,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -7976,6 +9640,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -7984,6 +9649,9 @@ export type EnteUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8017,6 +9685,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -8025,6 +9694,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -8033,6 +9703,9 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutStructuredFascicoloReportsInput = {
@@ -8066,6 +9739,7 @@ export type EnteCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -8075,6 +9749,7 @@ export type EnteCreateWithoutStructuredFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -8082,6 +9757,9 @@ export type EnteCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
@@ -8115,6 +9793,7 @@ export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -8124,6 +9803,7 @@ export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -8131,6 +9811,9 @@ export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutStructuredFascicoloReportsInput = {
@@ -8180,6 +9863,7 @@ export type EnteUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -8189,6 +9873,7 @@ export type EnteUpdateWithoutStructuredFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -8196,6 +9881,9 @@ export type EnteUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
@@ -8229,6 +9917,7 @@ export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -8238,6 +9927,7 @@ export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -8245,6 +9935,9 @@ export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
@@ -8278,6 +9971,7 @@ export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -8287,6 +9981,7 @@ export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -8294,6 +9989,9 @@ export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
@@ -8327,6 +10025,7 @@ export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -8336,6 +10035,7 @@ export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -8343,6 +10043,9 @@ export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloOperationalProposalsInput = {
@@ -8392,6 +10095,7 @@ export type EnteUpdateWithoutFascicoloOperationalProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -8401,6 +10105,7 @@ export type EnteUpdateWithoutFascicoloOperationalProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -8408,6 +10113,9 @@ export type EnteUpdateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
@@ -8441,6 +10149,7 @@ export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -8450,6 +10159,7 @@ export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -8457,6 +10167,9 @@ export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloSubjectsInput = {
@@ -8490,6 +10203,7 @@ export type EnteCreateWithoutFascicoloSubjectsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -8499,6 +10213,7 @@ export type EnteCreateWithoutFascicoloSubjectsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -8506,6 +10221,9 @@ export type EnteCreateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
@@ -8539,6 +10257,7 @@ export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -8548,6 +10267,7 @@ export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -8555,6 +10275,9 @@ export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloSubjectsInput = {
@@ -8604,6 +10327,7 @@ export type EnteUpdateWithoutFascicoloSubjectsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -8613,6 +10337,7 @@ export type EnteUpdateWithoutFascicoloSubjectsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -8620,6 +10345,9 @@ export type EnteUpdateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloSubjectsInput = {
@@ -8653,6 +10381,239 @@ export type EnteUncheckedUpdateWithoutFascicoloSubjectsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutFascicoloKnowledgeIdentitiesInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutFascicoloKnowledgeIdentitiesInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput>
+}
+
+export type EnteUpsertWithoutFascicoloKnowledgeIdentitiesInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutFascicoloKnowledgeIdentitiesInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutFascicoloKnowledgeIdentitiesInput, Prisma.EnteUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput>
+}
+
+export type EnteUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -8665,10 +10626,14 @@ export type EnteUncheckedUpdateWithoutFascicoloSubjectsInput = {
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -8702,6 +10667,7 @@ export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -8711,6 +10677,7 @@ export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
@@ -8718,6 +10685,9 @@ export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -8751,6 +10721,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -8760,6 +10731,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
@@ -8767,6 +10739,9 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeItemsInput = {
@@ -8816,6 +10791,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -8825,6 +10801,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeItemsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
@@ -8832,6 +10809,9 @@ export type EnteUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
@@ -8865,6 +10845,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -8874,6 +10855,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
@@ -8881,6 +10863,9 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -8914,6 +10899,7 @@ export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -8923,6 +10909,7 @@ export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
@@ -8930,6 +10917,9 @@ export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -8963,6 +10953,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -8972,6 +10963,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
@@ -8979,6 +10971,9 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
@@ -9028,6 +11023,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -9037,6 +11033,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
@@ -9044,6 +11041,9 @@ export type EnteUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -9077,6 +11077,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -9086,6 +11087,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
@@ -9093,6 +11095,9 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9126,6 +11131,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -9135,6 +11141,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
@@ -9142,6 +11149,9 @@ export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9175,6 +11185,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -9184,6 +11195,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
@@ -9191,6 +11203,9 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeRelationsInput = {
@@ -9240,6 +11255,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -9249,6 +11265,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRelationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
@@ -9256,6 +11273,9 @@ export type EnteUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9289,6 +11309,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -9298,6 +11319,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
@@ -9305,6 +11327,9 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9338,6 +11363,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -9346,6 +11372,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -9354,6 +11381,9 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9387,6 +11417,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -9395,6 +11426,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -9403,6 +11435,9 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9452,6 +11487,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -9460,6 +11496,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -9468,6 +11505,9 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9501,6 +11541,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -9509,6 +11550,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -9517,6 +11559,9 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9550,6 +11595,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
@@ -9558,6 +11604,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
@@ -9566,6 +11613,9 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9599,6 +11649,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedCreateNestedManyWithoutTenantInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
@@ -9607,6 +11658,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
@@ -9615,6 +11667,9 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9664,6 +11719,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
@@ -9672,6 +11728,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
@@ -9680,6 +11737,9 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9713,6 +11773,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
   researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  professionalLegalQuestions?: Prisma.ProfessionalLegalQuestionUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -9721,6 +11782,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeIdentities?: Prisma.FascicoloKnowledgeIdentityUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
@@ -9729,6 +11791,9 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluationPermits?: Prisma.FascicoloAnalysisEvaluationPermitUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloAnalysisEvaluations?: Prisma.FascicoloAnalysisEvaluationArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -9760,6 +11825,7 @@ export type EnteCountOutputType = {
   fascicoloSignals: number
   concessioneExpiryChangeCommands: number
   researchMissions: number
+  professionalLegalQuestions: number
   researchAssistedVerifications: number
   aiFascicoloTrustedReviewMaterials: number
   automaticFascicoloReports: number
@@ -9769,6 +11835,7 @@ export type EnteCountOutputType = {
   aiFascicoloHumanReviewStates: number
   aiFascicoloHumanReviewEvents: number
   fascicoloKnowledgeRevisions: number
+  fascicoloKnowledgeIdentities: number
   fascicoloKnowledgeItems: number
   fascicoloKnowledgeEvidence: number
   fascicoloKnowledgeRelations: number
@@ -9777,6 +11844,9 @@ export type EnteCountOutputType = {
   fascicoloOperationalProposals: number
   runtimeBudgetPolicies: number
   runtimeCostReservations: number
+  fascicoloAnalysisEvaluationPermits: number
+  fascicoloAnalysisEvaluations: number
+  technicalSourceResearchRecords: number
 }
 
 export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9803,6 +11873,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   fascicoloSignals?: boolean | EnteCountOutputTypeCountFascicoloSignalsArgs
   concessioneExpiryChangeCommands?: boolean | EnteCountOutputTypeCountConcessioneExpiryChangeCommandsArgs
   researchMissions?: boolean | EnteCountOutputTypeCountResearchMissionsArgs
+  professionalLegalQuestions?: boolean | EnteCountOutputTypeCountProfessionalLegalQuestionsArgs
   researchAssistedVerifications?: boolean | EnteCountOutputTypeCountResearchAssistedVerificationsArgs
   aiFascicoloTrustedReviewMaterials?: boolean | EnteCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs
   automaticFascicoloReports?: boolean | EnteCountOutputTypeCountAutomaticFascicoloReportsArgs
@@ -9812,6 +11883,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   aiFascicoloHumanReviewStates?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewStatesArgs
   aiFascicoloHumanReviewEvents?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewEventsArgs
   fascicoloKnowledgeRevisions?: boolean | EnteCountOutputTypeCountFascicoloKnowledgeRevisionsArgs
+  fascicoloKnowledgeIdentities?: boolean | EnteCountOutputTypeCountFascicoloKnowledgeIdentitiesArgs
   fascicoloKnowledgeItems?: boolean | EnteCountOutputTypeCountFascicoloKnowledgeItemsArgs
   fascicoloKnowledgeEvidence?: boolean | EnteCountOutputTypeCountFascicoloKnowledgeEvidenceArgs
   fascicoloKnowledgeRelations?: boolean | EnteCountOutputTypeCountFascicoloKnowledgeRelationsArgs
@@ -9820,6 +11892,9 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   fascicoloOperationalProposals?: boolean | EnteCountOutputTypeCountFascicoloOperationalProposalsArgs
   runtimeBudgetPolicies?: boolean | EnteCountOutputTypeCountRuntimeBudgetPoliciesArgs
   runtimeCostReservations?: boolean | EnteCountOutputTypeCountRuntimeCostReservationsArgs
+  fascicoloAnalysisEvaluationPermits?: boolean | EnteCountOutputTypeCountFascicoloAnalysisEvaluationPermitsArgs
+  fascicoloAnalysisEvaluations?: boolean | EnteCountOutputTypeCountFascicoloAnalysisEvaluationsArgs
+  technicalSourceResearchRecords?: boolean | EnteCountOutputTypeCountTechnicalSourceResearchRecordsArgs
 }
 
 /**
@@ -9996,6 +12071,13 @@ export type EnteCountOutputTypeCountResearchMissionsArgs<ExtArgs extends runtime
 /**
  * EnteCountOutputType without action
  */
+export type EnteCountOutputTypeCountProfessionalLegalQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProfessionalLegalQuestionWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
 export type EnteCountOutputTypeCountResearchAssistedVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ResearchAssistedVerificationRecordWhereInput
 }
@@ -10059,6 +12141,13 @@ export type EnteCountOutputTypeCountFascicoloKnowledgeRevisionsArgs<ExtArgs exte
 /**
  * EnteCountOutputType without action
  */
+export type EnteCountOutputTypeCountFascicoloKnowledgeIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloKnowledgeIdentityWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
 export type EnteCountOutputTypeCountFascicoloKnowledgeItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FascicoloKnowledgeItemWhereInput
 }
@@ -10112,6 +12201,27 @@ export type EnteCountOutputTypeCountRuntimeCostReservationsArgs<ExtArgs extends 
   where?: Prisma.RuntimeCostReservationWhereInput
 }
 
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountFascicoloAnalysisEvaluationPermitsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloAnalysisEvaluationPermitWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountFascicoloAnalysisEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloAnalysisEvaluationArtifactWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountTechnicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+}
+
 
 export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -10144,6 +12254,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   fascicoloSignals?: boolean | Prisma.Ente$fascicoloSignalsArgs<ExtArgs>
   concessioneExpiryChangeCommands?: boolean | Prisma.Ente$concessioneExpiryChangeCommandsArgs<ExtArgs>
   researchMissions?: boolean | Prisma.Ente$researchMissionsArgs<ExtArgs>
+  professionalLegalQuestions?: boolean | Prisma.Ente$professionalLegalQuestionsArgs<ExtArgs>
   researchAssistedVerifications?: boolean | Prisma.Ente$researchAssistedVerificationsArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   automaticFascicoloReports?: boolean | Prisma.Ente$automaticFascicoloReportsArgs<ExtArgs>
@@ -10153,6 +12264,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
   fascicoloKnowledgeRevisions?: boolean | Prisma.Ente$fascicoloKnowledgeRevisionsArgs<ExtArgs>
+  fascicoloKnowledgeIdentities?: boolean | Prisma.Ente$fascicoloKnowledgeIdentitiesArgs<ExtArgs>
   fascicoloKnowledgeItems?: boolean | Prisma.Ente$fascicoloKnowledgeItemsArgs<ExtArgs>
   fascicoloKnowledgeEvidence?: boolean | Prisma.Ente$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   fascicoloKnowledgeRelations?: boolean | Prisma.Ente$fascicoloKnowledgeRelationsArgs<ExtArgs>
@@ -10161,6 +12273,9 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   fascicoloOperationalProposals?: boolean | Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>
+  fascicoloAnalysisEvaluationPermits?: boolean | Prisma.Ente$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>
+  fascicoloAnalysisEvaluations?: boolean | Prisma.Ente$fascicoloAnalysisEvaluationsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ente"]>
 
@@ -10219,6 +12334,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   fascicoloSignals?: boolean | Prisma.Ente$fascicoloSignalsArgs<ExtArgs>
   concessioneExpiryChangeCommands?: boolean | Prisma.Ente$concessioneExpiryChangeCommandsArgs<ExtArgs>
   researchMissions?: boolean | Prisma.Ente$researchMissionsArgs<ExtArgs>
+  professionalLegalQuestions?: boolean | Prisma.Ente$professionalLegalQuestionsArgs<ExtArgs>
   researchAssistedVerifications?: boolean | Prisma.Ente$researchAssistedVerificationsArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   automaticFascicoloReports?: boolean | Prisma.Ente$automaticFascicoloReportsArgs<ExtArgs>
@@ -10228,6 +12344,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
   fascicoloKnowledgeRevisions?: boolean | Prisma.Ente$fascicoloKnowledgeRevisionsArgs<ExtArgs>
+  fascicoloKnowledgeIdentities?: boolean | Prisma.Ente$fascicoloKnowledgeIdentitiesArgs<ExtArgs>
   fascicoloKnowledgeItems?: boolean | Prisma.Ente$fascicoloKnowledgeItemsArgs<ExtArgs>
   fascicoloKnowledgeEvidence?: boolean | Prisma.Ente$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   fascicoloKnowledgeRelations?: boolean | Prisma.Ente$fascicoloKnowledgeRelationsArgs<ExtArgs>
@@ -10236,6 +12353,9 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   fascicoloOperationalProposals?: boolean | Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>
+  fascicoloAnalysisEvaluationPermits?: boolean | Prisma.Ente$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>
+  fascicoloAnalysisEvaluations?: boolean | Prisma.Ente$fascicoloAnalysisEvaluationsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -10267,6 +12387,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     fascicoloSignals: Prisma.$FascicoloSignalPayload<ExtArgs>[]
     concessioneExpiryChangeCommands: Prisma.$ConcessioneExpiryChangeCommandPayload<ExtArgs>[]
     researchMissions: Prisma.$ResearchMissionRecordPayload<ExtArgs>[]
+    professionalLegalQuestions: Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>[]
     researchAssistedVerifications: Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>[]
     aiFascicoloTrustedReviewMaterials: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>[]
     automaticFascicoloReports: Prisma.$AutomaticFascicoloReportPayload<ExtArgs>[]
@@ -10276,6 +12397,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     aiFascicoloHumanReviewStates: Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>[]
     aiFascicoloHumanReviewEvents: Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>[]
     fascicoloKnowledgeRevisions: Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>[]
+    fascicoloKnowledgeIdentities: Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>[]
     fascicoloKnowledgeItems: Prisma.$FascicoloKnowledgeItemPayload<ExtArgs>[]
     fascicoloKnowledgeEvidence: Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>[]
     fascicoloKnowledgeRelations: Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>[]
@@ -10284,6 +12406,9 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     fascicoloOperationalProposals: Prisma.$FascicoloOperationalProposalPayload<ExtArgs>[]
     runtimeBudgetPolicies: Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>[]
     runtimeCostReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
+    fascicoloAnalysisEvaluationPermits: Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>[]
+    fascicoloAnalysisEvaluations: Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>[]
+    technicalSourceResearchRecords: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -10710,6 +12835,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   fascicoloSignals<T extends Prisma.Ente$fascicoloSignalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloSignalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloSignalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   concessioneExpiryChangeCommands<T extends Prisma.Ente$concessioneExpiryChangeCommandsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$concessioneExpiryChangeCommandsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConcessioneExpiryChangeCommandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   researchMissions<T extends Prisma.Ente$researchMissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$researchMissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchMissionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  professionalLegalQuestions<T extends Prisma.Ente$professionalLegalQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$professionalLegalQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfessionalLegalQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   researchAssistedVerifications<T extends Prisma.Ente$researchAssistedVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$researchAssistedVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloTrustedReviewMaterials<T extends Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   automaticFascicoloReports<T extends Prisma.Ente$automaticFascicoloReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$automaticFascicoloReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AutomaticFascicoloReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -10719,6 +12845,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   aiFascicoloHumanReviewStates<T extends Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloHumanReviewEvents<T extends Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloKnowledgeRevisions<T extends Prisma.Ente$fascicoloKnowledgeRevisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloKnowledgeRevisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloKnowledgeIdentities<T extends Prisma.Ente$fascicoloKnowledgeIdentitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloKnowledgeIdentitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloKnowledgeItems<T extends Prisma.Ente$fascicoloKnowledgeItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloKnowledgeItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloKnowledgeEvidence<T extends Prisma.Ente$fascicoloKnowledgeEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloKnowledgeEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloKnowledgeRelations<T extends Prisma.Ente$fascicoloKnowledgeRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloKnowledgeRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -10727,6 +12854,9 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   fascicoloOperationalProposals<T extends Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloOperationalProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeBudgetPolicies<T extends Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeCostReservations<T extends Prisma.Ente$runtimeCostReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloAnalysisEvaluationPermits<T extends Prisma.Ente$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationPermitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloAnalysisEvaluations<T extends Prisma.Ente$fascicoloAnalysisEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloAnalysisEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloAnalysisEvaluationArtifactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  technicalSourceResearchRecords<T extends Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11708,6 +13838,30 @@ export type Ente$researchMissionsArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * Ente.professionalLegalQuestions
+ */
+export type Ente$professionalLegalQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfessionalLegalQuestion
+   */
+  select?: Prisma.ProfessionalLegalQuestionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProfessionalLegalQuestion
+   */
+  omit?: Prisma.ProfessionalLegalQuestionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfessionalLegalQuestionInclude<ExtArgs> | null
+  where?: Prisma.ProfessionalLegalQuestionWhereInput
+  orderBy?: Prisma.ProfessionalLegalQuestionOrderByWithRelationInput | Prisma.ProfessionalLegalQuestionOrderByWithRelationInput[]
+  cursor?: Prisma.ProfessionalLegalQuestionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProfessionalLegalQuestionScalarFieldEnum | Prisma.ProfessionalLegalQuestionScalarFieldEnum[]
+}
+
+/**
  * Ente.researchAssistedVerifications
  */
 export type Ente$researchAssistedVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -11924,6 +14078,30 @@ export type Ente$fascicoloKnowledgeRevisionsArgs<ExtArgs extends runtime.Types.E
 }
 
 /**
+ * Ente.fascicoloKnowledgeIdentities
+ */
+export type Ente$fascicoloKnowledgeIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeIdentity
+   */
+  select?: Prisma.FascicoloKnowledgeIdentitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeIdentity
+   */
+  omit?: Prisma.FascicoloKnowledgeIdentityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeIdentityInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeIdentityWhereInput
+  orderBy?: Prisma.FascicoloKnowledgeIdentityOrderByWithRelationInput | Prisma.FascicoloKnowledgeIdentityOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloKnowledgeIdentityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloKnowledgeIdentityScalarFieldEnum | Prisma.FascicoloKnowledgeIdentityScalarFieldEnum[]
+}
+
+/**
  * Ente.fascicoloKnowledgeItems
  */
 export type Ente$fascicoloKnowledgeItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -12113,6 +14291,78 @@ export type Ente$runtimeCostReservationsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.RuntimeCostReservationScalarFieldEnum | Prisma.RuntimeCostReservationScalarFieldEnum[]
+}
+
+/**
+ * Ente.fascicoloAnalysisEvaluationPermits
+ */
+export type Ente$fascicoloAnalysisEvaluationPermitsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloAnalysisEvaluationPermit
+   */
+  select?: Prisma.FascicoloAnalysisEvaluationPermitSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloAnalysisEvaluationPermit
+   */
+  omit?: Prisma.FascicoloAnalysisEvaluationPermitOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloAnalysisEvaluationPermitInclude<ExtArgs> | null
+  where?: Prisma.FascicoloAnalysisEvaluationPermitWhereInput
+  orderBy?: Prisma.FascicoloAnalysisEvaluationPermitOrderByWithRelationInput | Prisma.FascicoloAnalysisEvaluationPermitOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloAnalysisEvaluationPermitWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloAnalysisEvaluationPermitScalarFieldEnum | Prisma.FascicoloAnalysisEvaluationPermitScalarFieldEnum[]
+}
+
+/**
+ * Ente.fascicoloAnalysisEvaluations
+ */
+export type Ente$fascicoloAnalysisEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloAnalysisEvaluationArtifact
+   */
+  select?: Prisma.FascicoloAnalysisEvaluationArtifactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloAnalysisEvaluationArtifact
+   */
+  omit?: Prisma.FascicoloAnalysisEvaluationArtifactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloAnalysisEvaluationArtifactInclude<ExtArgs> | null
+  where?: Prisma.FascicoloAnalysisEvaluationArtifactWhereInput
+  orderBy?: Prisma.FascicoloAnalysisEvaluationArtifactOrderByWithRelationInput | Prisma.FascicoloAnalysisEvaluationArtifactOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloAnalysisEvaluationArtifactWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum | Prisma.FascicoloAnalysisEvaluationArtifactScalarFieldEnum[]
+}
+
+/**
+ * Ente.technicalSourceResearchRecords
+ */
+export type Ente$technicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TechnicalSourceResearchRecord
+   */
+  select?: Prisma.TechnicalSourceResearchRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TechnicalSourceResearchRecord
+   */
+  omit?: Prisma.TechnicalSourceResearchRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TechnicalSourceResearchRecordInclude<ExtArgs> | null
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+  orderBy?: Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput | Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput[]
+  cursor?: Prisma.TechnicalSourceResearchRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TechnicalSourceResearchRecordScalarFieldEnum | Prisma.TechnicalSourceResearchRecordScalarFieldEnum[]
 }
 
 /**
