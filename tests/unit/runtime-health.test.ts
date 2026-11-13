@@ -28,6 +28,39 @@ describe("Lotto 8 runtime health", () => {
     await expect(getRuntimeHealthSnapshot(60, db)).resolves.toMatchObject({ status: "DEGRADED" });
   });
 
+  it("degrades instead of failing when the migrations table is missing", async () => {
+    const undefinedTable = Object.assign(new Error('relation "_prisma_migrations" does not exist'), {
+      code: "42P01",
+    });
+    const query = vi.fn()
+      .mockResolvedValueOnce({
+        rows: [{
+          queueDepth: 0, runningJobs: 0, failedJobs: 0, staleLeases: 0,
+          oldestPendingAgeSeconds: null, activeWorkers: 1, lastSuccessfulJobAt: null,
+        }],
+      })
+      .mockRejectedValueOnce(undefinedTable);
+    const db: RuntimeSqlExecutor = { query };
+    await expect(getRuntimeHealthSnapshot(60, db)).resolves.toMatchObject({
+      status: "DEGRADED",
+      migrationState: "PENDING_OR_UNKNOWN",
+      databaseConnected: true,
+    });
+  });
+
+  it("propagates non-42P01 errors from the migration check", async () => {
+    const query = vi.fn()
+      .mockResolvedValueOnce({
+        rows: [{
+          queueDepth: 0, runningJobs: 0, failedJobs: 0, staleLeases: 0,
+          oldestPendingAgeSeconds: null, activeWorkers: 1, lastSuccessfulJobAt: null,
+        }],
+      })
+      .mockRejectedValueOnce(Object.assign(new Error("connection reset"), { code: "57P01" }));
+    const db: RuntimeSqlExecutor = { query };
+    await expect(getRuntimeHealthSnapshot(60, db)).rejects.toThrow("connection reset");
+  });
+
   it("registers the worker without including job payloads", async () => {
     const db = executor([]);
     await registerRuntimeWorker({ workerId: "worker-a", concurrency: 3, providerExecutionEnabled: false }, db);

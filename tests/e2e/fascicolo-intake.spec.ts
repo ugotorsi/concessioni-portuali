@@ -61,6 +61,7 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
     "Criticità",
     "Rapporto",
     "Proposte",
+    "Atti",
   ]);
   await expect(page.locator("#panoramica").getByText("Stato del fascicolo", { exact: true })).toBeVisible();
   await expect(page.locator("#panoramica").getByText("Concessione / titolo", { exact: true })).toBeVisible();

@@ -13,11 +13,12 @@ import { getCriticitaDetail, getCriticitaFilters } from "@/server/queries/critic
 
 interface ModificaCriticitaPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export const dynamic = "force-dynamic";
 
-export default async function ModificaCriticitaPage({ params }: ModificaCriticitaPageProps) {
+export default async function ModificaCriticitaPage({ params, searchParams }: ModificaCriticitaPageProps) {
   const role = await requireRole(BACKOFFICE_ROLES);
 
   if (!canManageCriticita(role)) {
@@ -25,6 +26,11 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
   }
 
   const { id } = await params;
+  const resolvedSearch = (await searchParams) ?? {};
+  const erroreParam = resolvedSearch.errore;
+  const errore = typeof erroreParam === "string" && erroreParam.trim()
+    ? erroreParam.slice(0, 300)
+    : null;
   const [detail, filtersData] = await Promise.all([getCriticitaDetail(id), getCriticitaFilters()]);
 
   if (!detail) {
@@ -39,6 +45,12 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
             <CardTitle>Modifica criticità</CardTitle>
           </CardHeader>
           <CardContent>
+            {errore ? (
+              <div role="alert" className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+                <p className="font-semibold">Dati non validi</p>
+                <p>{errore}</p>
+              </div>
+            ) : null}
             <form action={updateCriticitaAction} className="space-y-4">
               <input type="hidden" name="id" value={detail.id} />
 

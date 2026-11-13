@@ -85,16 +85,17 @@ export async function createCriticitaAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    const issue = parsed.error.issues[0]?.message ?? "Dati non validi.";
     await auditFailure({
       azione: "CRITICITA_CREATE",
       entita: "Criticita",
       actor: { userRole: role },
       metadata: {
         reason: "VALIDATION_ERROR",
-        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+        issue,
       },
     });
-    throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
+    redirect(`/criticita/nuova?errore=${encodeURIComponent(issue)}`);
   }
 
   try {
@@ -199,16 +200,21 @@ export async function updateCriticitaAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    const issue = parsed.error.issues[0]?.message ?? "Dati non validi.";
     await auditFailure({
       azione: "CRITICITA_UPDATE",
       entita: "Criticita",
       actor: { userRole: role },
       metadata: {
         reason: "VALIDATION_ERROR",
-        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+        issue,
       },
     });
-    throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
+    const criticitaId = formData.get("id");
+    if (typeof criticitaId === "string" && /^[a-z0-9-]{1,64}$/i.test(criticitaId)) {
+      redirect(`/criticita/${criticitaId}/modifica?errore=${encodeURIComponent(issue)}`);
+    }
+    throw new Error(issue);
   }
 
   const existing = await prisma.criticita.findUnique({

@@ -45,6 +45,7 @@ interface Props {
   procedimenti: readonly { id: string; label: string }[];
   selectedProcedimentoId: string | null;
   snapshot: LegalWorkbenchSnapshot | null;
+  notice?: string | null;
   assignedActorId: string;
   confirmReferenceDateAction: (formData: FormData) => Promise<void>;
   recoverMissionsAction: (formData: FormData) => Promise<void>;
@@ -73,10 +74,36 @@ const REQUIREMENT_LABELS: Record<string, string> = {
 
 const PROVIDER_LABELS: Record<string, string> = { MOONLIT: "Moonlit", SIMPLICITER: "Simpliciter" };
 
+const WORKBENCH_NOTICE_LABELS: Record<string, string> = {
+  ANALYSIS_ACTIVATION_DISABLED:
+    "L'analisi AI non è attivabile: configurazione OpenAI incompleta (chiave o limiti runtime mancanti) oppure autorizzazione dati reali assente.",
+  CORPUS_NOT_READY:
+    "Il corpus documentale del fascicolo non è ancora pronto: completare le estrazioni dei documenti prima dell'analisi.",
+  ECONOMIC_PREFLIGHT_FAILED:
+    "Preflight economico non superato: verificare i limiti di spesa configurati.",
+  AI_GLOBALLY_DISABLED:
+    "Le funzionalità AI sono disattivate dal comando generale o dal kill-switch.",
+  AI_PROVIDER_NOT_APPROVED:
+    "Il provider selezionato non è approvato per i dati reali.",
+  AI_PROVIDER_MANUAL_DISABLED:
+    "Il provider selezionato non è abilitato all'uso manuale.",
+  CURRENT_KNOWLEDGE_NOT_FOUND:
+    "Non esiste una revisione di conoscenza CURRENT per questo fascicolo: eseguire prima l'analisi giuridica completa.",
+  ASSIGNED_ACTOR_INVALID:
+    "L'utente assegnatario indicato non è valido per questo ente.",
+  RESEARCH_MISSION_ASSIGNEE_RESOLUTION_FAILED:
+    "Impossibile determinare un assegnatario valido per le missioni di ricerca.",
+  RESEARCH_MISSION_PLANNING_FAILED:
+    "La pianificazione delle missioni di ricerca non è riuscita.",
+  RESEARCH_MISSION_RECONCILIATION_FAILED:
+    "La riconciliazione delle missioni di ricerca non è riuscita.",
+};
+
 export function LegalWorkbenchSection({
   procedimenti,
   selectedProcedimentoId,
   snapshot,
+  notice,
   assignedActorId,
   confirmReferenceDateAction,
   recoverMissionsAction,
@@ -94,6 +121,12 @@ export function LegalWorkbenchSection({
           <CardTitle id="legal-workbench-title">Analisi giuridica e ricerche</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {notice ? (
+            <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+              <p className="font-semibold">Operazione non avviata</p>
+              <p>{WORKBENCH_NOTICE_LABELS[notice] ?? `Richiesta rifiutata dal controllo di autorizzazione (${notice}).`}</p>
+            </div>
+          ) : null}
           <p className="text-sm text-slate-600">
             Pannello di controllo manuale: scegli il fascicolo e premi «Avvia analisi giuridica». NOETRA esegue
             l&apos;analisi AI dei documenti, le ricerche normative e giurisprudenziali sulle fonti autorizzate e

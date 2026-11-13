@@ -116,6 +116,17 @@ function WorkflowSteps({
   );
 }
 
+const RESEARCH_REFUSAL_LABELS: Record<string, string> = {
+  AUTOMATIC_RESEARCH_POLICY_DISABLED:
+    "La ricerca autonoma non è abilitata in questo ambiente: servono il comando AI attivo, l'automazione generale e almeno un motore AI idoneo.",
+  AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED: "L'ente non è autorizzato alla ricerca autonoma.",
+  AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED: "Il fascicolo non è autorizzato alla ricerca autonoma.",
+  AUTOMATIC_RESEARCH_CAPABILITY_NOT_ALLOWED: "Una capacità richiesta dalla missione non è autorizzata.",
+  AUTOMATIC_RESEARCH_BUDGET_NOT_ALLOWED: "Il budget della missione supera il limite autorizzato.",
+  AUTOMATIC_RESEARCH_POLICY_INVALID: "La configurazione della ricerca autonoma è incompleta.",
+  PROFESSIONAL_RESEARCH_NOT_AUTHORIZED: "La ricerca non è stata autorizzata dai controlli correnti.",
+};
+
 export function ProfessionalLegalQuestionsPanel({
   procedimentoId,
   questions,
@@ -123,6 +134,7 @@ export function ProfessionalLegalQuestionsPanel({
   defaultReferenceDate,
   documentCount,
   reportCount,
+  refusalNotice,
 }: {
   procedimentoId: string;
   questions: readonly ProfessionalQuestion[];
@@ -130,9 +142,17 @@ export function ProfessionalLegalQuestionsPanel({
   defaultReferenceDate: string;
   documentCount: number;
   reportCount: number;
+  refusalNotice?: string | null;
 }) {
   return (
     <div className="space-y-5">
+      {refusalNotice ? (
+        <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+          <p className="font-semibold">Ricerca non avviata</p>
+          <p>{RESEARCH_REFUSAL_LABELS[refusalNotice] ?? `Richiesta rifiutata dal controllo di autorizzazione (${refusalNotice}).`}</p>
+          <p className="mt-1 text-xs">Il rifiuto è registrato nel registro di audit. La missione resta rinviata finché le condizioni non sono soddisfatte.</p>
+        </div>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Percorso professionale del fascicolo</CardTitle>

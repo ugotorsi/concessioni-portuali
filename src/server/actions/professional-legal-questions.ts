@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireUserWithMfa } from "@/lib/auth";
@@ -224,7 +225,9 @@ export async function startProfessionalLegalResearchAction(formData: FormData) {
         requirementCode: admission.requirementCode,
       },
     });
-    throw new Error(admission.requirementCode ?? "PROFESSIONAL_RESEARCH_NOT_AUTHORIZED");
+    // The denial is audited above; inform the operator in-page instead of
+    // failing the whole view through the error boundary.
+    redirect(`/procedimenti/${encodeURIComponent(procedimentoId)}?section=research&researchNotice=${encodeURIComponent(admission.requirementCode ?? "PROFESSIONAL_RESEARCH_NOT_AUTHORIZED")}`);
   }
   const activation = await requestDocumentWorkerActivation({
     kind: "LEGAL_RESEARCH",
