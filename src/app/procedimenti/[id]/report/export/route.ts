@@ -1,4 +1,5 @@
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -26,8 +27,8 @@ export async function GET(
   if (!role) return new Response("Unauthorized", { status: 401 });
   if (!canExportOperationalData(role)) return new Response("Forbidden", { status: 403 });
 
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+  const procedimento = await prisma.procedimento.findFirst({
+    where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() },
     select: { id: true, enteId: true },
   });
   if (!procedimento) return new Response("Not found", { status: 404 });

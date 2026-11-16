@@ -62,6 +62,13 @@ export function buildDatasetDocumentoWhere(
     AND: [
       {
         OR: [
+          { concessione: { is: { datasetClass: allowed } } },
+          { procedimento: { is: { datasetClass: allowed } } },
+          { fascicoloIntake: { is: { datasetClass: allowed } } },
+        ],
+      },
+      {
+        OR: [
           { concessioneId: null },
           { concessione: { is: { datasetClass: allowed } } },
         ],

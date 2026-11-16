@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { isTrustedJsonMutation, untrustedMutationResponse } from "@/lib/request-security";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
@@ -50,8 +51,8 @@ async function getAccessibleProcedure(
 ) {
   const [tenantContext, procedimento] = await Promise.all([
     getCurrentTenantContext(),
-    prisma.procedimento.findUnique({
-      where: { id: procedimentoId },
+    prisma.procedimento.findFirst({
+      where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() },
       select: { id: true, enteId: true },
     }),
   ]);

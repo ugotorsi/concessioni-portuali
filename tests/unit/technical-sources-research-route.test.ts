@@ -27,7 +27,7 @@ vi.mock("@/lib/tenant-auth", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    procedimento: { findUnique: procedureFindUniqueMock },
+    procedimento: { findFirst: procedureFindUniqueMock },
     researchMissionRecord: { findFirst: missionFindFirstMock, findMany: missionFindManyMock },
     technicalSourceResearchRecord: { findMany: researchFindManyMock },
     $transaction: transactionMock,
@@ -130,6 +130,10 @@ describe("technical source research route", () => {
       call: { tool: "search", arguments: { query: "urbanistica Amalfi" } },
     }), routeContext);
 
+    expect(procedureFindUniqueMock).toHaveBeenCalledWith({
+      where: { id: procedure.id, datasetClass: "PROFESSIONAL" },
+      select: { id: true, enteId: true },
+    });
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({
       error: "Technical source service identity is not configured.",

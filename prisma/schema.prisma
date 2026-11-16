@@ -966,6 +966,7 @@ enum ResearchCompletionState {
 }
 
 enum DatasetClass {
+  UNCLASSIFIED
   PROFESSIONAL
   DEMO
   E2E
@@ -1525,7 +1526,7 @@ model Concessionario {
 
 model Concessione {
   id                         String                     @id @default(cuid())
-  datasetClass               DatasetClass               @default(PROFESSIONAL)
+  datasetClass               DatasetClass               @default(UNCLASSIFIED)
   numeroAtto                 String
   dataRilascio               DateTime
   dataScadenza               DateTime
@@ -1705,7 +1706,7 @@ model Criticita {
 
 model Procedimento {
   id                               String                        @id @default(cuid())
-  datasetClass                     DatasetClass                  @default(PROFESSIONAL)
+  datasetClass                     DatasetClass                  @default(UNCLASSIFIED)
   enteId                           String
   concessioneId                    String?
   criticitaId                      String?
@@ -1805,7 +1806,7 @@ model Procedimento {
 
 model FascicoloIntake {
   id                         String             @id @default(cuid())
-  datasetClass               DatasetClass       @default(PROFESSIONAL)
+  datasetClass               DatasetClass       @default(UNCLASSIFIED)
   enteId                     String
   concessioneId              String?
   procedimentoId             String?            @unique

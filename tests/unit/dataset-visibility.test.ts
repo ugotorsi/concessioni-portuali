@@ -15,6 +15,9 @@ describe("dataset visibility", () => {
     expect(buildDatasetConcessioneWhere()).toEqual({ datasetClass: "PROFESSIONAL" });
     expect(buildDatasetProcedimentoWhere()).toEqual({ datasetClass: "PROFESSIONAL" });
     expect(buildDatasetFascicoloIntakeWhere()).toEqual({ datasetClass: "PROFESSIONAL" });
+    expect(buildDatasetConcessioneWhere("PROFESSIONAL")).not.toEqual({
+      datasetClass: "UNCLASSIFIED",
+    });
   });
 
   it("requires an explicit synthetic scope to expose demo and E2E roots", () => {
@@ -30,6 +33,13 @@ describe("dataset visibility", () => {
   it("requires every linked document root to be inside the selected dataset", () => {
     expect(buildDatasetDocumentoWhere("PROFESSIONAL")).toEqual({
       AND: [
+        {
+          OR: [
+            { concessione: { is: { datasetClass: "PROFESSIONAL" } } },
+            { procedimento: { is: { datasetClass: "PROFESSIONAL" } } },
+            { fascicoloIntake: { is: { datasetClass: "PROFESSIONAL" } } },
+          ],
+        },
         {
           OR: [
             { concessioneId: null },

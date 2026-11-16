@@ -1337,6 +1337,7 @@ export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typ
 
 
 export const DatasetClass = {
+  UNCLASSIFIED: 'UNCLASSIFIED',
   PROFESSIONAL: 'PROFESSIONAL',
   DEMO: 'DEMO',
   E2E: 'E2E'

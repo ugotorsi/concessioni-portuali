@@ -181,8 +181,8 @@ export async function requireConcessioneTenantAccess(
   concessioneId: string,
   options?: { mode?: "read" | "write"; allowWhenEnteMissing?: boolean },
 ): Promise<{ id: string; enteId: string | null }> {
-  const concessione = await prisma.concessione.findUnique({
-    where: { id: concessioneId },
+  const concessione = await prisma.concessione.findFirst({
+    where: { id: concessioneId, ...buildDatasetConcessioneWhere() },
     select: {
       id: true,
       enteId: true,
