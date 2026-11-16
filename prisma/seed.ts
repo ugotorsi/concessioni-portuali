@@ -736,6 +736,7 @@ async function main() {
 
     const created = await prisma.concessione.create({
       data: {
+        datasetClass: "DEMO",
         numeroAtto: item.numeroAtto,
         dataRilascio: item.dataRilascio,
         dataScadenza: item.dataScadenza,
@@ -1477,6 +1478,7 @@ async function main() {
   await prisma.procedimento.createMany({
     data: [
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-005"],
         enteId: concessioneEnteById[concessioniByKey["con-005"]],
         criticitaId: criticitaByKey["crit-004"],
@@ -1515,6 +1517,7 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-002"],
         enteId: concessioneEnteById[concessioniByKey["con-002"]],
         criticitaId: criticitaByKey["crit-001"],
@@ -1552,6 +1555,7 @@ async function main() {
           "Scenario DEMO-01: morosita art. 47 in procedimento d ufficio con comunicazione e contestazione gia presidiate.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-006"],
         enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
@@ -1586,6 +1590,7 @@ async function main() {
           "Caso art.47: presidiare contraddittorio e completezza istruttoria prima della proposta finale.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-001"],
         enteId: concessioneEnteById[concessioniByKey["con-001"]],
         criticitaId: criticitaByKey["crit-003"],
@@ -1599,6 +1604,7 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-003"],
         enteId: concessioneEnteById[concessioniByKey["con-003"]],
         criticitaId: criticitaByKey["crit-001"],
@@ -1612,6 +1618,7 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-006"],
         enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
@@ -1625,6 +1632,7 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-007"],
         enteId: concessioneEnteById[concessioniByKey["con-007"]],
         criticitaId: criticitaByKey["crit-006"],
@@ -1638,6 +1646,7 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-002"],
         enteId: concessioneEnteById[concessioniByKey["con-002"]],
         tipologia: "NUOVA_PROCEDURA",
@@ -1655,6 +1664,7 @@ async function main() {
   await prisma.fascicoloIntake.create({
     data: {
       id: "fascicolo-intake-e2e-preparazione",
+      datasetClass: "E2E",
       enteId: defaultDemoEnteId,
       tipologiaConcessione: "PORTUALE_ADSP",
       oggettoFascicolo: "Istruttoria preliminare per concessione portuale",

@@ -1,10 +1,11 @@
+import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 
 export async function getFascicoloIntakeDetail(id: string) {
-  const fascicolo = await prisma.fascicoloIntake.findUnique({
-    where: { id },
+  const fascicolo = await prisma.fascicoloIntake.findFirst({
+    where: { id, ...buildDatasetFascicoloIntakeWhere() },
     include: {
       concessione: { select: { id: true, numeroAtto: true } },
       procedimento: { select: { id: true } },
@@ -48,6 +49,7 @@ export async function getFascicoliIntakeList(input: { search?: string; concessio
 
   return prisma.fascicoloIntake.findMany({
     where: {
+      ...buildDatasetFascicoloIntakeWhere(),
       procedimentoId: null,
       ...(tenantContext.isAdmin ? {} : { enteId: { in: tenantContext.accessibleTenantIds } }),
       ...(input.concessioneId ? { concessioneId: input.concessioneId } : {}),

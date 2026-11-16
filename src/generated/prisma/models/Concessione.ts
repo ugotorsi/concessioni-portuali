@@ -44,6 +44,7 @@ export type ConcessioneSumAggregateOutputType = {
 
 export type ConcessioneMinAggregateOutputType = {
   id: string | null
+  datasetClass: $Enums.DatasetClass | null
   numeroAtto: string | null
   dataRilascio: Date | null
   dataScadenza: Date | null
@@ -81,6 +82,7 @@ export type ConcessioneMinAggregateOutputType = {
 
 export type ConcessioneMaxAggregateOutputType = {
   id: string | null
+  datasetClass: $Enums.DatasetClass | null
   numeroAtto: string | null
   dataRilascio: Date | null
   dataScadenza: Date | null
@@ -118,6 +120,7 @@ export type ConcessioneMaxAggregateOutputType = {
 
 export type ConcessioneCountAggregateOutputType = {
   id: number
+  datasetClass: number
   numeroAtto: number
   dataRilascio: number
   dataScadenza: number
@@ -173,6 +176,7 @@ export type ConcessioneSumAggregateInputType = {
 
 export type ConcessioneMinAggregateInputType = {
   id?: true
+  datasetClass?: true
   numeroAtto?: true
   dataRilascio?: true
   dataScadenza?: true
@@ -210,6 +214,7 @@ export type ConcessioneMinAggregateInputType = {
 
 export type ConcessioneMaxAggregateInputType = {
   id?: true
+  datasetClass?: true
   numeroAtto?: true
   dataRilascio?: true
   dataScadenza?: true
@@ -247,6 +252,7 @@ export type ConcessioneMaxAggregateInputType = {
 
 export type ConcessioneCountAggregateInputType = {
   id?: true
+  datasetClass?: true
   numeroAtto?: true
   dataRilascio?: true
   dataScadenza?: true
@@ -371,6 +377,7 @@ export type ConcessioneGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type ConcessioneGroupByOutputType = {
   id: string
+  datasetClass: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date
   dataScadenza: Date
@@ -431,6 +438,7 @@ export type ConcessioneWhereInput = {
   OR?: Prisma.ConcessioneWhereInput[]
   NOT?: Prisma.ConcessioneWhereInput | Prisma.ConcessioneWhereInput[]
   id?: Prisma.StringFilter<"Concessione"> | string
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Concessione"> | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFilter<"Concessione"> | string
   dataRilascio?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   dataScadenza?: Prisma.DateTimeFilter<"Concessione"> | Date | string
@@ -485,6 +493,7 @@ export type ConcessioneWhereInput = {
 
 export type ConcessioneOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   numeroAtto?: Prisma.SortOrder
   dataRilascio?: Prisma.SortOrder
   dataScadenza?: Prisma.SortOrder
@@ -542,6 +551,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ConcessioneWhereInput | Prisma.ConcessioneWhereInput[]
   OR?: Prisma.ConcessioneWhereInput[]
   NOT?: Prisma.ConcessioneWhereInput | Prisma.ConcessioneWhereInput[]
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Concessione"> | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFilter<"Concessione"> | string
   dataRilascio?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   dataScadenza?: Prisma.DateTimeFilter<"Concessione"> | Date | string
@@ -596,6 +606,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
 
 export type ConcessioneOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   numeroAtto?: Prisma.SortOrder
   dataRilascio?: Prisma.SortOrder
   dataScadenza?: Prisma.SortOrder
@@ -641,6 +652,7 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
   OR?: Prisma.ConcessioneScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ConcessioneScalarWhereWithAggregatesInput | Prisma.ConcessioneScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Concessione"> | string
+  datasetClass?: Prisma.EnumDatasetClassWithAggregatesFilter<"Concessione"> | $Enums.DatasetClass
   numeroAtto?: Prisma.StringWithAggregatesFilter<"Concessione"> | string
   dataRilascio?: Prisma.DateTimeWithAggregatesFilter<"Concessione"> | Date | string
   dataScadenza?: Prisma.DateTimeWithAggregatesFilter<"Concessione"> | Date | string
@@ -678,6 +690,7 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
 
 export type ConcessioneCreateInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -730,6 +743,7 @@ export type ConcessioneCreateInput = {
 
 export type ConcessioneUncheckedCreateInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -782,6 +796,7 @@ export type ConcessioneUncheckedCreateInput = {
 
 export type ConcessioneUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -834,6 +849,7 @@ export type ConcessioneUpdateInput = {
 
 export type ConcessioneUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -886,6 +902,7 @@ export type ConcessioneUncheckedUpdateInput = {
 
 export type ConcessioneCreateManyInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -923,6 +940,7 @@ export type ConcessioneCreateManyInput = {
 
 export type ConcessioneUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -958,6 +976,7 @@ export type ConcessioneUpdateManyMutationInput = {
 
 export type ConcessioneUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1005,6 +1024,7 @@ export type ConcessioneOrderByRelationAggregateInput = {
 
 export type ConcessioneCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   numeroAtto?: Prisma.SortOrder
   dataRilascio?: Prisma.SortOrder
   dataScadenza?: Prisma.SortOrder
@@ -1050,6 +1070,7 @@ export type ConcessioneAvgOrderByAggregateInput = {
 
 export type ConcessioneMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   numeroAtto?: Prisma.SortOrder
   dataRilascio?: Prisma.SortOrder
   dataScadenza?: Prisma.SortOrder
@@ -1087,6 +1108,7 @@ export type ConcessioneMaxOrderByAggregateInput = {
 
 export type ConcessioneMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   numeroAtto?: Prisma.SortOrder
   dataRilascio?: Prisma.SortOrder
   dataScadenza?: Prisma.SortOrder
@@ -1222,6 +1244,10 @@ export type ConcessioneUncheckedUpdateManyWithoutConcessionarioNestedInput = {
   update?: Prisma.ConcessioneUpdateWithWhereUniqueWithoutConcessionarioInput | Prisma.ConcessioneUpdateWithWhereUniqueWithoutConcessionarioInput[]
   updateMany?: Prisma.ConcessioneUpdateManyWithWhereWithoutConcessionarioInput | Prisma.ConcessioneUpdateManyWithWhereWithoutConcessionarioInput[]
   deleteMany?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
+}
+
+export type EnumDatasetClassFieldUpdateOperationsInput = {
+  set?: $Enums.DatasetClass
 }
 
 export type EnumNormaRiferimentoFieldUpdateOperationsInput = {
@@ -1506,6 +1532,7 @@ export type ConcessioneUpdateOneWithoutActivityLogsNestedInput = {
 
 export type ConcessioneCreateWithoutEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1557,6 +1584,7 @@ export type ConcessioneCreateWithoutEnteInput = {
 
 export type ConcessioneUncheckedCreateWithoutEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1637,6 +1665,7 @@ export type ConcessioneScalarWhereInput = {
   OR?: Prisma.ConcessioneScalarWhereInput[]
   NOT?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
   id?: Prisma.StringFilter<"Concessione"> | string
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Concessione"> | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFilter<"Concessione"> | string
   dataRilascio?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   dataScadenza?: Prisma.DateTimeFilter<"Concessione"> | Date | string
@@ -1674,6 +1703,7 @@ export type ConcessioneScalarWhereInput = {
 
 export type ConcessioneCreateWithoutConcessionarioInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1725,6 +1755,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
 
 export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1802,6 +1833,7 @@ export type ConcessioneUpdateManyWithWhereWithoutConcessionarioInput = {
 
 export type ConcessioneCreateWithoutLegalFrameworksInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1853,6 +1885,7 @@ export type ConcessioneCreateWithoutLegalFrameworksInput = {
 
 export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -1920,6 +1953,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutLegalFrameworksInput = {
 
 export type ConcessioneUpdateWithoutLegalFrameworksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1971,6 +2005,7 @@ export type ConcessioneUpdateWithoutLegalFrameworksInput = {
 
 export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2022,6 +2057,7 @@ export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
 
 export type ConcessioneCreateWithoutObblighiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2073,6 +2109,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
 
 export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2140,6 +2177,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutObblighiInput = {
 
 export type ConcessioneUpdateWithoutObblighiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2191,6 +2229,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2242,6 +2281,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
 
 export type ConcessioneCreateWithoutScadenzeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2293,6 +2333,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
 
 export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2360,6 +2401,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutScadenzeInput = {
 
 export type ConcessioneUpdateWithoutScadenzeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2411,6 +2453,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
 
 export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2462,6 +2505,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
 
 export type ConcessioneCreateWithoutCriticitaInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2513,6 +2557,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
 
 export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2580,6 +2625,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutCriticitaInput = {
 
 export type ConcessioneUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2631,6 +2677,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
 
 export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2682,6 +2729,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
 
 export type ConcessioneCreateWithoutProcedimentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2733,6 +2781,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
 
 export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2800,6 +2849,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutProcedimentiInput = {
 
 export type ConcessioneUpdateWithoutProcedimentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2851,6 +2901,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2902,6 +2953,7 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
 
 export type ConcessioneCreateWithoutFascicoliIntakeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -2953,6 +3005,7 @@ export type ConcessioneCreateWithoutFascicoliIntakeInput = {
 
 export type ConcessioneUncheckedCreateWithoutFascicoliIntakeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3020,6 +3073,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutFascicoliIntakeInput = {
 
 export type ConcessioneUpdateWithoutFascicoliIntakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3071,6 +3125,7 @@ export type ConcessioneUpdateWithoutFascicoliIntakeInput = {
 
 export type ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3122,6 +3177,7 @@ export type ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput = {
 
 export type ConcessioneCreateWithoutSopralluoghiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3173,6 +3229,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
 
 export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3240,6 +3297,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutSopralluoghiInput = {
 
 export type ConcessioneUpdateWithoutSopralluoghiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3291,6 +3349,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3342,6 +3401,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
 
 export type ConcessioneCreateWithoutPagamentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3393,6 +3453,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
 
 export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3460,6 +3521,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutPagamentiInput = {
 
 export type ConcessioneUpdateWithoutPagamentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3511,6 +3573,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3562,6 +3625,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
 
 export type ConcessioneCreateWithoutDocumentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3613,6 +3677,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
 
 export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3680,6 +3745,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutDocumentiInput = {
 
 export type ConcessioneUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3731,6 +3797,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3782,6 +3849,7 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
 
 export type ConcessioneCreateWithoutFascicoloSignalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3833,6 +3901,7 @@ export type ConcessioneCreateWithoutFascicoloSignalsInput = {
 
 export type ConcessioneUncheckedCreateWithoutFascicoloSignalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -3900,6 +3969,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutFascicoloSignalsInput = {
 
 export type ConcessioneUpdateWithoutFascicoloSignalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3951,6 +4021,7 @@ export type ConcessioneUpdateWithoutFascicoloSignalsInput = {
 
 export type ConcessioneUncheckedUpdateWithoutFascicoloSignalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4002,6 +4073,7 @@ export type ConcessioneUncheckedUpdateWithoutFascicoloSignalsInput = {
 
 export type ConcessioneCreateWithoutExpiryChangeCommandsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4053,6 +4125,7 @@ export type ConcessioneCreateWithoutExpiryChangeCommandsInput = {
 
 export type ConcessioneUncheckedCreateWithoutExpiryChangeCommandsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4120,6 +4193,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutExpiryChangeCommandsInput = {
 
 export type ConcessioneUpdateWithoutExpiryChangeCommandsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4171,6 +4245,7 @@ export type ConcessioneUpdateWithoutExpiryChangeCommandsInput = {
 
 export type ConcessioneUncheckedUpdateWithoutExpiryChangeCommandsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4222,6 +4297,7 @@ export type ConcessioneUncheckedUpdateWithoutExpiryChangeCommandsInput = {
 
 export type ConcessioneCreateWithoutDecisioniProcedimentoInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4273,6 +4349,7 @@ export type ConcessioneCreateWithoutDecisioniProcedimentoInput = {
 
 export type ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4340,6 +4417,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutDecisioniProcedimentoInput = {
 
 export type ConcessioneUpdateWithoutDecisioniProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4391,6 +4469,7 @@ export type ConcessioneUpdateWithoutDecisioniProcedimentoInput = {
 
 export type ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4442,6 +4521,7 @@ export type ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput = {
 
 export type ConcessioneCreateWithoutReportInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4493,6 +4573,7 @@ export type ConcessioneCreateWithoutReportInput = {
 
 export type ConcessioneUncheckedCreateWithoutReportInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4560,6 +4641,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutReportInput = {
 
 export type ConcessioneUpdateWithoutReportInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4611,6 +4693,7 @@ export type ConcessioneUpdateWithoutReportInput = {
 
 export type ConcessioneUncheckedUpdateWithoutReportInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4662,6 +4745,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
 
 export type ConcessioneCreateWithoutNormaImpattiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4713,6 +4797,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
 
 export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4780,6 +4865,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutNormaImpattiInput = {
 
 export type ConcessioneUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4831,6 +4917,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
 
 export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4882,6 +4969,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
 
 export type ConcessioneCreateWithoutActivityLogsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -4933,6 +5021,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
 
 export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -5000,6 +5089,7 @@ export type ConcessioneUpdateToOneWithWhereWithoutActivityLogsInput = {
 
 export type ConcessioneUpdateWithoutActivityLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5051,6 +5141,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
 
 export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5102,6 +5193,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
 
 export type ConcessioneCreateManyEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -5138,6 +5230,7 @@ export type ConcessioneCreateManyEnteInput = {
 
 export type ConcessioneUpdateWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5189,6 +5282,7 @@ export type ConcessioneUpdateWithoutEnteInput = {
 
 export type ConcessioneUncheckedUpdateWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5240,6 +5334,7 @@ export type ConcessioneUncheckedUpdateWithoutEnteInput = {
 
 export type ConcessioneUncheckedUpdateManyWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5276,6 +5371,7 @@ export type ConcessioneUncheckedUpdateManyWithoutEnteInput = {
 
 export type ConcessioneCreateManyConcessionarioInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   numeroAtto: string
   dataRilascio: Date | string
   dataScadenza: Date | string
@@ -5312,6 +5408,7 @@ export type ConcessioneCreateManyConcessionarioInput = {
 
 export type ConcessioneUpdateWithoutConcessionarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5363,6 +5460,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
 
 export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5414,6 +5512,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
 
 export type ConcessioneUncheckedUpdateManyWithoutConcessionarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
   dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5607,6 +5706,7 @@ export type ConcessioneCountOutputTypeCountExpiryChangeCommandsArgs<ExtArgs exte
 
 export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   numeroAtto?: boolean
   dataRilascio?: boolean
   dataScadenza?: boolean
@@ -5662,6 +5762,7 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   numeroAtto?: boolean
   dataRilascio?: boolean
   dataScadenza?: boolean
@@ -5701,6 +5802,7 @@ export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
 
 export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   numeroAtto?: boolean
   dataRilascio?: boolean
   dataScadenza?: boolean
@@ -5740,6 +5842,7 @@ export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 
 export type ConcessioneSelectScalar = {
   id?: boolean
+  datasetClass?: boolean
   numeroAtto?: boolean
   dataRilascio?: boolean
   dataScadenza?: boolean
@@ -5775,7 +5878,7 @@ export type ConcessioneSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "expiryGeneration" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "portActivityLegalType" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "enteId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
+export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetClass" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "expiryGeneration" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "portActivityLegalType" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "enteId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
 export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
   ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
@@ -5828,6 +5931,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    datasetClass: $Enums.DatasetClass
     numeroAtto: string
     dataRilascio: Date
     dataScadenza: Date
@@ -6302,6 +6406,7 @@ export interface Prisma__ConcessioneClient<T, Null = never, ExtArgs extends runt
  */
 export interface ConcessioneFieldRefs {
   readonly id: Prisma.FieldRef<"Concessione", 'String'>
+  readonly datasetClass: Prisma.FieldRef<"Concessione", 'DatasetClass'>
   readonly numeroAtto: Prisma.FieldRef<"Concessione", 'String'>
   readonly dataRilascio: Prisma.FieldRef<"Concessione", 'DateTime'>
   readonly dataScadenza: Prisma.FieldRef<"Concessione", 'DateTime'>

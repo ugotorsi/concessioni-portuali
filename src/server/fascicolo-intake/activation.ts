@@ -28,6 +28,7 @@ export async function activateFascicoloIntake(input: {
       where: { id: input.fascicoloIntakeId },
       select: {
         id: true,
+        datasetClass: true,
         enteId: true,
         concessioneId: true,
         procedimentoId: true,
@@ -70,6 +71,7 @@ export async function activateFascicoloIntake(input: {
     await tx.procedimento.createMany({
       data: [{
         id: procedimentoId,
+        datasetClass: intake.datasetClass,
         enteId: intake.enteId,
         concessioneId: intake.concessioneId,
         tipologia: "ALTRO",

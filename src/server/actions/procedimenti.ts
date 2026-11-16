@@ -604,13 +604,21 @@ export async function createProcedimentoAction(formData: FormData) {
   const created = await runSerializableTransactionWithRetry(async (tx) => {
     const concessione = await tx.concessione.findUnique({
       where: { id: parsed.data.concessioneId },
-      select: { id: true, enteId: true, dataScadenza: true, stato: true, expiryGeneration: true },
+      select: {
+        id: true,
+        datasetClass: true,
+        enteId: true,
+        dataScadenza: true,
+        stato: true,
+        expiryGeneration: true,
+      },
     });
     if (!concessione?.enteId || concessione.id !== parsed.data.concessioneId) {
       throw new Error("Concessione canonica non coerente con il procedimento da creare.");
     }
     const createdProcedimento = await tx.procedimento.create({
       data: {
+        datasetClass: concessione.datasetClass,
         enteId: concessione.enteId,
         concessioneId: parsed.data.concessioneId,
         criticitaId,

@@ -79,6 +79,7 @@ describe("createFascicoloIntakeAction", () => {
     expect(requireConcessioneTenantAccessMock).not.toHaveBeenCalled();
     expect(prismaMock.fascicoloIntake.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        datasetClass: "PROFESSIONAL",
         enteId: "ente-a",
         concessioneId: null,
         oggettoFascicolo: "Fascicolo Alfa",
@@ -106,7 +107,10 @@ describe("createFascicoloIntakeAction", () => {
   });
 
   it("collega facoltativamente una concessione reale e ne usa il tenant", async () => {
-    prismaMock.concessione.findUnique.mockResolvedValue({ enteId: "ente-b" });
+    prismaMock.concessione.findUnique.mockResolvedValue({
+      datasetClass: "DEMO",
+      enteId: "ente-b",
+    });
 
     await expect(createFascicoloIntakeAction(formData("con-1"))).rejects.toThrow(
       "REDIRECT:/procedimenti/fascicolo-1",
@@ -118,7 +122,11 @@ describe("createFascicoloIntakeAction", () => {
       { mode: "write", allowWhenEnteMissing: false },
     );
     expect(prismaMock.fascicoloIntake.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ enteId: "ente-b", concessioneId: "con-1" }),
+      data: expect.objectContaining({
+        datasetClass: "DEMO",
+        enteId: "ente-b",
+        concessioneId: "con-1",
+      }),
     });
   });
 

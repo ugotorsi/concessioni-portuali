@@ -127,6 +127,7 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
       },
       select: {
         id: true,
+        datasetClass: true,
         numeroAtto: true,
         concessionarioId: true,
         enteId: true,
@@ -136,6 +137,7 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
       concessioni.length > 1
       || concessioni.some((record) =>
         record.id !== STAGING_E2E_CASE.concessioneId
+        || record.datasetClass !== "E2E"
         || record.numeroAtto !== STAGING_E2E_CASE.numeroAtto
         || record.concessionarioId !== concessionario.id
         || record.enteId !== tenant.id)
@@ -145,6 +147,7 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
     const concessione = concessioni[0] ?? await tx.concessione.create({
       data: {
         id: STAGING_E2E_CASE.concessioneId,
+        datasetClass: "E2E",
         numeroAtto: STAGING_E2E_CASE.numeroAtto,
         dataRilascio: new Date("2024-01-15T00:00:00.000Z"),
         dataScadenza: new Date("2026-09-30T00:00:00.000Z"),
@@ -169,12 +172,13 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
           { concessioneId: concessione.id },
         ],
       },
-      select: { id: true, concessioneId: true, noteIstruttorie: true },
+      select: { id: true, datasetClass: true, concessioneId: true, noteIstruttorie: true },
     });
     if (
       procedures.length > 1
       || procedures.some((record) =>
         record.id !== STAGING_E2E_CASE.procedimentoId
+        || record.datasetClass !== "E2E"
         || record.concessioneId !== concessione.id
         || record.noteIstruttorie !== "STAGING ONLY - E2E-TEST-001 - DATI SINTETICI")
     ) {
@@ -183,6 +187,7 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
     const procedimento = procedures[0] ?? await tx.procedimento.create({
       data: {
         id: STAGING_E2E_CASE.procedimentoId,
+        datasetClass: "E2E",
         enteId: tenant.id,
         concessioneId: concessione.id,
         tipologia: "ALTRO",

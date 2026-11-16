@@ -1336,6 +1336,16 @@ export const ResearchCompletionState = {
 export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typeof ResearchCompletionState]
 
 
+export const DatasetClass = {
+  UNCLASSIFIED: 'UNCLASSIFIED',
+  PROFESSIONAL: 'PROFESSIONAL',
+  DEMO: 'DEMO',
+  E2E: 'E2E'
+} as const
+
+export type DatasetClass = (typeof DatasetClass)[keyof typeof DatasetClass]
+
+
 export const ProfessionalLegalQuestionVersionStatus = {
   DRAFT: 'DRAFT',
   APPROVED: 'APPROVED',

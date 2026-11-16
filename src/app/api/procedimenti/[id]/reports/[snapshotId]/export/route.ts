@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -31,7 +32,11 @@ export async function GET(
     return new Response("Forbidden", { status: 403 });
   }
   const snapshot = await prisma.structuredFascicoloReportSnapshot.findFirst({
-    where: { id: snapshotId, procedimentoId: id },
+    where: {
+      id: snapshotId,
+      procedimentoId: id,
+      procedimento: { is: buildDatasetProcedimentoWhere() },
+    },
   });
   if (!snapshot) return new Response("Not found", { status: 404 });
   const tenantContext = await getCurrentTenantContext();

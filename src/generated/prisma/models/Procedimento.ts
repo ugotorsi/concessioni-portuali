@@ -36,6 +36,7 @@ export type ProcedimentoSumAggregateOutputType = {
 
 export type ProcedimentoMinAggregateOutputType = {
   id: string | null
+  datasetClass: $Enums.DatasetClass | null
   enteId: string | null
   concessioneId: string | null
   criticitaId: string | null
@@ -84,6 +85,7 @@ export type ProcedimentoMinAggregateOutputType = {
 
 export type ProcedimentoMaxAggregateOutputType = {
   id: string | null
+  datasetClass: $Enums.DatasetClass | null
   enteId: string | null
   concessioneId: string | null
   criticitaId: string | null
@@ -132,6 +134,7 @@ export type ProcedimentoMaxAggregateOutputType = {
 
 export type ProcedimentoCountAggregateOutputType = {
   id: number
+  datasetClass: number
   enteId: number
   concessioneId: number
   criticitaId: number
@@ -190,6 +193,7 @@ export type ProcedimentoSumAggregateInputType = {
 
 export type ProcedimentoMinAggregateInputType = {
   id?: true
+  datasetClass?: true
   enteId?: true
   concessioneId?: true
   criticitaId?: true
@@ -238,6 +242,7 @@ export type ProcedimentoMinAggregateInputType = {
 
 export type ProcedimentoMaxAggregateInputType = {
   id?: true
+  datasetClass?: true
   enteId?: true
   concessioneId?: true
   criticitaId?: true
@@ -286,6 +291,7 @@ export type ProcedimentoMaxAggregateInputType = {
 
 export type ProcedimentoCountAggregateInputType = {
   id?: true
+  datasetClass?: true
   enteId?: true
   concessioneId?: true
   criticitaId?: true
@@ -421,6 +427,7 @@ export type ProcedimentoGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type ProcedimentoGroupByOutputType = {
   id: string
+  datasetClass: $Enums.DatasetClass
   enteId: string
   concessioneId: string | null
   criticitaId: string | null
@@ -492,6 +499,7 @@ export type ProcedimentoWhereInput = {
   OR?: Prisma.ProcedimentoWhereInput[]
   NOT?: Prisma.ProcedimentoWhereInput | Prisma.ProcedimentoWhereInput[]
   id?: Prisma.StringFilter<"Procedimento"> | string
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Procedimento"> | $Enums.DatasetClass
   enteId?: Prisma.StringFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
@@ -572,6 +580,7 @@ export type ProcedimentoWhereInput = {
 
 export type ProcedimentoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -656,6 +665,7 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ProcedimentoWhereInput | Prisma.ProcedimentoWhereInput[]
   OR?: Prisma.ProcedimentoWhereInput[]
   NOT?: Prisma.ProcedimentoWhereInput | Prisma.ProcedimentoWhereInput[]
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Procedimento"> | $Enums.DatasetClass
   enteId?: Prisma.StringFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
@@ -736,6 +746,7 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
 
 export type ProcedimentoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -792,6 +803,7 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
   OR?: Prisma.ProcedimentoScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ProcedimentoScalarWhereWithAggregatesInput | Prisma.ProcedimentoScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Procedimento"> | string
+  datasetClass?: Prisma.EnumDatasetClassWithAggregatesFilter<"Procedimento"> | $Enums.DatasetClass
   enteId?: Prisma.StringWithAggregatesFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   criticitaId?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
@@ -840,6 +852,7 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
 
 export type ProcedimentoCreateInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -917,6 +930,7 @@ export type ProcedimentoCreateInput = {
 
 export type ProcedimentoUncheckedCreateInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -994,6 +1008,7 @@ export type ProcedimentoUncheckedCreateInput = {
 
 export type ProcedimentoUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1071,6 +1086,7 @@ export type ProcedimentoUpdateInput = {
 
 export type ProcedimentoUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1148,6 +1164,7 @@ export type ProcedimentoUncheckedUpdateInput = {
 
 export type ProcedimentoCreateManyInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -1196,6 +1213,7 @@ export type ProcedimentoCreateManyInput = {
 
 export type ProcedimentoUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1241,6 +1259,7 @@ export type ProcedimentoUpdateManyMutationInput = {
 
 export type ProcedimentoUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1304,6 +1323,7 @@ export type ProcedimentoIdEnteIdCompoundUniqueInput = {
 
 export type ProcedimentoCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
@@ -1356,6 +1376,7 @@ export type ProcedimentoAvgOrderByAggregateInput = {
 
 export type ProcedimentoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
@@ -1404,6 +1425,7 @@ export type ProcedimentoMaxOrderByAggregateInput = {
 
 export type ProcedimentoMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  datasetClass?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
@@ -2034,6 +2056,7 @@ export type ProcedimentoUpdateOneRequiredWithoutAiFascicoloHumanReviewEventsNest
 
 export type ProcedimentoCreateWithoutEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -2110,6 +2133,7 @@ export type ProcedimentoCreateWithoutEnteInput = {
 
 export type ProcedimentoUncheckedCreateWithoutEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   concessioneId?: string | null
   criticitaId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -2215,6 +2239,7 @@ export type ProcedimentoScalarWhereInput = {
   OR?: Prisma.ProcedimentoScalarWhereInput[]
   NOT?: Prisma.ProcedimentoScalarWhereInput | Prisma.ProcedimentoScalarWhereInput[]
   id?: Prisma.StringFilter<"Procedimento"> | string
+  datasetClass?: Prisma.EnumDatasetClassFilter<"Procedimento"> | $Enums.DatasetClass
   enteId?: Prisma.StringFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
@@ -2263,6 +2288,7 @@ export type ProcedimentoScalarWhereInput = {
 
 export type ProcedimentoCreateWithoutConcessioneInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -2339,6 +2365,7 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
 
 export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   criticitaId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -2441,6 +2468,7 @@ export type ProcedimentoUpdateManyWithWhereWithoutConcessioneInput = {
 
 export type ProcedimentoCreateWithoutCriticitaInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -2517,6 +2545,7 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
 
 export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -2619,6 +2648,7 @@ export type ProcedimentoUpdateManyWithWhereWithoutCriticitaInput = {
 
 export type ProcedimentoCreateWithoutFascicoloIntakeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -2695,6 +2725,7 @@ export type ProcedimentoCreateWithoutFascicoloIntakeInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloIntakeInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -2787,6 +2818,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloIntakeInput = {
 
 export type ProcedimentoUpdateWithoutFascicoloIntakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2863,6 +2895,7 @@ export type ProcedimentoUpdateWithoutFascicoloIntakeInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloIntakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2939,6 +2972,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloIntakeInput = {
 
 export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -3015,6 +3049,7 @@ export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -3107,6 +3142,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutResponsabileAssignmentsInput 
 
 export type ProcedimentoUpdateWithoutResponsabileAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3183,6 +3219,7 @@ export type ProcedimentoUpdateWithoutResponsabileAssignmentsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3259,6 +3296,7 @@ export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
 
 export type ProcedimentoCreateWithoutDocumentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -3335,6 +3373,7 @@ export type ProcedimentoCreateWithoutDocumentiInput = {
 
 export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -3427,6 +3466,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDocumentiInput = {
 
 export type ProcedimentoUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3503,6 +3543,7 @@ export type ProcedimentoUpdateWithoutDocumentiInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3579,6 +3620,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
 
 export type ProcedimentoCreateWithoutDocumentExtractionAttemptsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -3655,6 +3697,7 @@ export type ProcedimentoCreateWithoutDocumentExtractionAttemptsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -3747,6 +3790,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDocumentExtractionAttemptsInp
 
 export type ProcedimentoUpdateWithoutDocumentExtractionAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3823,6 +3867,7 @@ export type ProcedimentoUpdateWithoutDocumentExtractionAttemptsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3899,6 +3944,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentExtractionAttemptsInput = 
 
 export type ProcedimentoCreateWithoutNeutralIntakeDestinationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -3975,6 +4021,7 @@ export type ProcedimentoCreateWithoutNeutralIntakeDestinationsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutNeutralIntakeDestinationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -4067,6 +4114,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutNeutralIntakeDestinationsInpu
 
 export type ProcedimentoUpdateWithoutNeutralIntakeDestinationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4143,6 +4191,7 @@ export type ProcedimentoUpdateWithoutNeutralIntakeDestinationsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutNeutralIntakeDestinationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4219,6 +4268,7 @@ export type ProcedimentoUncheckedUpdateWithoutNeutralIntakeDestinationsInput = {
 
 export type ProcedimentoCreateWithoutAsyncJobsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -4295,6 +4345,7 @@ export type ProcedimentoCreateWithoutAsyncJobsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutAsyncJobsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -4387,6 +4438,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutAsyncJobsInput = {
 
 export type ProcedimentoUpdateWithoutAsyncJobsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4463,6 +4515,7 @@ export type ProcedimentoUpdateWithoutAsyncJobsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutAsyncJobsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4539,6 +4592,7 @@ export type ProcedimentoUncheckedUpdateWithoutAsyncJobsInput = {
 
 export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -4615,6 +4669,7 @@ export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -4707,6 +4762,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationPe
 
 export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4783,6 +4839,7 @@ export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4859,6 +4916,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationPermits
 
 export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -4935,6 +4993,7 @@ export type ProcedimentoCreateWithoutFascicoloAnalysisEvaluationsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloAnalysisEvaluationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -5027,6 +5086,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloAnalysisEvaluationsI
 
 export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5103,6 +5163,7 @@ export type ProcedimentoUpdateWithoutFascicoloAnalysisEvaluationsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5179,6 +5240,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloAnalysisEvaluationsInput 
 
 export type ProcedimentoCreateWithoutRuntimeBudgetPoliciesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -5255,6 +5317,7 @@ export type ProcedimentoCreateWithoutRuntimeBudgetPoliciesInput = {
 
 export type ProcedimentoUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -5347,6 +5410,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutRuntimeBudgetPoliciesInput = 
 
 export type ProcedimentoUpdateWithoutRuntimeBudgetPoliciesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5423,6 +5487,7 @@ export type ProcedimentoUpdateWithoutRuntimeBudgetPoliciesInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5499,6 +5564,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
 
 export type ProcedimentoCreateWithoutRuntimeCostReservationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -5575,6 +5641,7 @@ export type ProcedimentoCreateWithoutRuntimeCostReservationsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutRuntimeCostReservationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -5667,6 +5734,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutRuntimeCostReservationsInput 
 
 export type ProcedimentoUpdateWithoutRuntimeCostReservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5743,6 +5811,7 @@ export type ProcedimentoUpdateWithoutRuntimeCostReservationsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5819,6 +5888,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
 
 export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -5895,6 +5965,7 @@ export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloSignalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -5987,6 +6058,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloSignalsInput = {
 
 export type ProcedimentoUpdateWithoutFascicoloSignalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6063,6 +6135,7 @@ export type ProcedimentoUpdateWithoutFascicoloSignalsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6139,6 +6212,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput = {
 
 export type ProcedimentoCreateWithoutProfessionalLegalQuestionsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -6215,6 +6289,7 @@ export type ProcedimentoCreateWithoutProfessionalLegalQuestionsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutProfessionalLegalQuestionsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -6307,6 +6382,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutProfessionalLegalQuestionsInp
 
 export type ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6383,6 +6459,7 @@ export type ProcedimentoUpdateWithoutProfessionalLegalQuestionsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6459,6 +6536,7 @@ export type ProcedimentoUncheckedUpdateWithoutProfessionalLegalQuestionsInput = 
 
 export type ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -6535,6 +6613,7 @@ export type ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -6627,6 +6706,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutTechnicalSourceResearchRecord
 
 export type ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6703,6 +6783,7 @@ export type ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6779,6 +6860,7 @@ export type ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInpu
 
 export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -6855,6 +6937,7 @@ export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -6947,6 +7030,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloObservationsInput = 
 
 export type ProcedimentoUpdateWithoutFascicoloObservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7023,6 +7107,7 @@ export type ProcedimentoUpdateWithoutFascicoloObservationsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7099,6 +7184,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
 
 export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -7175,6 +7261,7 @@ export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
 
 export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -7267,6 +7354,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutChecklistEvidenceInput = {
 
 export type ProcedimentoUpdateWithoutChecklistEvidenceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7343,6 +7431,7 @@ export type ProcedimentoUpdateWithoutChecklistEvidenceInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7419,6 +7508,7 @@ export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
 
 export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -7495,6 +7585,7 @@ export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -7587,6 +7678,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDocumentRequirementProposalsI
 
 export type ProcedimentoUpdateWithoutDocumentRequirementProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7663,6 +7755,7 @@ export type ProcedimentoUpdateWithoutDocumentRequirementProposalsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7739,6 +7832,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput 
 
 export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -7815,6 +7909,7 @@ export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
 
 export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -7907,6 +8002,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDecisioneProcedimentoInput = 
 
 export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7983,6 +8079,7 @@ export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8059,6 +8156,7 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
 
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -8135,6 +8233,7 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
 
 export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -8227,6 +8326,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutNormaImpattiInput = {
 
 export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8303,6 +8403,7 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8379,6 +8480,7 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
 
 export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -8455,6 +8557,7 @@ export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -8547,6 +8650,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloTrustedReviewMater
 
 export type ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8623,6 +8727,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8699,6 +8804,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsI
 
 export type ProcedimentoCreateWithoutAutomaticFascicoloReportsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -8775,6 +8881,7 @@ export type ProcedimentoCreateWithoutAutomaticFascicoloReportsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -8867,6 +8974,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutAutomaticFascicoloReportsInpu
 
 export type ProcedimentoUpdateWithoutAutomaticFascicoloReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8943,6 +9051,7 @@ export type ProcedimentoUpdateWithoutAutomaticFascicoloReportsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9019,6 +9128,7 @@ export type ProcedimentoUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeRevisionsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -9095,6 +9205,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRevisionsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -9187,6 +9298,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloKnowledgeRevisionsIn
 
 export type ProcedimentoUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9263,6 +9375,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRevisionsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9339,6 +9452,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput =
 
 export type ProcedimentoCreateWithoutStructuredFascicoloReportsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -9415,6 +9529,7 @@ export type ProcedimentoCreateWithoutStructuredFascicoloReportsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutStructuredFascicoloReportsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -9507,6 +9622,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutStructuredFascicoloReportsInp
 
 export type ProcedimentoUpdateWithoutStructuredFascicoloReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9583,6 +9699,7 @@ export type ProcedimentoUpdateWithoutStructuredFascicoloReportsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9659,6 +9776,7 @@ export type ProcedimentoUncheckedUpdateWithoutStructuredFascicoloReportsInput = 
 
 export type ProcedimentoCreateWithoutFascicoloOperationalProposalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -9735,6 +9853,7 @@ export type ProcedimentoCreateWithoutFascicoloOperationalProposalsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -9827,6 +9946,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloOperationalProposals
 
 export type ProcedimentoUpdateWithoutFascicoloOperationalProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9903,6 +10023,7 @@ export type ProcedimentoUpdateWithoutFascicoloOperationalProposalsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9979,6 +10100,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloOperationalProposalsInput
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeIdentitiesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -10055,6 +10177,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeIdentitiesInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeIdentitiesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -10147,6 +10270,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloKnowledgeIdentitiesI
 
 export type ProcedimentoUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10223,6 +10347,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10299,6 +10424,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeIdentitiesInput 
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeItemsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -10375,6 +10501,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeItemsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -10467,6 +10594,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloKnowledgeItemsInput 
 
 export type ProcedimentoUpdateWithoutFascicoloKnowledgeItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10543,6 +10671,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeItemsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10619,6 +10748,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeEvidenceInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -10695,6 +10825,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeEvidenceInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -10787,6 +10918,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloKnowledgeEvidenceInp
 
 export type ProcedimentoUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10863,6 +10995,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeEvidenceInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10939,6 +11072,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = 
 
 export type ProcedimentoCreateWithoutFascicoloKnowledgeRelationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -11015,6 +11149,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRelationsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -11107,6 +11242,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutFascicoloKnowledgeRelationsIn
 
 export type ProcedimentoUpdateWithoutFascicoloKnowledgeRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11183,6 +11319,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRelationsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11259,6 +11396,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput =
 
 export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -11335,6 +11473,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -11427,6 +11566,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewStatesI
 
 export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11503,6 +11643,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11579,6 +11720,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput 
 
 export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   responsabileProcedimentoNome?: string | null
   responsabileProcedimentoEmail?: string | null
   unitaOrganizzativaResponsabile?: string | null
@@ -11655,6 +11797,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
 
 export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   criticitaId?: string | null
@@ -11747,6 +11890,7 @@ export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewEventsI
 
 export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11823,6 +11967,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11899,6 +12044,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput 
 
 export type ProcedimentoCreateManyEnteInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   concessioneId?: string | null
   criticitaId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -11946,6 +12092,7 @@ export type ProcedimentoCreateManyEnteInput = {
 
 export type ProcedimentoUpdateWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12022,6 +12169,7 @@ export type ProcedimentoUpdateWithoutEnteInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12098,6 +12246,7 @@ export type ProcedimentoUncheckedUpdateWithoutEnteInput = {
 
 export type ProcedimentoUncheckedUpdateManyWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12145,6 +12294,7 @@ export type ProcedimentoUncheckedUpdateManyWithoutEnteInput = {
 
 export type ProcedimentoCreateManyConcessioneInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   criticitaId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -12192,6 +12342,7 @@ export type ProcedimentoCreateManyConcessioneInput = {
 
 export type ProcedimentoUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12268,6 +12419,7 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12344,6 +12496,7 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
 
 export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12391,6 +12544,7 @@ export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
 
 export type ProcedimentoCreateManyCriticitaInput = {
   id?: string
+  datasetClass?: $Enums.DatasetClass
   enteId: string
   concessioneId?: string | null
   responsabileProcedimentoNome?: string | null
@@ -12438,6 +12592,7 @@ export type ProcedimentoCreateManyCriticitaInput = {
 
 export type ProcedimentoUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12514,6 +12669,7 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
 
 export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12590,6 +12746,7 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
 
 export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetClass?: Prisma.EnumDatasetClassFieldUpdateOperationsInput | $Enums.DatasetClass
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12902,6 +13059,7 @@ export type ProcedimentoCountOutputTypeCountProfessionalLegalQuestionsArgs<ExtAr
 
 export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
@@ -12983,6 +13141,7 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
 
 export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
@@ -13034,6 +13193,7 @@ export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  datasetClass?: boolean
   enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
@@ -13085,6 +13245,7 @@ export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type ProcedimentoSelectScalar = {
   id?: boolean
+  datasetClass?: boolean
   enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
@@ -13131,7 +13292,7 @@ export type ProcedimentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "criticitaId" | "responsabileProcedimentoNome" | "responsabileProcedimentoEmail" | "unitaOrganizzativaResponsabile" | "responsabileAssegnatoAt" | "tipologia" | "origineProcedimento" | "procedimentoUfficio" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "preavvisoRigettoApplicabile" | "statoPreavvisoRigetto" | "dataPreavvisoRigetto" | "termineOsservazioniPreavviso" | "osservazioniPreavvisoRicevute" | "dataOsservazioniPreavviso" | "valutazioneOsservazioniPreavviso" | "motivazioneMancatoPreavviso" | "checklistProfile" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
+export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetClass" | "enteId" | "concessioneId" | "criticitaId" | "responsabileProcedimentoNome" | "responsabileProcedimentoEmail" | "unitaOrganizzativaResponsabile" | "responsabileAssegnatoAt" | "tipologia" | "origineProcedimento" | "procedimentoUfficio" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "preavvisoRigettoApplicabile" | "statoPreavvisoRigetto" | "dataPreavvisoRigetto" | "termineOsservazioniPreavviso" | "osservazioniPreavvisoRicevute" | "dataOsservazioniPreavviso" | "valutazioneOsservazioniPreavviso" | "motivazioneMancatoPreavviso" | "checklistProfile" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
 export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.Procedimento$concessioneArgs<ExtArgs>
@@ -13216,6 +13377,7 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    datasetClass: $Enums.DatasetClass
     enteId: string
     concessioneId: string | null
     criticitaId: string | null
@@ -13716,6 +13878,7 @@ export interface Prisma__ProcedimentoClient<T, Null = never, ExtArgs extends run
  */
 export interface ProcedimentoFieldRefs {
   readonly id: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly datasetClass: Prisma.FieldRef<"Procedimento", 'DatasetClass'>
   readonly enteId: Prisma.FieldRef<"Procedimento", 'String'>
   readonly concessioneId: Prisma.FieldRef<"Procedimento", 'String'>
   readonly criticitaId: Prisma.FieldRef<"Procedimento", 'String'>

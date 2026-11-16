@@ -140,6 +140,7 @@ async function seedIsolatedCorpus(): Promise<void> {
     await tx.procedimento.create({
       data: {
         id: procedimentoId,
+        datasetClass: "E2E",
         enteId: tenantId,
         tipologia: "ALTRO",
         stato: "IN_CORSO",

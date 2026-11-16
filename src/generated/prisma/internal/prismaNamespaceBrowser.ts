@@ -128,6 +128,8 @@ export const ModelName = {
   NormaVersione: 'NormaVersione',
   NormaImpatto: 'NormaImpatto',
   ActivityLog: 'ActivityLog',
+  HistoricalActivityLogArchiveManifest: 'HistoricalActivityLogArchiveManifest',
+  HistoricalActivityLogArchiveRecord: 'HistoricalActivityLogArchiveRecord',
   AiFascicoloTrustedReviewMaterial: 'AiFascicoloTrustedReviewMaterial',
   AutomaticFascicoloReport: 'AutomaticFascicoloReport',
   AutomaticFascicoloReportDocument: 'AutomaticFascicoloReportDocument',
@@ -515,6 +517,7 @@ export type ConcessionarioScalarFieldEnum = (typeof ConcessionarioScalarFieldEnu
 
 export const ConcessioneScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   numeroAtto: 'numeroAtto',
   dataRilascio: 'dataRilascio',
   dataScadenza: 'dataScadenza',
@@ -631,6 +634,7 @@ export type CriticitaScalarFieldEnum = (typeof CriticitaScalarFieldEnum)[keyof t
 
 export const ProcedimentoScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   enteId: 'enteId',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
@@ -682,6 +686,7 @@ export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[k
 
 export const FascicoloIntakeScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   enteId: 'enteId',
   concessioneId: 'concessioneId',
   procedimentoId: 'procedimentoId',
@@ -1905,6 +1910,40 @@ export const ActivityLogScalarFieldEnum = {
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+export const HistoricalActivityLogArchiveManifestScalarFieldEnum = {
+  id: 'id',
+  sourceDatabaseFingerprint: 'sourceDatabaseFingerprint',
+  sourceProjectId: 'sourceProjectId',
+  sourceBranchId: 'sourceBranchId',
+  sourceBackupBranchId: 'sourceBackupBranchId',
+  recordCount: 'recordCount',
+  firstRecordId: 'firstRecordId',
+  finalRecordId: 'finalRecordId',
+  finalHash: 'finalHash',
+  contentSha256: 'contentSha256',
+  verificationMode: 'verificationMode',
+  payloadHashVerifiedCount: 'payloadHashVerifiedCount',
+  payloadHashIssueCode: 'payloadHashIssueCode',
+  payloadHashIssueRecordId: 'payloadHashIssueRecordId',
+  capturedAt: 'capturedAt'
+} as const
+
+export type HistoricalActivityLogArchiveManifestScalarFieldEnum = (typeof HistoricalActivityLogArchiveManifestScalarFieldEnum)[keyof typeof HistoricalActivityLogArchiveManifestScalarFieldEnum]
+
+
+export const HistoricalActivityLogArchiveRecordScalarFieldEnum = {
+  archiveId: 'archiveId',
+  ordinal: 'ordinal',
+  originalId: 'originalId',
+  createdAt: 'createdAt',
+  previousHash: 'previousHash',
+  currentHash: 'currentHash',
+  payload: 'payload'
+} as const
+
+export type HistoricalActivityLogArchiveRecordScalarFieldEnum = (typeof HistoricalActivityLogArchiveRecordScalarFieldEnum)[keyof typeof HistoricalActivityLogArchiveRecordScalarFieldEnum]
 
 
 export const AiFascicoloTrustedReviewMaterialScalarFieldEnum = {

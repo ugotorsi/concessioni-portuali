@@ -1,4 +1,8 @@
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
+import {
+  buildDatasetDocumentoWhere,
+  buildDatasetProcedimentoWhere,
+} from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -21,8 +25,8 @@ export async function GET(
   if (!role) return new Response("Unauthorized", { status: 401 });
   if (!canExportOperationalData(role)) return new Response("Forbidden", { status: 403 });
 
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+  const procedimento = await prisma.procedimento.findFirst({
+    where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() },
     select: { id: true, enteId: true },
   });
   if (!procedimento?.enteId) return new Response("Not found", { status: 404 });
@@ -51,7 +55,11 @@ export async function GET(
 
   const attachments = version.attachments.length
     ? await prisma.documento.findMany({
-        where: { procedimentoId, id: { in: [...version.attachments] } },
+        where: {
+          ...buildDatasetDocumentoWhere(),
+          procedimentoId,
+          id: { in: [...version.attachments] },
+        },
         select: { id: true, nome: true },
       })
     : [];

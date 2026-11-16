@@ -15,7 +15,7 @@ vi.mock("@/lib/tenant-auth", () => ({
 }));
 
 vi.mock("@/lib/prisma", () => ({
-  prisma: { documento: { findUnique: documentoFindUniqueMock } },
+  prisma: { documento: { findFirst: documentoFindUniqueMock } },
 }));
 
 vi.mock("@/server/documents/storage", () => ({

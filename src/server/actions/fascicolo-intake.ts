@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import type { DatasetClass } from "@/generated/prisma/client";
+import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { prisma } from "@/lib/prisma";
@@ -65,6 +67,7 @@ export async function createFascicoloIntakeAction(formData: FormData) {
 
   const concessioneId = nullable(parsed.data.concessioneId);
   let enteId = tenantContext.defaultTenantId;
+  let datasetClass: DatasetClass = "PROFESSIONAL";
   if (concessioneId) {
     await requireConcessioneTenantAccess(tenantContext, concessioneId, {
       mode: "write",
@@ -72,9 +75,10 @@ export async function createFascicoloIntakeAction(formData: FormData) {
     });
     const concessione = await prisma.concessione.findUnique({
       where: { id: concessioneId },
-      select: { enteId: true },
+      select: { datasetClass: true, enteId: true },
     });
     enteId = concessione?.enteId ?? null;
+    datasetClass = concessione?.datasetClass ?? "UNCLASSIFIED";
   }
   if (!enteId) {
     throw new Error("Seleziona un tenant predefinito prima di creare un fascicolo senza concessione collegata.");
@@ -82,6 +86,7 @@ export async function createFascicoloIntakeAction(formData: FormData) {
 
   const created = await prisma.fascicoloIntake.create({
     data: {
+      datasetClass,
       enteId,
       concessioneId,
       tipologiaConcessione: parsed.data.tipologiaConcessioneIniziale,
@@ -135,8 +140,8 @@ export async function activateFascicoloIntakeAction(formData: FormData) {
   }
 
   const fascicoloIntakeId = z.string().trim().min(1).parse(formData.get("fascicoloIntakeId"));
-  const fascicolo = await prisma.fascicoloIntake.findUnique({
-    where: { id: fascicoloIntakeId },
+  const fascicolo = await prisma.fascicoloIntake.findFirst({
+    where: { id: fascicoloIntakeId, ...buildDatasetFascicoloIntakeWhere() },
     select: { id: true, enteId: true, concessioneId: true },
   });
   if (!fascicolo) {
