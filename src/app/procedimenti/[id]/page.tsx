@@ -14,6 +14,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
+import { FascicoloAiWorkspace } from "@/components/procedimenti/FascicoloAiWorkspace";
 import { FascicoloActsWorkspace } from "@/components/procedimenti/FascicoloActsWorkspace";
 import { FascicoloGuidedActivities } from "@/components/procedimenti/FascicoloGuidedActivities";
 import { FascicoloProposalPreview } from "@/components/procedimenti/FascicoloProposalPreview";
@@ -527,31 +528,38 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             />
           ) : null}
           {activeSection === "analysis" ? (
-            <FascicoloAnalysis
-              technicalResearchProcedureId={detail.procedimento.id}
-              model={{
-                questions: mergeFascicoloAnalysisQuestions([
-                  ...(structuredAnalysis?.questions ?? []),
-                  ...workflowAnalysisQuestions,
-                ]),
-                evidence: structuredAnalysis?.evidence ?? detail.documentiPrincipali.map((documento) => ({
-                  id: documento.id,
-                  title: documento.nome,
-                  detail: formatEnumLabel(documento.tipologia),
-                  href: documento.isFileAvailable ? documento.url : null,
-                })),
-                contradictions: structuredAnalysis?.contradictions ?? [],
-                gaps: structuredAnalysis?.gaps ?? (detail.documentiPrincipali.length === 0 ? [{
-                  id: "documenti-mancanti",
-                  title: "Documentazione da acquisire",
-                  requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
-                }] : []),
-                relevantItems: structuredAnalysis?.relevantItems ?? [],
-                legalSources: baseResearchModel.sources,
-                analysisStatus: structuredAnalysis?.analysisStatus,
-                corpus: analysisCorpus,
-              }}
-            />
+            <div className="space-y-6">
+              <FascicoloAiWorkspace
+                tenantId={detail.canonicalEnteId}
+                procedimentoId={detail.procedimento.id}
+                role={role}
+              />
+              <FascicoloAnalysis
+                technicalResearchProcedureId={detail.procedimento.id}
+                model={{
+                  questions: mergeFascicoloAnalysisQuestions([
+                    ...(structuredAnalysis?.questions ?? []),
+                    ...workflowAnalysisQuestions,
+                  ]),
+                  evidence: structuredAnalysis?.evidence ?? detail.documentiPrincipali.map((documento) => ({
+                    id: documento.id,
+                    title: documento.nome,
+                    detail: formatEnumLabel(documento.tipologia),
+                    href: documento.isFileAvailable ? documento.url : null,
+                  })),
+                  contradictions: structuredAnalysis?.contradictions ?? [],
+                  gaps: structuredAnalysis?.gaps ?? (detail.documentiPrincipali.length === 0 ? [{
+                    id: "documenti-mancanti",
+                    title: "Documentazione da acquisire",
+                    requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
+                  }] : []),
+                  relevantItems: structuredAnalysis?.relevantItems ?? [],
+                  legalSources: baseResearchModel.sources,
+                  analysisStatus: structuredAnalysis?.analysisStatus,
+                  corpus: analysisCorpus,
+                }}
+              />
+            </div>
           ) : null}
           {activeSection === "research" ? (
             <div className="space-y-6">
@@ -1035,9 +1043,15 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         ) : null}
 
         {activeSection === "analysis" ? (
-          <FascicoloAnalysis
-            technicalResearchProcedureId={detail.procedimento.id}
-            model={{
+          <div className="space-y-6">
+            <FascicoloAiWorkspace
+              tenantId={detail.canonicalEnteId}
+              procedimentoId={detail.procedimento.id}
+              role={role}
+            />
+            <FascicoloAnalysis
+              technicalResearchProcedureId={detail.procedimento.id}
+              model={{
               questions: mergeFascicoloAnalysisQuestions([
                 ...(structuredAnalysis?.questions ?? []),
                 ...workflowAnalysisQuestions,
@@ -1101,8 +1115,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               legalSources: researchModel.sources,
               analysisStatus: structuredAnalysis?.analysisStatus,
               corpus: analysisCorpus,
-            }}
-          />
+              }}
+            />
+          </div>
         ) : null}
 
         {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">

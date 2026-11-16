@@ -58,7 +58,7 @@ for (const name of [
   if (process.env[name]?.trim().toLowerCase() === "true") throw new Error(`${name} must stay OFF.`);
   process.env[name] = "false";
 }
-for (const name of ["LEGAL_DATA_HUNTER_API_KEY", "RESEARCH_PROVIDER_CREDENTIAL_KEY", "AI_GLOBAL_EMERGENCY_DISABLED"]) {
+for (const name of ["RESEARCH_PROVIDER_CREDENTIAL_KEY", "AI_GLOBAL_EMERGENCY_DISABLED"]) {
   delete process.env[name];
 }
 Object.assign(process.env, {
@@ -79,6 +79,9 @@ Object.assign(process.env, {
   AI_REAL_DATA_ENABLED: "true",
   AI_REAL_DATA_APPROVAL_ID: SIMULATED_APPROVAL_ID,
   AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+  // Marks one server-side research channel as ready for scope-policy evaluation. The registry
+  // below replaces all provider adapters and the network guard rejects every unsimulated host.
+  LEGAL_DATA_HUNTER_API_KEY: "isolated-simulated-key-not-a-secret",
   ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.50",
   ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.01",
   MANUAL_RESEARCH_EXECUTION_ENABLED: "true",

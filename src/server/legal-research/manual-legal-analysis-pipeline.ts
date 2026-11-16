@@ -171,6 +171,19 @@ export async function runManualLegalAnalysisPipeline(input: Readonly<{
     };
   };
 
+  if (corpus?.availability === "READY") {
+    const currentRevision = await dependencies.loadCurrentRevision({
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+    });
+    if (
+      currentRevision?.status === "CURRENT"
+      && currentRevision.corpusFingerprint === corpus.corpusFingerprint
+    ) {
+      return runCurrentRevisionResearch(null);
+    }
+  }
+
   let analysis: Awaited<ReturnType<typeof requestExistingCorpusAnalysis>>;
   try {
     analysis = await dependencies.requestAnalysis({

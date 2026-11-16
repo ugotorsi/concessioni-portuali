@@ -129,14 +129,16 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
   };
 }
 
+export type ExistingCorpusAnalysisReadinessCode =
+  | "ANALYSIS_ACTIVATION_DISABLED"
+  | "CORPUS_NOT_READY"
+  | "ECONOMIC_PREFLIGHT_FAILED"
+  | "AI_GLOBALLY_DISABLED"
+  | "AI_PROVIDER_NOT_APPROVED"
+  | "AI_PROVIDER_MANUAL_DISABLED";
+
 export class ExistingCorpusAnalysisRequestError extends Error {
-  constructor(readonly code:
-    | "ANALYSIS_ACTIVATION_DISABLED"
-    | "CORPUS_NOT_READY"
-    | "ECONOMIC_PREFLIGHT_FAILED"
-    | "AI_GLOBALLY_DISABLED"
-    | "AI_PROVIDER_NOT_APPROVED"
-    | "AI_PROVIDER_MANUAL_DISABLED") {
+  constructor(readonly code: ExistingCorpusAnalysisReadinessCode) {
     super(code);
     this.name = "ExistingCorpusAnalysisRequestError";
   }
@@ -192,6 +194,84 @@ const defaultDependencies: ExistingCorpusAnalysisDependencies = {
   activateWorker: requestDocumentWorkerActivation,
 };
 
+type ExistingCorpusAnalysisReadiness =
+  | Readonly<{
+      ready: false;
+      code: ExistingCorpusAnalysisReadinessCode;
+    }>
+  | Readonly<{
+      ready: true;
+      selection: AiModelSelection;
+      corpus: NonNullable<Awaited<ReturnType<typeof getFascicoloDocumentCorpusForTenant>>>;
+      estimatedCostEur: number;
+      budgetCompatibility: Awaited<ReturnType<typeof inspectFascicoloV7BudgetCompatibility>>;
+    }>;
+
+export async function getExistingCorpusAnalysisReadiness(input: {
+  tenantId: string;
+  procedimentoId: string;
+  environment?: Readonly<Record<string, string | undefined>>;
+  selection?: AiModelSelection;
+}, dependencies: Pick<
+  ExistingCorpusAnalysisDependencies,
+  "loadCorpus" | "loadGlobalAiControl" | "loadProviderControl" | "inspectBudgetCompatibility"
+> = defaultDependencies): Promise<ExistingCorpusAnalysisReadiness> {
+  const environment = input.environment ?? process.env;
+  const selection = input.selection ?? DEFAULT_AI_MODEL_SELECTION;
+  getAiModelCatalogEntry(selection);
+  if (!isAiModelReadyForRealData(selection)) {
+    return { ready: false, code: "AI_PROVIDER_NOT_APPROVED" };
+  }
+  if (!isExistingCorpusAnalysisRequestEnabled(environment, selection)) {
+    return { ready: false, code: "ANALYSIS_ACTIVATION_DISABLED" };
+  }
+  const aiControl = await dependencies.loadGlobalAiControl(environment);
+  if (!aiControl.effectiveEnabled) {
+    return { ready: false, code: "AI_GLOBALLY_DISABLED" };
+  }
+  const providerControl = await dependencies.loadProviderControl();
+  const selectedControl = providerControl.providers.find(
+    (provider) => provider.provider === selection.provider,
+  );
+  if (!selectedControl?.manualEnabled) {
+    return { ready: false, code: "AI_PROVIDER_MANUAL_DISABLED" };
+  }
+  const corpus = await dependencies.loadCorpus({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+  });
+  if (
+    !corpus
+    || corpus.availability !== "READY"
+    || corpus.documentCount === 0
+    || corpus.availableDocumentCount !== corpus.documentCount
+    || corpus.textPageCount === 0
+  ) {
+    return { ready: false, code: "CORPUS_NOT_READY" };
+  }
+  let estimatedCostEur: number;
+  try {
+    estimatedCostEur = aiModelEstimatedAmountEur(selection, environment);
+  } catch {
+    return { ready: false, code: "ECONOMIC_PREFLIGHT_FAILED" };
+  }
+  const budgetCompatibility = await dependencies.inspectBudgetCompatibility({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    requiredAmountEur: estimatedCostEur,
+  });
+  if (!budgetCompatibility.compatible) {
+    return { ready: false, code: "ECONOMIC_PREFLIGHT_FAILED" };
+  }
+  return {
+    ready: true,
+    selection,
+    corpus,
+    estimatedCostEur,
+    budgetCompatibility,
+  };
+}
+
 export async function requestExistingCorpusAnalysis(input: {
   tenantId: string;
   procedimentoId: string;
@@ -206,58 +286,16 @@ export async function requestExistingCorpusAnalysis(input: {
   selection?: AiModelSelection;
 }, dependencies: ExistingCorpusAnalysisDependencies = defaultDependencies) {
   const environment = input.environment ?? process.env;
-  const selection = input.selection ?? DEFAULT_AI_MODEL_SELECTION;
-  getAiModelCatalogEntry(selection);
-  if (!isAiModelReadyForRealData(selection)) {
-    throw new ExistingCorpusAnalysisRequestError("AI_PROVIDER_NOT_APPROVED");
-  }
-  if (!isExistingCorpusAnalysisRequestEnabled(environment, selection)) {
-    throw new ExistingCorpusAnalysisRequestError("ANALYSIS_ACTIVATION_DISABLED");
-  }
-  const aiControl = await dependencies.loadGlobalAiControl(environment);
-  if (!aiControl.effectiveEnabled) {
-    throw new ExistingCorpusAnalysisRequestError("AI_GLOBALLY_DISABLED");
-  }
-  const providerControl = await dependencies.loadProviderControl();
-  const selectedControl = providerControl.providers.find(
-    (provider) => provider.provider === selection.provider,
-  );
-  if (!selectedControl?.manualEnabled) {
-    throw new ExistingCorpusAnalysisRequestError("AI_PROVIDER_MANUAL_DISABLED");
-  }
-  const corpus = await dependencies.loadCorpus({
+  const readiness = await getExistingCorpusAnalysisReadiness({
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
-  });
-  if (
-    !corpus
-    || corpus.availability !== "READY"
-    || corpus.documentCount === 0
-    || corpus.availableDocumentCount !== corpus.documentCount
-    || corpus.textPageCount === 0
-  ) {
-    throw new ExistingCorpusAnalysisRequestError("CORPUS_NOT_READY");
+    environment,
+    selection: input.selection,
+  }, dependencies);
+  if (!readiness.ready) {
+    throw new ExistingCorpusAnalysisRequestError(readiness.code);
   }
-  let estimatedCostEur: number;
-  try {
-    estimatedCostEur = aiModelEstimatedAmountEur(selection, environment);
-  } catch {
-    throw new ExistingCorpusAnalysisRequestError("ECONOMIC_PREFLIGHT_FAILED");
-  }
-  let budgetCompatibility: Awaited<ReturnType<typeof inspectFascicoloV7BudgetCompatibility>>;
-  try {
-    budgetCompatibility = await dependencies.inspectBudgetCompatibility({
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-      requiredAmountEur: estimatedCostEur,
-    });
-    if (!budgetCompatibility.compatible) {
-      throw new ExistingCorpusAnalysisRequestError("ECONOMIC_PREFLIGHT_FAILED");
-    }
-  } catch (error) {
-    if (error instanceof ExistingCorpusAnalysisRequestError) throw error;
-    throw error;
-  }
+  const { selection, corpus, budgetCompatibility } = readiness;
   const admission = await dependencies.admitJob(
     buildFascicoloExistingCorpusAnalysisAdmission({
       tenantId: input.tenantId,

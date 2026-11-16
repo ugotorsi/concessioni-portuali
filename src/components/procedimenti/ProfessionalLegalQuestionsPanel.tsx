@@ -88,7 +88,7 @@ function WorkflowSteps({
   const sourceCount = missions.reduce((total, mission) => total + mission.questionResults.length, 0);
   const steps = [
     { label: "Documenti", complete: documentCount > 0, href: "documents" },
-    { label: "Analisi", complete: documentCount > 0, href: "analysis" },
+    { label: "Analisi", complete: reportCount > 0, href: "analysis" },
     { label: "Quesiti", complete: questions.length > 0, href: "research" },
     { label: "Autorizzazione", complete: approved && missions.length > 0, href: "research" },
     { label: "Fonti", complete: sourceCount > 0, href: "research" },
@@ -145,7 +145,7 @@ export function ProfessionalLegalQuestionsPanel({
   refusalNotice?: string | null;
 }) {
   return (
-    <div className="space-y-5">
+    <div id="ricerca-giuridica" className="space-y-5">
       {refusalNotice ? (
         <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
           <p className="font-semibold">Ricerca non avviata</p>
@@ -169,10 +169,13 @@ export function ProfessionalLegalQuestionsPanel({
       </Card>
 
       {canManage ? (
-        <Card>
+        <Card id="interroga-ai">
           <CardHeader>
-            <CardTitle>Nuovo quesito dell&apos;avvocato</CardTitle>
-            <CardDescription>Il quesito nasce in bozza. L&apos;approvazione e l&apos;eventuale ricerca sono passaggi separati.</CardDescription>
+            <CardTitle>Interroga AI sul fascicolo</CardTitle>
+            <CardDescription>
+              Formula il quesito liberamente. Il quesito nasce in bozza; approvazione, esecuzione AI,
+              verifica delle fonti e uso professionale restano passaggi separati e tracciati.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form action={createProfessionalLegalQuestionAction} className="grid gap-4">
@@ -194,7 +197,7 @@ export function ProfessionalLegalQuestionsPanel({
                 <Input name="referenceDate" type="date" required defaultValue={defaultReferenceDate} />
               </label>
               <div>
-                <SubmitButtonPending pendingLabel="Salvataggio in corso...">Salva la bozza</SubmitButtonPending>
+                <SubmitButtonPending pendingLabel="Salvataggio in corso...">Salva quesito</SubmitButtonPending>
               </div>
             </form>
           </CardContent>

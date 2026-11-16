@@ -7,6 +7,7 @@ import {
 import {
   buildFascicoloExistingCorpusAnalysisAdmission,
   ExistingCorpusAnalysisRequestError,
+  getExistingCorpusAnalysisReadiness,
   isExistingCorpusAnalysisRequestEnabled,
   requestExistingCorpusAnalysis,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
@@ -109,6 +110,34 @@ const request = {
 };
 
 describe("existing fascicolo corpus analysis", () => {
+  it("projects the same successful preflight without admitting or activating jobs", async () => {
+    const deps = dependencies();
+
+    await expect(getExistingCorpusAnalysisReadiness(request, deps)).resolves.toMatchObject({
+      ready: true,
+      selection: DEFAULT_AI_MODEL_SELECTION,
+      corpus: { corpusFingerprint: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint },
+      estimatedCostEur: 1,
+      budgetCompatibility: { compatible: true },
+    });
+    expect(deps.admitJob).not.toHaveBeenCalled();
+    expect(deps.activateWorker).not.toHaveBeenCalled();
+  });
+
+  it("projects the exact blocking reason without mutating state", async () => {
+    const deps = dependencies();
+    deps.loadGlobalAiControl.mockResolvedValue({ effectiveEnabled: false });
+
+    await expect(getExistingCorpusAnalysisReadiness(request, deps)).resolves.toEqual({
+      ready: false,
+      code: "AI_GLOBALLY_DISABLED",
+    });
+    expect(deps.loadCorpus).not.toHaveBeenCalled();
+    expect(deps.inspectBudgetCompatibility).not.toHaveBeenCalled();
+    expect(deps.admitJob).not.toHaveBeenCalled();
+    expect(deps.activateWorker).not.toHaveBeenCalled();
+  });
+
   it("requires immutable real-data authorization before admission", async () => {
     expect(isExistingCorpusAnalysisRequestEnabled({
       ...enabledEnvironment,

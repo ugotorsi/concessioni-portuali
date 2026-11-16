@@ -85,6 +85,30 @@ describe("Fascicolo UX contract", () => {
     );
   });
 
+  it("exposes the three professional AI actions inside the fascicolo", () => {
+    const aiWorkspace = readSource(
+      "src/components/procedimenti/FascicoloAiWorkspace.tsx",
+    );
+    const questionPanel = readSource(
+      "src/components/procedimenti/ProfessionalLegalQuestionsPanel.tsx",
+    );
+    const detailPage = readSource("src/app/procedimenti/[id]/page.tsx");
+    const runtimePage = readSource("src/app/admin/runtime/page.tsx");
+
+    expect(aiWorkspace).toContain("Aggiorna fascicolo");
+    expect(aiWorkspace).toContain("Interroga AI");
+    expect(aiWorkspace).toContain("Ricerca e aggiornamento giuridico");
+    expect(aiWorkspace).toContain("Il comando resta disabilitato");
+    expect(aiWorkspace).toContain("La policy del fascicolo può soltanto restringere");
+    expect(aiWorkspace).toContain("startLegalAnalysisPipeline");
+    expect(questionPanel).toContain('id="interroga-ai"');
+    expect(questionPanel).toContain("Salva quesito");
+    expect(detailPage.match(/<FascicoloAiWorkspace/g)).toHaveLength(2);
+    expect(runtimePage).toContain("Quadro operativo immediato");
+    expect(runtimePage).toContain("Percorso guidato di attivazione");
+    expect(runtimePage).toContain("Globali: deployment, kill-switch, provider, worker e budget globale.");
+  });
+
   it("opens with cover data and the fixed-context attachment panel", () => {
     const detailPage = readSource("src/app/procedimenti/[id]/page.tsx");
     const documentsPanel = readSource("src/components/documents/EntityDocumentsPanel.tsx");
