@@ -145,6 +145,38 @@ describe("manual legal analysis pipeline", () => {
     expect(activateWorker).toHaveBeenCalledWith({ kind: "LEGAL_RESEARCH", procedimentoId: "procedure-1" });
   });
 
+  it("reuses a current revision for the unchanged corpus instead of admitting another paid analysis", async () => {
+    const requestAnalysis = vi.fn();
+    const recoverMissions = vi.fn(async () => ({}) as never);
+    const admitResearch = vi.fn(async () => [{ outcome: "ADMITTED" }]) as never;
+    const activateWorker = vi.fn(async () => ({ outcome: "REQUESTED", renderJobId: "job-1" })) as never;
+
+    await expect(runManualLegalAnalysisPipeline(input, {
+      loadCorpus: vi.fn(async () => ({
+        availability: "READY",
+        corpusFingerprint: "a".repeat(64),
+        documents: [],
+      })) as never,
+      loadCurrentRevision: vi.fn(async () => ({
+        status: "CURRENT",
+        corpusFingerprint: "a".repeat(64),
+      })) as never,
+      requestAnalysis,
+      recoverMissions,
+      admitResearch,
+      countQueuedResearchJobs: vi.fn(async () => 1),
+      activateWorker,
+    })).resolves.toMatchObject({
+      outcome: "RESEARCH_STARTED",
+      analysisJobId: null,
+      researchAdmissions: 1,
+      queuedResearchJobs: 1,
+    });
+    expect(requestAnalysis).not.toHaveBeenCalled();
+    expect(recoverMissions).toHaveBeenCalled();
+    expect(admitResearch).toHaveBeenCalled();
+  });
+
   it("extracts documents never extracted before any analysis or research, without AI providers", async () => {
     const requestAnalysis = vi.fn();
     const admitResearch = vi.fn();
