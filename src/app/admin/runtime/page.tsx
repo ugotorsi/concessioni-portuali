@@ -185,6 +185,43 @@ export default async function RuntimeOperationsPage({
     aiProviders: aiEngines,
     researchChannels,
   });
+  const aiService = serviceCenter.services.find((service) => service.id === "ai");
+  const workerService = serviceCenter.services.find((service) => service.id === "render");
+  const eligibleAiEngines = aiEngines.filter((engine) => engine.manualEnabled && engine.manualEligible);
+  const availableResearchChannels = researchChannels.filter((channel) => channel.available);
+  const hasGlobalBudget = policies.some((policy) => policy.scope === "GLOBAL");
+  const activationSteps = [
+    {
+      complete: aiControl.deploymentAuthorized,
+      label: "Autorizzazione immutabile del deployment per dati reali",
+      remedy: "Usare un deployment esplicitamente autorizzato; il pannello non può superare questo gate.",
+    },
+    {
+      complete: eligibleAiEngines.length > 0,
+      label: "Almeno un provider manuale verificato e abilitato",
+      remedy: "Verificare la connessione del provider e abilitarlo soltanto dopo esito positivo.",
+    },
+    {
+      complete: hasGlobalBudget,
+      label: "Limite di spesa globale attivo",
+      remedy: "Registrare un cap globale auditato; i cap dell'ente e del fascicolo possono essere più restrittivi.",
+    },
+    {
+      complete: health.activeWorkers > 0 || health.queueDepth === 0,
+      label: "Worker disponibile oppure nessun job in attesa",
+      remedy: "Attivare il worker applicativo se esistono job in coda.",
+    },
+    {
+      complete: availableResearchChannels.length > 0,
+      label: "Almeno un canale di ricerca verificabile",
+      remedy: "Configurare e verificare un connettore autorizzato prima di avviare ricerche esterne.",
+    },
+    {
+      complete: aiControl.effectiveEnabled,
+      label: "Comando generale AI attivo",
+      remedy: "Attivarlo per ultimo, dopo avere verificato provider, budget, worker e autorizzazione deployment.",
+    },
+  ];
   const renderApplicationWorkerConfigured = Boolean(
     process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
   );
@@ -234,6 +271,100 @@ export default async function RuntimeOperationsPage({
           <p className="mt-1">Stato migrazioni: {health.migrationState}</p>
         </details>
       </div>
+
+      <section aria-labelledby="operations-overview-title" className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle id="operations-overview-title">Quadro operativo immediato</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <p className="text-sm text-slate-600">
+              Questa sintesi distingue i gate globali dalle autorizzazioni del singolo ente e fascicolo.
+              Un&apos;azione è eseguibile soltanto quando tutti i livelli richiesti risultano compatibili.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">AI</p>
+                <p className="mt-1 font-semibold text-slate-950">
+                  {aiControl.effectiveEnabled ? "Operativa" : "Non operativa"}
+                </p>
+                <p className="mt-1 text-xs text-slate-600">{aiService?.summary ?? "Stato non disponibile."}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Provider</p>
+                <p className="mt-1 font-semibold text-slate-950">
+                  {eligibleAiEngines.length} di {aiEngines.length} disponibili
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  {eligibleAiEngines.map((engine) => engine.label).join(", ") || "Nessun provider idoneo abilitato."}
+                </p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Worker e coda</p>
+                <p className="mt-1 font-semibold text-slate-950">
+                  {health.activeWorkers > 0 ? `${health.activeWorkers} attivi` : "Nessun worker attivo"}
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  {health.queueDepth} job in attesa · {failedJobs.length} non completati. {workerService?.summary}
+                </p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ricerca</p>
+                <p className="mt-1 font-semibold text-slate-950">
+                  {availableResearchChannels.length > 0 ? "Canali disponibili" : "Non disponibile"}
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  {availableResearchChannels.map((channel) => channel.channel).join(", ") || "Nessun canale verificato."}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <section aria-labelledby="activation-path-title" className="rounded-md border border-slate-200 p-4">
+                <h3 id="activation-path-title" className="font-semibold text-slate-950">Percorso guidato di attivazione</h3>
+                <ol className="mt-3 space-y-3">
+                  {activationSteps.map((step, index) => (
+                    <li key={step.label} className="flex gap-3 text-sm">
+                      <Badge variant={step.complete ? "success" : "warning"}>
+                        {step.complete ? "OK" : String(index + 1)}
+                      </Badge>
+                      <div>
+                        <p className="font-medium text-slate-900">{step.label}</p>
+                        {!step.complete ? <p className="mt-0.5 text-xs text-amber-900">{step.remedy}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+
+              <section aria-labelledby="budgets-blocks-title" className="rounded-md border border-slate-200 p-4">
+                <h3 id="budgets-blocks-title" className="font-semibold text-slate-950">Budget, consumi e blocchi</h3>
+                <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                  <div><dt className="text-slate-500">Costo effettivo 30 giorni</dt><dd className="font-semibold">{cost30Days._sum.actualAmount?.toNumber() ?? 0} EUR</dd></div>
+                  <div><dt className="text-slate-500">Costo riservato</dt><dd className="font-semibold">{reservedCosts._sum.reservedAmount?.toNumber() ?? 0} EUR</dd></div>
+                  <div><dt className="text-slate-500">Policy di budget attive</dt><dd className="font-semibold">{policies.length}</dd></div>
+                  <div><dt className="text-slate-500">Elaborazioni non completate</dt><dd className="font-semibold">{failedJobs.length}</dd></div>
+                </dl>
+                <div className="mt-4 rounded bg-slate-50 p-3 text-xs text-slate-700">
+                  <p className="font-semibold">Ambito dei controlli</p>
+                  <p className="mt-1">
+                    Globali: deployment, kill-switch, provider, worker e budget globale.
+                    Per ente: provider, ricerca e automazione consentiti.
+                    Per fascicolo: autorizzazioni ulteriormente restrittive e budget dedicato.
+                  </p>
+                </div>
+              </section>
+            </div>
+
+            <nav aria-label="Scorciatoie amministrative" className="flex flex-wrap gap-3 text-sm">
+              <a href="#global-ai-control-title" className="font-semibold text-blue-700 underline">Controllo AI globale</a>
+              <a href="#ai-engines-title" className="font-semibold text-blue-700 underline">Provider</a>
+              <a href="#legal-workbench-title" className="font-semibold text-blue-700 underline">Analisi e ricerca per fascicolo</a>
+              <a href="#service-center-title" className="font-semibold text-blue-700 underline">Infrastruttura e worker</a>
+            </nav>
+          </CardContent>
+        </Card>
+      </section>
 
       {databaseIdentity.available ? (
         <section aria-labelledby="database-identity-title" className="mb-4">
