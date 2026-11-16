@@ -24,6 +24,8 @@
     "runtime:verify-automatic-research-connectors": "tsx scripts/runtime/verify-automatic-research-connectors.ts",
     "runtime:verify-production-readiness": "tsx scripts/runtime/verify-production-readiness.ts",
     "runtime:verify-post-audit-production-readonly": "tsx scripts/runtime/verify-post-audit-production-readonly.ts",
+    "runtime:classify-known-synthetic-data": "tsx scripts/runtime/classify-known-synthetic-data.ts",
+    "runtime:verify-dataset-separation-isolated": "tsx scripts/runtime/verify-dataset-separation-isolated.ts",
     "runtime:verify-isolated-preview": "tsx scripts/runtime/verify-isolated-preview-environment.ts",
     "runtime:verify-post-audit-migration-rehearsal": "tsx scripts/runtime/verify-post-audit-migration-rehearsal.ts",
     "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",

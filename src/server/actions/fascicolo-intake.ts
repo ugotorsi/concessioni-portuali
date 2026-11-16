@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { prisma } from "@/lib/prisma";
@@ -135,8 +136,8 @@ export async function activateFascicoloIntakeAction(formData: FormData) {
   }
 
   const fascicoloIntakeId = z.string().trim().min(1).parse(formData.get("fascicoloIntakeId"));
-  const fascicolo = await prisma.fascicoloIntake.findUnique({
-    where: { id: fascicoloIntakeId },
+  const fascicolo = await prisma.fascicoloIntake.findFirst({
+    where: { id: fascicoloIntakeId, ...buildDatasetFascicoloIntakeWhere() },
     select: { id: true, enteId: true, concessioneId: true },
   });
   if (!fascicolo) {

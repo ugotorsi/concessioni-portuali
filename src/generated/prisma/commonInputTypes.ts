@@ -827,6 +827,13 @@ export type EnumRuoloUserWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRuoloUserFilter<$PrismaModel>
 }
 
+export type EnumDatasetClassFilter<$PrismaModel = never> = {
+  equals?: $Enums.DatasetClass | Prisma.EnumDatasetClassFieldRefInput<$PrismaModel>
+  in?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel> | $Enums.DatasetClass
+}
+
 export type EnumNormaRiferimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.NormaRiferimento | Prisma.EnumNormaRiferimentoFieldRefInput<$PrismaModel>
   in?: $Enums.NormaRiferimento[] | Prisma.ListEnumNormaRiferimentoFieldRefInput<$PrismaModel>
@@ -920,6 +927,16 @@ export type EnumStatoConcessioneFilter<$PrismaModel = never> = {
   in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel>
   notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumStatoConcessioneFilter<$PrismaModel> | $Enums.StatoConcessione
+}
+
+export type EnumDatasetClassWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DatasetClass | Prisma.EnumDatasetClassFieldRefInput<$PrismaModel>
+  in?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDatasetClassWithAggregatesFilter<$PrismaModel> | $Enums.DatasetClass
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel>
 }
 
 export type EnumNormaRiferimentoWithAggregatesFilter<$PrismaModel = never> = {
@@ -3414,6 +3431,13 @@ export type NestedEnumRuoloUserWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRuoloUserFilter<$PrismaModel>
 }
 
+export type NestedEnumDatasetClassFilter<$PrismaModel = never> = {
+  equals?: $Enums.DatasetClass | Prisma.EnumDatasetClassFieldRefInput<$PrismaModel>
+  in?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel> | $Enums.DatasetClass
+}
+
 export type NestedEnumNormaRiferimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.NormaRiferimento | Prisma.EnumNormaRiferimentoFieldRefInput<$PrismaModel>
   in?: $Enums.NormaRiferimento[] | Prisma.ListEnumNormaRiferimentoFieldRefInput<$PrismaModel>
@@ -3507,6 +3531,16 @@ export type NestedEnumStatoConcessioneFilter<$PrismaModel = never> = {
   in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel>
   notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumStatoConcessioneFilter<$PrismaModel> | $Enums.StatoConcessione
+}
+
+export type NestedEnumDatasetClassWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DatasetClass | Prisma.EnumDatasetClassFieldRefInput<$PrismaModel>
+  in?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DatasetClass[] | Prisma.ListEnumDatasetClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDatasetClassWithAggregatesFilter<$PrismaModel> | $Enums.DatasetClass
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDatasetClassFilter<$PrismaModel>
 }
 
 export type NestedEnumNormaRiferimentoWithAggregatesFilter<$PrismaModel = never> = {

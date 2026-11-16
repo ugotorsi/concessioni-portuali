@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { FascicoloAiResearchControlPanel } from "@/components/procedimenti/FascicoloAiResearchControlPanel";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { requireAdminWithMfa, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { formatDateIT } from "@/lib/utils";
@@ -145,7 +146,10 @@ export default async function RuntimeOperationsPage({
       _sum: { reservedAmount: true },
     }),
     prisma.procedimento.findMany({
-      where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
+      where: {
+        ...buildDatasetProcedimentoWhere(),
+        stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
+      },
       orderBy: [
         { ente: { nome: "asc" } },
         { updatedAt: "desc" },
@@ -187,7 +191,9 @@ export default async function RuntimeOperationsPage({
   });
   const aiService = serviceCenter.services.find((service) => service.id === "ai");
   const workerService = serviceCenter.services.find((service) => service.id === "render");
-  const eligibleAiEngines = aiEngines.filter((engine) => engine.manualEnabled && engine.manualEligible);
+  const policyEligibleAiEngines = aiEngines.filter((engine) => engine.manualEnabled && engine.manualEligible);
+  const verifiedAiEngines = policyEligibleAiEngines.filter((engine) => engine.connectionStatus === "VERIFIED");
+  const operationalAiEngines = aiEngines.filter((engine) => engine.operational);
   const availableResearchChannels = researchChannels.filter((channel) => channel.available);
   const hasGlobalBudget = policies.some((policy) => policy.scope === "GLOBAL");
   const activationSteps = [
@@ -197,9 +203,14 @@ export default async function RuntimeOperationsPage({
       remedy: "Usare un deployment esplicitamente autorizzato; il pannello non può superare questo gate.",
     },
     {
-      complete: eligibleAiEngines.length > 0,
-      label: "Almeno un provider manuale verificato e abilitato",
-      remedy: "Verificare la connessione del provider e abilitarlo soltanto dopo esito positivo.",
+      complete: policyEligibleAiEngines.length > 0,
+      label: "Almeno un provider manuale idoneo per policy e abilitato",
+      remedy: "Configurare pricing, autorizzazione dati reali e abilitazione manuale del provider.",
+    },
+    {
+      complete: verifiedAiEngines.length > 0,
+      label: "Connessione e modello correnti verificati",
+      remedy: "Eseguire la verifica read-only della connessione e del modello prima del primo avvio reale.",
     },
     {
       complete: hasGlobalBudget,
@@ -293,10 +304,14 @@ export default async function RuntimeOperationsPage({
               <div className="rounded-md border border-slate-200 p-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Provider</p>
                 <p className="mt-1 font-semibold text-slate-950">
-                  {eligibleAiEngines.length} di {aiEngines.length} disponibili
+                  {operationalAiEngines.length} di {aiEngines.length} eseguibili ora
                 </p>
                 <p className="mt-1 text-xs text-slate-600">
-                  {eligibleAiEngines.map((engine) => engine.label).join(", ") || "Nessun provider idoneo abilitato."}
+                  {operationalAiEngines.map((engine) => engine.label).join(", ")
+                    || "Nessun provider può eseguire richieste nello stato corrente."}
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  Idonei per policy manuale: {policyEligibleAiEngines.length}. Verificati sulla configurazione corrente: {verifiedAiEngines.length}.
                 </p>
               </div>
               <div className="rounded-md border border-slate-200 p-3">

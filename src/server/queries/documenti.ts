@@ -1,4 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { buildDatasetDocumentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
@@ -100,32 +101,38 @@ function buildWhere(params: GetDocumentiListParams): Prisma.DocumentoWhereInput 
 function buildDocumentoTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.DocumentoWhereInput {
+  const datasetWhere = buildDatasetDocumentoWhere();
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
-    return {};
+    return datasetWhere;
   }
 
   if (tenantContext.accessibleTenantIds.length === 0) {
     return {
-      OR: [{ enteId: null, concessioneId: null }],
+      AND: [datasetWhere, { OR: [{ enteId: null, concessioneId: null }] }],
     };
   }
 
   const tenantIds = tenantContext.accessibleTenantIds;
 
   return {
-    OR: [
-      { enteId: { in: tenantIds } },
+    AND: [
+      datasetWhere,
       {
-        enteId: null,
-        concessione: { is: { enteId: { in: tenantIds } } },
-      },
-      {
-        enteId: null,
-        report: { is: { enteId: { in: tenantIds } } },
-      },
-      {
-        enteId: null,
-        concessioneId: null,
+        OR: [
+          { enteId: { in: tenantIds } },
+          {
+            enteId: null,
+            concessione: { is: { enteId: { in: tenantIds } } },
+          },
+          {
+            enteId: null,
+            report: { is: { enteId: { in: tenantIds } } },
+          },
+          {
+            enteId: null,
+            concessioneId: null,
+          },
+        ],
       },
     ],
   };

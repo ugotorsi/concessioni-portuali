@@ -100,11 +100,6 @@ export async function FascicoloAiWorkspace({
       .map((channel) => channel.channel),
   });
 
-  const eligibleProviders = readiness.filter((provider) => (
-    provider.manualEnabled
-    && provider.manualEligible
-    && policy.selectedProviders.includes(provider.provider)
-  ));
   const availableResearchChannels = channels.filter((channel) => (
     channel.available
     && policy.researchChannels.includes(channel.channel)
@@ -130,7 +125,11 @@ export async function FascicoloAiWorkspace({
               Analisi, domande e ricerca giuridica con fonti, versioni, revisione professionale e audit.
             </p>
           </div>
-          <Status available={policy.aiEnabled && eligibleProviders.length > 0} availableLabel="AI autorizzata" blockedLabel="AI non operativa" />
+          <Status
+            available={canRunAnalysis}
+            availableLabel="Analisi AI autorizzata"
+            blockedLabel="Analisi AI bloccata"
+          />
         </div>
         {blockers.length > 0 ? (
           <div role="note" className="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
@@ -182,7 +181,7 @@ export async function FascicoloAiWorkspace({
               <CardTitle>Interroga AI</CardTitle>
               <Status
                 available={canManageQuestions && canRunResearch}
-                availableLabel="Percorso operativo"
+                availableLabel="Ricerca manuale autorizzata"
                 blockedLabel={canManageQuestions ? "Solo preparazione" : "Bloccata"}
               />
             </div>
@@ -205,6 +204,12 @@ export async function FascicoloAiWorkspace({
                 è bloccata finché policy e canali non sono autorizzati.
               </p>
             ) : null}
+            {canRunResearch && !canRunAnalysis ? (
+              <p className="text-xs text-slate-600">
+                La ricerca manuale autorizzata è distinta dall&apos;analisi del corpus: non indica
+                che il provider AI del fascicolo sia eseguibile.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
 
@@ -212,7 +217,7 @@ export async function FascicoloAiWorkspace({
           <CardHeader>
             <div className="flex items-start justify-between gap-2">
               <CardTitle>Ricerca e aggiornamento giuridico</CardTitle>
-              <Status available={canRunResearch} />
+              <Status available={canRunResearch} availableLabel="Ricerca manuale autorizzata" />
             </div>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-slate-700">

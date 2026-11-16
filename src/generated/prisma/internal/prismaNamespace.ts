@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.8.0
- * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
+ * Prisma Client JS version: 7.10.1
+ * Query Engine version: d1b3f377ca835d73fd50954a5e22128b9ebdd6b8
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.8.0",
-  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
+  client: "7.10.1",
+  engine: "d1b3f377ca835d73fd50954a5e22128b9ebdd6b8"
 }
 
 /**
@@ -156,6 +156,19 @@ export type Subset<T, U> = {
 };
 
 /**
+ * Resolved type of the argument passed to the `PrismaClient` constructor.
+ *
+ * When called without a narrower options type (the common case), this resolves
+ * to `PrismaClientOptions` directly, which produces a clear TypeScript error
+ * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
+ * the argument is missing or incomplete. When the user supplies a narrower
+ * options type (e.g. via a literal), it falls back to `Subset` to keep
+ * filtering out unknown properties.
+ */
+export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
+  [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
+
+/**
  * SelectSubset
  * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
  * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -187,7 +200,7 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> =
   T extends object ?
   U extends object ?
-    (Without<T, U> & U) | (Without<U, T> & T)
+    ((Without<T, U> & U) | (Without<U, T> & T)) & object
   : U : T
 
 
@@ -461,6 +474,8 @@ export const ModelName = {
   NormaVersione: 'NormaVersione',
   NormaImpatto: 'NormaImpatto',
   ActivityLog: 'ActivityLog',
+  HistoricalActivityLogArchiveManifest: 'HistoricalActivityLogArchiveManifest',
+  HistoricalActivityLogArchiveRecord: 'HistoricalActivityLogArchiveRecord',
   AiFascicoloTrustedReviewMaterial: 'AiFascicoloTrustedReviewMaterial',
   AutomaticFascicoloReport: 'AutomaticFascicoloReport',
   AutomaticFascicoloReportDocument: 'AutomaticFascicoloReportDocument',
@@ -495,7 +510,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "v7ProviderOutputRecoveryArtifact" | "researchProviderOAuthCredential" | "runtimeWorkerHeartbeat" | "fascicoloAnalysisEvaluationPermit" | "fascicoloAnalysisEvaluationArtifact" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "professionalLegalQuestion" | "professionalLegalQuestionVersion" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeIdentity" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeEvidenceSpan" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "v7ProviderOutputRecoveryArtifact" | "researchProviderOAuthCredential" | "runtimeWorkerHeartbeat" | "fascicoloAnalysisEvaluationPermit" | "fascicoloAnalysisEvaluationArtifact" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "professionalLegalQuestion" | "professionalLegalQuestionVersion" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "historicalActivityLogArchiveManifest" | "historicalActivityLogArchiveRecord" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeIdentity" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeEvidenceSpan" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6197,6 +6212,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HistoricalActivityLogArchiveManifest: {
+      payload: Prisma.$HistoricalActivityLogArchiveManifestPayload<ExtArgs>
+      fields: Prisma.HistoricalActivityLogArchiveManifestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HistoricalActivityLogArchiveManifestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HistoricalActivityLogArchiveManifestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        findFirst: {
+          args: Prisma.HistoricalActivityLogArchiveManifestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HistoricalActivityLogArchiveManifestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        findMany: {
+          args: Prisma.HistoricalActivityLogArchiveManifestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>[]
+        }
+        create: {
+          args: Prisma.HistoricalActivityLogArchiveManifestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        createMany: {
+          args: Prisma.HistoricalActivityLogArchiveManifestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HistoricalActivityLogArchiveManifestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>[]
+        }
+        delete: {
+          args: Prisma.HistoricalActivityLogArchiveManifestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        update: {
+          args: Prisma.HistoricalActivityLogArchiveManifestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        deleteMany: {
+          args: Prisma.HistoricalActivityLogArchiveManifestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HistoricalActivityLogArchiveManifestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HistoricalActivityLogArchiveManifestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>[]
+        }
+        upsert: {
+          args: Prisma.HistoricalActivityLogArchiveManifestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveManifestPayload>
+        }
+        aggregate: {
+          args: Prisma.HistoricalActivityLogArchiveManifestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHistoricalActivityLogArchiveManifest>
+        }
+        groupBy: {
+          args: Prisma.HistoricalActivityLogArchiveManifestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoricalActivityLogArchiveManifestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HistoricalActivityLogArchiveManifestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoricalActivityLogArchiveManifestCountAggregateOutputType> | number
+        }
+      }
+    }
+    HistoricalActivityLogArchiveRecord: {
+      payload: Prisma.$HistoricalActivityLogArchiveRecordPayload<ExtArgs>
+      fields: Prisma.HistoricalActivityLogArchiveRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HistoricalActivityLogArchiveRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HistoricalActivityLogArchiveRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.HistoricalActivityLogArchiveRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HistoricalActivityLogArchiveRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        findMany: {
+          args: Prisma.HistoricalActivityLogArchiveRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>[]
+        }
+        create: {
+          args: Prisma.HistoricalActivityLogArchiveRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        createMany: {
+          args: Prisma.HistoricalActivityLogArchiveRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HistoricalActivityLogArchiveRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.HistoricalActivityLogArchiveRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        update: {
+          args: Prisma.HistoricalActivityLogArchiveRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.HistoricalActivityLogArchiveRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HistoricalActivityLogArchiveRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HistoricalActivityLogArchiveRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.HistoricalActivityLogArchiveRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoricalActivityLogArchiveRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.HistoricalActivityLogArchiveRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHistoricalActivityLogArchiveRecord>
+        }
+        groupBy: {
+          args: Prisma.HistoricalActivityLogArchiveRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoricalActivityLogArchiveRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HistoricalActivityLogArchiveRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoricalActivityLogArchiveRecordCountAggregateOutputType> | number
+        }
+      }
+    }
     AiFascicoloTrustedReviewMaterial: {
       payload: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>
       fields: Prisma.AiFascicoloTrustedReviewMaterialFieldRefs
@@ -7992,6 +8155,7 @@ export type ConcessionarioScalarFieldEnum = (typeof ConcessionarioScalarFieldEnu
 
 export const ConcessioneScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   numeroAtto: 'numeroAtto',
   dataRilascio: 'dataRilascio',
   dataScadenza: 'dataScadenza',
@@ -8108,6 +8272,7 @@ export type CriticitaScalarFieldEnum = (typeof CriticitaScalarFieldEnum)[keyof t
 
 export const ProcedimentoScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   enteId: 'enteId',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
@@ -8159,6 +8324,7 @@ export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[k
 
 export const FascicoloIntakeScalarFieldEnum = {
   id: 'id',
+  datasetClass: 'datasetClass',
   enteId: 'enteId',
   concessioneId: 'concessioneId',
   procedimentoId: 'procedimentoId',
@@ -9384,6 +9550,40 @@ export const ActivityLogScalarFieldEnum = {
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
+export const HistoricalActivityLogArchiveManifestScalarFieldEnum = {
+  id: 'id',
+  sourceDatabaseFingerprint: 'sourceDatabaseFingerprint',
+  sourceProjectId: 'sourceProjectId',
+  sourceBranchId: 'sourceBranchId',
+  sourceBackupBranchId: 'sourceBackupBranchId',
+  recordCount: 'recordCount',
+  firstRecordId: 'firstRecordId',
+  finalRecordId: 'finalRecordId',
+  finalHash: 'finalHash',
+  contentSha256: 'contentSha256',
+  verificationMode: 'verificationMode',
+  payloadHashVerifiedCount: 'payloadHashVerifiedCount',
+  payloadHashIssueCode: 'payloadHashIssueCode',
+  payloadHashIssueRecordId: 'payloadHashIssueRecordId',
+  capturedAt: 'capturedAt'
+} as const
+
+export type HistoricalActivityLogArchiveManifestScalarFieldEnum = (typeof HistoricalActivityLogArchiveManifestScalarFieldEnum)[keyof typeof HistoricalActivityLogArchiveManifestScalarFieldEnum]
+
+
+export const HistoricalActivityLogArchiveRecordScalarFieldEnum = {
+  archiveId: 'archiveId',
+  ordinal: 'ordinal',
+  originalId: 'originalId',
+  createdAt: 'createdAt',
+  previousHash: 'previousHash',
+  currentHash: 'currentHash',
+  payload: 'payload'
+} as const
+
+export type HistoricalActivityLogArchiveRecordScalarFieldEnum = (typeof HistoricalActivityLogArchiveRecordScalarFieldEnum)[keyof typeof HistoricalActivityLogArchiveRecordScalarFieldEnum]
+
+
 export const AiFascicoloTrustedReviewMaterialScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -10265,6 +10465,20 @@ export type EnumRuoloUserFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'RuoloUser[]'
  */
 export type ListEnumRuoloUserFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RuoloUser[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DatasetClass'
+ */
+export type EnumDatasetClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetClass'>
+    
+
+
+/**
+ * Reference to a field of type 'DatasetClass[]'
+ */
+export type ListEnumDatasetClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetClass[]'>
     
 
 
@@ -11621,19 +11835,10 @@ export type BatchPayload = {
 export const defineExtension = runtime.Extensions.defineExtension as unknown as runtime.Types.Extensions.ExtendsHook<"define", TypeMapCb, runtime.Types.Extensions.DefaultArgs>
 export type DefaultPrismaClient = PrismaClient
 export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
-export type PrismaClientOptions = ({
-  /**
-   * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-pg`.
-   */
-  adapter: runtime.SqlDriverAdapterFactory
-  accelerateUrl?: never
-} | {
-  /**
-   * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
-   */
-  accelerateUrl: string
-  adapter?: never
-}) & {
+/**
+ * Options common to all variants of `PrismaClientOptions`, regardless of whether you connect to your database through a driver adapter or through Prisma Accelerate.
+ */
+export interface PrismaClientBaseOptions {
   /**
    * @default "colorless"
    */
@@ -11720,6 +11925,56 @@ export type PrismaClientOptions = ({
    */
   queryPlanCacheMaxSize?: number
 }
+
+/**
+ * `PrismaClient` options for connecting to your database through Prisma Accelerate instead of a driver adapter.
+ * 
+ * Learn more: https://pris.ly/d/accelerate
+ */
+export interface PrismaClientOptionsWithAccelerateUrl extends PrismaClientBaseOptions {
+  /**
+   * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
+   * 
+   * Learn more: https://pris.ly/d/accelerate
+   */
+  accelerateUrl: string
+  adapter?: never
+}
+
+/**
+ * `PrismaClient` options for connecting to your database through a driver adapter. This is the common case in Prisma 7.
+ * 
+ * Learn more: https://pris.ly/d/driver-adapters
+ */
+export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions {
+  /**
+   * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
+   * 
+   * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
+   * 
+   * Learn more: https://pris.ly/d/driver-adapters
+   * 
+   * @example
+   * ```ts
+   * import { PrismaPg } from '@prisma/adapter-pg'
+   * import { PrismaClient } from './generated/prisma/client'
+   * 
+   * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * const prisma = new PrismaClient({ adapter })
+   * ```
+   */
+  adapter: runtime.SqlDriverAdapterFactory
+  accelerateUrl?: never
+}
+
+/**
+ * Options passed to the `PrismaClient` constructor.
+ * 
+ * A driver adapter (or, alternatively, a Prisma Accelerate URL) is **required**. See {@link PrismaClientOptionsWithAdapter} and {@link PrismaClientOptionsWithAccelerateUrl} for the two variants. All other properties live in {@link PrismaClientBaseOptions} and are optional.
+ * 
+ * Learn more about driver adapters: https://pris.ly/d/driver-adapters
+ */
+export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   ente?: Prisma.EnteOmit
   authority?: Prisma.AuthorityOmit
@@ -11798,6 +12053,8 @@ export type GlobalOmitConfig = {
   normaVersione?: Prisma.NormaVersioneOmit
   normaImpatto?: Prisma.NormaImpattoOmit
   activityLog?: Prisma.ActivityLogOmit
+  historicalActivityLogArchiveManifest?: Prisma.HistoricalActivityLogArchiveManifestOmit
+  historicalActivityLogArchiveRecord?: Prisma.HistoricalActivityLogArchiveRecordOmit
   aiFascicoloTrustedReviewMaterial?: Prisma.AiFascicoloTrustedReviewMaterialOmit
   automaticFascicoloReport?: Prisma.AutomaticFascicoloReportOmit
   automaticFascicoloReportDocument?: Prisma.AutomaticFascicoloReportDocumentOmit

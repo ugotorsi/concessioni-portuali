@@ -6,6 +6,7 @@ import {
   getProcedimentoChecklistGuidance,
   getProcedimentoWarningLevel,
 } from "@/lib/procedimento-checklist";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 import {
@@ -379,6 +380,7 @@ function buildWhere(
     : {};
 
   return {
+    ...buildDatasetProcedimentoWhere(),
     ...tenantWhere,
     ...(search
       ? {
@@ -676,8 +678,8 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   const today = startOfDay(new Date());
   const tenantContext = await getCurrentTenantContext();
 
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id },
+  const procedimento = await prisma.procedimento.findFirst({
+    where: { id, ...buildDatasetProcedimentoWhere() },
     include: {
       decisioneProcedimento: {
         include: {

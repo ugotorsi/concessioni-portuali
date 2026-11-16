@@ -403,6 +403,16 @@ export type NormaImpatto = Prisma.NormaImpattoModel
  */
 export type ActivityLog = Prisma.ActivityLogModel
 /**
+ * Model HistoricalActivityLogArchiveManifest
+ * 
+ */
+export type HistoricalActivityLogArchiveManifest = Prisma.HistoricalActivityLogArchiveManifestModel
+/**
+ * Model HistoricalActivityLogArchiveRecord
+ * 
+ */
+export type HistoricalActivityLogArchiveRecord = Prisma.HistoricalActivityLogArchiveRecordModel
+/**
  * Model AiFascicoloTrustedReviewMaterial
  * 
  */

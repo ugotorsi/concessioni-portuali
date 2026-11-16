@@ -1,4 +1,5 @@
 import { getCurrentUser, type DemoRole } from "@/lib/auth";
+import { buildDatasetConcessioneWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getDefaultTenantMembership, isTenantScopedRole, type TenantMembershipLike } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
@@ -143,22 +144,27 @@ export function buildTenantConcessioneWhere(
   context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role"> | null,
   options?: { allowWhenEnteMissing?: boolean },
 ): Prisma.ConcessioneWhereInput {
+  const datasetWhere = buildDatasetConcessioneWhere();
   if (!context || context.isAdmin || !isTenantScopedRole(context.role)) {
-    return {};
+    return datasetWhere;
   }
 
   const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? false;
   const tenantIds = context.accessibleTenantIds;
 
   if (tenantIds.length === 0) {
-    return allowWhenEnteMissing ? { enteId: null } : { id: { in: [] } };
+    return {
+      ...datasetWhere,
+      ...(allowWhenEnteMissing ? { enteId: null } : { id: { in: [] } }),
+    };
   }
 
   if (!allowWhenEnteMissing) {
-    return { enteId: { in: tenantIds } };
+    return { ...datasetWhere, enteId: { in: tenantIds } };
   }
 
   return {
+    ...datasetWhere,
     OR: [{ enteId: { in: tenantIds } }, { enteId: null }],
   };
 }

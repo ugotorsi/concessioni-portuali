@@ -1,5 +1,6 @@
 import { buildCsv, buildCsvFilename, csvResponse } from "@/lib/csv";
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 import { buildRateLimitKey, checkRateLimit, createRateLimitResponse } from "@/lib/rate-limit";
@@ -32,11 +33,12 @@ export async function GET(request: Request): Promise<Response> {
   const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
   const rows = await prisma.procedimento.findMany({
-    where: hasConcessioneTenantScope
-      ? {
-          concessione: concessioneTenantWhere,
-        }
-      : undefined,
+    where: {
+      ...buildDatasetProcedimentoWhere(),
+      ...(hasConcessioneTenantScope
+        ? { concessione: concessioneTenantWhere }
+        : {}),
+    },
     orderBy: [{ createdAt: "desc" }],
     select: {
       id: true,

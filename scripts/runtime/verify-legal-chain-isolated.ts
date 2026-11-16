@@ -290,6 +290,7 @@ async function main() {
   await prisma.procedimento.create({
     data: {
       id: procedimentoId,
+      datasetClass: "E2E",
       enteId: tenantId,
       concessioneId: concession.id,
       tipologia: "ALTRO",

@@ -191,3 +191,98 @@ Nessun record Production è stato modificato o cancellato.
 
 In Production i passaggi AI restano bloccati finché comando globale, provider, worker, canali e
 budget non sono autorizzati. Questo è il comportamento atteso.
+
+## Verifica finale della Production `a97dbbe`
+
+La verifica successiva al merge della PR #78 ha confermato online:
+
+- 6/6 pagine principali renderizzate;
+- 17 fascicoli identificati;
+- 11/11 schede aperte per ogni fascicolo, 187/187 pagine HTTP 200;
+- navigazione **AI e analisi** e **Ricerca giuridica** presente;
+- tre attività AI presenti e collegate ai percorsi applicativi reali;
+- nessun comando AI, job, worker o provider a pagamento avviato.
+
+Stato Production osservato:
+
+- comando AI globale OFF;
+- autorizzazione deployment per dati reali presente;
+- nessun worker applicativo attivo e servizio configurato ma sospeso;
+- 13 job in attesa e 3 job non conclusi;
+- automazione OFF;
+- canali manuali `CHATGPT_MCP` e `LEGAL_DATA_HUNTER` disponibili;
+- budget globale presente e costo effettivo ultimi 30 giorni pari a 0,50 EUR;
+- OpenAI idoneo secondo la policy legacy ma non verificato sulla configurazione corrente;
+- diagnostica credenziale generica `READY`, in contrasto con il dettaglio provider `BLOCKED`.
+
+Il riepilogo provider è stato corretto nel ramo
+`noetra/demo-separation-20261116`: distingue provider eseguibili ora, idoneità
+per policy e verifica della configurazione corrente. Il pannello fascicolo distingue inoltre
+**Analisi AI bloccata** da **Ricerca manuale autorizzata**; la disponibilità della ricerca non
+viene più presentata come prova del funzionamento del provider di analisi.
+
+## Separazione dataset implementata nel ramo isolato
+
+Sono state introdotte classi persistenti:
+
+- `PROFESSIONAL`;
+- `DEMO`;
+- `E2E`.
+
+La classe è registrata sulle radici `Concessione`, `Procedimento` e `FascicoloIntake`.
+I documenti ereditano il perimetro da tutte le radici collegate e vengono esclusi se anche una
+sola radice non appartiene alla vista attiva. `NOETRA_DATASET_SCOPE=PROFESSIONAL` è il default
+fail-closed; un deployment demo separato deve richiedere esplicitamente `SYNTHETIC`.
+
+Il filtro è applicato ai read-model condivisi che alimentano dashboard, concessioni,
+concessionari, verticali, mappa, criticità, scadenze, pagamenti, sopralluoghi, fascicoli,
+documenti, export e selettori amministrativi. Seed e fixture marcano i nuovi record
+rispettivamente `DEMO` ed `E2E`.
+
+`npm run runtime:classify-known-synthetic-data` esegue soltanto inventario e dry-run.
+L'opzione `--apply` richiede anche la conferma
+`NOETRA_DATASET_BACKFILL_CONFIRM=CLASSIFY_KNOWN_SYNTHETIC_DATA`, rifiuta inventari parziali e
+aggiorna solo le nove concessioni note e i fascicoli/intake collegati. Non è stata eseguita
+contro Production.
+
+Collaudo PostgreSQL 16 effimero:
+
+- vista professionale: 1 concessione, 1 fascicolo, 1 intake e 1 documento sintetico di controllo;
+- vista sintetica: 8 concessioni DEMO e 1 E2E;
+- vista `ALL`: 10 concessioni;
+- inventario dry-run: 9/9 record trovati, nessun mancante;
+- TypeScript superato;
+- build Next.js Production superata;
+- 34/34 test correlati superati;
+- ESLint: zero errori e due warning preesistenti;
+- container PostgreSQL rimosso.
+
+La separazione non produce effetti sui record storici fino all'esecuzione autorizzata del
+backfill. Non sono stati modificati o cancellati record Production.
+
+## Candidato e piano per il primo aggiornamento AI reale
+
+Il candidato più sicuro è
+`procedimento-intake-9e04f4d4cdbf092845b57c66`: corpus sintetico già estratto, un documento,
+40 pagine e testo disponibile. Prima del test deve essere classificato `E2E` e reso visibile
+soltanto nel deployment sintetico. Non deve essere usato un fascicolo professionale reale per
+il primo avvio.
+
+Ordine vincolante, ancora non eseguito:
+
+1. eseguire il backfill classificazione in dry-run e approvarne separatamente l'applicazione;
+2. verificare connessione OpenAI e presenza del modello con la chiamata read-only prevista;
+3. risolvere il gate `ANALYSIS_ACTIVATION_DISABLED` e riconciliare diagnostica generica e
+   readiness provider;
+4. confermare policy tenant/fascicolo e un budget dedicato al solo fascicolo;
+5. verificare fingerprint e completezza del corpus;
+6. isolare i 13 job preesistenti affinché la finestra di test non li esegua;
+7. configurare il worker con allowlist del solo tenant e procedimento candidato;
+8. avviare e verificare il worker;
+9. attivare il comando AI globale per ultimo;
+10. avviare una sola volta **Aggiorna fascicolo** con ADMIN, MFA e conferma esplicita;
+11. verificare job, revisione corrente, rapporto, evidenze, audit e costo `SETTLED`;
+12. riportare il comando globale OFF e sospendere il worker al termine della finestra.
+
+Fino alla prova dei punti 9-11, il percorso completo non è dimostrato in Production e NOETRA
+non viene dichiarata completata.

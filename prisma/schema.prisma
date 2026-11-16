@@ -965,6 +965,12 @@ enum ResearchCompletionState {
   HUMAN_DECISION_REQUIRED
 }
 
+enum DatasetClass {
+  PROFESSIONAL
+  DEMO
+  E2E
+}
+
 model Ente {
   id                           String                                 @id @default(cuid())
   nome                         String
@@ -1519,6 +1525,7 @@ model Concessionario {
 
 model Concessione {
   id                         String                     @id @default(cuid())
+  datasetClass               DatasetClass               @default(PROFESSIONAL)
   numeroAtto                 String
   dataRilascio               DateTime
   dataScadenza               DateTime
@@ -1572,6 +1579,7 @@ model Concessione {
   expiryChangeCommands  ConcessioneExpiryChangeCommand[]
 
   @@index([stato])
+  @@index([datasetClass])
   @@index([dataScadenza])
   @@index([concessionarioId])
   @@index([enteId])
@@ -1697,6 +1705,7 @@ model Criticita {
 
 model Procedimento {
   id                               String                        @id @default(cuid())
+  datasetClass                     DatasetClass                  @default(PROFESSIONAL)
   enteId                           String
   concessioneId                    String?
   criticitaId                      String?
@@ -1776,6 +1785,7 @@ model Procedimento {
   professionalLegalQuestions        ProfessionalLegalQuestion[]
 
   @@index([enteId])
+  @@index([datasetClass])
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([stato])
@@ -1795,6 +1805,7 @@ model Procedimento {
 
 model FascicoloIntake {
   id                         String             @id @default(cuid())
+  datasetClass               DatasetClass       @default(PROFESSIONAL)
   enteId                     String
   concessioneId              String?
   procedimentoId             String?            @unique
@@ -1823,6 +1834,7 @@ model FascicoloIntake {
   documenti   Documento[]
 
   @@index([enteId])
+  @@index([datasetClass])
   @@index([concessioneId])
   @@index([createdAt])
 }

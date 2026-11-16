@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { buildDatasetDocumentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -229,8 +230,11 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
     throw new DocumentReadAuthorizationError("UNAUTHENTICATED");
   }
 
-  const documento = await prisma.documento.findUnique({
-    where: { id: input.documentoId },
+  const documento = await prisma.documento.findFirst({
+    where: {
+      id: input.documentoId,
+      ...buildDatasetDocumentoWhere(),
+    },
     select: {
       id: true,
       nome: true,

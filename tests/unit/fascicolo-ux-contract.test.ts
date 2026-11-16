@@ -100,12 +100,18 @@ describe("Fascicolo UX contract", () => {
     expect(aiWorkspace).toContain("Ricerca e aggiornamento giuridico");
     expect(aiWorkspace).toContain("Il comando resta disabilitato");
     expect(aiWorkspace).toContain("La policy del fascicolo può soltanto restringere");
+    expect(aiWorkspace).toContain("Analisi AI bloccata");
+    expect(aiWorkspace).toContain("Ricerca manuale autorizzata");
+    expect(aiWorkspace).toContain("La ricerca manuale autorizzata è distinta dall&apos;analisi del corpus");
     expect(aiWorkspace).toContain("startLegalAnalysisPipeline");
     expect(questionPanel).toContain('id="interroga-ai"');
     expect(questionPanel).toContain("Salva quesito");
     expect(detailPage.match(/<FascicoloAiWorkspace/g)).toHaveLength(2);
     expect(runtimePage).toContain("Quadro operativo immediato");
     expect(runtimePage).toContain("Percorso guidato di attivazione");
+    expect(runtimePage).toContain("eseguibili ora");
+    expect(runtimePage).toContain("Verificati sulla configurazione corrente");
+    expect(runtimePage).not.toContain("di {aiEngines.length} disponibili");
     expect(runtimePage).toContain("Globali: deployment, kill-switch, provider, worker e budget globale.");
   });
 
