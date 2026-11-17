@@ -1,5 +1,7 @@
 import { startOfMonth } from "date-fns";
 
+import { buildDatasetConcessioneWhere } from "@/lib/dataset-visibility";
+
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
@@ -242,15 +244,17 @@ function buildWhere(params: GetReportListParams): Prisma.ReportWhereInput {
 function buildConcessioneTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.ConcessioneWhereInput {
+  const datasetWhere = buildDatasetConcessioneWhere();
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
-    return {};
+    return datasetWhere;
   }
 
   if (tenantContext.accessibleTenantIds.length === 0) {
-    return { enteId: null };
+    return { ...datasetWhere, enteId: null };
   }
 
   return {
+    ...datasetWhere,
     OR: [
       { enteId: { in: tenantContext.accessibleTenantIds } },
       { enteId: null },
@@ -261,31 +265,16 @@ function buildConcessioneTenantWhere(
 function buildReportTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.ReportWhereInput {
+  const concessioneWhere = buildConcessioneTenantWhere(tenantContext);
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
-    return {};
+    return { concessione: { is: concessioneWhere } };
   }
 
   if (tenantContext.accessibleTenantIds.length === 0) {
-    return {
-      OR: [{ enteId: null, concessioneId: null }],
-    };
+    return { concessione: { is: concessioneWhere } };
   }
 
-  const tenantIds = tenantContext.accessibleTenantIds;
-
-  return {
-    OR: [
-      { enteId: { in: tenantIds } },
-      {
-        enteId: null,
-        concessione: { is: { enteId: { in: tenantIds } } },
-      },
-      {
-        enteId: null,
-        concessioneId: null,
-      },
-    ],
-  };
+  return { concessione: { is: concessioneWhere } };
 }
 
 function tipologiaPriority(tipologia: string): number {

@@ -13,7 +13,7 @@ export interface PasswordPolicyValidation {
 }
 
 function getMinLength(): number {
-  const configured = Number.parseInt(process.env.AUTH_PASSWORD_MIN_LENGTH ?? "10", 10);
+  const configured = Number.parseInt(process.env.AUTH_PASSWORD_MIN_LENGTH ?? "12", 10);
 
   if (!Number.isFinite(configured) || configured < 8) {
     return 10;

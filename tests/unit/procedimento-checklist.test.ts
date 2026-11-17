@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CHECKLIST_ITEM_CODES,
   calculateChecklistCompleteness,
+  getChecklistContraddittorioItems,
   getMissingChecklistItems,
   getProcedimentoWarningLevel,
   isProcedimentoUfficio,
@@ -9,6 +11,30 @@ import {
 } from "@/lib/procedimento-checklist";
 
 describe("procedimento checklist helpers", () => {
+  it("exposes the stable 13-code catalog without changing dynamic applicability", () => {
+    expect(CHECKLIST_ITEM_CODES).toEqual([
+      "COMUNICAZIONE_AVVIO_INVIATA",
+      "TERMINE_MEMORIE",
+      "MEMORIE_RICEVUTE",
+      "AUDIZIONE_SVOLTA",
+      "CONTESTAZIONE_FORMALE_INVIATA",
+      "CONTRODEDUZIONI_VALUTATE",
+      "MOTIVAZIONE_VALUTAZIONE",
+      "PROPOSTA_ESITO_ISTRUTTORIO",
+      "PREAVVISO_VALUTATO",
+      "PREAVVISO_INVIATO",
+      "TERMINE_OSSERVAZIONI_PREAVVISO",
+      "OSSERVAZIONI_PREAVVISO_VALUTATE",
+      "MOTIVAZIONE_MANCATO_PREAVVISO",
+    ]);
+    expect(getChecklistContraddittorioItems({ origineProcedimento: "UFFICIO" }).map((item) => item.code)).toEqual(
+      CHECKLIST_ITEM_CODES.slice(0, 8),
+    );
+    expect(getChecklistContraddittorioItems({ origineProcedimento: "ISTANZA_PARTE" }).map((item) => item.code)).toEqual(
+      CHECKLIST_ITEM_CODES,
+    );
+  });
+
   it("considers checklist complete for decadenziale flow with required steps", () => {
     const procedimento = {
       tipologia: "AVVIO_DECADENZA",

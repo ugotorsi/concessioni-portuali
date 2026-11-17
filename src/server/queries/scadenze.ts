@@ -377,7 +377,7 @@ export async function getScadenzaDetail(id: string): Promise<ScadenzaDetail | nu
     try {
       requireTenantAccess(tenantContext, scadenza.concessione.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;

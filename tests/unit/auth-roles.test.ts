@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   BACKOFFICE_ROLES,
+  canFinalizeProcedimentoDecision,
   canDownloadReportPdf,
   canManageCriticita,
   canManagePagamenti,
@@ -18,6 +19,7 @@ describe("auth role capabilities", () => {
     expect(canManagePagamenti("ADMIN")).toBe(true);
     expect(canManageProcedimenti("ADMIN")).toBe(true);
     expect(canValidateReport("ADMIN")).toBe(true);
+    expect(canFinalizeProcedimentoDecision("ADMIN")).toBe(true);
     expect(canUseAI("ADMIN")).toBe(true);
     expect(isBackofficeRole("ADMIN")).toBe(true);
   });
@@ -28,7 +30,17 @@ describe("auth role capabilities", () => {
     expect(canManagePagamenti("VIEWER_ADSP")).toBe(false);
     expect(canManageProcedimenti("VIEWER_ADSP")).toBe(false);
     expect(canValidateReport("VIEWER_ADSP")).toBe(false);
+    expect(canFinalizeProcedimentoDecision("VIEWER_ADSP")).toBe(false);
     expect(canUseAI("VIEWER_ADSP")).toBe(false);
+  });
+
+  it("solo ADMIN e GIURIDICO possono registrare decisioni conclusive", () => {
+    expect(canFinalizeProcedimentoDecision("ADMIN")).toBe(true);
+    expect(canFinalizeProcedimentoDecision("GIURIDICO")).toBe(true);
+    expect(canFinalizeProcedimentoDecision("OPERATORE_SOCIETA")).toBe(false);
+    expect(canFinalizeProcedimentoDecision("TECNICO")).toBe(false);
+    expect(canFinalizeProcedimentoDecision("ECONOMICO")).toBe(false);
+    expect(canFinalizeProcedimentoDecision("VIEWER_ADSP")).toBe(false);
   });
 
   it("download PDF per VIEWER_ADSP dipende da validazione", () => {

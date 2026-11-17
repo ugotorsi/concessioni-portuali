@@ -57,6 +57,7 @@ export interface DashboardSummary {
 
 export interface DashboardCriticitaItem {
   id: string;
+  fascicoloId: string | null;
   gravita: string;
   tipologia: string;
   concessione: string;
@@ -68,6 +69,7 @@ export interface DashboardCriticitaItem {
 
 export interface DashboardScadenzaItem {
   id: string;
+  fascicoloId: string | null;
   data: Date;
   tipologia: string;
   concessione: string;
@@ -77,6 +79,7 @@ export interface DashboardScadenzaItem {
 
 export interface DashboardPagamentoItem {
   id: string;
+  fascicoloId: string | null;
   concessione: string;
   anno: number;
   importoDovuto: number;
@@ -93,6 +96,7 @@ export interface DashboardProcedimentoItem {
   stato: string;
   termineContraddittorio: Date | null;
   riferimentoNormativo: string | null;
+  updatedAt: Date;
 }
 
 export interface DashboardData {
@@ -138,9 +142,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
   const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
-  let dashboardRows: any = null;
-
-  try {
+  const dashboardRows = await (async () => {
+    try {
     const [
       totaleConcessioni,
       concessioniAttive,
@@ -237,9 +240,24 @@ export async function getDashboardData(): Promise<DashboardData> {
           riferimentoNormativo: true,
           stato: true,
           dataRilevazione: true,
+          procedimenti: {
+            orderBy: { updatedAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -261,6 +279,16 @@ export async function getDashboardData(): Promise<DashboardData> {
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -283,6 +311,16 @@ export async function getDashboardData(): Promise<DashboardData> {
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -294,7 +332,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           },
           ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
-        orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
+        orderBy: { updatedAt: "desc" },
         take: 5,
         select: {
           id: true,
@@ -302,6 +340,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           stato: true,
           riferimentoNormativo: true,
           dataScadenzaContraddittorio: true,
+          updatedAt: true,
           concessione: {
             select: {
               numeroAtto: true,
@@ -311,30 +350,31 @@ export async function getDashboardData(): Promise<DashboardData> {
       }),
     ]);
 
-    dashboardRows = {
-      totaleConcessioni,
-      concessioniAttive,
-      concessioniInScadenza90,
-      criticitaAperte,
-      criticitaUrgenti,
-      morositaAperte,
-      pagamentiCritici,
-      procedimentiInCorsoCount,
-      garanziePolizzeCritiche,
-      fontiNormative,
-      versioniNormativeInConsultazione,
-      criticitaPrioritarieRows,
-      scadenzeImminentiRows,
-      pagamentiCriticiRows,
-      procedimentiRows,
-    };
-  } catch (error) {
-    if (isRecoverableDashboardQueryError(error) || process.env.NODE_ENV !== "production") {
-      return buildFallbackDashboardData();
-    }
+      return {
+        totaleConcessioni,
+        concessioniAttive,
+        concessioniInScadenza90,
+        criticitaAperte,
+        criticitaUrgenti,
+        morositaAperte,
+        pagamentiCritici,
+        procedimentiInCorsoCount,
+        garanziePolizzeCritiche,
+        fontiNormative,
+        versioniNormativeInConsultazione,
+        criticitaPrioritarieRows,
+        scadenzeImminentiRows,
+        pagamentiCriticiRows,
+        procedimentiRows,
+      };
+    } catch (error) {
+      if (isRecoverableDashboardQueryError(error) || process.env.NODE_ENV !== "production") {
+        return null;
+      }
 
-    throw error;
-  }
+      throw error;
+    }
+  })();
 
   if (!dashboardRows) {
     return buildFallbackDashboardData();
@@ -358,17 +398,12 @@ export async function getDashboardData(): Promise<DashboardData> {
     procedimentiRows,
   } = dashboardRows;
 
-  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item: {
-    id: string;
-    gravita: string;
-    tipologia: string;
-    descrizione: string;
-    riferimentoNormativo: string | null;
-    stato: string;
-    dataRilevazione: Date;
-    concessione: { numeroAtto: string };
-  }) => ({
+  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item) => ({
     id: item.id,
+    fascicoloId: item.procedimenti[0]?.id
+      ?? item.concessione.procedimenti[0]?.id
+      ?? item.concessione.fascicoliIntake[0]?.id
+      ?? null,
     gravita: item.gravita,
     tipologia: item.tipologia,
     concessione: item.concessione.numeroAtto,
@@ -378,14 +413,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     dataRilevazione: item.dataRilevazione,
   }));
 
-  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item: {
-    id: string;
-    dataScadenza: Date;
-    tipologia: string;
-    stato: string;
-    concessione: { numeroAtto: string };
-  }) => ({
+  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item) => ({
     id: item.id,
+    fascicoloId: item.concessione.procedimenti[0]?.id
+      ?? item.concessione.fascicoliIntake[0]?.id
+      ?? null,
     data: item.dataScadenza,
     tipologia: item.tipologia,
     concessione: item.concessione.numeroAtto,
@@ -393,20 +425,15 @@ export async function getDashboardData(): Promise<DashboardData> {
     giorniDelta: differenceInCalendarDays(item.dataScadenza, oggi),
   }));
 
-  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item: {
-    id: string;
-    annoRiferimento: number;
-    importoDovuto: number;
-    importoVersato: number;
-    stato: string;
-    dataScadenza: Date;
-    concessione: { numeroAtto: string };
-  }) => {
+  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item) => {
     const dovuto = Number(item.importoDovuto);
     const versato = Number(item.importoVersato);
 
     return {
       id: item.id,
+      fascicoloId: item.concessione.procedimenti[0]?.id
+        ?? item.concessione.fascicoliIntake[0]?.id
+        ?? null,
       concessione: item.concessione.numeroAtto,
       anno: item.annoRiferimento,
       importoDovuto: dovuto,
@@ -417,20 +444,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     };
   });
 
-  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item: {
-    id: string;
-    tipologia: string;
-    stato: string;
-    riferimentoNormativo: string | null;
-    dataScadenzaContraddittorio: Date | null;
-    concessione: { numeroAtto: string };
-  }) => ({
+  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item) => ({
     id: item.id,
     tipologia: item.tipologia,
-    concessione: item.concessione.numeroAtto,
+    concessione: item.concessione?.numeroAtto ?? "Titolo concessorio non accertato",
     stato: item.stato,
     termineContraddittorio: item.dataScadenzaContraddittorio,
     riferimentoNormativo: item.riferimentoNormativo,
+    updatedAt: item.updatedAt,
   }));
 
   const azioniConsigliate: string[] = [];

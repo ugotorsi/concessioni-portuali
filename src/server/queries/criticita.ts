@@ -505,7 +505,7 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
     try {
       requireTenantAccess(tenantContext, criticita.concessione.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;

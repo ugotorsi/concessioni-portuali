@@ -1,5 +1,6 @@
 import { buildCsv, buildCsvFilename, csvResponse } from "@/lib/csv";
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
+import { buildDatasetConcessioneWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import { buildRateLimitKey, checkRateLimit, createRateLimitResponse } from "@/lib/rate-limit";
@@ -28,35 +29,25 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const tenantContext = await getCurrentTenantContext();
+  const datasetConcessioneWhere = buildDatasetConcessioneWhere();
   const reportTenantWhere = (() => {
     if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
-      return undefined;
+      return { concessione: { is: datasetConcessioneWhere } };
     }
 
     if (tenantContext.accessibleTenantIds.length === 0) {
-      return {
-        OR: [{ enteId: null, concessioneId: null }],
-      };
+      return { concessione: { is: { ...datasetConcessioneWhere, enteId: null } } };
     }
 
     const tenantIds = tenantContext.accessibleTenantIds;
 
     return {
-      OR: [
-        { enteId: { in: tenantIds } },
-        {
-          enteId: null,
-          concessione: {
-            is: {
-              OR: [{ enteId: { in: tenantIds } }, { enteId: null }],
-            },
-          },
+      concessione: {
+        is: {
+          ...datasetConcessioneWhere,
+          OR: [{ enteId: { in: tenantIds } }, { enteId: null }],
         },
-        {
-          enteId: null,
-          concessioneId: null,
-        },
-      ],
+      },
     };
   })();
 

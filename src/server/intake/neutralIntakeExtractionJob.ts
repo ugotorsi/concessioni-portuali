@@ -1,0 +1,215 @@
+import { z } from "zod";
+
+import { prisma } from "@/lib/prisma";
+import { ensureFascicoloAutomaticAnalysisJob } from "@/server/ai/fascicoloAutomaticAnalysisJob";
+import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-jobs/registry";
+import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
+
+import { extractNeutralIntake } from "./extractNeutralIntake";
+import { ensureNeutralIntakeClassificationJob } from "./neutralIntakeClassificationJob";
+import { ensureLegalReferenceDiscoveryJob } from "./neutralIntakeLegalReferenceDiscoveryJob";
+
+export {
+  buildNeutralIntakeExtractionAdmission,
+  NEUTRAL_INTAKE_EXTRACTION_OPERATION,
+  NEUTRAL_INTAKE_EXTRACTION_PURPOSE,
+} from "./neutralIntakeExtractionAdmission";
+import { NEUTRAL_INTAKE_EXTRACTION_OPERATION } from "./neutralIntakeExtractionAdmission";
+const EXTRACTION_HEARTBEAT_INTERVAL_MS = 60_000;
+
+const referenceSchema = z.object({
+  referenceType: z.literal("NEUTRAL_INTAKE"),
+  referenceId: z.string().trim().min(1).max(256),
+  referenceVersion: z.literal("V1"),
+  metadata: z.object({
+    receivedActorId: z.string().trim().min(1).max(256).optional(),
+    receivedActorRoleCode: z.string().trim().min(1).max(512).optional(),
+  }).strict(),
+}).strict();
+const persistedAttemptReferenceSchema = z.object({
+  id: z.string().trim().min(1).max(256),
+}).passthrough();
+
+type ExtractionReference = z.output<typeof referenceSchema>;
+
+function evidenceReadyResult(neutralIntakeId: string) {
+  return {
+    referenceType: "NEUTRAL_INTAKE_EXTRACTION",
+    referenceId: neutralIntakeId,
+    referenceVersion: "V1",
+    metadata: { statusCode: "EVIDENCE_READY" },
+  };
+}
+
+export interface NeutralIntakeExtractionHandlerDependencies {
+  loadAuthority(input: { jobId: string; neutralIntakeId: string }): Promise<{
+    job: { operation: string; tenantId: string | null } | null;
+    intake: { id: string; enteId: string | null; status: string } | null;
+  }>;
+  extract(neutralIntakeId: string): ReturnType<typeof extractNeutralIntake>;
+  ensureClassification(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureNeutralIntakeClassificationJob>;
+  ensureLegalReferenceDiscovery(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureLegalReferenceDiscoveryJob>;
+  ensureFascicoloAnalysis(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureFascicoloAutomaticAnalysisJob>;
+}
+
+const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
+  async loadAuthority(input) {
+    const [job, intake] = await Promise.all([
+      prisma.asyncJob.findUnique({
+        where: { id: input.jobId },
+        select: { operation: true, tenantId: true },
+      }),
+      prisma.neutralIntake.findUnique({
+        where: { id: input.neutralIntakeId },
+        select: { id: true, enteId: true, status: true },
+      }),
+    ]);
+    return { job, intake };
+  },
+  extract: (neutralIntakeId) => extractNeutralIntake(neutralIntakeId),
+  ensureClassification: (input) => ensureNeutralIntakeClassificationJob(input),
+  ensureLegalReferenceDiscovery: (input) => ensureLegalReferenceDiscoveryJob(input),
+  ensureFascicoloAnalysis: (input) => ensureFascicoloAutomaticAnalysisJob(input),
+};
+
+async function ensureClassificationAdmission(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  try {
+    await dependencies.ensureClassification(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("CLASSIFICATION_ADMISSION", "CLASSIFICATION_ADMISSION_FAILED", true);
+  }
+}
+
+async function ensureDiscoveryAdmission(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  try {
+    await dependencies.ensureLegalReferenceDiscovery(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("LEGAL_REFERENCE_DISCOVERY_ADMISSION", "DISCOVERY_ADMISSION_FAILED", true);
+  }
+}
+
+async function ensureFascicoloAnalysisAdmission(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  try {
+    await dependencies.ensureFascicoloAnalysis(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("FASCICOLO_ANALYSIS_ADMISSION", "FASCICOLO_ANALYSIS_ADMISSION_FAILED", true);
+  }
+}
+
+async function ensurePostExtractionAdmissions(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  await ensureClassificationAdmission(dependencies, input);
+  await ensureDiscoveryAdmission(dependencies, input);
+  await ensureFascicoloAnalysisAdmission(dependencies, input);
+}
+
+async function executeExtraction(
+  input: ExtractionReference,
+  context: AsyncJobHandlerContext,
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+) {
+  const authority = await dependencies.loadAuthority({
+    jobId: context.jobId,
+    neutralIntakeId: input.referenceId,
+  });
+  if (
+    !authority.job
+    || authority.job.operation !== NEUTRAL_INTAKE_EXTRACTION_OPERATION
+    || !authority.intake
+    || authority.job.tenantId !== authority.intake.enteId
+  ) {
+    throw new AsyncJobExecutionError("AUTHORIZATION", "NEUTRAL_INTAKE_AUTHORITY_MISMATCH", false);
+  }
+  if (![
+    "RECEIVED",
+    "EVIDENCE_READY",
+    "REVIEW_REQUIRED",
+    "FAILED_CLASSIFICATION",
+  ].includes(authority.intake.status)) {
+    throw new AsyncJobExecutionError("EXTRACTION", "NEUTRAL_INTAKE_NOT_EXTRACTABLE", false);
+  }
+  if (await context.isCancellationRequested()) {
+    throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
+  }
+  if (authority.intake.status !== "RECEIVED") {
+    await ensurePostExtractionAdmissions(dependencies, {
+      sourceJobId: context.jobId,
+      neutralIntakeId: input.referenceId,
+    });
+    return evidenceReadyResult(input.referenceId);
+  }
+
+  await context.heartbeat();
+  let heartbeatFailure: unknown;
+  let heartbeatInFlight: Promise<void> | null = null;
+  const heartbeatTimer = setInterval(() => {
+    if (heartbeatInFlight) return;
+    heartbeatInFlight = context.heartbeat()
+      .catch((error: unknown) => { heartbeatFailure ??= error; })
+      .finally(() => { heartbeatInFlight = null; });
+  }, EXTRACTION_HEARTBEAT_INTERVAL_MS);
+  heartbeatTimer.unref();
+  let result: Awaited<ReturnType<typeof dependencies.extract>>;
+  try {
+    result = await dependencies.extract(input.referenceId);
+  } finally {
+    clearInterval(heartbeatTimer);
+    await heartbeatInFlight;
+  }
+  if (heartbeatFailure) throw heartbeatFailure;
+  await context.heartbeat();
+  if (result.outcome === "FAILED") {
+    throw new AsyncJobExecutionError("EXTRACTION", result.failureCode, false);
+  }
+
+  const completed = await dependencies.loadAuthority({
+    jobId: context.jobId,
+    neutralIntakeId: input.referenceId,
+  });
+  if (!completed.intake || completed.intake.status !== "EVIDENCE_READY") {
+    throw new AsyncJobExecutionError("EXTRACTION", "EVIDENCE_READY_NOT_CONFIRMED", false);
+  }
+  const persistedAttempt = persistedAttemptReferenceSchema.parse(result.attempt);
+  await ensurePostExtractionAdmissions(dependencies, {
+    sourceJobId: context.jobId,
+    neutralIntakeId: input.referenceId,
+    extractionAttemptId: persistedAttempt.id,
+  });
+  return evidenceReadyResult(input.referenceId);
+}
+
+export function createNeutralIntakeExtractionHandler(
+  dependencies: NeutralIntakeExtractionHandlerDependencies = defaultDependencies,
+): AsyncJobHandler<ExtractionReference> {
+  return {
+    operation: NEUTRAL_INTAKE_EXTRACTION_OPERATION,
+    parseInput: (input) => referenceSchema.parse(input),
+    execute: (input, context) => executeExtraction(input, context, dependencies),
+  };
+}

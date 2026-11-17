@@ -1,0 +1,2 @@
+ALTER TYPE "FascicoloOperationalProposalType"
+ADD VALUE IF NOT EXISTS 'CONCESSION_LINK_OR_CREATE';

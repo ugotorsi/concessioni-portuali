@@ -1,0 +1,332 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const requireRoleMock = vi.hoisted(() => vi.fn());
+const requireAdminWithMfaMock = vi.hoisted(() => vi.fn());
+const getCurrentUserMock = vi.hoisted(() => vi.fn());
+const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
+const requireTenantAccessMock = vi.hoisted(() => vi.fn());
+const provisionMock = vi.hoisted(() => vi.fn());
+const readAuthorizationMock = vi.hoisted(() => vi.fn());
+const auditSuccessMock = vi.hoisted(() => vi.fn());
+const recoverMissionsMock = vi.hoisted(() => vi.fn());
+const setGlobalAiControlStateMock = vi.hoisted(() => vi.fn());
+const confirmReferenceDateMock = vi.hoisted(() => vi.fn());
+
+const prismaMock = vi.hoisted(() => ({
+  procedimento: { findUnique: vi.fn() },
+}));
+
+vi.mock("@/lib/auth", () => ({
+  requireRole: requireRoleMock,
+  requireAdminWithMfa: requireAdminWithMfaMock,
+  getCurrentUser: getCurrentUserMock,
+}));
+vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
+vi.mock("@/lib/tenant-auth", () => ({
+  getCurrentTenantContext: getCurrentTenantContextMock,
+  requireTenantAccess: requireTenantAccessMock,
+}));
+vi.mock("@/server/audit/auditLog", () => ({ auditSuccess: auditSuccessMock }));
+vi.mock("@/server/runtime/procedimentoBudgetPolicy", () => ({
+  provisionDefaultProcedimentoBudgetPolicy: provisionMock,
+  readDefaultProcedimentoBudgetAuthorization: readAuthorizationMock,
+}));
+vi.mock("@/server/fascicolo-knowledge/researchMissionRecovery", () => ({
+  recoverCurrentKnowledgeResearchMissions: recoverMissionsMock,
+}));
+vi.mock("@/server/fascicolo-knowledge/referenceDateConfirmation", () => ({
+  confirmKnowledgeReferenceDate: confirmReferenceDateMock,
+}));
+vi.mock("@/server/runtime/legalWorkbench", () => ({
+  getLegalWorkbenchSnapshot: vi.fn(),
+  buildSelvaraMissionInstructions: vi.fn(),
+}));
+vi.mock("@/server/ai/globalAiControl", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/server/ai/globalAiControl")>()),
+  setGlobalAiControlState: setGlobalAiControlStateMock,
+}));
+vi.mock("@/server/ai/fascicoloExistingCorpusAnalysis", () => ({
+  requestExistingCorpusAnalysis: vi.fn(),
+}));
+vi.mock("@/server/async-jobs/persistence", () => ({
+  retryTerminalAsyncJob: vi.fn(),
+}));
+vi.mock("@/server/async-jobs/documentWorkerActivation", () => ({
+  documentWorkerKindForOperation: vi.fn(),
+  requestDocumentWorkerActivation: vi.fn(),
+}));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+
+import {
+  assignDefaultProcedimentoBudgetPolicy,
+  confirmResearchReferenceDate,
+  recoverCurrentKnowledgeMissions,
+  updateGlobalAiControl,
+} from "@/app/admin/runtime/actions";
+import RuntimeOperationsPage from "@/app/admin/runtime/page";
+
+function formData() {
+  const data = new FormData();
+  data.set("procedimentoId", "procedure-1");
+  return data;
+}
+
+describe("assignDefaultProcedimentoBudgetPolicy", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireRoleMock.mockResolvedValue("ADMIN");
+    getCurrentUserMock.mockResolvedValue({
+      id: "admin-1",
+      email: "admin@example.test",
+      role: "ADMIN",
+    });
+    getCurrentTenantContextMock.mockResolvedValue({
+      userId: "admin-1",
+      role: "ADMIN",
+      isAdmin: true,
+      defaultTenantId: "tenant-1",
+      accessibleTenantIds: ["tenant-1"],
+    });
+    readAuthorizationMock.mockReturnValue({
+      authorized: true,
+      currency: "EUR",
+      hardCapAmount: "1.000000",
+      windowSeconds: 86_400,
+    });
+    prismaMock.procedimento.findUnique.mockResolvedValue({
+      id: "procedure-1",
+      enteId: "tenant-1",
+    });
+    provisionMock.mockResolvedValue({
+      outcome: "CREATED",
+      policy: {
+        id: "policy-1",
+        enabled: true,
+        hardCapAmount: "1.000000",
+        windowSeconds: 86_400,
+      },
+    });
+    recoverMissionsMock.mockResolvedValue({
+      revisionId: "revision-1",
+      missionCount: 2,
+      assignedActorId: null,
+      assignmentRequired: true,
+      lifecycle: [],
+    });
+  });
+
+  describe("updateGlobalAiControl", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      requireAdminWithMfaMock.mockResolvedValue({
+        id: "admin-1",
+        email: "admin@example.test",
+        role: "ADMIN",
+        mfaVerified: true,
+      });
+      setGlobalAiControlStateMock.mockResolvedValue({
+        previousEnabled: false,
+        requestedEnabled: true,
+      });
+    });
+
+    describe("RuntimeOperationsPage authorization", () => {
+      it("runs the redirecting role guard before the ADMIN MFA assertion", async () => {
+        const redirectError = new Error("NEXT_REDIRECT");
+        requireRoleMock.mockRejectedValueOnce(redirectError);
+
+        await expect(RuntimeOperationsPage({ searchParams: Promise.resolve({}) })).rejects.toBe(redirectError);
+
+        expect(requireRoleMock).toHaveBeenCalledWith(["ADMIN"]);
+        expect(requireAdminWithMfaMock).not.toHaveBeenCalled();
+      });
+    });
+
+    it("requires ADMIN with verified MFA before changing state", async () => {
+      requireAdminWithMfaMock.mockRejectedValueOnce(
+        new Error("MFA_VERIFICATION_REQUIRED"),
+      );
+      const data = new FormData();
+      data.set("enabled", "true");
+
+      await expect(updateGlobalAiControl(data)).rejects.toThrow(
+        "MFA_VERIFICATION_REQUIRED",
+      );
+      expect(setGlobalAiControlStateMock).not.toHaveBeenCalled();
+    });
+
+    it("forwards the authenticated ADMIN identity and normalized reason", async () => {
+      const data = new FormData();
+      data.set("enabled", "true");
+      data.set("reason", "  Controlled activation  ");
+
+      await updateGlobalAiControl(data);
+
+      expect(setGlobalAiControlStateMock).toHaveBeenCalledWith({
+        enabled: true,
+        actor: {
+          userId: "admin-1",
+          userEmail: "admin@example.test",
+          userRole: "ADMIN",
+        },
+        reason: "Controlled activation",
+      });
+    });
+  });
+
+  it("requires ADMIN and tenant write access before provisioning", async () => {
+    await assignDefaultProcedimentoBudgetPolicy(formData());
+
+    expect(requireRoleMock).toHaveBeenCalledWith(["ADMIN"]);
+    expect(requireTenantAccessMock).toHaveBeenCalledWith(
+      expect.anything(),
+      "tenant-1",
+      { mode: "write", allowWhenEnteMissing: false },
+    );
+    expect(provisionMock).toHaveBeenCalledWith({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      authorization: {
+        authorized: true,
+        currency: "EUR",
+        hardCapAmount: "1.000000",
+        windowSeconds: 86_400,
+      },
+    });
+  });
+
+  describe("recoverCurrentKnowledgeMissions", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      requireRoleMock.mockResolvedValue("ADMIN");
+      getCurrentUserMock.mockResolvedValue({
+        id: "admin-1",
+        email: "admin@example.test",
+        role: "ADMIN",
+      });
+      getCurrentTenantContextMock.mockResolvedValue({
+        userId: "admin-1",
+        role: "ADMIN",
+        isAdmin: true,
+        defaultTenantId: "tenant-1",
+        accessibleTenantIds: ["tenant-1"],
+      });
+      prismaMock.procedimento.findUnique.mockResolvedValue({
+        id: "procedure-1",
+        enteId: "tenant-1",
+      });
+      recoverMissionsMock.mockResolvedValue({
+        revisionId: "revision-1",
+        missionCount: 2,
+        assignedActorId: null,
+        assignmentRequired: true,
+        lifecycle: [],
+      });
+    });
+
+    it("is ADMIN-only, tenant-scoped, audited, and does not invoke a provider", async () => {
+      await recoverCurrentKnowledgeMissions(formData());
+
+      expect(requireRoleMock).toHaveBeenCalledWith(["ADMIN"]);
+      expect(requireTenantAccessMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "tenant-1",
+        { mode: "write", allowWhenEnteMissing: false },
+      );
+      expect(recoverMissionsMock).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        candidateActorId: null,
+        requireValidCandidate: false,
+      });
+      expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
+        metadata: expect.objectContaining({ providerCalled: false }),
+      }));
+    });
+
+    it("requires an explicitly supplied assignee to be valid", async () => {
+      const data = formData();
+      data.set("assignedActorId", "user-1");
+
+      await recoverCurrentKnowledgeMissions(data);
+
+      expect(recoverMissionsMock).toHaveBeenCalledWith(expect.objectContaining({
+        candidateActorId: "user-1",
+        requireValidCandidate: true,
+      }));
+    });
+  });
+
+  describe("confirmResearchReferenceDate", () => {
+    function confirmationData(confirmed = true) {
+      const data = formData();
+      data.set("questionSemanticKey", "a".repeat(64));
+      data.set("confirmedDate", "2026-10-15");
+      data.set("rationale", "Data indicata nel documento dimostrativo");
+      if (confirmed) data.set("confirmation", "CONFIRM_LEGAL_REFERENCE_DATE");
+      return data;
+    }
+
+    beforeEach(() => {
+      confirmReferenceDateMock.mockResolvedValue({
+        questionSemanticKey: "a".repeat(64),
+        confirmedDate: "2026-10-15",
+        sourceId: "activity-1",
+        sourceVersion: "REFERENCE_DATE_CONFIRMATION_V1",
+        knowledgeRevisionId: "revision-1",
+      });
+    });
+
+    it("requires explicit confirmation and MFA before recording a date", async () => {
+      await expect(confirmResearchReferenceDate(confirmationData(false)))
+        .rejects.toThrow("REFERENCE_DATE_CONFIRMATION_REQUIRED");
+      expect(requireAdminWithMfaMock).toHaveBeenCalled();
+      expect(confirmReferenceDateMock).not.toHaveBeenCalled();
+    });
+
+    it("records the confirmation and prepares missions assigned to the confirming admin", async () => {
+      await confirmResearchReferenceDate(confirmationData());
+
+      expect(requireTenantAccessMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "tenant-1",
+        { mode: "write", allowWhenEnteMissing: false },
+      );
+      expect(confirmReferenceDateMock).toHaveBeenCalledWith(expect.objectContaining({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        confirmedDate: "2026-10-15",
+        actor: expect.objectContaining({ userId: "admin-1" }),
+      }));
+      expect(recoverMissionsMock).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        candidateActorId: "admin-1",
+        requireValidCandidate: true,
+      });
+      expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
+        metadata: expect.objectContaining({
+          referenceDateConfirmationId: "activity-1",
+          providerCalled: false,
+        }),
+      }));
+    });
+  });
+
+  it("fails closed when the default budget is not authorized", async () => {
+    readAuthorizationMock.mockReturnValue({ authorized: false });
+
+    await expect(assignDefaultProcedimentoBudgetPolicy(formData()))
+      .rejects.toThrow("PROCEDIMENTO_BUDGET_NOT_AUTHORIZED");
+    expect(provisionMock).not.toHaveBeenCalled();
+  });
+
+  it("does not provision a missing or tenant-less procedimento", async () => {
+    prismaMock.procedimento.findUnique.mockResolvedValue(null);
+
+    await expect(assignDefaultProcedimentoBudgetPolicy(formData()))
+      .rejects.toThrow("PROCEDIMENTO_NOT_FOUND");
+    expect(requireTenantAccessMock).not.toHaveBeenCalled();
+    expect(provisionMock).not.toHaveBeenCalled();
+  });
+});

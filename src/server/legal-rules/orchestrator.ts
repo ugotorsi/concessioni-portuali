@@ -457,8 +457,20 @@ function buildTenantSourceWhere(
   };
 }
 
-export async function resolveApplicableLegalRules(input: RuleResolutionInput): Promise<RuleResolutionResult> {
-  const tenantContext = await getCurrentTenantContext();
+export interface RuleResolutionSystemScope {
+  /** Tenant already authorized by the background job; replaces the HTTP session lookup. */
+  systemTenantId: string;
+}
+
+export async function resolveApplicableLegalRules(
+  input: RuleResolutionInput,
+  scope?: RuleResolutionSystemScope,
+): Promise<RuleResolutionResult> {
+  if (scope && (!scope.systemTenantId || input.enteId !== scope.systemTenantId)) {
+    throw new OrchestrationInputError("enteId must match the system tenant scope.", 400);
+  }
+  // Workers run outside a request: tenant isolation comes from the enforced enteId filter instead of the session.
+  const tenantContext = scope ? null : await getCurrentTenantContext();
   const tenantWhere = buildTenantWhere(tenantContext);
   const tenantSourceWhere = buildTenantSourceWhere(tenantContext);
   const referenceDate = parseReferenceDate(input.referenceDate);

@@ -17,7 +17,7 @@ test("admin visualizza i 6 scenari demo istituzionali", async ({ page }) => {
   await expect(page.getByTestId("demo-scenario-card-comune-costiero-stagionale")).toBeVisible();
 
   await expect(page.getByTestId("demo-scenario-vertical-comune-costiero-stagionale")).toContainText(
-    "Turistico-ricreativa / Comune costiero",
+    "Marittima turistico-ricreativa",
   );
 
   const reportLink = page

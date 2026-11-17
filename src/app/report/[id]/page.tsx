@@ -56,20 +56,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Dettaglio report</h1>
-            <p className="mt-1 text-sm text-slate-600">Output finale del servizio di monitoraggio a supporto delle istruttorie.</p>
-          </div>
+          <p className="text-sm text-slate-600">Output finale del monitoraggio a supporto delle istruttorie.</p>
           <div className="flex flex-wrap items-center gap-2">
-            <PrintButton />
-            {canDownloadPdf ? (
-              <Link
-                href={`/report/${detail.report.id}/pdf`}
-                className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
-              >
-                Scarica PDF istituzionale
-              </Link>
-            ) : null}
             {canToggleValidation ? (
               <form action={toggleReportValidationAction}>
                 <input type="hidden" name="id" value={detail.report.id} />
@@ -96,6 +84,20 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 Apri concessione
               </Link>
             ) : null}
+            <details>
+              <summary className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Altro</summary>
+              <div className="mt-2 flex flex-col items-start gap-2 border-l border-slate-200 pl-3">
+                <PrintButton />
+                {canDownloadPdf ? (
+                  <Link
+                    href={`/report/${detail.report.id}/pdf`}
+                    className="text-sm font-medium text-slate-700 underline underline-offset-4"
+                  >
+                    Scarica PDF istituzionale
+                  </Link>
+                ) : null}
+              </div>
+            </details>
           </div>
         </div>
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import type { GetScadenzeListParams, ScadenzeFiltersData } from "@/server/queries/scadenze";
@@ -60,12 +62,12 @@ export function ScadenzeFiltersBar({ filtersData, current }: ScadenzeFiltersBarP
         >
           Applica filtri
         </button>
-        <a
+        <Link
           href="/scadenze"
           className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
         >
           Reset
-        </a>
+        </Link>
       </div>
     </form>
   );

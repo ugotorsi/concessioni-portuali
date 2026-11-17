@@ -1,0 +1,127 @@
+import { AsyncJobHandlerRegistry } from "./registry";
+import { drainAsyncJobById, drainOneAsyncJob } from "./worker";
+import { createNeutralIntakeClassificationHandler } from "../intake/neutralIntakeClassificationJob";
+import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExtractionJob";
+import {
+  createFascicoloAutomaticAnalysisHandler,
+  type FascicoloAutomaticAnalysisDependencies,
+} from "../ai/fascicoloAutomaticAnalysisJob";
+import { FASCICOLO_ANALYSIS_EVALUATION_OPERATION } from "../ai/fascicoloAnalysisEvaluation";
+import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
+import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
+import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
+import { createLegalReferenceOfficialReconciliationHandler } from "../intake/neutralIntakeLegalReferenceOfficialReconciliationJob";
+import { createFascicoloReevaluationHandler } from "../fascicolo-lifecycle/fascicoloReevaluationJob";
+import {
+  createConcessioneTimeWatchHandler,
+  createConcessioneTimeWatchV2Handler,
+} from "../fascicolo-lifecycle/concessioneTimeWatchJob";
+import {
+  createAutomaticResearchExecutionHandler,
+  reconcilePendingAutomaticResearchExecutions,
+  type AutomaticResearchExecutionDependencies,
+} from "../legal-research/automatic-research-job";
+import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
+import { createPeriodicLegalResearchScheduler } from "../legal-research/periodic-legal-research";
+import {
+  AI_PROVIDER_BACKED_ASYNC_OPERATIONS,
+  getGlobalAiControlState,
+} from "../ai/globalAiControl";
+import { getAutomationControlState } from "../automation/automationControl";
+
+const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
+const TARGETED_FASCICOLO_ANALYSIS_LEASE_MS = 15 * 60 * 1_000;
+const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
+const ISOLATED_OPERATIONS = [FASCICOLO_ANALYSIS_EVALUATION_OPERATION] as const;
+const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
+
+export function createApplicationAsyncJobRegistry(input: {
+  automaticAnalysisDependencies?: FascicoloAutomaticAnalysisDependencies;
+  automaticResearchDependencies?: Partial<AutomaticResearchExecutionDependencies>;
+} = {}) {
+  return new AsyncJobHandlerRegistry([
+    createDocumentExtractionHandler(),
+    createNeutralIntakeExtractionHandler(),
+    createFascicoloAutomaticAnalysisHandler(input.automaticAnalysisDependencies),
+    createAutomaticResearchExecutionHandler(input.automaticResearchDependencies),
+    createNeutralIntakeClassificationHandler(),
+    createLegalReferenceDiscoveryHandler(),
+    createLegalReferenceMatchingHandler(),
+    createLegalReferenceOfficialLookupHandler(),
+    createLegalReferenceOfficialReconciliationHandler(),
+    createFascicoloReevaluationHandler(),
+    createConcessioneTimeWatchHandler(),
+    createConcessioneTimeWatchV2Handler(),
+  ]);
+}
+
+export const applicationAsyncJobRegistry = createApplicationAsyncJobRegistry();
+
+export function applicationAsyncJobOperationBlocklist(
+  providerExecutionEnabled: boolean | undefined,
+): readonly string[] {
+  return [
+    ...ISOLATED_OPERATIONS,
+    ...(providerExecutionEnabled === false ? AI_PROVIDER_BACKED_ASYNC_OPERATIONS : []),
+  ];
+}
+
+export async function drainOneApplicationAsyncJob(input: {
+  workerId: string;
+  retryDelayMs: number;
+  operationAllowlist?: readonly string[];
+  procedimentoAllowlist?: readonly string[];
+  providerExecutionEnabled?: boolean;
+}) {
+  const [aiControl, automationControl] = await Promise.all([
+    getGlobalAiControlState(),
+    getAutomationControlState(),
+  ]);
+  const providerExecutionEnabled =
+    input.providerExecutionEnabled === true && aiControl.effectiveEnabled;
+  if (
+    providerExecutionEnabled
+    && automationControl.effectiveEnabled
+    && !input.procedimentoAllowlist?.length
+  ) {
+    await reconcilePeriodicLegalResearch();
+  }
+  if (
+    providerExecutionEnabled
+    && automationControl.effectiveEnabled
+    && (!input.operationAllowlist?.length
+      || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION))
+  ) {
+    await reconcilePendingAutomaticResearchExecutions();
+  }
+  return drainOneAsyncJob({
+    ...input,
+    operationBlocklist: applicationAsyncJobOperationBlocklist(providerExecutionEnabled),
+    leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
+    registry: applicationAsyncJobRegistry,
+  });
+}
+
+export async function drainTargetedFascicoloAnalysisJob(input: {
+  jobId: string;
+  tenantId: string;
+  procedimentoId: string;
+  workerId: string;
+  retryDelayMs: number;
+  providerExecutionEnabled?: boolean;
+}) {
+  const aiControl = await getGlobalAiControlState();
+  if (input.providerExecutionEnabled !== true || !aiControl.effectiveEnabled) {
+    return { outcome: "IDLE" as const };
+  }
+  return drainAsyncJobById({
+    jobId: input.jobId,
+    expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    expectedTenantId: input.tenantId,
+    expectedProcedimentoId: input.procedimentoId,
+    workerId: input.workerId,
+    leaseDurationMs: TARGETED_FASCICOLO_ANALYSIS_LEASE_MS,
+    retryDelayMs: input.retryDelayMs,
+    registry: applicationAsyncJobRegistry,
+  });
+}

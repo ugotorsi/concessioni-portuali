@@ -211,8 +211,21 @@ describe("tenant search scope composition", () => {
     expect(where).toMatchObject({
       AND: expect.arrayContaining([
         expect.objectContaining({
-          OR: expect.arrayContaining([
-            expect.objectContaining({ enteId: { in: ["ente-a"] } }),
+          AND: expect.arrayContaining([
+            expect.objectContaining({
+              AND: expect.arrayContaining([
+                expect.objectContaining({
+                  OR: expect.arrayContaining([
+                    { concessione: { is: { datasetClass: "PROFESSIONAL" } } },
+                  ]),
+                }),
+              ]),
+            }),
+            expect.objectContaining({
+              OR: expect.arrayContaining([
+                expect.objectContaining({ enteId: { in: ["ente-a"] } }),
+              ]),
+            }),
           ]),
         }),
         expect.objectContaining({
@@ -232,9 +245,14 @@ describe("tenant search scope composition", () => {
     expect(where).toMatchObject({
       AND: expect.arrayContaining([
         expect.objectContaining({
-          OR: expect.arrayContaining([
-            expect.objectContaining({ enteId: { in: ["ente-a"] } }),
-          ]),
+          concessione: {
+            is: expect.objectContaining({
+              datasetClass: "PROFESSIONAL",
+              OR: expect.arrayContaining([
+                expect.objectContaining({ enteId: { in: ["ente-a"] } }),
+              ]),
+            }),
+          },
         }),
         expect.objectContaining({
           validato: true,

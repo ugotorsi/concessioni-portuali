@@ -1,0 +1,2 @@
+src/generated/prisma/** -whitespace
+src/server/legal-research/assisted-verification-route.ts whitespace=-blank-at-eof

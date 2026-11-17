@@ -1,6 +1,5 @@
 import { getCurrentUser, type DemoRole } from "@/lib/auth";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
-import { investorDemoIdentity } from "@/lib/investor-demo-data";
+import { buildDatasetConcessioneWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getDefaultTenantMembership, isTenantScopedRole, type TenantMembershipLike } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
@@ -36,7 +35,7 @@ export function canReadTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -52,7 +51,7 @@ export function canWriteTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -88,17 +87,6 @@ export function requireTenantAccess(
 }
 
 export async function getCurrentTenantContext(): Promise<CurrentTenantContext | null> {
-  if (isInvestorDemoMode()) {
-    return {
-      userId: investorDemoIdentity.tenantId,
-      role: "ADMIN",
-      isAdmin: true,
-      tenantMemberships: [],
-      defaultTenantId: investorDemoIdentity.tenantId,
-      accessibleTenantIds: [],
-    };
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return null;
@@ -156,22 +144,27 @@ export function buildTenantConcessioneWhere(
   context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role"> | null,
   options?: { allowWhenEnteMissing?: boolean },
 ): Prisma.ConcessioneWhereInput {
+  const datasetWhere = buildDatasetConcessioneWhere();
   if (!context || context.isAdmin || !isTenantScopedRole(context.role)) {
-    return {};
+    return datasetWhere;
   }
 
-  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? true;
+  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? false;
   const tenantIds = context.accessibleTenantIds;
 
   if (tenantIds.length === 0) {
-    return allowWhenEnteMissing ? { enteId: null } : { id: { in: [] } };
+    return {
+      ...datasetWhere,
+      ...(allowWhenEnteMissing ? { enteId: null } : { id: { in: [] } }),
+    };
   }
 
   if (!allowWhenEnteMissing) {
-    return { enteId: { in: tenantIds } };
+    return { ...datasetWhere, enteId: { in: tenantIds } };
   }
 
   return {
+    ...datasetWhere,
     OR: [{ enteId: { in: tenantIds } }, { enteId: null }],
   };
 }
@@ -188,8 +181,8 @@ export async function requireConcessioneTenantAccess(
   concessioneId: string,
   options?: { mode?: "read" | "write"; allowWhenEnteMissing?: boolean },
 ): Promise<{ id: string; enteId: string | null }> {
-  const concessione = await prisma.concessione.findUnique({
-    where: { id: concessioneId },
+  const concessione = await prisma.concessione.findFirst({
+    where: { id: concessioneId, ...buildDatasetConcessioneWhere() },
     select: {
       id: true,
       enteId: true,

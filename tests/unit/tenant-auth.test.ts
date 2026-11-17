@@ -56,9 +56,11 @@ describe("tenant auth helpers", () => {
     expect(canWriteTenantResource(tenantUser, "ente-b")).toBe(false);
   });
 
-  it("null enteId fallback can be allowed conservatively", () => {
+  it("denies null enteId by default and allows only explicit global resources", () => {
     const tenantUser = ctx({ role: "TECNICO", isAdmin: false, accessibleTenantIds: ["ente-a"] });
 
+    expect(canReadTenantResource(tenantUser, null)).toBe(false);
+    expect(canWriteTenantResource(tenantUser, undefined)).toBe(false);
     expect(canReadTenantResource(tenantUser, null, { allowWhenEnteMissing: true })).toBe(true);
     expect(canWriteTenantResource(tenantUser, undefined, { allowWhenEnteMissing: true })).toBe(true);
     expect(canReadTenantResource(tenantUser, null, { allowWhenEnteMissing: false })).toBe(false);

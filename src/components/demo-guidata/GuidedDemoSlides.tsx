@@ -304,25 +304,32 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       return;
     }
 
-    const state = loadDemoState();
-    if (!state) {
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const state = loadDemoState();
+      if (!state) {
+        setHasLoadedState(true);
+        return;
+      }
+
+      const normalizedIndex = Math.max(0, Math.min(totalSlides - 1, state.slideIndex));
+
+      if (state.pausedForVisit || resumeRequested) {
+        setCurrentIndex(normalizedIndex);
+        setIsAutoNarrationEnabled(state.autoNarration);
+        setResumeState({
+          ...state,
+          slideId: slides[normalizedIndex]?.id ?? state.slideId,
+          slideIndex: normalizedIndex,
+        });
+      }
+
       setHasLoadedState(true);
-      return;
-    }
-
-    const normalizedIndex = Math.max(0, Math.min(totalSlides - 1, state.slideIndex));
-
-    if (state.pausedForVisit || resumeRequested) {
-      setCurrentIndex(normalizedIndex);
-      setIsAutoNarrationEnabled(state.autoNarration);
-      setResumeState({
-        ...state,
-        slideId: slides[normalizedIndex]?.id ?? state.slideId,
-        slideIndex: normalizedIndex,
-      });
-    }
-
-    setHasLoadedState(true);
+    });
+    return () => {
+      active = false;
+    };
   }, [hasLoadedState, loadDemoState, resumeRequested, slides, totalSlides]);
 
   useEffect(() => {
@@ -334,11 +341,18 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       return;
     }
 
-    saveDemoState("state-sync", {
-      pausedForVisit: false,
-      lastVisitedHref: resumeState?.lastVisitedHref,
-      lastVisitedLabel: resumeState?.lastVisitedLabel,
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      saveDemoState("state-sync", {
+        pausedForVisit: false,
+        lastVisitedHref: resumeState?.lastVisitedHref,
+        lastVisitedLabel: resumeState?.lastVisitedLabel,
+      });
     });
+    return () => {
+      active = false;
+    };
   }, [currentIndex, hasLoadedState, isAutoNarrationEnabled, isPaused, isSpeaking, resumeState, saveDemoState]);
 
   useEffect(() => {
@@ -347,17 +361,16 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
     }
 
     const isSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-    setSpeechSupported(isSupported);
-
     if (!isSupported) {
       return;
     }
 
     const speech = window.speechSynthesis;
+    let active = true;
 
     const chooseVoice = () => {
       const voices = speech.getVoices();
-      if (!voices || voices.length === 0) {
+      if (!active || !voices || voices.length === 0) {
         return;
       }
 
@@ -365,10 +378,15 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       setSelectedVoice(italian ?? voices[0] ?? null);
     };
 
-    chooseVoice();
     speech.addEventListener("voiceschanged", chooseVoice);
+    queueMicrotask(() => {
+      if (!active) return;
+      setSpeechSupported(true);
+      chooseVoice();
+    });
 
     return () => {
+      active = false;
       speech.removeEventListener("voiceschanged", chooseVoice);
     };
   }, []);
@@ -378,11 +396,18 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       return;
     }
 
-    stopNarration();
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      stopNarration();
 
-    if (isAutoNarrationEnabled && hasUserStartedNarrationRef.current) {
-      speakCurrentSlide();
-    }
+      if (isAutoNarrationEnabled && hasUserStartedNarrationRef.current) {
+        speakCurrentSlide();
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [currentIndex, isAutoNarrationEnabled, speakCurrentSlide, speechSupported, stopNarration]);
 
   useEffect(() => {
