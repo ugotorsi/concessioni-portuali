@@ -61,4 +61,37 @@ describe("isolated PDF direct-text extraction", () => {
     await expect(new PdfJsExtractionAdapter({ isolatedDirectText: true }).open(Buffer.from("%PDF-1.4 broken"), 5))
       .rejects.toMatchObject({ code: "MALFORMED_PDF" });
   }, 30_000);
+
+  it("removes the complete tsx loader option before starting the plain Node parser", async () => {
+    const originalNodeOptions = process.env.NODE_OPTIONS;
+    process.env.NODE_OPTIONS = "--import tsx --max-old-space-size=512";
+    try {
+      const result = await readPdfDirectTextIsolated(minimalPdf("Loader isolato"), 5);
+      expect(result.pages[0]?.text).toContain("Loader isolato");
+    } finally {
+      if (originalNodeOptions === undefined) delete process.env.NODE_OPTIONS;
+      else process.env.NODE_OPTIONS = originalNodeOptions;
+    }
+  }, 30_000);
+
+  it("reports subprocess startup failures without exposing runtime paths", async () => {
+    let error: unknown;
+    try {
+      await readPdfDirectTextIsolated(
+        minimalPdf("Test"),
+        5,
+        "/tmp/noetra-missing-pdf-direct-text.mjs",
+      );
+    } catch (caught) {
+      error = caught;
+    }
+
+    expect(error).toBeInstanceOf(ExtractionFailure);
+    expect(error).toMatchObject({
+      code: "DIRECT_PARSER_FAILURE",
+      message: "Lo script o una dipendenza del parser PDF non è disponibile.",
+    });
+    expect((error as Error).message).not.toContain("/tmp/");
+    expect((error as Error).message).not.toContain("noetra-missing-pdf-direct-text");
+  }, 30_000);
 });

@@ -122,10 +122,12 @@ describe("document extraction retry permits", () => {
     expect(harness.persistPermit).not.toHaveBeenCalled();
   });
 
-  it("rejects a permanent failure", async () => {
+  it.each(["INTEGRITY_SHA256_MISMATCH", "MALFORMED_PDF"])(
+    "rejects permanent failure %s",
+    async (failureCode) => {
     const harness = dependencies({
       loadAttempt: vi.fn().mockResolvedValue(attempt({
-        failureCode: "INTEGRITY_SHA256_MISMATCH",
+        failureCode,
       })),
     });
     await expect(issueDocumentExtractionRetryPermit("attempt-failed", harness))
@@ -133,6 +135,21 @@ describe("document extraction retry permits", () => {
         code: "FAILED_ATTEMPT_NOT_RETRYABLE",
       });
     expect(harness.persistPermit).not.toHaveBeenCalled();
+    },
+  );
+
+  it("permits an audited retry for a direct parser failure", async () => {
+    const source = attempt({ failureCode: "DIRECT_PARSER_FAILURE" });
+    const harness = dependencies({
+      loadAttempt: vi.fn().mockResolvedValue(source),
+      persistPermit: vi.fn(async (input) => permitRecord(input)),
+    });
+
+    const result = await issueDocumentExtractionRetryPermit(source.id, harness);
+
+    expect(result.failedAttemptId).toBe(source.id);
+    expect(result.documentFileVersionId).toBe("version-1");
+    expect(harness.persistPermit).toHaveBeenCalledOnce();
   });
 
   it("issues the same audited permit for repeated authorization", async () => {

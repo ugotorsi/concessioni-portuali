@@ -70,6 +70,7 @@ export async function acquirePdfDocument<T>(
 
 const ISOLATED_PDF_TIMEOUT_MS = 60_000;
 const ISOLATED_PDF_MAX_OUTPUT_BYTES = 16 * 1024 * 1024;
+const ISOLATED_PDF_MAX_DIAGNOSTIC_BYTES = 4 * 1024;
 const ISOLATED_PDF_MAX_CHARS_PER_PAGE = 1_000_000;
 
 export function isIsolatedPdfDirectTextEnabled(
@@ -87,12 +88,51 @@ function parserFailureCode(message: string): "MALFORMED_PDF" | "DIRECT_PARSER_FA
 
 type IsolatedPdfText = { pageCount: number; pages: { text: string; overLimit: boolean }[] };
 
-function childEnvironment(): NodeJS.ProcessEnv {
-  const nodeOptions = (process.env.NODE_OPTIONS ?? "")
-    .split(/\s+/)
-    .filter((token) => token && !token.includes("tsx"))
-    .join(" ");
-  return { ...process.env, NODE_OPTIONS: nodeOptions };
+const NODE_LOADER_OPTIONS = new Set(["--import", "--loader", "--experimental-loader", "--require", "-r"]);
+
+function childEnvironment(environment: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const tokens = (environment.NODE_OPTIONS ?? "").split(/\s+/).filter(Boolean);
+  const nodeOptions: string[] = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index]!;
+    if (NODE_LOADER_OPTIONS.has(token)) {
+      const loader = tokens[index + 1];
+      if (loader?.toLowerCase().includes("tsx")) {
+        index += 1;
+        continue;
+      }
+    }
+    if (
+      [...NODE_LOADER_OPTIONS].some((option) => token.startsWith(`${option}=`))
+      && token.toLowerCase().includes("tsx")
+    ) {
+      continue;
+    }
+    nodeOptions.push(token);
+  }
+  return { ...environment, NODE_OPTIONS: nodeOptions.join(" ") };
+}
+
+function sanitizedParserFailureMessage(input: {
+  stderr?: string;
+  message?: string;
+  exitCode?: number | null;
+  signal?: NodeJS.Signals | null;
+}): string {
+  const diagnostic = `${input.stderr ?? ""}\n${input.message ?? ""}`.toLowerCase();
+  if (/err_module_not_found|cannot find (?:module|package)|module_not_found/.test(diagnostic)) {
+    return "Lo script o una dipendenza del parser PDF non è disponibile.";
+  }
+  if (/out of memory|enomem|allocation failed/.test(diagnostic) || input.signal === "SIGKILL") {
+    return "Il parser PDF è stato terminato per esaurimento di memoria.";
+  }
+  if (input.signal) {
+    return "Il processo del parser PDF è stato terminato inaspettatamente.";
+  }
+  if (typeof input.exitCode === "number" && input.exitCode !== 0) {
+    return `Il processo del parser PDF è terminato con codice ${input.exitCode}.`;
+  }
+  return "Il parser PDF ha restituito una risposta tecnica non valida.";
 }
 
 /**
@@ -105,17 +145,27 @@ export async function readPdfDirectTextIsolated(
   scriptPath = join(process.cwd(), "scripts", "runtime", "pdf-direct-text.mjs"),
 ): Promise<IsolatedPdfText> {
   const { spawn } = await import("node:child_process");
-  const output = await new Promise<string>((resolve, reject) => {
+  const subprocessResult = await new Promise<{
+    output: string;
+    stderr: string;
+    exitCode: number | null;
+    signal: NodeJS.Signals | null;
+  }>((resolve, reject) => {
     const child = spawn(
       process.execPath,
       [scriptPath, String(maxPages), String(ISOLATED_PDF_MAX_CHARS_PER_PAGE)],
-      { cwd: process.cwd(), env: childEnvironment(), stdio: ["pipe", "pipe", "ignore"] },
+      { cwd: process.cwd(), env: childEnvironment(), stdio: ["pipe", "pipe", "pipe"] },
     );
     const chunks: Buffer[] = [];
+    const diagnosticChunks: Buffer[] = [];
     let size = 0;
+    let diagnosticSize = 0;
     const timeout = setTimeout(() => {
       child.kill("SIGKILL");
-      reject(new ExtractionFailure("DIRECT_PARSER_FAILURE"));
+      reject(new ExtractionFailure(
+        "DIRECT_PARSER_FAILURE",
+        "Il parser PDF non ha risposto entro il limite di tempo.",
+      ));
     }, ISOLATED_PDF_TIMEOUT_MS);
     child.stdout.on("data", (chunk: Buffer) => {
       size += chunk.length;
@@ -126,26 +176,53 @@ export async function readPdfDirectTextIsolated(
       }
       chunks.push(chunk);
     });
-    child.on("error", (error) => {
-      clearTimeout(timeout);
-      reject(new ExtractionFailure("DIRECT_PARSER_FAILURE", undefined, error));
+    child.stderr.on("data", (chunk: Buffer) => {
+      if (diagnosticSize >= ISOLATED_PDF_MAX_DIAGNOSTIC_BYTES) return;
+      const boundedChunk = chunk.subarray(0, ISOLATED_PDF_MAX_DIAGNOSTIC_BYTES - diagnosticSize);
+      diagnosticSize += boundedChunk.length;
+      diagnosticChunks.push(boundedChunk);
     });
-    child.on("close", () => {
+    child.on("error", (error: NodeJS.ErrnoException) => {
       clearTimeout(timeout);
-      resolve(Buffer.concat(chunks).toString("utf8"));
+      const message = error.code === "ENOENT"
+        ? "Il runtime del parser PDF non è disponibile."
+        : "Il processo del parser PDF non è stato avviato.";
+      reject(new ExtractionFailure("DIRECT_PARSER_FAILURE", message));
+    });
+    child.on("close", (exitCode, signal) => {
+      clearTimeout(timeout);
+      resolve({
+        output: Buffer.concat(chunks).toString("utf8"),
+        stderr: Buffer.concat(diagnosticChunks).toString("utf8"),
+        exitCode,
+        signal,
+      });
     });
     child.stdin.on("error", () => undefined);
     child.stdin.end(bytes);
   });
+  if (subprocessResult.exitCode !== 0 || subprocessResult.signal !== null) {
+    throw new ExtractionFailure(
+      "DIRECT_PARSER_FAILURE",
+      sanitizedParserFailureMessage(subprocessResult),
+    );
+  }
   let parsed: { ok?: unknown; code?: unknown; message?: unknown; pageCount?: unknown; pages?: unknown };
   try {
-    parsed = JSON.parse(output.trim().split("\n").at(-1) ?? "");
-  } catch (error) {
-    throw new ExtractionFailure("DIRECT_PARSER_FAILURE", undefined, error);
+    parsed = JSON.parse(subprocessResult.output.trim().split("\n").at(-1) ?? "");
+  } catch {
+    throw new ExtractionFailure(
+      "DIRECT_PARSER_FAILURE",
+      sanitizedParserFailureMessage(subprocessResult),
+    );
   }
   if (parsed.ok !== true) {
     if (parsed.code === "PAGE_LIMIT_EXCEEDED") throw new ExtractionFailure("PAGE_LIMIT_EXCEEDED");
-    throw new ExtractionFailure(parserFailureCode(typeof parsed.message === "string" ? parsed.message : ""));
+    const message = typeof parsed.message === "string" ? parsed.message : "";
+    throw new ExtractionFailure(
+      parserFailureCode(message),
+      sanitizedParserFailureMessage({ ...subprocessResult, message }),
+    );
   }
   const pages = Array.isArray(parsed.pages) ? parsed.pages : [];
   if (
