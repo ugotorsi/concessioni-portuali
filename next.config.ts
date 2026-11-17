@@ -34,6 +34,8 @@ const productionContentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+	// Native PDF/OCR adapters run in Node.js and must not be bundled by Turbopack.
+	serverExternalPackages: ["@napi-rs/canvas", "tesseract.js", "@tesseract.js-data/ita"],
 	async headers() {
 		const headers = [...commonSecurityHeaders];
 

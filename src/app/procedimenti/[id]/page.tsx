@@ -97,6 +97,7 @@ import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-pro
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
+import { extractQueuedProcedimentoDocumentsAction } from "@/server/actions/procedimento-document-extraction";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
@@ -556,6 +557,19 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 canUpload={canWriteChecklist}
                 archiveMode
               />
+              {canWriteChecklist ? (
+                <form action={extractQueuedProcedimentoDocumentsAction} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                  <p className="mb-2 text-sm text-slate-700">
+                    Elabora soltanto i documenti in attesa in questo fascicolo (massimo cinque per richiesta).
+                    Non avvia analisi AI o job di altri fascicoli.
+                  </p>
+                  <Button type="submit">Estrai testo dei documenti caricati</Button>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Il risultato è consultabile nella sezione Documenti dopo l’elaborazione.
+                  </p>
+                </form>
+              ) : null}
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
           ) : null}
