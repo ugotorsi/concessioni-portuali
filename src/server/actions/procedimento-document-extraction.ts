@@ -53,7 +53,7 @@ export async function extractQueuedProcedimentoDocumentsAction(formData: FormDat
         jobId: job.id,
         workerId: "vercel-authorized-document-extraction",
       });
-      if (outcome.outcome === "PROCESSED") completed++;
+      if (outcome.outcome === "SUCCEEDED") completed++;
     } catch (error) {
       console.error("bounded_document_extraction_failed", {
         procedimentoId,
