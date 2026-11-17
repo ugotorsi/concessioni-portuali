@@ -63,6 +63,8 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import {
   isExistingCorpusAnalysisRequestEnabled,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
@@ -463,11 +465,28 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   ) : null;
 
   if (!detail.concessione || !detail.concessionario) {
+    // A linked neutral intake carries the original factual context even when
+    // no concession title or uploaded document has yet been established.
+    // Scope by the already authorized proceeding's tenant and dataset class.
+    const initialIntake = detail.canonicalEnteId
+      ? await prisma.fascicoloIntake.findFirst({
+          where: {
+            procedimentoId: detail.procedimento.id,
+            enteId: detail.canonicalEnteId,
+            ...buildDatasetFascicoloIntakeWhere(),
+          },
+          select: {
+            oggettoFascicolo: true,
+            contestoIniziale: true,
+            numeroConcessione: true,
+          },
+        })
+      : null;
     const overview: FascicoloOverviewModel = {
-      title: "Fascicolo operativo",
+      title: initialIntake?.oggettoFascicolo ?? "Fascicolo operativo",
       status: formatEnumLabel(detail.procedimento.stato),
       type: formatEnumLabel(detail.procedimento.tipologia),
-      reference: "Titolo concessorio non accertato",
+      reference: initialIntake?.numeroConcessione ?? "Titolo concessorio non accertato",
       lastUpdated: formatDateIT(detail.procedimento.updatedAt),
       documentCount: detail.documentiPrincipali.length,
       openIssueCount: detail.altreCriticitaAperte.length,
@@ -501,11 +520,30 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         model={overview}
         basePath={`/procedimenti/${detail.procedimento.id}`}
         activeSection={activeSection}
-        notice={duplicateDocumentUpload ? (
-          <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            Documento già presente nel fascicolo.
+        notice={(
+          <div className="space-y-3">
+            {initialIntake?.contestoIniziale ? (
+              <section aria-label="Contesto iniziale del fascicolo" className="rounded-md border border-slate-200 bg-white p-4">
+                <h2 className="text-base font-semibold text-slate-950">Contesto iniziale acquisito</h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Testo istruttorio fornito all'apertura del fascicolo. Non costituisce
+                  un'analisi AI e non sostituisce i documenti da caricare.
+                </p>
+                <details className="mt-3" open={activeSection === "overview"}>
+                  <summary className="cursor-pointer text-sm font-medium text-[#173d4f]">Leggi il contesto e i quesiti</summary>
+                  <div className="mt-3 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-md bg-slate-50 p-4 text-sm leading-relaxed text-slate-800">
+                    {initialIntake.contestoIniziale}
+                  </div>
+                </details>
+              </section>
+            ) : null}
+            {duplicateDocumentUpload ? (
+              <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                Documento già presente nel fascicolo.
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        )}
       >
         <div className="space-y-4">
           {activeSection === "documents" ? (
