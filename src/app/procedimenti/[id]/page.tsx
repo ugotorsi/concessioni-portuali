@@ -119,6 +119,7 @@ interface ProcedimentoDetailPageProps {
     reconciliationDone?: string | string[];
     analysisRefresh?: string | string[];
     researchNotice?: string | string[];
+    extraction?: string | string[];
   }>;
 }
 
@@ -213,7 +214,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice, extraction } = await searchParams;
   const sanitizedResearchNotice = typeof researchNotice === "string" && /^[A-Z0-9_]{1,80}$/.test(researchNotice)
     ? researchNotice
     : null;
@@ -242,6 +243,25 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         procedimentoId: detail.procedimento.id,
       })
     : null;
+  const documentExtractionQueue = activeSection === "documents" ? await prisma.asyncJob.groupBy({
+    by: ["status"],
+    where: {
+      procedimentoId: detail.procedimento.id,
+      operation: "DOCUMENT_EXTRACTION_V1",
+      tenantId: detail.canonicalEnteId ?? "__NO_TENANT__",
+    },
+    _count: { id: true },
+  }) : [];
+  const pendingExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "QUEUED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const failedExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "TERMINAL_FAILED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const succeededExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "SUCCEEDED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const extractionNotice = Array.isArray(extraction) ? extraction[0] : extraction;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
   const professionalLegalQuestions = detail.canonicalEnteId
@@ -558,17 +578,35 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 archiveMode
               />
               {canWriteChecklist ? (
-                <form action={extractQueuedProcedimentoDocumentsAction} className="rounded-lg border border-slate-200 bg-white p-4">
-                  <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
-                  <p className="mb-2 text-sm text-slate-700">
-                    Elabora soltanto i documenti in attesa in questo fascicolo (massimo cinque per richiesta).
-                    Non avvia analisi AI o job di altri fascicoli.
+                <div className="rounded-lg border border-slate-200 bg-white p-4" role="status">
+                  <p className="mb-2 text-sm font-medium text-slate-800">
+                    Estrazione documentale: {succeededExtractionCount} completati, {failedExtractionCount} falliti, {pendingExtractionCount} in attesa.
                   </p>
-                  <Button type="submit">Estrai testo dei documenti caricati</Button>
-                  <p className="mt-2 text-xs text-slate-500">
-                    Il risultato è consultabile nella sezione Documenti dopo l’elaborazione.
-                  </p>
-                </form>
+                  {failedExtractionCount > 0 ? (
+                    <p className="mb-3 rounded border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">
+                      L'estrazione di {failedExtractionCount} documenti non è riuscita. I job sono terminati
+                      e non possono essere ripetuti con questo pulsante. I file originali restano conservati.
+                      È necessaria una correzione del parser e un nuovo tentativo autorizzato.
+                    </p>
+                  ) : null}
+                  {extractionNotice === "partial" ? (
+                    <p className="mb-3 text-sm text-amber-800">Elaborazione non completata: controlla lo stato dei documenti qui sopra.</p>
+                  ) : extractionNotice === "done" ? (
+                    <p className="mb-3 text-sm text-green-800">Job di estrazione conclusi correttamente.</p>
+                  ) : extractionNotice === "none" ? (
+                    <p className="mb-3 text-sm text-slate-700">Nessun job in attesa da elaborare: non è stato avviato nulla.</p>
+                  ) : null}
+                  {pendingExtractionCount > 0 ? (
+                    <form action={extractQueuedProcedimentoDocumentsAction}>
+                      <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                      <p className="mb-2 text-sm text-slate-700">
+                        Elabora i documenti in attesa soltanto in questo fascicolo (massimo cinque per richiesta);
+                        nessun provider AI verrà attivato.
+                      </p>
+                      <Button type="submit">Estrai testo dei documenti caricati</Button>
+                    </form>
+                  ) : null}
+                </div>
               ) : null}
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
