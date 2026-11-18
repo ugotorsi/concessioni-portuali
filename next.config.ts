@@ -37,7 +37,8 @@ const nextConfig: NextConfig = {
 	// Native PDF/OCR adapters run in Node.js and must not be bundled by Turbopack.
 	serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas", "tesseract.js", "@tesseract.js-data/ita"],
 	outputFileTracingIncludes: {
-		"/procedimenti/[id]": [
+		// Route keys use picomatch syntax, so dynamic-segment brackets must be escaped.
+		"/procedimenti/\\[id\\]": [
 			"./scripts/runtime/pdf-direct-text.mjs",
 			"./node_modules/pdfjs-dist/**/*",
 		],
