@@ -462,6 +462,43 @@ describe("Block 3B.7 application async worker runtime", () => {
     }
   });
 
+  it("reports bounded fatal error codes without logging sensitive details", async () => {
+    const fatalError = Object.assign(
+      new Error("postgresql://secret@database.example/app"),
+      {
+        code: "P2010",
+        meta: {
+          code: "42P10",
+          message: "sensitive database detail",
+        },
+      },
+    );
+    const runtime = {
+      requestShutdown: vi.fn(),
+      run: vi.fn(async () => { throw fatalError; }),
+    };
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      await runApplicationAsyncWorkerProcess({
+        parseConfig: () => config,
+        createRuntime: () => runtime,
+        installSignalHandlers: () => vi.fn(),
+        disconnect: vi.fn(async () => undefined),
+        markFailure: vi.fn(),
+      });
+
+      const reported = consoleError.mock.calls[0]?.[0];
+      expect(reported).toContain('"errorCode":"P2010"');
+      expect(reported).toContain('"databaseErrorCode":"42P10"');
+      expect(reported).not.toContain("postgresql://");
+      expect(reported).not.toContain("secret");
+      expect(reported).not.toContain("sensitive database detail");
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("continues after a recoverable drain error using the bounded error backoff", async () => {
     const recoverableError = Object.assign(
       new Error("database temporarily unavailable"),
