@@ -1,0 +1,50 @@
+{
+  "scenarioId": "TEST-LEGAL-001",
+  "documents": [
+    {
+      "file": "01-prescrizioni.txt",
+      "basisRef": "DOCUMENT_1.PAGE_1",
+      "role": "PRESCRIPTIONS"
+    },
+    {
+      "file": "02-contestazione-formale.txt",
+      "basisRef": "DOCUMENT_2.PAGE_1",
+      "role": "FORMAL_NOTICE"
+    },
+    {
+      "file": "03-controdeduzioni.txt",
+      "basisRef": "DOCUMENT_3.PAGE_1",
+      "role": "DEFENSES"
+    },
+    {
+      "file": "04-relazione-tecnica-contraddittoria.txt",
+      "basisRef": "DOCUMENT_4.PAGE_1",
+      "role": "TECHNICAL_REPORT"
+    }
+  ],
+  "requiredCoverage": {
+    "chronology": true,
+    "partyObligations": true,
+    "authorityObligations": true,
+    "allegedBreaches": true,
+    "formalNotice": true,
+    "defenses": true,
+    "technicalContradiction": true,
+    "legalIssues": true,
+    "researchQuestions": true,
+    "documentGaps": true
+  },
+  "expectedIssueThemes": [
+    "compatibility of stable containers with the concession purpose",
+    "need for prior authorization",
+    "evidence of concession fee payment",
+    "procedural treatment of the formal notice and defenses",
+    "technical verification of anchoring and continuous use"
+  ],
+  "epistemicRequirements": [
+    "do not treat allegations as established facts",
+    "keep the concessionaire defenses distinct from technical findings",
+    "do not state legal or technical compliance without verified sources",
+    "cite every factual proposition with document and page"
+  ]
+}

@@ -10,7 +10,15 @@ import {
   mapTipologiaBeneToConcessionObjectType,
 } from "../src/lib/concession-vertical";
 import { resolveDemoEnteCodeForConcessione } from "../src/lib/tenant";
+import { assertDemoSeedAllowed } from "../src/lib/demo-seed-guard";
+import { encryptMfaSecret, isMfaRequiredRole } from "../src/lib/mfa";
+import {
+  GAP_KEY,
+  RULE_CODE,
+  SOURCE_KEY,
+} from "../src/server/fascicolo-document-requirements/types";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { computeAuditHash } from "../src/server/audit/hash";
 import type {
   Art47CodNavLettera,
   EsitoRegolarizzazione,
@@ -69,37 +77,45 @@ function buildAuditHash(payload: {
   azione: string;
   entita: string;
   entitaId: string | null;
+  enteId: string | null;
   concessioneId: string | null;
   esito: "SUCCESS" | "FAILURE";
-  metadata: Record<string, string | null>;
+  metadata: {
+    seed: boolean;
+    message: string;
+  };
   createdAt: Date;
 }): string {
-  return createHash("sha256")
-    .update(
-      JSON.stringify({
-        previousHash: payload.previousHash,
-        userId: payload.userId,
-        userEmail: payload.userEmail,
-        userRole: payload.userRole,
-        azione: payload.azione,
-        entita: payload.entita,
-        entitaId: payload.entitaId,
-        concessioneId: payload.concessioneId,
-        esito: payload.esito,
-        metadata: payload.metadata,
-        createdAt: payload.createdAt.toISOString(),
-      }),
-    )
-    .digest("hex");
+  return computeAuditHash({
+    previousHash: payload.previousHash,
+    createdAt: payload.createdAt,
+    azione: payload.azione,
+    entita: payload.entita,
+    entitaId: payload.entitaId,
+    enteId: payload.enteId,
+    concessioneId: payload.concessioneId,
+    esito: payload.esito,
+    actor: {
+      userId: payload.userId,
+      userEmail: payload.userEmail,
+      userRole: payload.userRole,
+    },
+    metadata: payload.metadata,
+  });
 }
 
 async function clearDemoData() {
+  await prisma.fascicoloDocumentRequirementProposal.deleteMany();
   await prisma.normaImpatto.deleteMany();
   await prisma.normaVersione.deleteMany();
   await prisma.normaFonte.deleteMany();
   await prisma.activityLog.deleteMany();
   await prisma.report.deleteMany();
+  await prisma.decisioneProcedimento.deleteMany();
+  await prisma.documento.updateMany({ data: { currentFileVersionId: null } });
+  await prisma.documentFileVersion.deleteMany();
   await prisma.documento.deleteMany();
+  await prisma.fascicoloIntake.deleteMany();
   await prisma.pagamento.deleteMany();
   await prisma.sopralluogo.deleteMany();
   await prisma.procedimento.deleteMany();
@@ -114,7 +130,9 @@ async function clearDemoData() {
 }
 
 async function main() {
+  assertDemoSeedAllowed(process.env);
   await clearDemoData();
+  const e2eMfaSecret = process.env.E2E_MFA_SECRET?.trim() || null;
 
   const demoCredentials: Array<{
     nome: string;
@@ -193,21 +211,25 @@ async function main() {
   ];
 
   const hashedCredentials = await Promise.all(
-    demoCredentials.map(async (item) => ({
-      nome: item.nome,
-      email: item.email,
-      ruolo: item.role,
-      passwordHash: await bcrypt.hash(item.password, 10),
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lastFailedLoginAt: null,
-      lastLoginAt: null,
-      passwordChangedAt: new Date(),
-      mustChangePassword: false,
-      mfaEnabled: false,
-      mfaSecret: null,
-      mfaVerifiedAt: null,
-    })),
+    demoCredentials.map(async (item) => {
+      const seedMfa = e2eMfaSecret !== null && isMfaRequiredRole(item.role);
+      return {
+        nome: item.nome,
+        email: item.email,
+        ruolo: item.role,
+        passwordHash: await bcrypt.hash(item.password, 10),
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        lastFailedLoginAt: null,
+        lastLoginAt: null,
+        passwordChangedAt: new Date(),
+        mustChangePassword: false,
+        mfaEnabled: seedMfa,
+        mfaSecret: seedMfa ? encryptMfaSecret(e2eMfaSecret) : null,
+        mfaRecoveryCodes: seedMfa ? [] : undefined,
+        mfaVerifiedAt: seedMfa ? new Date() : null,
+      };
+    }),
   );
 
   await prisma.user.createMany({
@@ -243,6 +265,34 @@ async function main() {
     throw new Error("Default demo ente DEMO-ENTE-ADSP not found after seed create.");
   }
 
+  const demoAuthority = await prisma.authority.upsert({
+    where: { code: "ADSP-MTC" },
+    create: {
+      code: "ADSP-MTC",
+      name: "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+      level: "ADSP",
+    },
+    update: {
+      name: "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+      level: "ADSP",
+    },
+  });
+
+  await prisma.port.upsert({
+    where: { code: "SALERNO" },
+    create: {
+      code: "SALERNO",
+      name: "Porto di Salerno",
+      enteId: defaultDemoEnteId,
+      authorityId: demoAuthority.id,
+    },
+    update: {
+      name: "Porto di Salerno",
+      enteId: defaultDemoEnteId,
+      authorityId: demoAuthority.id,
+    },
+  });
+
   await prisma.tenantMembership.createMany({
     data: users.map((item) => ({
       userId: item.id,
@@ -250,6 +300,153 @@ async function main() {
       role: item.ruolo,
       isDefault: true,
     })),
+  });
+
+  const p1c1LegalSource = await prisma.legalSource.upsert({
+    where: { sourceKey: SOURCE_KEY },
+    create: {
+      sourceKey: SOURCE_KEY,
+      title: "L. 28 gennaio 1994 n. 84",
+      sourceType: "LEGGE",
+      status: "CURRENT_SUBJECT_TO_REVIEW",
+      role: "NORMATIVE",
+      legalRank: "NATIONAL_LAW",
+      territorialScope: "NATIONAL",
+      confidence: "MEDIUM",
+      sourceNumber: "84",
+      sourceDate: new Date("1994-01-28T00:00:00.000Z"),
+      humanReviewRequired: true,
+      isConformative: true,
+      isExtractable: false,
+      enteId: null,
+      authorityId: null,
+      portId: null,
+      effectiveFrom: null,
+      effectiveTo: null,
+      fileName: null,
+      filePath: null,
+      fileChecksumSha256: null,
+      fileMimeType: null,
+      fileSizeBytes: null,
+    },
+    update: {
+      title: "L. 28 gennaio 1994 n. 84",
+      sourceType: "LEGGE",
+      status: "CURRENT_SUBJECT_TO_REVIEW",
+      role: "NORMATIVE",
+      legalRank: "NATIONAL_LAW",
+      territorialScope: "NATIONAL",
+      confidence: "MEDIUM",
+      sourceNumber: "84",
+      sourceDate: new Date("1994-01-28T00:00:00.000Z"),
+      humanReviewRequired: true,
+      isConformative: true,
+      isExtractable: false,
+      enteId: null,
+      authorityId: null,
+      portId: null,
+      effectiveFrom: null,
+      effectiveTo: null,
+      fileName: null,
+      filePath: null,
+      fileChecksumSha256: null,
+      fileMimeType: null,
+      fileSizeBytes: null,
+    },
+  });
+
+  const p1c1LegalRule = await prisma.legalRule.upsert({
+    where: {
+      sourceId_ruleCode: {
+        sourceId: p1c1LegalSource.id,
+        ruleCode: RULE_CODE,
+      },
+    },
+    create: {
+      sourceId: p1c1LegalSource.id,
+      ruleCode: RULE_CODE,
+      title: "Verifica autorizzazione ex art. 16 per concessioni ex art. 18",
+      summary:
+        "Per una concessione ex art. 18 con attività OPERAZIONI_PORTUALI proporre esclusivamente la verifica del titolo autorizzatorio ex art. 16.",
+      category: "DOCUMENTAZIONE",
+      status: "BOZZA",
+      priority: 100,
+      enteId: null,
+      portId: null,
+      matchConcessionVertical: null,
+      matchObjectType: null,
+      matchAttivita: null,
+      matchAwardingProcedure: null,
+      matchFeeRegime: null,
+      matchComparativeStatus: null,
+      requiresRilevanzaArt47: null,
+      matchArt47Letter: null,
+      requiresMorosita: null,
+      requiresPolizzaValida: null,
+      outputSeverity: "MEDIA",
+      outcomeTitle: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      outcomeSummary:
+        "Sottoporre a verifica umana l'applicabilità del requisito istruttorio senza attestare esistenza, validità, efficacia o sufficienza del titolo.",
+      disclaimer:
+        "La proposta indica esclusivamente un'attività istruttoria da verificare e non determina l'esito del procedimento.",
+      humanReviewRequired: true,
+    },
+    update: {
+      title: "Verifica autorizzazione ex art. 16 per concessioni ex art. 18",
+      summary:
+        "Per una concessione ex art. 18 con attività OPERAZIONI_PORTUALI proporre esclusivamente la verifica del titolo autorizzatorio ex art. 16.",
+      category: "DOCUMENTAZIONE",
+      status: "BOZZA",
+      priority: 100,
+      enteId: null,
+      portId: null,
+      matchConcessionVertical: null,
+      matchObjectType: null,
+      matchAttivita: null,
+      matchAwardingProcedure: null,
+      matchFeeRegime: null,
+      matchComparativeStatus: null,
+      requiresRilevanzaArt47: null,
+      matchArt47Letter: null,
+      requiresMorosita: null,
+      requiresPolizzaValida: null,
+      outputSeverity: "MEDIA",
+      outcomeTitle: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      outcomeSummary:
+        "Sottoporre a verifica umana l'applicabilità del requisito istruttorio senza attestare esistenza, validità, efficacia o sufficienza del titolo.",
+      disclaimer:
+        "La proposta indica esclusivamente un'attività istruttoria da verificare e non determina l'esito del procedimento.",
+      humanReviewRequired: true,
+    },
+  });
+
+  await prisma.documentGap.upsert({
+    where: { gapKey: GAP_KEY },
+    create: {
+      gapKey: GAP_KEY,
+      ruleId: p1c1LegalRule.id,
+      title: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      description:
+        "Requisito istruttorio di verifica del titolo autorizzatorio ex art. 16 senza presupporne esistenza, validità, efficacia o sufficienza.",
+      severity: "MEDIA",
+      status: "APERTA",
+      requiredDocumentTypes: [],
+      humanReviewRequired: true,
+      enteId: null,
+      portId: null,
+    },
+    update: {
+      ruleId: p1c1LegalRule.id,
+      title: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      description:
+        "Requisito istruttorio di verifica del titolo autorizzatorio ex art. 16 senza presupporne esistenza, validità, efficacia o sufficienza.",
+      severity: "MEDIA",
+      status: "APERTA",
+      requiredDocumentTypes: [],
+      humanReviewRequired: true,
+      enteId: null,
+      portId: null,
+    },
   });
 
   const concessionariData = [
@@ -539,6 +736,7 @@ async function main() {
 
     const created = await prisma.concessione.create({
       data: {
+        datasetClass: "DEMO",
         numeroAtto: item.numeroAtto,
         dataRilascio: item.dataRilascio,
         dataScadenza: item.dataScadenza,
@@ -1280,7 +1478,9 @@ async function main() {
   await prisma.procedimento.createMany({
     data: [
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-005"],
+        enteId: concessioneEnteById[concessioniByKey["con-005"]],
         criticitaId: criticitaByKey["crit-004"],
         tipologia: "CHIARIMENTI",
         checklistProfile: "PORTUALE_ADSP",
@@ -1317,7 +1517,9 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         criticitaId: criticitaByKey["crit-001"],
         tipologia: "DIFFIDA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1353,7 +1555,9 @@ async function main() {
           "Scenario DEMO-01: morosita art. 47 in procedimento d ufficio con comunicazione e contestazione gia presidiate.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         tipologia: "AVVIO_DECADENZA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1386,7 +1590,9 @@ async function main() {
           "Caso art.47: presidiare contraddittorio e completezza istruttoria prima della proposta finale.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-001"],
+        enteId: concessioneEnteById[concessioniByKey["con-001"]],
         criticitaId: criticitaByKey["crit-003"],
         tipologia: "ORDINE_RIPRISTINO",
         checklistProfile: "PORTUALE_ADSP",
@@ -1398,7 +1604,9 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-003"],
+        enteId: concessioneEnteById[concessioniByKey["con-003"]],
         criticitaId: criticitaByKey["crit-001"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "RECUPERO_CANONI",
@@ -1410,7 +1618,9 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_DECADENZA",
@@ -1422,7 +1632,9 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-007"],
+        enteId: concessioneEnteById[concessioniByKey["con-007"]],
         criticitaId: criticitaByKey["crit-006"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_REVOCA",
@@ -1434,7 +1646,9 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
       {
+        datasetClass: "DEMO",
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         tipologia: "NUOVA_PROCEDURA",
         checklistProfile: "TURISTICO_RICREATIVO",
         riferimentoNormativo: "art. 18 l. 84/1994",
@@ -1445,6 +1659,30 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
     ],
+  });
+
+  await prisma.fascicoloIntake.create({
+    data: {
+      id: "fascicolo-intake-e2e-preparazione",
+      datasetClass: "E2E",
+      enteId: defaultDemoEnteId,
+      tipologiaConcessione: "PORTUALE_ADSP",
+      oggettoFascicolo: "Istruttoria preliminare per concessione portuale",
+      denominazioneBreve: "Fascicolo intake E2E",
+      concessionario: "Operatore portuale in verifica",
+      enteConcedente: "Autorita di Sistema Portuale Demo",
+      autoritaCompetente: "Autorita di Sistema Portuale Demo",
+      numeroConcessione: "INTAKE-E2E-001",
+      dataRilascio: daysAgo(365),
+      decorrenza: daysAgo(365),
+      scadenza: daysFromNow(365),
+      oggettoConcessione: "Area portuale destinata a servizi logistici",
+      beneAreaServizio: "Area operativa E2E",
+      localita: "Porto demo",
+      soggettoAssistito: "Operatore portuale in verifica",
+      controparteAmministrazione: "Autorita di Sistema Portuale Demo",
+      contestoIniziale: "Fixture deterministica priva di job AI e chiamate provider.",
+    },
   });
 
   const concessioniRowsForFrameworks = await prisma.concessione.findMany({
@@ -1958,6 +2196,7 @@ async function main() {
   for (const row of seedAuditRows) {
     const snapshot = row.userId ? userSnapshotById[row.userId] : null;
     const createdAt = new Date();
+    const enteId = row.concessioneId ? concessioneEnteById[row.concessioneId] ?? null : null;
     const currentHash = buildAuditHash({
       previousHash,
       userId: row.userId,
@@ -1966,10 +2205,11 @@ async function main() {
       azione: row.azione,
       entita: row.entita,
       entitaId: row.entitaId,
+      enteId,
       concessioneId: row.concessioneId,
       esito: "SUCCESS",
       metadata: {
-        seed: "true",
+        seed: true,
         message: row.message,
       },
       createdAt,
@@ -1980,7 +2220,7 @@ async function main() {
         userId: row.userId,
         userEmail: snapshot?.email,
         userRole: snapshot?.ruolo,
-        enteId: row.concessioneId ? concessioneEnteById[row.concessioneId] ?? null : null,
+        enteId,
         concessioneId: row.concessioneId,
         azione: row.azione,
         entita: row.entita,

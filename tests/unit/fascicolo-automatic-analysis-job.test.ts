@@ -1,0 +1,1852 @@
+import { createHash } from "node:crypto";
+
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/prisma", () => ({ prisma: {} }));
+vi.mock("@/server/legal-research/persisted-research-policy", () => ({
+  effectiveResearchPolicyEnvironment: vi.fn(async (input: {
+    tenantId: string;
+    procedimentoId: string;
+  }) => ({
+    AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
+    AUTOMATIC_RESEARCH_TENANT_ALLOWLIST: input.tenantId,
+    AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST: input.procedimentoId,
+    AUTOMATIC_RESEARCH_ALLOWED_CAPABILITIES:
+      "SEMANTIC_DISCOVERY,KEYWORD_DISCOVERY,EXACT_RETRIEVAL,FULL_TEXT_RETRIEVAL,CITATION_NETWORK,CROSS_JURISDICTION_DISCOVERY,ADVERSE_AUTHORITY_DISCOVERY",
+    AUTOMATIC_RESEARCH_MAX_CALLS: "100",
+    AUTOMATIC_RESEARCH_WORKER_ACTOR_ID: "worker-1",
+    AUTOMATIC_RESEARCH_LEASE_MS: "60000",
+    AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS: "5000",
+  })),
+}));
+
+import {
+  buildFascicoloAutomaticAnalysisAdmission,
+  buildFascicoloAutomaticAnalysisCostIdempotencyKey,
+  buildFascicoloDocumentCorpusUpdateAdmission,
+  createFascicoloAutomaticAnalysisHandler,
+  executeDeferredKnowledgeResearchWave,
+  fascicoloAutomaticAnalysisDiagnostic,
+  FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+  rethrowAutomaticAnalysisProviderFailure,
+  type AutomaticFascicoloReport,
+  type FascicoloAutomaticAnalysisDependencies,
+} from "@/server/ai/fascicoloAutomaticAnalysisJob";
+import { FascicoloDocumentAnalysisError } from "@/server/ai/fascicoloDocumentAnalysis";
+import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
+import { FascicoloV7PreflightError } from "@/server/ai/fascicoloV7Preflight";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
+import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
+import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
+import { RuntimeCostSettlementRequiredError } from "@/server/runtime/cost";
+import { buildCanonicalSourceSpans } from "@/server/fascicolo-knowledge/canonicalStructuredPersistence";
+import {
+  createAuthorityCandidate,
+  type ResearchEvidenceBundle,
+  type ResearchMission,
+} from "@/server/legal-research/bridge";
+import type { ResearchProviderAdapter } from "@/server/legal-research/provider-research-adapters";
+import type { TrustedResearchHttpClient } from "@/server/legal-research/trusted-research-http-client";
+import { createTrustedMissionExecutor } from "@/server/legal-research/trusted-mission-executor";
+import type { BuiltStructuredFascicoloReport } from "@/server/fascicolo-report/structured-report";
+import {
+  fascicoloStructuredKnowledgeSchema,
+  assertStructuredKnowledgeQuality,
+  projectStructuredKnowledge,
+  StructuredKnowledgeQualityError,
+  type KnowledgeEvidenceCandidate,
+  type KnowledgeResearchMissionPlan,
+  type KnowledgeReconciliationResult,
+} from "@/server/fascicolo-knowledge";
+
+const reference = {
+  referenceType: "FASCICOLO_DOCUMENT_VERSION",
+  referenceId: "attempt-1",
+  referenceVersion: "V1",
+  metadata: {
+    procedimentoId: "procedimento-1",
+    neutralIntakeId: "intake-1",
+    extractionAttemptId: "attempt-1",
+  },
+} as const;
+
+const authority = {
+  tenantId: "tenant-1",
+  procedimentoId: "procedimento-1",
+  neutralIntakeId: "intake-1",
+  extractionAttemptId: "attempt-1",
+  artifactSha256: "a".repeat(64),
+  corpusFingerprint: "c".repeat(64),
+  actorId: "user-1",
+  documents: [{
+    neutralIntakeId: "intake-1",
+    documentVersionId: "attempt-1",
+    artifactSha256: "a".repeat(64),
+    pages: [{
+      pageNumber: 1,
+      normalizedText: "Il provvedimento indica la scadenza al 31 dicembre 2026 e richiama l'articolo 18.",
+      sourceText: "Il provvedimento indica la scadenza al 31 dicembre 2026 e richiama l'articolo 18.",
+      textSha256: "b".repeat(64),
+      extractionMethod: "DIRECT_TEXT",
+      ocrConfidence: null,
+    }],
+  }],
+} as const;
+
+const analysis = {
+  summary: { text: "Il documento contiene una scadenza e un riferimento normativo.", basisRefs: ["DOCUMENT_1.PAGE_1"] },
+  timeline: [{ recordedAt: "2026-12-31T00:00:00.000Z", text: "Scadenza indicata nel documento.", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+  recordedState: [{ text: "È richiamato l'articolo 18.", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+  signals: [{ type: "VERIFY", text: "Verificare la versione vigente della norma.", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+  investigativeQuestions: [{ text: "Manca la data di notifica?", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+  suggestedActivities: [{ text: "Acquisire la ricevuta di notifica.", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+  legalResearchQuestions: [{ text: "Quale disciplina si applica alla scadenza indicata ai sensi dell'articolo 18?", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+} as const;
+
+const structuredKnowledge = {
+  version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+  subjects: [],
+  items: [{
+    localId: "fact-1",
+    kind: "FACT",
+    confidence: 90,
+    basisRefs: ["DOCUMENT_1.PAGE_1"],
+    payload: {
+      normalizedStatement: "Il provvedimento indica la scadenza al 31 dicembre 2026.",
+      subjectLocalIds: [],
+      object: null,
+      qualifier: null,
+    },
+  }],
+} as const;
+
+const lotto3Knowledge = {
+  ...structuredKnowledge,
+  items: [
+    ...structuredKnowledge.items,
+    {
+      localId: "event-1",
+      kind: "EVENT",
+      confidence: 90,
+      basisRefs: ["DOCUMENT_1.PAGE_1"],
+      payload: {
+        title: "Istanza",
+        normalizedStatement: "Istanza presentata",
+        date: { precision: "EXACT", from: "2026-09-01", to: null, originalText: null, confidence: 100 },
+        subjectLocalIds: [],
+        relatedItemLocalIds: [],
+      },
+    },
+  ],
+  legalIssues: [{
+    localId: "issue-1",
+    title: "Disciplina della scadenza",
+    normalizedIssue: "disciplina applicabile alla scadenza",
+    areaOfLaw: "demanio",
+    priority: "HIGH",
+    rationale: "Il fatto documentato richiede qualificazione",
+    originatingItemLocalIds: ["fact-1", "event-1"],
+    confidence: 90,
+    referenceDateBasis: null,
+  }],
+  researchQuestions: [{
+    localId: "question-1",
+    legalIssueLocalId: "issue-1",
+    canonicalQuestion: "Quale disciplina si applica alla scadenza?",
+    priority: "HIGH",
+    referenceDate: "2026-09-01",
+    referenceDateBasis: { type: "EVENT_DATE", itemLocalId: "event-1", rationale: "Data esatta dell'istanza" },
+    requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+    mode: "PRIMARY",
+  }],
+} as const;
+
+const controlledV7Reference = {
+  referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+  referenceId: "c".repeat(64),
+  referenceVersion: "V1",
+  metadata: {
+    procedimentoId: "procedimento-1",
+    corpusHash: "c".repeat(64),
+    trialContractVersion: "FASCICOLO_DOCUMENT_ANALYSIS_V7",
+    trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+    trialPreflightHash: "f".repeat(64),
+  },
+} as const;
+
+const controlledV7Knowledge = {
+  ...lotto3Knowledge,
+  sourceQuotes: [
+    {
+      itemLocalId: "fact-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "scadenza al 31 dicembre 2026",
+    },
+    {
+      itemLocalId: "event-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "richiama l'articolo 18",
+    },
+  ],
+  documentInventory: [{
+    localId: "document-1",
+    basisRefs: ["DOCUMENT_1.PAGE_1"],
+    documentType: "provvedimento",
+    documentDate: null,
+    issuer: null,
+    recipients: [],
+    proceduralPhase: null,
+    subject: "scadenza",
+    summary: "Provvedimento che documenta la scadenza.",
+    referencedActs: [],
+    attachments: [],
+    materialProfiles: ["LEGAL"],
+    classification: "MATERIAL",
+    rationale: "Contiene un termine e una questione giuridica rilevanti.",
+    relatedItemLocalIds: ["fact-1", "event-1"],
+  }],
+} as const;
+
+function currentReconciliation(knowledge: unknown): KnowledgeReconciliationResult {
+  const documentEvidence: KnowledgeEvidenceCandidate = {
+    provenanceType: "DOCUMENT_EXTRACTION",
+    documentoId: "document-1",
+    documentFileVersionId: "file-version-1",
+    extractionAttemptId: "attempt-1",
+    pageNumber: 1,
+    textSha256: "b".repeat(64),
+    quoteSha256: null,
+    basisRef: "DOCUMENT_1.PAGE_1",
+  };
+  const projection = projectStructuredKnowledge({
+    knowledge: fascicoloStructuredKnowledgeSchema.parse(knowledge),
+    subjectIdsByLocalId: new Map(),
+    evidenceByBasisRef: new Map([[documentEvidence.basisRef, documentEvidence]]),
+  });
+  const idByKey = new Map(projection.candidates.map((candidate, index) => [candidate.semanticKey, `item-${index}`]));
+  return {
+    revision: {
+      id: "revision-current",
+      tenantId: "tenant-1",
+      procedimentoId: "procedimento-1",
+      corpusFingerprint: "c".repeat(64),
+      contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+      status: "CURRENT",
+      warnings: [],
+      createdAt: new Date("2026-09-29T00:00:00Z"),
+      completedAt: new Date("2026-09-29T00:00:01Z"),
+      supersededAt: null,
+      items: projection.candidates.map((candidate, index) => ({
+        id: `item-${index}`,
+        tenantId: "tenant-1",
+        procedimentoId: "procedimento-1",
+        revisionId: "revision-current",
+        ...candidate,
+        evidence: candidate.evidence.map((item, evidenceIndex) => ({
+          id: `evidence-${index}-${evidenceIndex}`,
+          tenantId: "tenant-1",
+          procedimentoId: "procedimento-1",
+          itemId: `item-${index}`,
+          createdAt: new Date("2026-09-29T00:00:00Z"),
+          ...item,
+        })),
+        status: "AI_PROPOSED",
+        reviewVersion: 0,
+        createdAt: new Date("2026-09-29T00:00:00Z"),
+        supersededAt: null,
+      })),
+      relations: projection.relations.map((relation, index) => ({
+        id: `relation-${index}`,
+        tenantId: "tenant-1",
+        procedimentoId: "procedimento-1",
+        revisionId: "revision-current",
+        sourceItemId: idByKey.get(relation.sourceSemanticKey)!,
+        targetItemId: idByKey.get(relation.targetSemanticKey)!,
+        relationType: relation.relationType,
+        confidence: null,
+        createdAt: new Date("2026-09-29T00:00:00Z"),
+      })),
+    },
+    classifications: [],
+  };
+}
+
+function buildingReconciliation(knowledge: unknown): KnowledgeReconciliationResult {
+  const current = currentReconciliation(knowledge);
+  return {
+    ...current,
+    revision: {
+      ...current.revision,
+      id: "revision-building",
+      contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+      status: "BUILDING",
+      completedAt: null,
+      items: current.revision.items.map((item) => ({
+        ...item,
+        revisionId: "revision-building",
+      })),
+      relations: current.revision.relations.map((relation) => ({
+        ...relation,
+        revisionId: "revision-building",
+      })),
+    },
+  };
+}
+
+const preparedStructuredReport = {
+  reportFingerprint: "d".repeat(64),
+  payload: { knowledgeRevisionId: "revision-building" },
+} as unknown as BuiltStructuredFascicoloReport;
+
+function context() {
+  return {
+    jobId: "job-1",
+    correlationId: "correlation-1",
+    attempt: 1,
+    isCancellationRequested: vi.fn(async () => false),
+    heartbeat: vi.fn(async () => undefined),
+  };
+}
+
+describe("automatic analysis safe diagnostics", () => {
+  it("identifies the invalid runtime parameter without its value", () => {
+    expect(fascicoloAutomaticAnalysisDiagnostic(
+      new OpenAiRuntimeConfigurationError("AI_OPENAI_API_KEY"),
+    )).toEqual({
+      event: "fascicolo_automatic_analysis_configuration_error",
+      envName: "AI_OPENAI_API_KEY",
+    });
+  });
+
+  it.each([
+    [401, "invalid_api_key"],
+    [403, "project_permission_denied"],
+  ] as const)("reports HTTP %s and a safe provider code", (httpStatus, providerCode) => {
+    expect(fascicoloAutomaticAnalysisDiagnostic(new FascicoloDocumentAnalysisError(
+      "AI_CONFIGURATION_ERROR",
+      { httpStatus, providerCode },
+    ))).toEqual({
+      event: "fascicolo_automatic_analysis_provider_error",
+      errorCode: "AI_CONFIGURATION_ERROR",
+      httpStatus,
+      providerCode,
+      providerRequestId: null,
+    });
+  });
+});
+
+function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies> = {}) {
+  const reports = new Map<string, AutomaticFascicoloReport>();
+  return {
+    loadAuthority: vi.fn(async () => authority),
+    validateControlledV7Preflight: vi.fn(async () => undefined),
+    findExistingReport: vi.fn(async () => null),
+    analyze: vi.fn(async () => analysis),
+    persistProviderOutputRecovery: vi.fn(async () => ({
+      artifactRef: "V7ProviderOutputRecoveryArtifact:test",
+      outputFingerprint: "a".repeat(64),
+      sizeBytes: 1_024,
+      expiresAt: new Date("2026-11-05T00:00:00Z"),
+    })),
+    auditProviderOutputRecovery: vi.fn(async () => undefined),
+    deleteProviderOutputRecovery: vi.fn(async () => undefined),
+    persistReport: vi.fn(async (report: AutomaticFascicoloReport) => {
+      const outcome = reports.has(report.reportId) ? "REUSED" as const : "CREATED" as const;
+      reports.set(report.reportId, report);
+      return { outcome, reportId: report.reportId };
+    }),
+    persistMission: vi.fn(async () => ({ outcome: "CREATED" as const })),
+    persistStructuredReport: vi.fn(async () => ({
+      outcome: "CREATED" as const,
+      snapshotId: "structured-report-1",
+    })),
+    scheduleMission: vi.fn(async () => ({
+      outcome: "ADMITTED" as const,
+      requirementCode: null,
+      jobId: "research-job-1",
+    })),
+    listPriorReportIds: vi.fn(async () => []),
+    ...overrides,
+  } satisfies FascicoloAutomaticAnalysisDependencies;
+}
+
+describe("automatic fascicolo analysis job", () => {
+  it("recovers a uniquely quoted page reference and preserves optional unresolved relations", () => {
+    const page1 = "Il canone annuale documentato ammonta a euro 12.000.";
+    const page2 = "Pagina tecnica priva della citazione contabile.";
+    const evidence = (pageNumber: number): KnowledgeEvidenceCandidate => ({
+      provenanceType: "DOCUMENT_EXTRACTION",
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      extractionAttemptId: "attempt-1",
+      pageNumber,
+      textSha256: createHash("sha256").update(pageNumber === 1 ? page1 : page2).digest("hex"),
+      quoteSha256: null,
+      basisRef: `DOCUMENT_1.PAGE_${pageNumber}`,
+    });
+    const projected = projectStructuredKnowledge({
+      knowledge: fascicoloStructuredKnowledgeSchema.parse({
+        version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+        subjects: [],
+        items: [{
+          localId: "event-payment",
+          kind: "EVENT",
+          confidence: 90,
+          basisRefs: ["DOCUMENT_1.PAGE_2"],
+          payload: {
+            title: "Canone documentato",
+            normalizedStatement: "Il canone annuale e pari a euro 12.000.",
+            date: {
+              precision: "YEAR",
+              from: "2026",
+              to: null,
+              originalText: "anno 2026",
+              confidence: 80,
+            },
+            subjectLocalIds: [],
+            relatedItemLocalIds: ["optional-missing-item"],
+          },
+        }],
+        sourceQuotes: [{
+          itemLocalId: "event-payment",
+          basisRef: "DOCUMENT_1.PAGE_2",
+          quote: "Il canone annuale documentato ammonta a euro 12.000.",
+        }],
+        documentInventory: [{
+          localId: "document-accounting",
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          documentType: "prospetto contabile",
+          documentDate: null,
+          issuer: null,
+          recipients: [],
+          proceduralPhase: null,
+          subject: "canone annuale",
+          summary: "Documento materiale sul canone.",
+          referencedActs: [],
+          attachments: [],
+          materialProfiles: ["ACCOUNTING"],
+          classification: "MATERIAL",
+          rationale: "Contiene importo rilevante.",
+          relatedItemLocalIds: ["event-payment"],
+        }, {
+          localId: "document-technical-index",
+          basisRefs: ["DOCUMENT_1.PAGE_2"],
+          documentType: "pagina tecnica",
+          documentDate: null,
+          issuer: null,
+          recipients: [],
+          proceduralPhase: null,
+          subject: "pagina priva di contenuto materiale",
+          summary: "Pagina esaminata senza fatti autonomi.",
+          referencedActs: [],
+          attachments: [],
+          materialProfiles: ["OTHER"],
+          classification: "NOT_MATERIAL",
+          rationale: "Non contiene fatti, obblighi o questioni autonome.",
+          relatedItemLocalIds: [],
+        }],
+      }),
+      subjectIdsByLocalId: new Map(),
+      evidenceByBasisRef: new Map([
+        ["DOCUMENT_1.PAGE_1", evidence(1)],
+        ["DOCUMENT_1.PAGE_2", evidence(2)],
+      ]),
+      sourceTextByBasisRef: new Map([
+        ["DOCUMENT_1.PAGE_1", page1],
+        ["DOCUMENT_1.PAGE_2", page2],
+      ]),
+    });
+
+    expect(projected.candidates).toHaveLength(1);
+    expect(projected.candidates[0].evidence[0].basisRef).toBe("DOCUMENT_1.PAGE_1");
+    expect(projected.quality).toMatchObject({
+      proposedCount: 1,
+      acceptedCount: 1,
+      correctedCount: 1,
+      rejectedCount: 0,
+      blockingReasons: [],
+    });
+    expect(projected.warnings).toContain(
+      "UNRESOLVED_OPTIONAL_RELATION:event-payment:optional-missing-item",
+    );
+  });
+
+  it("blocks material incompleteness instead of promoting a false success", () => {
+    const page = "Il titolo concessorio e presente, ma non contiene la citazione proposta.";
+    const evidence: KnowledgeEvidenceCandidate = {
+      provenanceType: "DOCUMENT_EXTRACTION",
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      extractionAttemptId: "attempt-1",
+      pageNumber: 1,
+      textSha256: createHash("sha256").update(page).digest("hex"),
+      quoteSha256: null,
+      basisRef: "DOCUMENT_1.PAGE_1",
+    };
+    const projected = projectStructuredKnowledge({
+      knowledge: fascicoloStructuredKnowledgeSchema.parse({
+        version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+        subjects: [],
+        items: [{
+          localId: "fact-unverified",
+          kind: "FACT",
+          confidence: 60,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            normalizedStatement: "Presunto inadempimento non verificabile.",
+            subjectLocalIds: [],
+            object: null,
+            qualifier: "allegato mancante",
+          },
+        }],
+        sourceQuotes: [{
+          itemLocalId: "fact-unverified",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Citazione inesistente nel corpus.",
+        }],
+      }),
+      subjectIdsByLocalId: new Map(),
+      evidenceByBasisRef: new Map([[evidence.basisRef, evidence]]),
+      sourceTextByBasisRef: new Map([[evidence.basisRef, page]]),
+    });
+
+    expect(projected.quality).toMatchObject({
+      proposedCount: 1,
+      acceptedCount: 0,
+      rejectedCount: 1,
+      invalidCitationCount: 1,
+      blockingReasons: [
+        "EVIDENCE_COVERAGE_LOST",
+        "MATERIAL_ITEMS_LOST",
+        "NONEXISTENT_CITATIONS",
+      ],
+    });
+    expect(() => assertStructuredKnowledgeQuality(projected.quality))
+      .toThrow(StructuredKnowledgeQualityError);
+  });
+
+  it("is registered in the real application worker", () => {
+    expect(applicationAsyncJobRegistry.resolve(FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION)).not.toBeNull();
+  });
+
+  it("scopes cost idempotency to the job while preserving same-attempt determinism", () => {
+    const input = {
+      jobId: "job-1",
+      corpusFingerprint: "c".repeat(64),
+      attempt: 2,
+    };
+    const first = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const duplicate = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const otherJob = buildFascicoloAutomaticAnalysisCostIdempotencyKey({
+      ...input,
+      jobId: "job-2",
+    });
+
+    expect(duplicate).toBe(first);
+    expect(otherJob).not.toBe(first);
+    expect(first).not.toBe(
+      `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
+    );
+  });
+
+  it.each([
+    "timeout after dispatch",
+    "truncated output after dispatch",
+    "missing usage after dispatch",
+    "invalid usage after dispatch",
+    "model mismatch after dispatch",
+  ])("settles the full reservation conservatively for %s", (message) => {
+    const error = new Error(message);
+    expect(() => rethrowAutomaticAnalysisProviderFailure({
+      error,
+      usage: null,
+      requestSent: true,
+      estimatedAmount: 0.84,
+      usdToEurRate: 0.9,
+    })).toThrow(expect.objectContaining({
+      name: "RuntimeCostSettlementRequiredError",
+      actualAmount: 0.84,
+      originalError: error,
+    }));
+  });
+
+  it("releases only a failure proven to have occurred before dispatch", () => {
+    const error = new Error("pre-dispatch authorization failure");
+    expect(() => rethrowAutomaticAnalysisProviderFailure({
+      error,
+      usage: null,
+      requestSent: false,
+      estimatedAmount: 0.84,
+      usdToEurRate: 0.9,
+    })).toThrow(error);
+  });
+
+  it("settles verified usage instead of the maximum without marking provider billing verified", () => {
+    const error = new Error("quality failure after usage");
+    let settlement: RuntimeCostSettlementRequiredError | null = null;
+    try {
+      rethrowAutomaticAnalysisProviderFailure({
+        error,
+        usage: {
+          inputTokens: 1_000,
+          cachedInputTokens: 0,
+          cacheWriteInputTokens: 0,
+          outputTokens: 500,
+          reasoningOutputTokens: 100,
+        },
+        requestSent: true,
+        estimatedAmount: 0.84,
+        usdToEurRate: 0.9,
+      });
+    } catch (caught) {
+      if (caught instanceof RuntimeCostSettlementRequiredError) settlement = caught;
+    }
+    expect(settlement).not.toBeNull();
+    expect(settlement?.actualAmount).toBeGreaterThan(0);
+    expect(settlement?.actualAmount).toBeLessThan(0.84);
+    expect(settlement?.originalError).toBe(error);
+  });
+
+  it("builds deterministic tenant-scoped admission for the extracted document version", () => {
+    const input = {
+      tenantId: "tenant-1",
+      procedimentoId: "procedimento-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "attempt-1",
+      correlationId: "correlation-1",
+      policyDecisionRef: null,
+      admissionType: "AUTHENTICATED_USER" as const,
+      initiatingUserId: "user-1",
+      actorId: "receipt-actor",
+      actorEmail: "user@example.test",
+      actorRole: "GIURIDICO",
+      selection: {
+        provider: "OPENAI" as const,
+        model: "gpt-5.6-terra" as const,
+        selectionVersion: "AI_MODEL_SELECTION_V1" as const,
+      },
+      authorizationRef: "automatic-real-data-approval",
+    };
+    const first = normalizeAsyncJobAdmission(buildFascicoloAutomaticAnalysisAdmission(input));
+    const second = normalizeAsyncJobAdmission(buildFascicoloAutomaticAnalysisAdmission(input));
+    expect(first.idempotencyKey).toBe(second.idempotencyKey);
+    expect(first.admission.tenantId).toBe("tenant-1");
+    expect(first.inputReference.metadata.extractionAttemptId).toBe("attempt-1");
+    expect(first.inputReference.metadata).toMatchObject({
+      providerKind: "OPENAI",
+      modelCode: "gpt-5.6-terra",
+      approvalRef: "automatic-real-data-approval",
+    });
+  });
+
+  it("deduplicates each corpus version while keeping ten fascicoli independent", () => {
+    const admissions = Array.from({ length: 10 }, (_, index) => {
+      const input = {
+        tenantId: "tenant-1",
+        procedimentoId: `procedimento-${index + 1}`,
+        corpusFingerprint: (index + 1).toString(16).padStart(64, "0"),
+        correlationId: `correlation-${index + 1}`,
+        policyDecisionRef: null,
+        admissionType: "AUTHENTICATED_USER" as const,
+        initiatingUserId: "user-1",
+        actorId: "user-1",
+        actorEmail: "user@example.test",
+        actorRole: "GIURIDICO",
+      };
+      const first = normalizeAsyncJobAdmission(buildFascicoloDocumentCorpusUpdateAdmission(input));
+      const duplicate = normalizeAsyncJobAdmission(buildFascicoloDocumentCorpusUpdateAdmission(input));
+      expect(duplicate.idempotencyKey).toBe(first.idempotencyKey);
+      return first;
+    });
+    expect(new Set(admissions.map((item) => item.idempotencyKey)).size).toBe(10);
+    expect(new Set(admissions.map((item) => item.logicalOperationId)).size).toBe(10);
+  });
+
+  it("executes the controlled V7 output instead of reusing a prior current revision", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      structuredKnowledge: controlledV7Knowledge,
+    }));
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      const projection = projectStructuredKnowledge({
+        knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+        subjectIdsByLocalId: new Map(),
+        evidenceByBasisRef: input.evidenceByBasisRef,
+        sourceTextByBasisRef: input.sourceTextByBasisRef,
+      });
+      assertStructuredKnowledgeQuality(projection.quality);
+      expect(projection.quality).toMatchObject({
+        validCitationCount: 2,
+        invalidCitationCount: 0,
+        lostLegalIssueCount: 0,
+        lostRelationCount: 0,
+        blockingReasons: [],
+      });
+      return buildingReconciliation(lotto3Knowledge);
+    });
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const finalizeControlledV7 = vi.fn(async () => ({
+      revision: {
+        ...buildingReconciliation(lotto3Knowledge).revision,
+        status: "CURRENT" as const,
+        completedAt: new Date("2026-10-26T12:00:00Z"),
+      },
+      outcome: "CREATED" as const,
+      snapshotId: "structured-report-1",
+    }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze,
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => preparedStructuredReport),
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).resolves.toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      metadata: { structuredReportId: "structured-report-1" },
+    });
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).toHaveBeenCalledWith(expect.objectContaining({
+      forceNewRevision: true,
+      deferPromotion: true,
+    }));
+    expect(deps.reconcileKnowledgeMissions).toHaveBeenCalledWith(
+      expect.objectContaining({ allowBuildingRevision: true }),
+    );
+    expect(finalizeControlledV7).toHaveBeenCalledWith(expect.objectContaining({
+      knowledgeRevisionId: "revision-building",
+      expectedCurrentRevisionId: prior.id,
+      report: preparedStructuredReport,
+    }));
+  });
+
+  it("keeps the previous revision current when V7 mission reconciliation fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const prepareStructuredReport = vi.fn();
+    const finalizeControlledV7 = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => {
+        throw Object.assign(new Error("MISSION_RECONCILIATION_FAILED"), {
+          code: "40P01",
+        });
+      }),
+      prepareStructuredReport,
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toMatchObject({
+      category: "PERSISTENCE",
+      code: "RESEARCH_MISSION_RECONCILIATION_FAILED",
+      retryable: false,
+    });
+    expect(prepareStructuredReport).not.toHaveBeenCalled();
+    expect(finalizeControlledV7).not.toHaveBeenCalled();
+    expect(prior.status).toBe("CURRENT");
+    expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({
+      event: "fascicolo_research_mission_reconciliation_failed",
+      databaseCode: "40P01",
+    }));
+    consoleError.mockRestore();
+  });
+
+  it("keeps the previous revision current when the V7 report cannot be prepared", async () => {
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const finalizeControlledV7 = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => null),
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toMatchObject({
+      code: "STRUCTURED_FASCICOLO_REPORT_NOT_CREATED",
+      retryable: false,
+    });
+    expect(finalizeControlledV7).not.toHaveBeenCalled();
+    expect(prior.status).toBe("CURRENT");
+  });
+
+  it("keeps the previous revision current when atomic V7 finalization fails", async () => {
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => preparedStructuredReport),
+      finalizeControlledV7: vi.fn(async () => {
+        throw new Error("ATOMIC_FINALIZATION_FAILED");
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "PERSISTENCE",
+      "V7_FINALIZATION_FAILED",
+      false,
+    ));
+    expect(prior.status).toBe("CURRENT");
+  });
+
+  it.each([
+    "V7_PREFLIGHT_APPROVAL_MISMATCH",
+    "V7_PREFLIGHT_IDENTITY_MISMATCH",
+    "V7_PREFLIGHT_FINGERPRINT_MISMATCH",
+    "V7_PREFLIGHT_CONFIGURATION_INVALID",
+  ] as const)("blocks controlled V7 before the provider when runtime revalidation fails with %s", async (code) => {
+    const analyze = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+      })),
+      validateControlledV7Preflight: vi.fn(async () => {
+        throw new FascicoloV7PreflightError(code);
+      }),
+      analyze,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError("AUTHORIZATION", code, false));
+    expect(analyze).not.toHaveBeenCalled();
+    expect(deps.persistKnowledge).toBeUndefined();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("fails the controlled V7 job before persistence when narrative or inventory is incomplete", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      suggestedActivities: [],
+      structuredKnowledge: {
+        ...controlledV7Knowledge,
+        documentInventory: [],
+      },
+    }));
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => currentReconciliation(lotto3Knowledge).revision),
+      analyze,
+      persistKnowledge,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "ANALYSIS",
+      "V7_OUTPUT_REQUIRED_SECTIONS_EMPTY",
+      false,
+    ));
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).not.toHaveBeenCalled();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes incomplete V7 document inventory coverage before persistence", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      structuredKnowledge: {
+        ...controlledV7Knowledge,
+        documentInventory: controlledV7Knowledge.documentInventory.map((document) => ({
+          ...document,
+          basisRefs: ["DOCUMENT_1.PAGE_999"],
+        })),
+      },
+    }));
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => currentReconciliation(lotto3Knowledge).revision),
+      analyze,
+      persistKnowledge,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "ANALYSIS",
+      "V7_DOCUMENT_INVENTORY_INCOMPLETE",
+      false,
+    ));
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).not.toHaveBeenCalled();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("passes all 21 OCR pages through to document-only analysis without truncation", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
+    } as const;
+    const pages = Array.from({ length: 21 }, (_, index) => {
+      const text = `Pagina ${index + 1}: ` + "x".repeat(3400);
+      return {
+        ...authority.documents[0].pages[0],
+        pageNumber: index + 1,
+        normalizedText: text.replaceAll("  ", " "),
+        sourceText: text,
+      };
+    });
+    const analyze = vi.fn(async (_input: unknown) => ({ ...analysis, structuredKnowledge }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: [{ ...authority.documents[0], documentoId: "document-1", documentFileVersionId: "file-version-1", pages }],
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze,
+      persistKnowledge: vi.fn(async () => currentReconciliation(structuredKnowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
+    const excerpts = (analyze.mock.calls[0]?.[0] as { excerpts: { text: string }[] } | undefined)?.excerpts;
+    expect(excerpts).toHaveLength(21);
+    if (!excerpts) throw new Error("EXPECTED_ANALYSIS_EXCERPTS");
+    expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.sourceText));
+  });
+
+  it("rejects oversized OCR corpus before charging the analysis provider", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
+    } as const;
+    const analyze = vi.fn(async (_input: unknown) => ({ ...analysis, structuredKnowledge }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: [{ ...authority.documents[0], documentoId: "document-1", documentFileVersionId: "file-version-1", pages: [
+          {
+            ...authority.documents[0].pages[0],
+            normalizedText: "x".repeat(96_001),
+            sourceText: "x".repeat(96_001),
+          },
+        ] }],
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze,
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context()))
+      .rejects.toMatchObject({ code: "DOCUMENT_CORPUS_EXCEEDS_ANALYSIS_LIMIT" });
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("persists a direct document corpus revision without starting paid legal research", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedimento-1",
+        corpusHash: "c".repeat(64),
+      },
+    } as const;
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge: vi.fn(async () => currentReconciliation(structuredKnowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps)
+      .execute(directReference, context());
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      referenceId: "revision-current",
+      metadata: {
+        corpusHash: "c".repeat(64),
+        researchJobCount: 0,
+      },
+    });
+    expect(deps.persistKnowledge).toHaveBeenCalledOnce();
+    const { normalizeAsyncJobResultMetadata } = await import("@/server/async-jobs/domain");
+    expect(() => normalizeAsyncJobResultMetadata(result)).not.toThrow();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+  });
+
+  it("maps direct document corpus evidence to the fascicolo extraction attempt", async () => {
+    const sourceText = "Il  provvedimento indica la scadenza al 31 dicembre 2026.";
+    const normalizedText = "Il provvedimento indica la scadenza al 31 dicembre 2026.";
+    const textSha256 = createHash("sha256").update(sourceText, "utf8").digest("hex");
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedimento-1",
+        corpusHash: "c".repeat(64),
+      },
+    } as const;
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      expect([...input.evidenceByBasisRef.values()]).toEqual([{
+        provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+        documentoId: "document-1",
+        documentFileVersionId: "file-version-1",
+        documentExtractionAttemptId: "attempt-1",
+        pageNumber: 1,
+        textSha256,
+        quoteSha256: null,
+        basisRef: "DOCUMENT_1.PAGE_1",
+      }]);
+      expect(input.sourceTextByBasisRef?.get("DOCUMENT_1.PAGE_1")).toBe(sourceText);
+      expect(createHash("sha256").update(
+        input.sourceTextByBasisRef!.get("DOCUMENT_1.PAGE_1")!,
+        "utf8",
+      ).digest("hex")).toBe(textSha256);
+      return currentReconciliation(structuredKnowledge);
+    });
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+          pages: document.pages.map((page) => ({
+            ...page,
+            normalizedText,
+            sourceText,
+            textSha256,
+          })),
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
+
+    expect(persistKnowledge).toHaveBeenCalledOnce();
+  });
+
+  it("runs the synthetic canonical path through facts, events, citations, reconciliation, and report persistence", async () => {
+    const sourceText = "Fatto autentico. Evento autentico.";
+    const textSha256 = createHash("sha256").update(sourceText, "utf8").digest("hex");
+    const knowledge = {
+      version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+      subjects: [],
+      sourceQuotes: [
+        {
+          itemLocalId: "fact-authentic",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Fatto autentico",
+        },
+        {
+          itemLocalId: "event-authentic",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Evento autentico",
+        },
+      ],
+      items: [
+        {
+          localId: "fact-authentic",
+          kind: "FACT",
+          confidence: 95,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            normalizedStatement: "Il documento attesta il fatto rilevante.",
+            subjectLocalIds: [],
+            object: null,
+            qualifier: null,
+          },
+        },
+        {
+          localId: "event-authentic",
+          kind: "EVENT",
+          confidence: 95,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            title: "Evento",
+            normalizedStatement: "L'evento risulta essersi verificato.",
+            date: {
+              precision: "EXACT",
+              from: "2026-10-24",
+              to: null,
+              originalText: null,
+              confidence: 100,
+            },
+            subjectLocalIds: [],
+            relatedItemLocalIds: [],
+          },
+        },
+      ],
+      legalIssues: [],
+      researchQuestions: [],
+    } as const;
+    const syntheticAuthority = {
+      ...authority,
+      documents: authority.documents.map((document) => ({
+        ...document,
+        documentoId: "document-1",
+        documentFileVersionId: "file-version-1",
+        pages: document.pages.map((page) => ({
+          ...page,
+          normalizedText: sourceText,
+          sourceText,
+          textSha256,
+        })),
+      })),
+    };
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      const projection = projectStructuredKnowledge({
+        knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+        subjectIdsByLocalId: new Map(),
+        evidenceByBasisRef: input.evidenceByBasisRef,
+      });
+      const spans = projection.candidates.flatMap((candidate) => (
+        buildCanonicalSourceSpans(candidate, input.sourceTextByBasisRef!)
+      ));
+      expect(spans.map((span) => span.quote)).toHaveLength(2);
+      expect(spans.map((span) => span.quote)).toEqual(expect.arrayContaining([
+        "Fatto autentico",
+        "Evento autentico",
+      ]));
+      return currentReconciliation(knowledge);
+    });
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => syntheticAuthority),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: knowledge })),
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+
+    expect(persistKnowledge).toHaveBeenCalledOnce();
+    expect(deps.persistReport).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_AUTOMATIC_REPORT",
+      metadata: { missionCount: 0, researchJobCount: 0 },
+    });
+  });
+
+  it("recovers idempotently after persistence by reusing the current corpus revision", async () => {
+    const deps = dependencies({
+      getCurrentRevision: vi.fn(async () => currentReconciliation(structuredKnowledge).revision),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps)
+      .execute(reference, context());
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      referenceId: "revision-current",
+      metadata: { persistenceCode: "REUSED" },
+    });
+    expect(deps.analyze).not.toHaveBeenCalled();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("derives a question from document text, persists a report, and creates a pending mission without manual input", async () => {
+    const deps = dependencies();
+    const result = await createFascicoloAutomaticAnalysisHandler(deps)
+      .execute(reference, context());
+    expect(deps.analyze).toHaveBeenCalledWith(expect.objectContaining({
+      jobId: "job-1",
+      documentsAreUntrustedData: true,
+      externalToolsAllowed: false,
+      documentVersionId: "attempt-1",
+      excerpts: [expect.objectContaining({
+        reference: "DOCUMENT_1.PAGE_1",
+        documentVersionId: "attempt-1",
+        textSha256: "b".repeat(64),
+      })],
+    }));
+    const report = vi.mocked(deps.persistReport).mock.calls[0][0];
+    expect(report.analysis.timeline[0].basisRefs).toEqual(["DOCUMENT_1.PAGE_1"]);
+    expect(report.missions).toHaveLength(1);
+    expect(report.missions[0]).toMatchObject({
+      status: "PENDING",
+      caseReference: { caseId: "procedimento-1" },
+      researchQuestion: analysis.legalResearchQuestions[0].text,
+      budget: { maxTotalResearchCalls: 6, maxMoonlitCalls: 2, maxSimpliciterCalls: 2, maxLegalDataHunterCalls: 2 },
+    });
+    expect(deps.persistMission).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({ metadata: { missionCount: 1, supersededCount: 0 } });
+  });
+
+  it("persists optional structured knowledge with canonical document provenance without creating extra missions", async () => {
+    const persistKnowledge = vi.fn<NonNullable<FascicoloAutomaticAnalysisDependencies["persistKnowledge"]>>(
+      async () => currentReconciliation(structuredKnowledge),
+    );
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => {
+        expect(plans).toEqual([]);
+        return [];
+      }),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(persistKnowledge).toHaveBeenCalledOnce();
+    const input = persistKnowledge.mock.calls[0][0];
+    expect(input).toMatchObject({
+      tenantId: "tenant-1",
+      procedimentoId: "procedimento-1",
+      corpusFingerprint: "c".repeat(64),
+      knowledge: structuredKnowledge,
+    });
+    expect(input.evidenceByBasisRef.get("DOCUMENT_1.PAGE_1")).toMatchObject({
+      documentoId: "document-1",
+      documentFileVersionId: "file-version-1",
+      extractionAttemptId: "attempt-1",
+      textSha256: "b".repeat(64),
+    });
+    expect(deps.persistMission).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ metadata: { missionCount: 0 } });
+  });
+
+  it("creates ChatGPT connector missions after CURRENT promotion without autonomous scheduling", async () => {
+    const order: string[] = [];
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => { order.push("CURRENT"); return reconciliation; }),
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => {
+        order.push("MISSIONS");
+        expect(plans).toHaveLength(1);
+        expect(plans[0]).toMatchObject({ execution: "ADMITTED", referenceDate: "2026-09-01" });
+        expect(plans[0].mission?.referenceDate).toBe("2026-09-01T00:00:00.000Z");
+        return [{ missionId: plans[0].mission!.missionId, missionFingerprint: plans[0].missionFingerprint, questionSemanticKey: plans[0].questionSemanticKey, outcome: "CREATED" as const, lifecycleStatus: "CURRENT" as const, operationalStatus: "PENDING" as const }];
+      }),
+      persistReport: vi.fn(async (report) => { order.push("REPORT"); return { outcome: "CREATED" as const, reportId: report.reportId }; }),
+      scheduleMission: vi.fn(async () => { order.push("SCHEDULE"); return { outcome: "ADMITTED" as const, requirementCode: null, jobId: "research-job" }; }),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(order).toEqual(["CURRENT", "MISSIONS", "REPORT"]);
+    expect(deps.persistMission).not.toHaveBeenCalled();
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions[0].executionChannel)
+      .toBe("CHATGPT_CONNECTOR");
+    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
+  });
+
+  it("keeps an uncertain structured question blocked without epoch fallback or scheduling", async () => {
+    const uncertain = {
+      ...lotto3Knowledge,
+      researchQuestions: [{
+        ...lotto3Knowledge.researchQuestions[0],
+        referenceDate: null,
+        referenceDateBasis: { type: "UNKNOWN" as const, itemLocalId: null, rationale: "Data non determinabile" },
+      }],
+    };
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: uncertain })),
+      persistKnowledge: vi.fn(async () => currentReconciliation(uncertain)),
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => {
+        expect(plans[0]).toMatchObject({ execution: "BLOCKED_FOR_REVIEW", mission: null });
+        return [];
+      }),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(deps.persistMission).not.toHaveBeenCalled();
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(JSON.stringify(vi.mocked(deps.persistReport).mock.calls[0][0])).not.toContain("1970-01-01");
+    expect(result).toMatchObject({ metadata: { missionCount: 0, researchJobCount: 0 } });
+  });
+
+  it("links a reused pending ChatGPT connector mission without autonomous scheduling", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => [{
+        missionId: plans[0].mission!.missionId,
+        missionFingerprint: plans[0].missionFingerprint,
+        questionSemanticKey: plans[0].questionSemanticKey,
+        outcome: "REUSED" as const,
+        lifecycleStatus: "CURRENT" as const,
+        operationalStatus: "PENDING" as const,
+      }]),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions).toHaveLength(1);
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
+  });
+
+  it("links a reused completed structured mission without scheduling it again", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => [{
+        missionId: plans[0].mission!.missionId,
+        missionFingerprint: plans[0].missionFingerprint,
+        questionSemanticKey: plans[0].questionSemanticKey,
+        outcome: "REUSED" as const,
+        lifecycleStatus: "CURRENT" as const,
+        operationalStatus: "COMPLETED" as const,
+      }]),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions).toHaveLength(1);
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
+  });
+
+  it("keeps every structured ChatGPT mission outside both autonomous scheduling waves", async () => {
+    const sevenQuestions = {
+      ...lotto3Knowledge,
+      researchQuestions: Array.from({ length: 7 }, (_, index) => ({
+        ...lotto3Knowledge.researchQuestions[0],
+        localId: `question-${index + 1}`,
+        canonicalQuestion: `Quale disciplina si applica alla scadenza? ${index + 1}`,
+      })),
+    };
+    const reconciliation = currentReconciliation(sevenQuestions);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: sevenQuestions })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      reconcileKnowledgeMissions: vi.fn(async ({ plans }) => plans.map((plan: KnowledgeResearchMissionPlan) => ({
+        missionId: plan.mission!.missionId,
+        missionFingerprint: plan.missionFingerprint,
+        questionSemanticKey: plan.questionSemanticKey,
+        outcome: "CREATED" as const,
+        lifecycleStatus: "CURRENT" as const,
+        operationalStatus: plan.execution === "DEFERRED_BY_POLICY" ? "DEFERRED" as const : "PENDING" as const,
+      }))),
+    });
+    const firstWave = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions).toHaveLength(7);
+    expect(firstWave).toMatchObject({ metadata: { missionCount: 7, researchJobCount: 0 } });
+
+    const deferred = vi.mocked(deps.persistReport).mock.calls[0][0].missions.slice(5);
+    const schedule = vi.fn(async () => ({ outcome: "ADMITTED" as const, requirementCode: null, jobId: "wave-2-job" }));
+    const secondWave = await executeDeferredKnowledgeResearchWave({
+      tenantId: "tenant-1", procedimentoId: "procedimento-1", actorId: "user-1", correlationId: "wave-2",
+    }, { admit: vi.fn(async () => deferred.map((mission) => ({ mission }))), schedule });
+    expect(secondWave).toEqual([]);
+    expect(schedule).not.toHaveBeenCalled();
+  });
+
+  it("does not create or enqueue structured missions for rejected issues or questions", async () => {
+    for (const rejectedKind of ["LEGAL_ISSUE", "RESEARCH_QUESTION"] as const) {
+      const current = currentReconciliation(lotto3Knowledge);
+      const reconciliation: KnowledgeReconciliationResult = {
+        ...current,
+        revision: {
+          ...current.revision,
+          items: current.revision.items.map((item) => (
+            item.kind === rejectedKind ? { ...item, status: "REJECTED" as const } : item
+          )),
+        },
+      };
+      const deps = dependencies({
+        loadAuthority: vi.fn(async () => ({
+          ...authority,
+          documents: authority.documents.map((document) => ({ ...document, documentoId: "document-1", documentFileVersionId: "file-version-1" })),
+        })),
+        analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+        persistKnowledge: vi.fn(async () => reconciliation),
+        reconcileKnowledgeMissions: vi.fn(async ({ plans }) => {
+          expect(plans[0].mission).toBeNull();
+          return [];
+        }),
+      });
+      const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+      expect(deps.persistMission).not.toHaveBeenCalled();
+      expect(deps.scheduleMission).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ metadata: { missionCount: 0, researchJobCount: 0 } });
+    }
+  });
+
+  it("does not create a legacy mission with an epoch date when no documented reference date exists", async () => {
+    const deps = dependencies({ analyze: vi.fn(async () => ({ ...analysis, timeline: [] })) });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(deps.persistMission).not.toHaveBeenCalled();
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(JSON.stringify(vi.mocked(deps.persistReport).mock.calls[0][0])).not.toContain("1970-01-01");
+    expect(result).toMatchObject({ metadata: { missionCount: 0, researchJobCount: 0 } });
+  });
+
+  it("keeps legacy provider output backward compatible without invoking structured persistence", async () => {
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({ persistKnowledge });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .resolves.toMatchObject({ metadata: { missionCount: 1 } });
+    expect(persistKnowledge).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before report and mission writes when structured provenance or persistence is invalid", async () => {
+    const missingProvenance = dependencies({
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge: vi.fn(),
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(missingProvenance).execute(reference, context()))
+      .rejects.toMatchObject({ code: "DOCUMENT_GROUNDING_INVALID", retryable: false });
+    expect(missingProvenance.persistReport).not.toHaveBeenCalled();
+    expect(missingProvenance.persistMission).not.toHaveBeenCalled();
+
+    const diagnostic = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const persistenceError = Object.assign(new Error("reserved document text"), {
+      name: "SyntheticPersistenceError",
+      code: "23505",
+    });
+    const failedPersistence = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge: vi.fn(async () => { throw persistenceError; }),
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(failedPersistence).execute(reference, context()))
+      .rejects.toMatchObject({ code: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", retryable: false });
+    expect(diagnostic).toHaveBeenCalledWith(JSON.stringify({
+      event: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILURE",
+      phase: "PERSIST_KNOWLEDGE",
+      engine: "LEGACY",
+      errorType: "SyntheticPersistenceError",
+      errorCode: "23505",
+    }));
+    expect(JSON.stringify(diagnostic.mock.calls)).not.toContain("reserved document text");
+    diagnostic.mockRestore();
+    expect(failedPersistence.persistReport).not.toHaveBeenCalled();
+    expect(failedPersistence.persistMission).not.toHaveBeenCalled();
+  });
+
+  it("reports mission reconciliation separately after preserving CURRENT knowledge", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      reconcileKnowledgeMissions: vi.fn(async () => {
+        throw new Error("foreign key violation");
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toMatchObject({
+        code: "RESEARCH_MISSION_RECONCILIATION_FAILED",
+        retryable: false,
+      });
+    expect(deps.persistKnowledge).toHaveBeenCalledOnce();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("defers missions when an AUTHORIZED_SYSTEM actor is not a valid tenant user", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        actorId: "system-actor",
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      resolveMissionAssignee: vi.fn(async () => null),
+      reconcileKnowledgeMissions: vi.fn(async ({
+        assignedActorId,
+        plans,
+      }: {
+        assignedActorId: string | null;
+        plans: readonly KnowledgeResearchMissionPlan[];
+      }) => {
+        expect(assignedActorId).toBeNull();
+        return plans.filter((plan) => plan.mission !== null).map((plan) => ({
+          missionId: plan.mission!.missionId,
+          missionFingerprint: plan.missionFingerprint,
+          questionSemanticKey: plan.questionSemanticKey,
+          outcome: "CREATED" as const,
+          lifecycleStatus: "CURRENT" as const,
+          operationalStatus: "DEFERRED" as const,
+          assignmentStatus: "REQUIRES_ASSIGNMENT" as const,
+        }));
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .resolves.toMatchObject({
+        metadata: {
+          missionCount: 1,
+          researchJobCount: 0,
+          structuredReportId: "structured-report-1",
+          structuredReportPersistenceCode: "CREATED",
+          researchRequirementCode: "ASSIGNMENT_AND_EXPLICIT_AUTHORIZATION_REQUIRED",
+        },
+      });
+    expect(deps.persistStructuredReport).toHaveBeenCalledWith({
+      tenantId: "tenant-1",
+      procedimentoId: "procedimento-1",
+    });
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+  });
+
+  it("reconciles an existing CURRENT revision without invoking the provider again", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      getCurrentRevision: vi.fn(async () => reconciliation.revision),
+      analyze: vi.fn(),
+      resolveMissionAssignee: vi.fn(async () => "user-1"),
+      reconcileKnowledgeMissions: vi.fn(async ({
+        plans,
+      }: {
+        plans: readonly KnowledgeResearchMissionPlan[];
+      }) => plans
+        .filter((plan) => plan.mission !== null)
+        .map((plan) => ({
+          missionId: plan.mission!.missionId,
+          missionFingerprint: plan.missionFingerprint,
+          questionSemanticKey: plan.questionSemanticKey,
+          outcome: "CREATED" as const,
+          lifecycleStatus: "CURRENT" as const,
+          operationalStatus: "PENDING" as const,
+          assignmentStatus: "ASSIGNED" as const,
+        }))),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .resolves.toMatchObject({
+        referenceId: reconciliation.revision.id,
+        metadata: { persistenceCode: "REUSED", missionCount: 1 },
+      });
+    expect(deps.analyze).not.toHaveBeenCalled();
+    expect(deps.reconcileKnowledgeMissions).toHaveBeenCalledOnce();
+  });
+
+  it("reuses the same report and mission identities when execution is repeated", async () => {
+    const deps = dependencies();
+    const handler = createFascicoloAutomaticAnalysisHandler(deps);
+    const first = await handler.execute(reference, context()) as { referenceId: string };
+    const second = await handler.execute(reference, context()) as { referenceId: string };
+    expect(second.referenceId).toBe(first.referenceId);
+    await expect(vi.mocked(deps.persistReport).mock.results[1].value).resolves.toMatchObject({ outcome: "REUSED" });
+    const firstMission = vi.mocked(deps.persistMission).mock.calls[0][0].mission;
+    const secondMission = vi.mocked(deps.persistMission).mock.calls[1][0].mission;
+    expect(secondMission.missionId).toBe(firstMission.missionId);
+  });
+
+  it("reuses a persistent report after restart without repeating AI or mission writes", async () => {
+    const deps = dependencies({
+      findExistingReport: vi.fn(async () => ({
+        reportId: "fascicolo-report:persisted",
+        documentVersionId: "attempt-1",
+        corpusFingerprint: "c".repeat(64),
+        missionCount: 1,
+        supersededCount: 0,
+      })),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(result).toMatchObject({
+      referenceId: "fascicolo-report:persisted",
+      metadata: { persistenceCode: "REUSED", missionCount: 1 },
+    });
+    expect(deps.analyze).not.toHaveBeenCalled();
+    expect(deps.persistMission).not.toHaveBeenCalled();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("marks reports from earlier document versions as superseded", async () => {
+    const deps = dependencies({ listPriorReportIds: vi.fn(async () => ["fascicolo-report:older"]) });
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    expect(deps.persistReport).toHaveBeenCalledWith(expect.objectContaining({
+      documentVersionId: "attempt-1",
+      supersedesReportIds: ["fascicolo-report:older"],
+    }));
+  });
+
+  it("fails closed on tenant or version authority mismatch", async () => {
+    const deps = dependencies({ loadAuthority: vi.fn(async () => null) });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toEqual(new AsyncJobExecutionError("AUTHORIZATION", "FASCICOLO_ANALYSIS_AUTHORITY_MISMATCH", false));
+    expect(deps.analyze).not.toHaveBeenCalled();
+  });
+
+  it("reports an unreadable document without claiming analysis success", async () => {
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({ ...authority, documents: [{ ...authority.documents[0], pages: [] }] })),
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toEqual(new AsyncJobExecutionError("DOCUMENT", "DOCUMENT_UNREADABLE", false));
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("preserves an unavailable-provider failure without a report or mission", async () => {
+    const deps = dependencies({
+      analyze: vi.fn(async () => { throw new AsyncJobExecutionError("PROVIDER", "AI_PROVIDER_UNAVAILABLE", true); }),
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toMatchObject({ code: "AI_PROVIDER_UNAVAILABLE", retryable: true });
+    expect(deps.persistReport).not.toHaveBeenCalled();
+    expect(deps.persistMission).not.toHaveBeenCalled();
+  });
+
+  it("rejects uncertain or ungrounded output instead of reporting false success", async () => {
+    const deps = dependencies({
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        summary: { ...analysis.summary, basisRefs: ["DOCUMENT_2.PAGE_99"] },
+      })),
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toMatchObject({ code: "DOCUMENT_GROUNDING_INVALID", retryable: false });
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("continues through pre-claim, lease, budget, submit, and completion with a mocked research provider", async () => {
+    const deps = dependencies({
+      analyze: vi.fn(async () => ({ ...analysis, investigativeQuestions: [] })),
+    });
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+    const mission = vi.mocked(deps.persistMission).mock.calls[0][0].mission;
+    let submittedBundle: ResearchEvidenceBundle | null = null;
+    const client = {
+      readMission: vi.fn(async () => ({
+        mission,
+        operational: {
+          status: "PENDING" as const,
+          stateVersion: 0,
+          claimExpiresAt: null,
+          activeExecutionId: null,
+          completedAt: null,
+          deferredAt: null,
+        },
+        fascicoloContext: {},
+      })),
+      claimMission: vi.fn(async () => ({
+        outcome: "CLAIMED" as const,
+        missionId: mission.missionId,
+        fascicoloScopeId: "procedimento-1",
+        executionId: "execution-synthetic",
+        leaseExpiresAt: "2026-12-31T12:15:00.000Z",
+        claimToken: "c".repeat(64),
+      })),
+      submitEvidenceBundle: vi.fn(async ({ bundle }: { bundle: ResearchEvidenceBundle }) => {
+        submittedBundle = bundle;
+        return {
+          outcome: "CREATED" as const,
+          bundleId: "bundle-synthetic",
+          missionId: mission.missionId,
+          fascicoloScopeId: "procedimento-1",
+          executionId: bundle.executionId,
+          completionState: bundle.completionState,
+        };
+      }),
+      completeMission: vi.fn(async () => ({
+        outcome: "COMPLETED" as const,
+        missionId: mission.missionId,
+        fascicoloScopeId: "procedimento-1",
+        status: "COMPLETED" as const,
+        stateVersion: 3,
+      })),
+      deferMission: vi.fn(),
+    } as unknown as TrustedResearchHttpClient;
+    const adapter: ResearchProviderAdapter = {
+      provider: "MOONLIT",
+      capability: "SEMANTIC_DISCOVERY",
+      toolName: "synthetic_semantic_search",
+      role: "BROAD_DISCOVERY",
+      operationType: "SEMANTIC_SEARCH",
+      prepare: (current: ResearchMission) => ({
+        name: "synthetic_semantic_search",
+        arguments: { query: current.researchQuestion },
+      }),
+      callTool: vi.fn(async () => ({ resultId: "synthetic-result-1" })),
+      normalize: (_response, current) => ({
+        resultCount: 1,
+        resultIdentifiersUsed: ["synthetic-result-1"],
+        authorityCandidates: [createAuthorityCandidate({
+          kind: "AUTHORITY_CANDIDATE",
+          executionRecordId: current.executionRecordId,
+          toolId: "synthetic_semantic_search",
+          providerId: "MOONLIT",
+          courtOrBody: "Consiglio di Stato",
+          documentType: "SENTENZA",
+          number: "101",
+          year: 2026,
+          documentDate: "2026-06-10T00:00:00.000Z",
+          title: "Decisione sintetica per collaudo offline",
+          sourceUrl: "https://official.example.test/decision-101",
+          providerDocumentId: "synthetic-result-1",
+          supportDirection: "UNKNOWN",
+          sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+          retrievalMethod: "SEMANTIC_SEARCH",
+          fullTextAvailable: false,
+          verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+        })],
+        evidenceGaps: [],
+        incomplete: false,
+      }),
+    };
+    const result = await createTrustedMissionExecutor({
+      client,
+      providerAdapters: [adapter],
+      now: () => new Date("2026-12-31T12:00:00.000Z"),
+      executionId: () => "execution-synthetic",
+    }).execute(mission.missionId);
+
+    expect(result.status).toBe("COMPLETED");
+    expect(client.readMission).toHaveBeenCalledBefore(vi.mocked(client.claimMission));
+    expect(client.claimMission).toHaveBeenCalledWith(expect.objectContaining({ leaseDurationMs: 900_000 }));
+    expect(adapter.callTool).toHaveBeenCalledOnce();
+    expect(client.submitEvidenceBundle).toHaveBeenCalledOnce();
+    expect(client.completeMission).toHaveBeenCalledOnce();
+    expect(submittedBundle).toMatchObject({
+      completionState: "COMPLETE",
+      researchToolExecutions: [expect.objectContaining({ callsConsumed: 1 })],
+      authorityCandidates: [expect.objectContaining({
+        documentDate: "2026-06-10T00:00:00.000Z",
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+        supportDirection: "UNKNOWN",
+      })],
+    });
+    expect(JSON.stringify(mission)).not.toContain(authority.documents[0].pages[0].normalizedText);
+    expect(JSON.stringify(submittedBundle)).not.toContain(authority.documents[0].pages[0].normalizedText);
+  });
+});

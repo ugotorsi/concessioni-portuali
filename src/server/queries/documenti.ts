@@ -1,4 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { buildDatasetDocumentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
@@ -36,6 +37,7 @@ export interface DocumentoListItem {
   source: string | null;
   status: string | null;
   dataDocumento: Date | null;
+  descrizione: string | null;
   direzione: string | null;
   canale: string | null;
   numeroProtocollo: string | null;
@@ -55,6 +57,7 @@ export interface DocumentoListItem {
   reportId: string | null;
   downloadUrl: string;
   uploadedByUserEmail: string | null;
+  ocrFailedAttemptId: string | null;
 }
 
 export interface DocumentiFiltersData {
@@ -98,32 +101,38 @@ function buildWhere(params: GetDocumentiListParams): Prisma.DocumentoWhereInput 
 function buildDocumentoTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.DocumentoWhereInput {
+  const datasetWhere = buildDatasetDocumentoWhere();
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
-    return {};
+    return datasetWhere;
   }
 
   if (tenantContext.accessibleTenantIds.length === 0) {
     return {
-      OR: [{ enteId: null, concessioneId: null }],
+      AND: [datasetWhere, { OR: [{ enteId: null, concessioneId: null }] }],
     };
   }
 
   const tenantIds = tenantContext.accessibleTenantIds;
 
   return {
-    OR: [
-      { enteId: { in: tenantIds } },
+    AND: [
+      datasetWhere,
       {
-        enteId: null,
-        concessione: { is: { enteId: { in: tenantIds } } },
-      },
-      {
-        enteId: null,
-        report: { is: { enteId: { in: tenantIds } } },
-      },
-      {
-        enteId: null,
-        concessioneId: null,
+        OR: [
+          { enteId: { in: tenantIds } },
+          {
+            enteId: null,
+            concessione: { is: { enteId: { in: tenantIds } } },
+          },
+          {
+            enteId: null,
+            report: { is: { enteId: { in: tenantIds } } },
+          },
+          {
+            enteId: null,
+            concessioneId: null,
+          },
+        ],
       },
     ],
   };
@@ -158,6 +167,7 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
       source: true,
       status: true,
       dataDocumento: true,
+      descrizione: true,
       direzione: true,
       canale: true,
       numeroProtocollo: true,
@@ -176,6 +186,20 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
       pagamentoId: true,
       reportId: true,
       uploadedByUserEmail: true,
+      currentFileVersion: {
+        select: {
+          extractionAttempts: {
+            where: {
+              policyVersion: "DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1",
+              outcome: "FAILED",
+              failureCode: "OCR_REQUIRED",
+            },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
+        },
+      },
     },
   });
 
@@ -183,6 +207,7 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
     ...row,
     dimensioneBytes: row.dimensioneBytes ?? null,
     downloadUrl: `/documenti/${row.id}/download`,
+    ocrFailedAttemptId: row.currentFileVersion?.extractionAttempts[0]?.id ?? null,
   }));
 }
 
@@ -256,7 +281,10 @@ export async function getDocumentiFiltersData(): Promise<DocumentiFiltersData> {
     canali: DOCUMENT_CANALE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     concessioni: concessioni.map((item) => ({ id: item.id, label: item.numeroAtto })),
     criticita: criticita.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${formatEnumLabel(item.tipologia)}` })),
-    procedimenti: procedimenti.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${formatEnumLabel(item.tipologia)}` })),
+    procedimenti: procedimenti.map((item) => ({
+      id: item.id,
+      label: `${item.concessione?.numeroAtto ?? "Titolo non accertato"} - ${formatEnumLabel(item.tipologia)}`,
+    })),
     sopralluoghi: sopralluoghi.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${item.data.toISOString().slice(0, 10)}` })),
     pagamenti: pagamenti.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${item.annoRiferimento}` })),
     report: report.map((item) => ({ id: item.id, label: item.titolo })),

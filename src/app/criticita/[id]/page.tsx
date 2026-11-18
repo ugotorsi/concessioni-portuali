@@ -240,7 +240,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
             <CardHeader>
               <CardTitle>Lettura istruttoria</CardTitle>
               <CardDescription>
-                Supporto decisionale interno: la valutazione finale resta in capo all'Autorità competente.
+                Supporto decisionale interno: la valutazione finale resta in capo all&apos;Autorità competente.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-slate-700">
@@ -271,7 +271,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
           <CardHeader>
             <CardTitle>Mapping art. 47 Cod. Nav.</CardTitle>
             <CardDescription>
-              Sezione di supporto istruttorio interno: non sostituisce la valutazione provvedimentale dell'Autorità.
+              Sezione di supporto istruttorio interno: non sostituisce la valutazione provvedimentale dell&apos;Autorità.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -318,7 +318,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
           <CardHeader>
             <CardTitle>Regolarizzazione / sanatoria</CardTitle>
             <CardDescription>
-              La regolarizzazione incide sulla valutazione istruttoria ma non determina automaticamente l'esclusione di misure decadenziali.
+              La regolarizzazione incide sulla valutazione istruttoria ma non determina automaticamente l&apos;esclusione di misure decadenziali.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

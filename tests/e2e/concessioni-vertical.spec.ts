@@ -9,7 +9,7 @@ test("admin vede la verticale concessione in lista e dettaglio", async ({ page }
   await expect(page.getByTestId(/concessione-vertical-/).first()).toBeVisible();
   const concessioniTable = page.locator("tbody");
   await expect(concessioniTable.getByText("Portuale / AdSP").first()).toBeVisible();
-  await expect(concessioniTable.getByText("Turistico-ricreativa / Comune costiero").first()).toBeVisible();
+  await expect(concessioniTable.getByText("Marittima turistico-ricreativa").first()).toBeVisible();
 
   const dettaglioLink = page.getByRole("link", { name: "Apri scheda" }).first();
   await expect(dettaglioLink).toBeVisible();

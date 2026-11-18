@@ -62,7 +62,7 @@ export async function GET(
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({

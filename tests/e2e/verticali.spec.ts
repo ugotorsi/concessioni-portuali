@@ -1,44 +1,44 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("desktop navigation exposes Verticali and landing page renders cards", async ({ page }) => {
-  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+test("desktop navigation exposes Verticali and its landing page remains available", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
-  const verticaliSidebarLink = page.getByRole("link", { name: "Verticali" }).first();
-  await expect(verticaliSidebarLink).toBeVisible();
+  const verticaliLink = page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" });
+  await expect(verticaliLink).toBeVisible();
 
-  await page.goto("/verticali");
+  await verticaliLink.click();
   await expect(page).toHaveURL(/\/verticali$/);
-  await expect(verticaliSidebarLink).toHaveAttribute("aria-current", "page");
+  await expect(verticaliLink).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
   await expect(page.getByTestId("verticali-cards-grid")).toBeVisible();
   await expect(page.getByTestId(/vertical-card-/).first()).toBeVisible();
 
-  const firstWorkspaceCta = page.getByRole("link", { name: "Apri workspace verticale" }).first();
+  const firstWorkspaceCta = page.getByRole("link", { name: "Apri verticale" }).first();
   await expect(firstWorkspaceCta).toBeVisible();
   await Promise.all([page.waitForURL(/\/verticali\/.+/), firstWorkspaceCta.click()]);
 
-  await expect(verticaliSidebarLink).toHaveAttribute("aria-current", "page");
   await expect(page.getByTestId("vertical-workspace-kpi")).toBeVisible();
 });
 
-test("mobile navigation shows Verticali and workspace links remain reachable", async ({ page }) => {
+test("mobile navigation exposes Verticali and its route remains reachable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
-  const verticaliLink = page.getByRole("link", { name: "Verticali" }).first();
+  await page.getByText("Concessioni Portuali").first().click();
+  const verticaliLink = page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" });
   await expect(verticaliLink).toBeVisible();
-  await verticaliLink.click();
 
+  await verticaliLink.click();
   await expect(page).toHaveURL(/\/verticali$/);
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
 });
 
 test("verticale workspace links to concessioni filtered by concessionVertical", async ({ page }) => {
-  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
   await page.goto("/verticali");
-  const filteredLink = page.getByRole("link", { name: "Vedi concessioni correlate" }).first();
+  const filteredLink = page.getByRole("link", { name: "Vedi concessioni" }).first();
   const href = await filteredLink.getAttribute("href");
   expect(href).toContain("/concessioni?concessionVertical=");
 
@@ -48,14 +48,14 @@ test("verticale workspace links to concessioni filtered by concessionVertical", 
 });
 
 test("workspace links keep vertical filter only for concessioni and use generic links elsewhere", async ({ page }) => {
-  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
   await page.goto("/verticali");
-  await page.getByRole("link", { name: "Apri workspace verticale" }).first().click();
+  await page.getByRole("link", { name: "Apri verticale" }).first().click();
   await expect(page).toHaveURL(/\/verticali\/.+/);
 
   await expect(page.getByTestId("workspace-links-scope-note")).toContainText(
-    "La sezione si apre sul perimetro tenant corrente; non e applicato un filtro verticale.",
+    "Gli elenchi sono generali per il tuo perimetro di accesso e non sono filtrati per questa verticale.",
   );
 
   await expect(page.getByTestId("workspace-link-concessioni")).toHaveAttribute(
@@ -69,8 +69,18 @@ test("workspace links keep vertical filter only for concessioni and use generic 
   await expect(page.getByTestId("workspace-link-procedimenti")).toHaveAttribute("href", "/procedimenti");
 });
 
+test("workspace exposes fascicolo-first actions without hiding the concession", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
+
+  await page.goto("/verticali/portuale-adsp");
+  const item = page.getByTestId("vertical-concessione-item").filter({ has: page.getByText("1 fascicolo", { exact: true }) }).first();
+  await expect(item.getByRole("link", { name: "Apri fascicolo" })).toHaveAttribute("href", /\/procedimenti\/.+/);
+  await expect(item.getByRole("link", { name: "Apri concessione" })).toHaveAttribute("href", /\/concessioni\/.+/);
+  await expect(page.getByTestId("vertical-multiple-fascicoli").first().getByRole("link", { name: "Apri fascicolo" }).first()).toHaveAttribute("href", /\/procedimenti\/.+/);
+});
+
 test("viewer adsp can access /verticali in read-only with scoped data", async ({ page }) => {
-  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
+  await loginAndExpectLanding(page, "viewer.adsp.demo@concessioni.local", "adsp123", /\/adsp$/);
 
   await page.goto("/verticali");
   await expect(page).toHaveURL(/\/verticali$/);

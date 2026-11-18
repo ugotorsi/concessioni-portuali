@@ -1,0 +1,387 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  buildActExportDocument,
+  actDraftMatchesTemplate,
+  bodySha256,
+  changedActDraftFields,
+  normalizeActDraftContent,
+  projectActDrafts,
+  stableActDraftKey,
+  type ActDraftContent,
+  type ActDraftVersion,
+} from "@/server/fascicolo-acts/model";
+import { buildActTemplateCatalog, detectActPhase, findActTemplate, reportPlanTemplateKey } from "@/server/fascicolo-acts/templates";
+import type { StructuredReportProceduralContext } from "@/server/fascicolo-report/structured-report";
+
+function context(overrides: Partial<StructuredReportProceduralContext> = {}): StructuredReportProceduralContext {
+  return {
+    stato: "DA_AVVIARE",
+    tipologia: "ALTRO",
+    origineProcedimento: "UFFICIO",
+    dataAvvio: null,
+    dataProvvedimentoFinale: null,
+    comunicazioneAvvioInviata: false,
+    contestazioneFormaleInviata: false,
+    memorieRicevute: false,
+    audizioneSvolta: false,
+    controdeduzioniValutate: false,
+    checklistContraddittorioCompleta: false,
+    finalAct: null,
+    concessione: { numeroAtto: "17/2023", stato: "ATTIVA", dataRilascio: "2023-03-01" },
+    documentTitles: [],
+    ...overrides,
+  };
+}
+
+const templateContext = { procedimentoLabel: "Procedimento P-1", responsabile: "Dott.ssa Rossi", unitaOrganizzativa: "Ufficio Demanio" };
+
+function content(overrides: Partial<ActDraftContent> = {}): ActDraftContent {
+  return {
+    templateKey: "CATALOG:COMUNICAZIONE_AVVIO",
+    issueSemanticKey: null,
+    title: "Comunicazione di avvio",
+    body: "Testo",
+    status: "BOZZA",
+    assignee: null,
+    dueDate: null,
+    progress: 0,
+    dependencies: [],
+    attachments: [],
+    changeNote: null,
+    ...overrides,
+  };
+}
+
+function version(draftKey: string, versionNumber: number, overrides: Partial<ActDraftContent> = {}): ActDraftVersion {
+  const value = content(overrides);
+  return {
+    ...value,
+    schema: "FASCICOLO_ACT_DRAFT_V1",
+    procedimentoId: "P-1",
+    draftKey,
+    version: versionNumber,
+    bodySha256: bodySha256(value.body),
+    savedAt: new Date(Date.UTC(2026, 10, versionNumber)),
+    savedBy: "rup@example.test",
+    auditHash: "h".repeat(64),
+  };
+}
+
+describe("fascicolo act templates", () => {
+  it("leaves unverified deadlines, consequences and assumptions for professional assessment", () => {
+    const catalog = buildActTemplateCatalog({ payload: { proceduralContext: context() }, context: templateContext });
+    const start = findActTemplate(catalog, "CATALOG:COMUNICAZIONE_AVVIO")!.body;
+    const integration = findActTemplate(catalog, "CATALOG:RICHIESTA_INTEGRAZIONE")!.body;
+    const objection = findActTemplate(catalog, "CATALOG:PREAVVISO_RIGETTO")!.body;
+    const decision = findActTemplate(catalog, "CATALOG:PROVVEDIMENTO_FINALE")!.body;
+    expect(start).toContain("[TERMINE E DECORRENZA VERIFICATI PER IL PROCEDIMENTO]");
+    expect(start).not.toContain("decorrente dalla ricezione");
+    expect(integration).toContain("[DISCIPLINA E PRESUPPOSTI VERIFICATI PER IL PROCEDIMENTO]");
+    expect(objection).toContain("[TERMINE, DECORRENZA E MODALITÀ VERIFICATI");
+    expect(objection).not.toContain("Entro dieci giorni");
+    expect(decision).toContain("[INDICARE SOLO DOPO VERIFICA DELLA GIURISDIZIONE");
+    expect(decision).not.toMatch(/entro (60|120) giorni|sono stati contestati gli addebiti/i);
+  });
+
+  it("uses stable draft identities scoped to both the activity template and legal issue", () => {
+    const first = reportPlanTemplateKey("issue-m4", "Contestare uso M4", "Contestazione degli addebiti");
+    const second = reportPlanTemplateKey("issue-investments", "Contestare uso M4", "Contestazione degli addebiti");
+    const third = reportPlanTemplateKey("issue-m4", "Contestare condotta diversa", "Contestazione degli addebiti");
+    expect(first).toBe(reportPlanTemplateKey("issue-m4", "Contestare uso M4", "Contestazione degli addebiti"));
+    expect(first).not.toBe(second);
+    expect(stableActDraftKey(first, "issue-m4")).toBe(stableActDraftKey(first, "issue-m4"));
+    expect(stableActDraftKey(first, "issue-m4")).not.toBe(stableActDraftKey(first, "issue-investments"));
+    expect(first).not.toBe(third);
+    expect(stableActDraftKey(first, "issue-m4")).not.toBe(stableActDraftKey(third, "issue-m4"));
+  });
+
+  it("recognizes legacy report-plan drafts only for their matching issue and preserves their history", () => {
+    const legacyTitle = "Contestazione degli addebiti";
+    const drafts = projectActDrafts([
+      version("legacy-1", 1, {
+        templateKey: `PLAN:${legacyTitle}`,
+        issueSemanticKey: "issue-m4",
+        title: legacyTitle,
+      }),
+      version("legacy-1", 2, {
+        templateKey: "REPORT_PLAN:v2:issue-m4",
+        issueSemanticKey: "issue-m4",
+        title: legacyTitle,
+      }),
+      version("legacy-2", 1, {
+        templateKey: `PLAN:${legacyTitle}`,
+        issueSemanticKey: "issue-investments",
+        title: legacyTitle,
+      }),
+    ]);
+
+    expect(drafts).toHaveLength(2);
+    expect(actDraftMatchesTemplate(drafts.find((draft) => draft.draftKey === "legacy-1")!, {
+      templateKey: "REPORT_PLAN:v2:issue-m4",
+      issueSemanticKey: "issue-m4",
+      legacyTemplateKey: `PLAN:${legacyTitle}`,
+    })).toBe(true);
+    expect(actDraftMatchesTemplate(drafts.find((draft) => draft.draftKey === "legacy-2")!, {
+      templateKey: "REPORT_PLAN:v2:issue-m4",
+      issueSemanticKey: "issue-m4",
+      legacyTemplateKey: `PLAN:${legacyTitle}`,
+    })).toBe(false);
+  });
+
+  it("detects the administrative phase from the procedural context", () => {
+    expect(detectActPhase({ proceduralContext: context() }).phase).toBe("INITIAL");
+    expect(detectActPhase({ proceduralContext: context({ contestazioneFormaleInviata: true }) }).phase).toBe("INSTRUCTION");
+    expect(detectActPhase({ proceduralContext: context({ controdeduzioniValutate: true }) }).phase).toBe("DECISION");
+    const concluded = detectActPhase({
+      proceduralContext: context({ stato: "CONCLUSO", documentTitles: ["Istanza di riesame"] }),
+    });
+    expect(concluded).toMatchObject({ phase: "POST_DECISION", reviewPending: true, documentaryAhead: false });
+    expect(detectActPhase(null).phase).toBe("INITIAL");
+  });
+
+  it("infers a later phase from evidenced documents when authoritative metadata is stale", () => {
+    const knowledge = (text: string, evidence = true) => ({
+      id: text, kind: "LEGAL_ACT" as const, semanticKey: text, contentFingerprint: text, normalizedText: text,
+      payload: {}, confidence: 0.9, status: "AI_PROPOSED" as const, reviewVersion: 1,
+      evidence: evidence
+        ? [{ basisRef: "DOCUMENT_1.PAGE_2", documentoId: "d", documentFileVersionId: null, pageNumber: 2, textSha256: "x" }]
+        : [],
+    });
+    const framework = (legalActs: ReturnType<typeof knowledge>[]) => ({
+      partyRoles: [], facts: [], timeline: [], legalActs, measures: [], contradictions: [],
+    });
+
+    const stale = detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([
+        knowledge("Decreto n. 5/2025 di decadenza dalla concessione n. 17/2023"),
+        knowledge("Istanza di riesame presentata dal concessionario"),
+      ]),
+    });
+    expect(stale).toMatchObject({ phase: "POST_DECISION", authoritativePhase: "INITIAL", documentaryAhead: true, reviewPending: true });
+    expect(stale.documentarySignals).toContain("Decreto n. 5/2025 di decadenza dalla concessione n. 17/2023");
+
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Proposta di provvedimento di decadenza da sottoporre al dirigente")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Non risulta inviata la contestazione degli addebiti.")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Bozza di comunicazione di avvio da valutare.")]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Decreto di decadenza n. 5/2025", false)]),
+    })).toMatchObject({ phase: "INITIAL", documentaryAhead: false });
+    expect(detectActPhase({
+      proceduralContext: context(),
+      documentedFramework: framework([knowledge("Contestazione degli addebiti con termine per deduzioni di 30 giorni")]),
+    })).toMatchObject({ phase: "INSTRUCTION", documentaryAhead: true });
+    expect(detectActPhase({
+      proceduralContext: context({ stato: "CONCLUSO" }),
+      documentedFramework: framework([knowledge("Contestazione degli addebiti")]),
+    })).toMatchObject({ phase: "POST_DECISION", documentaryAhead: false });
+  });
+
+  it("recommends phase-specific facsimiles and fills only verified placeholders", () => {
+    const catalog = buildActTemplateCatalog({ payload: { proceduralContext: context() }, context: templateContext });
+    const keys = catalog.recommended.map((template) => template.templateKey);
+    expect(keys).toContain("CATALOG:COMUNICAZIONE_AVVIO");
+    expect(keys).not.toContain("CATALOG:PROVVEDIMENTO_FINALE");
+    expect(catalog.others.map((template) => template.templateKey)).toContain("CATALOG:PROVVEDIMENTO_FINALE");
+    const avvio = findActTemplate(catalog, "CATALOG:COMUNICAZIONE_AVVIO");
+    expect(avvio?.body).toContain("concessione demaniale n. 17/2023");
+    expect(avvio?.body).toContain("Responsabile del procedimento: Dott.ssa Rossi");
+    expect(avvio?.body).toContain("[CONCESSIONARIO]");
+    expect(avvio?.body).toContain("nessuna firma, protocollazione, notifica o invio automatici");
+  });
+
+  it("includes report plan drafts for concluded proceedings", () => {
+    const catalog = buildActTemplateCatalog({
+      payload: {
+        proceduralContext: context({
+          stato: "CONCLUSO",
+          finalAct: { numeroAtto: "12", dataAtto: "2025-04-02", motivazioneSintetica: "Decadenza" },
+        }),
+        operationalPlans: [{
+          issueSemanticKey: "issue-1",
+          issueText: "Decadenza",
+          sourceDocumentRefs: [],
+          outstandingEvidence: [],
+          legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+          professionalStatus: "PRELIMINARY_NOT_APPROVED",
+          recommendedNextStep: "",
+          alternatives: [],
+          deadlineReview: "",
+          steps: [{
+            title: "1. Istruire l'istanza di riesame",
+            action: "",
+            office: "",
+            requiredDocuments: [],
+            completionGate: "",
+            draftTitle: "Riscontro motivato all'istanza di riesame",
+            draftTemplate: "Oggetto: istanza di riesame relativa a [TITOLO/ATTO].",
+          }],
+        }],
+      },
+      context: templateContext,
+    });
+    expect(catalog.phase).toBe("POST_DECISION");
+    const plan = catalog.recommended[0];
+    expect(plan.source).toBe("REPORT_PLAN");
+    expect(plan.issueSemanticKey).toBe("issue-1");
+    expect(plan.body).toBe("Oggetto: istanza di riesame relativa a provvedimento n. 12 del 2025-04-02.");
+    expect(plan.phases).toEqual(["POST_DECISION"]);
+    expect(catalog.recommended.map((template) => template.templateKey)).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+  });
+
+  it("recommends issue-specific facsimiles only for the issues present in the report", () => {
+    const required: Record<string, string[]> = {
+      FEE_PAYMENT: ["non-payment"],
+      INVESTMENT_DEFAULT: ["obligation", "non-performance"],
+      THIRD_PARTY_USE: ["third-party-use"],
+    };
+    const legalApplication = (profileIds: string[]) => profileIds.map((profileId) => ({
+      issueText: "Questione relativa alla concessione demaniale portuale",
+      elementAnalysis: {
+        profileId,
+        elements: (required[profileId] ?? []).map((elementId) => ({ elementId, status: "INDICATED", core: true })),
+      },
+    })) as never;
+    const fee = buildActTemplateCatalog({
+      payload: { proceduralContext: context(), legalApplication: legalApplication(["FEE_PAYMENT"]) },
+      context: templateContext,
+    });
+    const feeKeys = fee.recommended.map((template) => template.templateKey);
+    expect(feeKeys).toContain("CATALOG:MESSA_IN_MORA_CANONE");
+    expect(feeKeys).not.toContain("CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI");
+    expect(feeKeys).not.toContain("CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI");
+    expect(fee.others.map((template) => template.templateKey)).toContain("CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI");
+    const moraBody = findActTemplate(fee, "CATALOG:MESSA_IN_MORA_CANONE")?.body ?? "";
+    expect(moraBody).toContain("[TERMINE]");
+    expect(moraBody).toContain("[SOLO SE VERIFICATO NEL TITOLO");
+    expect(moraBody).not.toMatch(/\b\d{1,2}\/\d{2}\/\d{4}\b/);
+
+    const thirdParty = buildActTemplateCatalog({
+      payload: { proceduralContext: context(), legalApplication: legalApplication(["THIRD_PARTY_USE", "INVESTMENT_DEFAULT"]) },
+      context: templateContext,
+    });
+    expect(thirdParty.recommended.map((template) => template.templateKey)).toEqual(expect.arrayContaining([
+      "CATALOG:RICHIESTA_CHIARIMENTI_USO_TERZI",
+      "CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI",
+    ]));
+
+    const undocumented = buildActTemplateCatalog({
+      payload: {
+        proceduralContext: context(),
+        legalApplication: [{
+          issueText: "Inadempimento investimenti concessione portuale",
+          elementAnalysis: { profileId: "INVESTMENT_DEFAULT", elements: [
+            { elementId: "obligation", status: "INDICATED", core: true },
+            { elementId: "non-performance", status: "NOT_PROVEN", core: true },
+          ] },
+        }] as never,
+      },
+      context: templateContext,
+    });
+    const undocumentedKeys = undocumented.recommended.map((template) => template.templateKey);
+    expect(undocumentedKeys).not.toContain("CATALOG:DIFFIDA_ADEMPIERE_INVESTIMENTI");
+    expect(undocumentedKeys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+  });
+
+  it("does not offer or create acts already performed according to the procedural metadata", () => {
+    const catalog = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ comunicazioneAvvioInviata: true, contestazioneFormaleInviata: true }) },
+      context: templateContext,
+    });
+    expect(catalog.phase).toBe("INSTRUCTION");
+    const keys = [...catalog.recommended, ...catalog.others].map((template) => template.templateKey);
+    expect(keys).not.toContain("CATALOG:COMUNICAZIONE_AVVIO");
+    expect(keys).not.toContain("CATALOG:CONTESTAZIONE_DECADENZA");
+    expect(keys).toContain("CATALOG:VALUTAZIONE_CONTRODEDUZIONI");
+    expect(findActTemplate(catalog, "CATALOG:CONTESTAZIONE_DECADENZA")).toBeNull();
+  });
+
+  it("excludes completed phases and port-specific templates from unrelated proceedings", () => {
+    const concluded = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ stato: "CONCLUSO" }) },
+      context: templateContext,
+    });
+    expect(findActTemplate(concluded, "CATALOG:COMUNICAZIONE_AVVIO")).toBeNull();
+    expect(findActTemplate(concluded, "CATALOG:CONTESTAZIONE_DECADENZA")).toBeNull();
+    const generic = buildActTemplateCatalog({
+      payload: { proceduralContext: context({ concessione: null }) },
+      context: templateContext,
+    });
+    expect([...generic.recommended, ...generic.others]).toEqual([]);
+  });
+});
+
+describe("fascicolo act versioning", () => {
+  it("normalizes content and rejects invalid dates", () => {
+    const normalized = normalizeActDraftContent(content({
+      status: "APPROVATA_INTERNAMENTE",
+      progress: 40,
+      dependencies: ["b", "a", "a", "self"],
+      attachments: ["d2", "d1", "d2"],
+      assignee: "",
+    }), "self");
+    expect(normalized).toMatchObject({ progress: 100, dependencies: ["a", "b"], attachments: ["d1", "d2"], assignee: null });
+    expect(() => normalizeActDraftContent(content({ dueDate: "2026-02-30" }), null)).toThrow();
+    expect(() => normalizeActDraftContent(content({ progress: 120 }), null)).toThrow();
+  });
+
+  it("projects append-only history with open dependencies", () => {
+    const drafts = projectActDrafts([
+      version("a", 1),
+      version("a", 2, { body: "Testo rivisto", status: "IN_REVISIONE", progress: 50 }),
+      version("b", 1, { title: "Provvedimento", dependencies: ["a"], dueDate: "2026-12-01" }),
+    ]);
+    expect(drafts.map((draft) => draft.draftKey)).toEqual(["b", "a"]);
+    const draftA = drafts.find((draft) => draft.draftKey === "a");
+    expect(draftA?.current.version).toBe(2);
+    expect(draftA?.history.map((item) => item.version)).toEqual([2, 1]);
+    expect(drafts.find((draft) => draft.draftKey === "b")?.openDependencies).toEqual(["a"]);
+    expect(changedActDraftFields(draftA!.history[1], draftA!.history[0])).toEqual(["testo", "stato", "avanzamento"]);
+    expect(changedActDraftFields(null, draftA!.history[1])).toEqual(["prima versione"]);
+    expect(() => projectActDrafts([
+      version("a", 1),
+      version("a", 2, { body: "Testo rivisto" }),
+      version("a", 2, { body: "Versione concorrente" }),
+    ])).toThrow("versioni duplicate");
+
+    const resolved = projectActDrafts([
+      version("a", 1, { status: "APPROVATA_INTERNAMENTE" }),
+      version("b", 1, { dependencies: ["a"] }),
+    ]);
+    expect(resolved.find((draft) => draft.draftKey === "b")?.openDependencies).toEqual([]);
+  });
+
+  it("builds a professional export with management details", () => {
+    const document = buildActExportDocument({
+      version: version("a", 3, {
+        body: "Primo paragrafo.\n\nSecondo paragrafo.",
+        assignee: "Ufficio Demanio",
+        dueDate: "2026-12-01",
+        attachments: ["doc-1", "doc-x"],
+        dependencies: ["b"],
+      }),
+      procedimentoLabel: "Procedimento P-1",
+      attachmentNames: new Map([["doc-1", "Verbale di sopralluogo.pdf"]]),
+      dependencyTitles: new Map([["b", "Comunicazione di avvio"]]),
+    });
+    expect(document.sections[0].paragraphs).toEqual(["Primo paragrafo.", "Secondo paragrafo."]);
+    const management = document.sections[1].paragraphs.join(" ");
+    expect(management).toContain("versione 3");
+    expect(management).toContain("Assegnatario: Ufficio Demanio.");
+    expect(management).toContain("01/12/2026");
+    expect(management).toContain("Allegati: Verbale di sopralluogo.pdf; documento non più disponibile.");
+    expect(management).toContain("Atti presupposti: Comunicazione di avvio.");
+    expect(document.subtitle).toContain("non firmato, non protocollato e non inviato");
+  });
+});

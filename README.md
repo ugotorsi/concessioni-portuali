@@ -22,7 +22,8 @@ Posizionamento attuale:
 3. Genera client Prisma e sincronizza schema:
    - `npm run db:generate`
    - `npm run db:push`
-4. (Opzionale) Carica dati demo:
+4. (Opzionale) Carica dati demo **solo in un database locale temporaneo**:
+   - imposta `ALLOW_DEMO_SEED=true` per il comando;
    - `npm run db:seed`
 5. Avvia applicazione:
    - `npm run dev`
@@ -49,7 +50,46 @@ Normalizzazione enum legacy `LegalSourceStatus` (39C-3):
 ## Comandi principali progetto
 - `npm run dev`
 - `npm run build`
+- `npm run lint`
 - `npm run check`
+
+Il collaudo guidato con scritture usa esclusivamente un PostgreSQL locale
+disponibile e dedicato (`127.0.0.1:55432`, database `noetra_test_workflow`,
+utente `noetra_test`) e una directory assoluta dedicata chiamata
+`browser-test-storage`. Su un cluster temporaneo vuoto, configurare
+`DATABASE_URL`, `DOCUMENT_STORAGE_ROOT`, `DOCUMENT_STORAGE_BACKEND=local`,
+`AI_REAL_DATA_ENABLED=false`, `ASYNC_PROVIDER_EXECUTION_ENABLED=false` e
+`AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false`, disabilitare il worker documentale
+con `DOCUMENT_WORKER_ACTIVATION_MODE=DISABLED` e impostare
+`NOETRA_GUIDED_E2E=1` e un identificativo nuovo `NOETRA_GUIDED_E2E_RUN_ID`
+(lettere minuscole, cifre e trattini). Applicare lo schema e il seed demo
+locale, impostando `ALLOW_DEMO_SEED=true` solo per il seed sul database
+temporaneo verificato e vuoto; poi eseguire
+`npx tsx tests/e2e/helpers/seed-guided-isolated.ts`.
+Infine eseguire
+`npm run test:e2e:guided-isolated`. Il server usa la porta 3119, non riusa
+server esistenti e disabilita worker e provider. I documenti e la Knowledge del
+collaudo sono sintetici e non dimostrano l'estrazione semantica automatica.
+Per i canoni, la soglia di decadenza non è dedotta dalla sola menzione delle
+rate: il confronto preliminare richiede una clausola del titolo e un conteggio
+contabile datato e non contrastante. In assenza di questi elementi il risultato
+resta da verificare; anche il confronto disponibile richiede la verifica
+professionale del titolo, delle condizioni e dei pagamenti successivi.
+Nel rapporto e nelle esportazioni, l'eventuale effetto strutturato di una
+lacuna è presentato accanto alla lacuna e ai riferimenti documentali disponibili
+come indicazione da verificare, non come conclusione accertata.
+Una fonte di ricerca entra fra gli argomenti favorevoli o contrari solo se
+supera i controlli documentali e temporali e se la sua classificazione è
+motivata da un revisore autorizzato e attestata nell'audit. La verifica tecnica
+non accerta da sola la pertinenza: il professionista deve confrontare fatti,
+passaggio, questione e limiti temporali. Le classificazioni precedenti prive
+di audit corrispondente richiedono una nuova valutazione. Le versioni storiche
+del rapporto non vengono riscritte: se non attestano tali controlli, la
+presentazione e le esportazioni sospendono le conclusioni fondate sulle fonti.
+Il test di concorrenza PostgreSQL richiede invece un database locale separato e
+vuoto, `noetra_test_concurrency`, sullo stesso indirizzo, porta e utente.
+Configurare `NOETRA_ISOLATED_PG_URL` e `DATABASE_URL` con tale database, quindi
+eseguire `npx vitest run --maxWorkers=1 tests/unit/fascicolo-operational-concurrency-postgres.test.ts`.
 
 ## Cloud demo (pilot preview, non-production)
 Stato: previsto/preparato per deploy demo cloud, senza sostituire l ambiente locale Docker.
@@ -96,6 +136,13 @@ Verticale B - Marittima turistico-ricreativa / Comuni costieri (roadmap):
 - art. 36, 37, 47 cod. nav.;
 - d.l. 400/1993;
 - art. 12 direttiva 2006/123/CE (selezione trasparente/imparziale, no proroghe automatiche generalizzate).
+
+Per l'art. 45-bis cod. nav. sono state confrontate le versioni ufficiali
+[vigente nel 2000](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-30;327:1~art45bis!vig=2000-10-10)
+e [vigente al 3 novembre 2026](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-30;327:1~art45bis!vig=2026-11-03):
+dal 18 aprile 2001 il testo non richiede più, di per sé, casi eccezionali e
+periodi determinati, ma mantiene la previa autorizzazione. La disciplina
+speciale portuale e le fonti aggiornate vanno verificate per il caso concreto.
 
 Presidio comunicativo:
 - AI come supporto istruttorio, non decisore;
@@ -424,5 +471,3 @@ Perimetro e limiti:
 - L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
 - Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.
 - La baseline test attuale e orientata a smoke/regressioni principali, non sostituisce una suite completa di integrazione e carico.
-
-

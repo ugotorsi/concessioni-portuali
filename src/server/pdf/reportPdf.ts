@@ -11,7 +11,7 @@ interface NormaReportItem {
 }
 
 interface PdfContext {
-  doc: any;
+  doc: PDFKit.PDFDocument;
   margin: number;
   writableWidth: number;
   lineGap: number;

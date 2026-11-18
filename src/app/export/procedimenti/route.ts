@@ -1,5 +1,6 @@
 import { buildCsv, buildCsvFilename, csvResponse } from "@/lib/csv";
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 import { buildRateLimitKey, checkRateLimit, createRateLimitResponse } from "@/lib/rate-limit";
@@ -32,11 +33,12 @@ export async function GET(request: Request): Promise<Response> {
   const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
   const rows = await prisma.procedimento.findMany({
-    where: hasConcessioneTenantScope
-      ? {
-          concessione: concessioneTenantWhere,
-        }
-      : undefined,
+    where: {
+      ...buildDatasetProcedimentoWhere(),
+      ...(hasConcessioneTenantScope
+        ? { concessione: concessioneTenantWhere }
+        : {}),
+    },
     orderBy: [{ createdAt: "desc" }],
     select: {
       id: true,
@@ -104,8 +106,8 @@ export async function GET(request: Request): Promise<Response> {
     { header: "motivazione_mancato_preavviso", value: (row) => row.motivazioneMancatoPreavviso },
     { header: "checklist_contraddittorio_completa", value: (row) => (row.checklistContraddittorioCompleta ? "SI" : "NO") },
     { header: "proposta_esito_istruttorio", value: (row) => row.propostaEsitoIstruttorio },
-    { header: "numero_atto", value: (row) => row.concessione.numeroAtto },
-    { header: "concessionario", value: (row) => row.concessione.concessionario.denominazione },
+    { header: "numero_atto", value: (row) => row.concessione?.numeroAtto },
+    { header: "concessionario", value: (row) => row.concessione?.concessionario?.denominazione },
     { header: "criticita_tipologia", value: (row) => row.criticita?.tipologia },
     { header: "criticita_gravita", value: (row) => row.criticita?.gravita },
     { header: "criticita_stato", value: (row) => row.criticita?.stato },
