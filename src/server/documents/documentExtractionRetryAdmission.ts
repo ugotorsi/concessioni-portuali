@@ -28,6 +28,7 @@ const terminalRecoveryFailureCodes = new Set([
   "DOCUMENT_EXTRACTION_JOB_LOOKUP_FAILED",
   "DOCUMENT_EXTRACTION_RETRY_PERMIT_VERIFICATION_FAILED",
   "DOCUMENT_EXTRACTION_EXECUTION_FAILED",
+  "DOCUMENT_EXTRACTION_PERSISTENCE_FAILED",
 ]);
 const TERMINAL_RECOVERY_AUTHORIZATION = "DOCUMENT_EXTRACTION_TERMINAL_RECOVERY_AUTHORIZED";
 
@@ -352,4 +353,30 @@ export async function ensureAuthorizedFascicoloTerminalDocumentExtractionRecover
     createdJobCount: admissions.filter((admission) => admission.outcome === "CREATED").length,
     reusedJobCount: admissions.filter((admission) => admission.outcome === "REUSED").length,
   };
+}
+
+export async function ensureAuthorizedFascicoloTerminalDocumentExtractionRecovery(
+  input: {
+    tenantId: string;
+    procedimentoId: string;
+    failedAttemptId: string;
+    reason: string;
+  },
+  dependencies: FascicoloTerminalRecoveryDependencies = defaultFascicoloTerminalRecoveryDependencies,
+) {
+  const failedAttemptId = identifier.parse(input.failedAttemptId);
+  const targets = await dependencies.list({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    limit: 5,
+  });
+  const target = targets.find((candidate) => candidate.failedAttemptId === failedAttemptId);
+  if (!target) {
+    throw new Error("DOCUMENT_EXTRACTION_TERMINAL_RECOVERY_NOT_ELIGIBLE");
+  }
+  return dependencies.recover({
+    terminalJobId: target.terminalJobId,
+    failedAttemptId: target.failedAttemptId,
+    reason: input.reason,
+  });
 }
