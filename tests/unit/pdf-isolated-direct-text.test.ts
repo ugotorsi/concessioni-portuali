@@ -51,6 +51,24 @@ describe("isolated PDF direct-text extraction", () => {
     }
   }, 30_000);
 
+  it.each([
+    ["concessione", "Concessione demaniale portuale"],
+    ["investimenti", "Piano degli investimenti e PEF"],
+    ["canoni", "Canoni e solleciti di pagamento"],
+    ["sopralluogo", "Verbale sopralluogo edilizia ambiente"],
+    ["controdeduzioni", "Memoria di controdeduzioni"],
+  ])("extracts direct text from the %s fixture using the default in-process path", async (_label, text) => {
+    const adapter = new PdfJsExtractionAdapter();
+    expect(isIsolatedPdfDirectTextEnabled({ NODE_ENV: "production" })).toBe(false);
+    const session = await adapter.open(minimalPdf(text), 5);
+    try {
+      expect(session.pageCount).toBe(1);
+      expect(await session.pages[0]!.readText(10_000)).toContain(text);
+    } finally {
+      await session.close(1_000);
+    }
+  }, 30_000);
+
   it("keeps page, character and malformed-input limits", async () => {
     const bytes = minimalPdf("Testo di prova");
     await expect(readPdfDirectTextIsolated(bytes, 0)).rejects.toMatchObject({ code: "DIRECT_PARSER_FAILURE" });

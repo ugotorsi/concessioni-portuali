@@ -241,7 +241,10 @@ export class PdfJsExtractionAdapter implements PdfExtractionAdapter {
   readonly rasterizerName = "@napi-rs/canvas";
   readonly rasterizerVersion = "0.1.80";
 
-  constructor(private readonly options: Readonly<{ isolatedDirectText?: boolean }> = {}) {}
+  constructor(private readonly options: Readonly<{
+    isolatedDirectText?: boolean;
+    loadPdfJs?: () => Promise<typeof import("pdfjs-dist/legacy/build/pdf.mjs")>;
+  }> = {}) {}
 
   async open(bytes: Buffer, maxPages: number): Promise<PdfExtractionSession> {
     if (this.options.isolatedDirectText ?? isIsolatedPdfDirectTextEnabled()) {
@@ -280,7 +283,9 @@ export class PdfJsExtractionAdapter implements PdfExtractionAdapter {
 
   private async openInProcess(bytes: Buffer, maxPages: number): Promise<PdfExtractionSession> {
     try {
-      const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      const pdfjs = await (this.options.loadPdfJs
+        ? this.options.loadPdfJs()
+        : import("pdfjs-dist/legacy/build/pdf.mjs"));
       const loadingTask = pdfjs.getDocument({
         data: new Uint8Array(bytes),
         isEvalSupported: false,
@@ -345,7 +350,11 @@ export class PdfJsExtractionAdapter implements PdfExtractionAdapter {
         throw error;
       }
       const message = error instanceof Error ? error.message : "";
-      throw new ExtractionFailure(parserFailureCode(message), undefined, error);
+      throw new ExtractionFailure(
+        parserFailureCode(message),
+        sanitizedParserFailureMessage({ message }),
+        error,
+      );
     }
   }
 }
