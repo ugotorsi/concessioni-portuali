@@ -94,6 +94,8 @@ describe("Fascicolo UX contract", () => {
     );
     const detailPage = readSource("src/app/procedimenti/[id]/page.tsx");
     const runtimePage = readSource("src/app/admin/runtime/page.tsx");
+    const runtimeActions = readSource("src/app/admin/runtime/actions.ts");
+    const legalWorkbench = readSource("src/app/admin/runtime/LegalWorkbenchSection.tsx");
 
     expect(aiWorkspace).toContain("Aggiorna fascicolo");
     expect(aiWorkspace).toContain("Interroga AI");
@@ -104,6 +106,10 @@ describe("Fascicolo UX contract", () => {
     expect(aiWorkspace).toContain("Ricerca manuale autorizzata");
     expect(aiWorkspace).toContain("La ricerca manuale autorizzata è distinta dall&apos;analisi del corpus");
     expect(aiWorkspace).toContain("startLegalAnalysisPipeline");
+    expect(runtimePage).toContain("activateQueuedLegalAnalysisJob");
+    expect(runtimePage).toContain("activateQueuedAnalysisAction");
+    expect(runtimeActions).toContain("FASCICOLO_QUEUED_ANALYSIS_WORKER_ACTIVATION");
+    expect(legalWorkbench).toContain("Avvia worker per analisi accodata");
     expect(questionPanel).toContain('id="interroga-ai"');
     expect(questionPanel).toContain("Salva quesito");
     expect(detailPage.match(/<FascicoloAiWorkspace/g)).toHaveLength(2);

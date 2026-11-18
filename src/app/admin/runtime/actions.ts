@@ -1206,6 +1206,77 @@ export async function startLegalAnalysisPipeline(formData: FormData): Promise<vo
   revalidatePath(`/procedimenti/${procedimento.id}`);
 }
 
+export async function activateQueuedLegalAnalysisJob(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const jobId = formData.get("jobId");
+  const procedimentoId = formData.get("procedimentoId");
+  if (
+    typeof jobId !== "string"
+    || !/^[A-Za-z0-9_-]{1,256}$/.test(jobId)
+    || typeof procedimentoId !== "string"
+    || !/^[A-Za-z0-9_-]{1,256}$/.test(procedimentoId)
+  ) {
+    throw new Error("INVALID_ANALYSIS_ACTIVATION_TARGET");
+  }
+  if (formData.get("confirmation") !== "ACTIVATE_QUEUED_ANALYSIS") {
+    throw new Error("ANALYSIS_ACTIVATION_CONFIRMATION_REQUIRED");
+  }
+  const job = await prisma.asyncJob.findUnique({
+    where: { id: jobId },
+    select: {
+      id: true,
+      tenantId: true,
+      procedimentoId: true,
+      operation: true,
+      purpose: true,
+      status: true,
+    },
+  });
+  if (
+    !job
+    || !job.tenantId
+    || !job.procedimentoId
+    || job.procedimentoId !== procedimentoId
+    || job.operation !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+    || job.purpose !== "FASCICOLO_MANUAL_ANALYSIS"
+    || job.status !== "QUEUED"
+  ) {
+    throw new Error("QUEUED_ANALYSIS_ACTIVATION_NOT_ELIGIBLE");
+  }
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, job.tenantId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const activation = await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_ANALYSIS",
+    applicationJobId: job.id,
+    tenantId: job.tenantId,
+    procedimentoId,
+    withLegalResearch: true,
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_QUEUED_ANALYSIS_WORKER_ACTIVATION",
+    entita: "AsyncJob",
+    entitaId: job.id,
+    enteId: job.tenantId,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      procedimentoId,
+      activationOutcome: activation.outcome,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${procedimentoId}`);
+  redirect(`/admin/runtime?procedimentoId=${encodeURIComponent(procedimentoId)}`);
+}
+
 export async function recoverCurrentKnowledgeMissions(
   formData: FormData,
 ): Promise<void> {

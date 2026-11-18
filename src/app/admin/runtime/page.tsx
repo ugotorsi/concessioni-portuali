@@ -37,6 +37,7 @@ import {
   runManualFascicoloAnalysis,
   runManualTenantBatchAnalysis,
   setRenderWorkerState,
+  activateQueuedLegalAnalysisJob,
   startLegalAnalysisPipeline,
   upsertRuntimeBudgetPolicy,
   updateAutomationControl,
@@ -709,6 +710,7 @@ export default async function RuntimeOperationsPage({
         confirmReferenceDateAction={confirmResearchReferenceDate}
         recoverMissionsAction={recoverCurrentKnowledgeMissions}
         startLegalAnalysisAction={startLegalAnalysisPipeline}
+        activateQueuedAnalysisAction={activateQueuedLegalAnalysisJob}
         configureLegalDataHunterAction={configureLegalDataHunterCredential}
         synchronizeProviderCredentialKeyAction={synchronizeResearchProviderCredentialKey}
       />
