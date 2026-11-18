@@ -4,7 +4,9 @@ import { useState, type ReactNode } from "react";
 import { AlertTriangle, FileText, Paperclip } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { Select } from "@/components/ui/Select";
+import { recoverFascicoloDocumentExtractionsAction } from "@/server/actions/fascicolo-document-extraction-recovery";
 import type { DocumentExtractionReadModel } from "@/server/queries/document-extractions";
 
 export interface FascicoloDocumentArchiveItem {
@@ -36,6 +38,8 @@ interface FascicoloDocumentsArchiveProps {
   uploadForm?: ReactNode;
   uploadInitiallyOpen?: boolean;
   archiveAction?: (formData: FormData) => void | Promise<void>;
+  procedimentoId?: string;
+  canManageProcessing?: boolean;
 }
 
 type SortOrder = "recent" | "oldest" | "name";
@@ -62,12 +66,17 @@ export function FascicoloDocumentsArchive({
   uploadForm,
   uploadInitiallyOpen = false,
   archiveAction,
+  procedimentoId,
+  canManageProcessing = false,
 }: FascicoloDocumentsArchiveProps) {
   const [selectedType, setSelectedType] = useState("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [uploadOpen, setUploadOpen] = useState(uploadInitiallyOpen);
   const availableTypes = Array.from(new Map(documents.map((item) => [item.typeCode, item.type])).entries());
   const problemCount = documents.filter((item) => item.alert).length;
+  const hasUnreadDocuments = documents.some(
+    (item) => item.versionId && (item.extraction?.status ?? "NOT_RUN") === "NOT_RUN",
+  );
   const visibleDocuments = documents
     .filter((item) => selectedType === "all" || item.typeCode === selectedType)
     .sort((left, right) => {
@@ -94,17 +103,30 @@ export function FascicoloDocumentsArchive({
             ) : null}
           </div>
         </div>
-        {uploadForm ? (
-          <Button
-            type="button"
-            onClick={() => setUploadOpen((current) => !current)}
-            aria-expanded={uploadOpen}
-            aria-controls="fascicolo-document-upload"
-          >
-            <Paperclip className="h-4 w-4" aria-hidden="true" />
-            Allega documento
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {canManageProcessing && procedimentoId && hasUnreadDocuments ? (
+            <form action={recoverFascicoloDocumentExtractionsAction}>
+              <input type="hidden" name="procedimentoId" value={procedimentoId} />
+              <SubmitButtonPending
+                variant="secondary"
+                pendingLabel="Avvio lettura..."
+              >
+                Avvia lettura documenti
+              </SubmitButtonPending>
+            </form>
+          ) : null}
+          {uploadForm ? (
+            <Button
+              type="button"
+              onClick={() => setUploadOpen((current) => !current)}
+              aria-expanded={uploadOpen}
+              aria-controls="fascicolo-document-upload"
+            >
+              <Paperclip className="h-4 w-4" aria-hidden="true" />
+              Allega documento
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {uploadForm && uploadOpen ? (
@@ -229,7 +251,9 @@ export function FascicoloDocumentsArchive({
                     </p>
                   ) : null}
                   {(item.extraction?.status ?? "NOT_RUN") === "NOT_RUN" ? (
-                    <p className="rounded-md border border-slate-200 bg-white p-3">Nessun risultato di estrazione disponibile per questa versione.</p>
+                    <p className="rounded-md border border-slate-200 bg-white p-3">
+                      Testo non ancora letto. Usa “Avvia lettura documenti” per preparare il corpus del fascicolo.
+                    </p>
                   ) : null}
                   {item.extraction?.status === "PENDING" ? (
                     <p role="status" className="rounded-md border border-sky-200 bg-sky-50 p-3 text-sky-900">

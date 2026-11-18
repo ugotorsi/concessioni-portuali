@@ -164,6 +164,8 @@ export function EntityDocumentsPanel({
         documents={documents.map((item) => toArchiveItem(item, canUpload))}
         uploadForm={uploadForm}
         archiveAction={archiveDocumentoAction}
+        procedimentoId={isProcedimento ? entityId : undefined}
+        canManageProcessing={isProcedimento && canUpload}
       />
     );
   }
