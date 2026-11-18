@@ -10,6 +10,7 @@ import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
+import { isRecoverableTerminalDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryAdmission";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
 import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
@@ -30,6 +31,7 @@ import {
   confirmResearchReferenceDate,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  recoverTerminalDocumentExtractionJob,
   cancelArchivedDocumentExtraction,
   retryFailedDocumentExtraction,
   runManualFascicoloAnalysis,
@@ -123,7 +125,7 @@ export default async function RuntimeOperationsPage({
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
     prisma.asyncJob.findMany({
       where: { status: "TERMINAL_FAILED" },
-      select: { id: true, operation: true, tenantId: true, procedimentoId: true, attemptCount: true, failureCode: true, completedAt: true },
+      select: { id: true, operation: true, tenantId: true, procedimentoId: true, attemptCount: true, failureCode: true, completedAt: true, inputReference: true },
       orderBy: { completedAt: "desc" }, take: 25,
     }),
     prisma.asyncJob.findMany({
@@ -921,7 +923,49 @@ export default async function RuntimeOperationsPage({
         <Card>
           <CardHeader><CardTitle>Elaborazioni non completate</CardTitle></CardHeader>
           <CardContent><Table><TableHeader><TableRow><TableHead>Operazione</TableHead><TableHead>Ambito</TableHead><TableHead>Tentativi</TableHead><TableHead>Codice</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
-            {failedJobs.map((job) => <TableRow key={job.id}><TableCell>{job.operation}</TableCell><TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell><TableCell>{job.attemptCount}</TableCell><TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell><TableCell><form action={retryRuntimeJob}><input type="hidden" name="jobId" value={job.id} /><Button size="sm" variant="outline" type="submit">Riprova</Button></form></TableCell></TableRow>)}
+            {failedJobs.map((job) => {
+              const reference = job.inputReference && typeof job.inputReference === "object"
+                && !Array.isArray(job.inputReference)
+                ? job.inputReference as { metadata?: unknown }
+                : null;
+              const metadata = reference?.metadata && typeof reference.metadata === "object"
+                && !Array.isArray(reference.metadata)
+                ? reference.metadata as Record<string, unknown>
+                : null;
+              const failedAttemptId = metadata?.retryAttemptId;
+              const recoverableExtraction = job.operation === "DOCUMENT_EXTRACTION_V1"
+                && isRecoverableTerminalDocumentExtractionFailure(job.failureCode)
+                && typeof failedAttemptId === "string"
+                && typeof metadata?.retryPermitRef === "string";
+              return (
+                <TableRow key={job.id}>
+                  <TableCell>{job.operation}</TableCell>
+                  <TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell>
+                  <TableCell>{job.attemptCount}</TableCell>
+                  <TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell>
+                  <TableCell>
+                    {recoverableExtraction ? (
+                      <form action={recoverTerminalDocumentExtractionJob} className="grid gap-2">
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <input name="reason" required minLength={10} maxLength={500} placeholder="Motivazione" className="h-9 rounded-md border border-slate-300 px-2 text-sm" />
+                        <label className="flex items-start gap-2 text-xs text-slate-600">
+                          <input type="checkbox" name="confirmation" value="RECOVER_TERMINAL_DOCUMENT_EXTRACTION" required />
+                          Crea un nuovo job auditato senza riaprire questo job
+                        </label>
+                        <Button size="sm" variant="outline" type="submit">Recupera estrazione</Button>
+                      </form>
+                    ) : job.operation === "DOCUMENT_EXTRACTION_V1" ? (
+                      <span className="text-xs text-slate-500">Recupero manuale dedicato non disponibile.</span>
+                    ) : (
+                      <form action={retryRuntimeJob}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <Button size="sm" variant="outline" type="submit">Riprova</Button>
+                      </form>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody></Table></CardContent>
         </Card>
       </section>
@@ -988,7 +1032,12 @@ export default async function RuntimeOperationsPage({
                   <TableCell>{attempt.documento.nome}<br /><code className="text-xs">{attempt.documentFileVersionId}</code></TableCell>
                   <TableCell>{attempt.procedimentoId}</TableCell>
                   <TableCell><code className="text-xs">{attempt.id}</code> · {formatDateIT(attempt.createdAt)}</TableCell>
-                  <TableCell>{attempt.failureCode}</TableCell>
+                  <TableCell>
+                    {attempt.failureCode}
+                    {attempt.failureCode === "DIRECT_PARSER_FAILURE" && attempt.failureMessage ? (
+                      <p className="mt-1 text-xs text-slate-600">{attempt.failureMessage}</p>
+                    ) : null}
+                  </TableCell>
                   <TableCell>
                     <form action={retryFailedDocumentExtraction} className="grid gap-2">
                       <input type="hidden" name="attemptId" value={attempt.id} />

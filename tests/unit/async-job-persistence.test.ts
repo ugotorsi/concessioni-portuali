@@ -411,6 +411,23 @@ describe("B2C9 generic async job persistence", () => {
     expect(harness.resetDocumentAnalysisActivationInTransaction).not.toHaveBeenCalled();
   });
 
+  it("does not reopen terminal document extraction jobs through the generic retry path", async () => {
+    const job = running({
+      status: "TERMINAL_FAILED",
+      operation: "DOCUMENT_EXTRACTION_V1",
+      attemptCount: 1,
+      maxAttempts: 1,
+    });
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+
+    await expect(retryTerminalAsyncJob({
+      jobId: job.id,
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    })).resolves.toMatchObject({ outcome: "NOT_RETRYABLE" });
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    expect(harness.createAuditLogInTransaction).not.toHaveBeenCalled();
+  });
+
   it("runs an optional terminal hook in the failure transaction", async () => {
     const job = running({ attemptCount: 2, maxAttempts: 2 });
     const hook = vi.fn(async (tx) => {

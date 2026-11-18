@@ -11,6 +11,7 @@ import {
 import {
   buildDocumentExtractionAdmission as buildLightweightDocumentExtractionAdmission,
 } from "@/server/documents/documentExtractionAdmission";
+import { DocumentExtractionRetryPermitError } from "@/server/documents/documentExtractionRetryPermit";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 
 const authority = {
@@ -189,6 +190,29 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
     expect(extract).not.toHaveBeenCalled();
   });
 
+  it("reports a sanitized job lookup diagnostic before creating an extraction attempt", async () => {
+    const extract = vi.fn();
+    const handler = createDocumentExtractionHandler({
+      loadJob: vi.fn().mockRejectedValue(new Error("database URL contains secret data")),
+      verifyRetryPermit: vi.fn(),
+      extract,
+      ensureFascicoloUpdate: vi.fn(),
+    });
+    const reference = handler.parseInput(normalizeAsyncJobAdmission(admission()).inputReference);
+    await expect(handler.execute(reference, {
+      jobId: "job-1",
+      correlationId: "document-extraction-test",
+      attempt: 1,
+      isCancellationRequested: vi.fn().mockResolvedValue(false),
+      heartbeat: vi.fn(),
+    })).rejects.toMatchObject({
+      category: "DEPENDENCY",
+      code: "DOCUMENT_EXTRACTION_JOB_LOOKUP_FAILED",
+      retryable: true,
+    });
+    expect(extract).not.toHaveBeenCalled();
+  });
+
   it("rejects an invented retry permit before extraction", async () => {
     const extract = vi.fn();
     const handler = createDocumentExtractionHandler({
@@ -200,7 +224,9 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
         actorEmail: "admin@example.test",
         actorRole: "ADMIN",
       }),
-      verifyRetryPermit: vi.fn().mockRejectedValue(new Error("PERMIT_NOT_FOUND")),
+      verifyRetryPermit: vi.fn().mockRejectedValue(
+        new DocumentExtractionRetryPermitError("PERMIT_NOT_FOUND"),
+      ),
       extract,
       ensureFascicoloUpdate: vi.fn(),
     });

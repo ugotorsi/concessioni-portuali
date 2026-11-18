@@ -63,6 +63,8 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import {
   isExistingCorpusAnalysisRequestEnabled,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
@@ -95,6 +97,9 @@ import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-pro
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
+import { extractQueuedProcedimentoDocumentsAction } from "@/server/actions/procedimento-document-extraction";
+import { retryFailedDocumentExtraction } from "@/app/admin/runtime/actions";
+import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
@@ -116,6 +121,7 @@ interface ProcedimentoDetailPageProps {
     reconciliationDone?: string | string[];
     analysisRefresh?: string | string[];
     researchNotice?: string | string[];
+    extraction?: string | string[];
   }>;
 }
 
@@ -210,7 +216,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section, activityError, activity, reconciliationError, reconciliationDone, analysisRefresh, researchNotice, extraction } = await searchParams;
   const sanitizedResearchNotice = typeof researchNotice === "string" && /^[A-Z0-9_]{1,80}$/.test(researchNotice)
     ? researchNotice
     : null;
@@ -239,6 +245,53 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         procedimentoId: detail.procedimento.id,
       })
     : null;
+  const documentExtractionQueue = activeSection === "documents" ? await prisma.asyncJob.groupBy({
+    by: ["status"],
+    where: {
+      procedimentoId: detail.procedimento.id,
+      operation: "DOCUMENT_EXTRACTION_V1",
+      tenantId: detail.canonicalEnteId ?? "__NO_TENANT__",
+    },
+    _count: { id: true },
+  }) : [];
+  const retryableExtractionAttempts = role === "ADMIN" && activeSection === "documents"
+    ? await prisma.documentExtractionAttempt.findMany({
+        where: {
+          tenantId: detail.canonicalEnteId ?? "__NO_TENANT__",
+          procedimentoId: detail.procedimento.id,
+          outcome: "FAILED",
+          documento: { statoDocumento: "ATTIVO" },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 50,
+        select: {
+          id: true,
+          failureCode: true,
+          failureMessage: true,
+          documentFileVersionId: true,
+          documento: { select: { nome: true, currentFileVersionId: true } },
+        },
+      })
+    : [];
+  const latestRetryableAttemptByVersion = new Map<string, (typeof retryableExtractionAttempts)[number]>();
+  for (const attempt of retryableExtractionAttempts) {
+    if (!latestRetryableAttemptByVersion.has(attempt.documentFileVersionId)) {
+      latestRetryableAttemptByVersion.set(attempt.documentFileVersionId, attempt);
+    }
+  }
+  const fascicoloRetryableAttempts = [...latestRetryableAttemptByVersion.values()].filter((attempt) =>
+    attempt.documento.currentFileVersionId === attempt.documentFileVersionId
+    && isRetryableDocumentExtractionFailure(attempt.failureCode));
+  const pendingExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "QUEUED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const failedExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "TERMINAL_FAILED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const succeededExtractionCount = documentExtractionQueue
+    .filter((row) => row.status === "SUCCEEDED")
+    .reduce((sum, row) => sum + row._count.id, 0);
+  const extractionNotice = Array.isArray(extraction) ? extraction[0] : extraction;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
   const professionalLegalQuestions = detail.canonicalEnteId
@@ -463,11 +516,28 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   ) : null;
 
   if (!detail.concessione || !detail.concessionario) {
+    // A linked neutral intake carries the original factual context even when
+    // no concession title or uploaded document has yet been established.
+    // Scope by the already authorized proceeding's tenant and dataset class.
+    const initialIntake = detail.canonicalEnteId
+      ? await prisma.fascicoloIntake.findFirst({
+          where: {
+            procedimentoId: detail.procedimento.id,
+            enteId: detail.canonicalEnteId,
+            ...buildDatasetFascicoloIntakeWhere(),
+          },
+          select: {
+            oggettoFascicolo: true,
+            contestoIniziale: true,
+            numeroConcessione: true,
+          },
+        })
+      : null;
     const overview: FascicoloOverviewModel = {
-      title: "Fascicolo operativo",
+      title: initialIntake?.oggettoFascicolo ?? "Fascicolo operativo",
       status: formatEnumLabel(detail.procedimento.stato),
       type: formatEnumLabel(detail.procedimento.tipologia),
-      reference: "Titolo concessorio non accertato",
+      reference: initialIntake?.numeroConcessione ?? "Titolo concessorio non accertato",
       lastUpdated: formatDateIT(detail.procedimento.updatedAt),
       documentCount: detail.documentiPrincipali.length,
       openIssueCount: detail.altreCriticitaAperte.length,
@@ -501,11 +571,30 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         model={overview}
         basePath={`/procedimenti/${detail.procedimento.id}`}
         activeSection={activeSection}
-        notice={duplicateDocumentUpload ? (
-          <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            Documento già presente nel fascicolo.
+        notice={(
+          <div className="space-y-3">
+            {initialIntake?.contestoIniziale ? (
+              <section aria-label="Contesto iniziale del fascicolo" className="rounded-md border border-slate-200 bg-white p-4">
+                <h2 className="text-base font-semibold text-slate-950">Contesto iniziale acquisito</h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Testo istruttorio fornito all&apos;apertura del fascicolo. Non costituisce
+                  un&apos;analisi AI e non sostituisce i documenti da caricare.
+                </p>
+                <details className="mt-3" open={activeSection === "overview"}>
+                  <summary className="cursor-pointer text-sm font-medium text-[#173d4f]">Leggi il contesto e i quesiti</summary>
+                  <div className="mt-3 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-md bg-slate-50 p-4 text-sm leading-relaxed text-slate-800">
+                    {initialIntake.contestoIniziale}
+                  </div>
+                </details>
+              </section>
+            ) : null}
+            {duplicateDocumentUpload ? (
+              <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                Documento già presente nel fascicolo.
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        )}
       >
         <div className="space-y-4">
           {activeSection === "documents" ? (
@@ -518,6 +607,77 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 canUpload={canWriteChecklist}
                 archiveMode
               />
+              {canWriteChecklist ? (
+                <div className="rounded-lg border border-slate-200 bg-white p-4" role="status">
+                  <p className="mb-2 text-sm font-medium text-slate-800">
+                    Estrazione documentale: {succeededExtractionCount} completati, {failedExtractionCount} falliti, {pendingExtractionCount} in attesa.
+                  </p>
+                  {failedExtractionCount > 0 ? (
+                    <p className="mb-3 rounded border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">
+                      L&apos;estrazione di {failedExtractionCount} documenti non è riuscita. I job sono terminati
+                      e non possono essere ripetuti con questo pulsante. I file originali restano conservati.
+                      È necessaria una correzione del parser e un nuovo tentativo autorizzato.
+                    </p>
+                  ) : null}
+                  {extractionNotice === "partial" ? (
+                    <p className="mb-3 text-sm text-amber-800">Elaborazione non completata: controlla lo stato dei documenti qui sopra.</p>
+                  ) : extractionNotice === "done" ? (
+                    <p className="mb-3 text-sm text-green-800">Job di estrazione conclusi correttamente.</p>
+                  ) : extractionNotice === "none" ? (
+                    <p className="mb-3 text-sm text-slate-700">Nessun job in attesa da elaborare: non è stato avviato nulla.</p>
+                  ) : extractionNotice === "retry-queued" ? (
+                    <p className="mb-3 text-sm text-green-800">Retry autorizzato e accodato. Verifica qui l&apos;esito dell&apos;estrazione; il file originale resta invariato.</p>
+                  ) : null}
+                  {role === "ADMIN" && fascicoloRetryableAttempts.length > 0 ? (
+                    <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3">
+                      <p className="mb-3 text-sm text-amber-950">
+                        Retry disponibile solo per ADMIN con MFA attiva. Ogni richiesta è motivata, auditata e limitata alla versione corrente del documento.
+                      </p>
+                      <div className="space-y-3">
+                        {fascicoloRetryableAttempts.map((attempt) => (
+                          <form
+                            key={attempt.id}
+                            action={retryFailedDocumentExtraction}
+                            className="grid gap-2 rounded border border-amber-200 bg-white p-3"
+                          >
+                            <input type="hidden" name="attemptId" value={attempt.id} />
+                            <p className="text-sm font-medium text-slate-900">
+                              {attempt.documento.nome} · {attempt.failureCode}
+                            </p>
+                            {attempt.failureCode === "DIRECT_PARSER_FAILURE" && attempt.failureMessage ? (
+                              <p className="text-xs text-slate-600">{attempt.failureMessage}</p>
+                            ) : null}
+                            <input
+                              name="reason"
+                              required
+                              minLength={10}
+                              placeholder="Motivazione del nuovo tentativo"
+                              className="h-9 rounded-md border border-slate-300 px-2 text-sm"
+                            />
+                            <label className="flex items-start gap-2 text-xs text-slate-700">
+                              <input type="checkbox" name="confirmation" value="RETRY_DOCUMENT_EXTRACTION" required />
+                              Autorizzo un solo nuovo tentativo locale per questa versione; nessun provider AI verrà usato.
+                            </label>
+                            <Button size="sm" variant="outline" type="submit">
+                              Autorizza retry e torna al fascicolo
+                            </Button>
+                          </form>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {pendingExtractionCount > 0 ? (
+                    <form action={extractQueuedProcedimentoDocumentsAction}>
+                      <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                      <p className="mb-2 text-sm text-slate-700">
+                        Elabora i documenti in attesa soltanto in questo fascicolo (massimo cinque per richiesta);
+                        nessun provider AI verrà attivato.
+                      </p>
+                      <Button type="submit">Estrai testo dei documenti caricati</Button>
+                    </form>
+                  ) : null}
+                </div>
+              ) : null}
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
           ) : null}

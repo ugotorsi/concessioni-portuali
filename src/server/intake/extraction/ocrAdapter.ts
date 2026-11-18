@@ -6,9 +6,13 @@ import { ExtractionFailure } from "./errors";
 import type { OcrAdapter, OcrResult } from "./types";
 
 const require = createRequire(import.meta.url);
-const italianLanguagePath = path.dirname(
-  require.resolve("@tesseract.js-data/ita/4.0.0_best_int/ita.traineddata.gz"),
-);
+
+// Resolve the optional OCR language asset only when OCR is actually requested.
+// Avoid importing binary language data into the Next.js server action bundle.
+function italianOcrLanguagePath(): string {
+  const asset = ["@tesseract.js-data", "ita", "4.0.0_best_int", "ita.traineddata.gz"].join("/");
+  return path.dirname(require.resolve(asset));
+}
 
 const workerSource = String.raw`
   const { parentPort, workerData } = require("node:worker_threads");
@@ -82,7 +86,7 @@ export class TesseractItalianOcrAdapter implements OcrAdapter {
     const deadline = Date.now() + timeoutMs;
     let execution: OcrExecution;
     try {
-      execution = this.executionFactory(image, italianLanguagePath);
+      execution = this.executionFactory(image, italianOcrLanguagePath());
     } catch (error) {
       throw new ExtractionFailure("OCR_ENGINE_FAILURE", undefined, error);
     }

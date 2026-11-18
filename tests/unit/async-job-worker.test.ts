@@ -181,6 +181,26 @@ describe("B2C9 generic async job worker", () => {
     })).resolves.toEqual({ outcome: "RETRY_SCHEDULED", jobId: "job-1" });
   });
 
+  it("uses a sanitized diagnostic code for unexpected handler errors", async () => {
+    const registry = new AsyncJobHandlerRegistry([{
+      operation: "GENERIC.TEST",
+      parseInput: (value) => value,
+      execute: async () => { throw new Error("secret token and private document details"); },
+    }]);
+    await drainOneAsyncJob({
+      workerId: "worker-1", leaseDurationMs: 60_000, retryDelayMs: 1_000, registry,
+    });
+    expect(persistence.failAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
+      failure: {
+        retryable: false,
+        category: "INTERNAL",
+        code: "UNEXPECTED_HANDLER_ERROR",
+      },
+    }));
+    expect(JSON.stringify(persistence.failAsyncJob.mock.calls)).not.toContain("secret token");
+    expect(JSON.stringify(persistence.failAsyncJob.mock.calls)).not.toContain("private document");
+  });
+
   it("cooperatively finalizes cancellation observed after execution", async () => {
     persistence.isAsyncJobCancellationRequested.mockResolvedValue(true);
     const registry = new AsyncJobHandlerRegistry([{
