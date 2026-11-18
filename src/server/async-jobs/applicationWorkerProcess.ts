@@ -13,13 +13,30 @@ function report(event: ApplicationAsyncWorkerEvent): void {
   console.log(JSON.stringify({ ...event, timestamp: new Date().toISOString() }));
 }
 
+function boundedErrorField(error: unknown, field: string, maxLength: number): string | undefined {
+  if (typeof error !== "object" || error === null || !(field in error)) return undefined;
+  const value = Reflect.get(error, field);
+  return typeof value === "string" && value.length <= maxLength ? value : undefined;
+}
+
+function databaseErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("meta" in error)) return undefined;
+  const meta = Reflect.get(error, "meta");
+  return boundedErrorField(meta, "code", 32);
+}
+
 function reportFatal(error: unknown): void {
+  const configurationCode = error instanceof ApplicationAsyncWorkerConfigurationError
+    ? error.code
+    : undefined;
   console.error(JSON.stringify({
     event: error instanceof ApplicationAsyncWorkerConfigurationError
       ? "ASYNC_WORKER_FATAL_CONFIGURATION"
       : "ASYNC_WORKER_FATAL_ERROR",
     errorName: error instanceof Error ? error.name : "UnknownError",
-    errorCode: error instanceof ApplicationAsyncWorkerConfigurationError ? error.code : "UNEXPECTED_FAILURE",
+    errorCode: configurationCode ?? boundedErrorField(error, "code", 128) ?? "UNEXPECTED_FAILURE",
+    errorSource: boundedErrorField(error, "diagnosticSource", 256),
+    databaseErrorCode: databaseErrorCode(error),
     timestamp: new Date().toISOString(),
   }));
 }
