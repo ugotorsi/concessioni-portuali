@@ -7,7 +7,8 @@ const harness = vi.hoisted(() => ({
   admit: vi.fn(),
   prisma: {
     $transaction: vi.fn(),
-    asyncJob: { findUnique: vi.fn() },
+    asyncJob: { findUnique: vi.fn(), findMany: vi.fn() },
+    documentExtractionAttempt: { findMany: vi.fn() },
   },
   findRecoveryAudit: vi.fn(),
   createRecoveryAudit: vi.fn(),
@@ -43,6 +44,7 @@ import {
   ensureAuthorizedDocumentExtractionRetryJob,
   ensureAuthorizedTerminalDocumentExtractionRecoveryJob,
 } from "@/server/documents/documentExtractionJob";
+import { listRecoverableFascicoloTerminalDocumentExtractions } from "@/server/documents/documentExtractionRetryAdmission";
 
 const permit = {
   permitRef: "a".repeat(64),
@@ -83,6 +85,8 @@ describe("authorized document extraction retry admission", () => {
       activityLog: { findFirst: harness.findRecoveryAudit },
     }));
     harness.findRecoveryAudit.mockResolvedValue(null);
+    harness.prisma.asyncJob.findMany.mockResolvedValue([]);
+    harness.prisma.documentExtractionAttempt.findMany.mockResolvedValue([]);
   });
 
   it("verifies the persisted permit before admitting one idempotent job identity", async () => {
@@ -165,5 +169,80 @@ describe("authorized document extraction retry admission", () => {
     })).rejects.toThrow("DOCUMENT_EXTRACTION_TERMINAL_RECOVERY_NOT_ELIGIBLE");
     expect(harness.admit).not.toHaveBeenCalled();
     expect(harness.issuePermit).not.toHaveBeenCalled();
+  });
+
+  it("selects only the newest terminal recovery for each current retryable attempt", async () => {
+    harness.prisma.asyncJob.findMany.mockResolvedValue([
+      {
+        id: "terminal-new",
+        failureCode: "UNHANDLED_ERROR",
+        inputReference: {
+          metadata: {
+            retryAttemptId: "attempt-failed",
+            retryPermitRef: permit.permitRef,
+          },
+        },
+      },
+      {
+        id: "terminal-old",
+        failureCode: "UNEXPECTED_TYPE_ERROR",
+        inputReference: {
+          metadata: {
+            retryAttemptId: "attempt-failed",
+            retryPermitRef: permit.permitRef,
+          },
+        },
+      },
+      {
+        id: "terminal-unrelated",
+        failureCode: "PROVIDER_FAILURE",
+        inputReference: {
+          metadata: {
+            retryAttemptId: "attempt-other",
+            retryPermitRef: permit.permitRef,
+          },
+        },
+      },
+    ]);
+    harness.prisma.documentExtractionAttempt.findMany.mockResolvedValue([
+      {
+        id: "attempt-failed",
+        failureCode: "DIRECT_PARSER_FAILURE",
+        documentFileVersionId: "version-1",
+        documento: { currentFileVersionId: "version-1" },
+      },
+    ]);
+
+    await expect(listRecoverableFascicoloTerminalDocumentExtractions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+    })).resolves.toEqual([{
+      terminalJobId: "terminal-new",
+      failedAttemptId: "attempt-failed",
+    }]);
+  });
+
+  it("excludes terminal retries for stale document versions", async () => {
+    harness.prisma.asyncJob.findMany.mockResolvedValue([{
+      id: "terminal-old-version",
+      failureCode: "UNHANDLED_ERROR",
+      inputReference: {
+        metadata: {
+          retryAttemptId: "attempt-failed",
+          retryPermitRef: permit.permitRef,
+        },
+      },
+    }]);
+    harness.prisma.documentExtractionAttempt.findMany.mockResolvedValue([{
+      id: "attempt-failed",
+      failureCode: "DIRECT_PARSER_FAILURE",
+      documentFileVersionId: "version-1",
+      documento: { currentFileVersionId: "version-2" },
+    }]);
+
+    await expect(listRecoverableFascicoloTerminalDocumentExtractions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+    })).resolves.toEqual([]);
   });
 });

@@ -100,6 +100,8 @@ import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { extractQueuedProcedimentoDocumentsAction } from "@/server/actions/procedimento-document-extraction";
 import { retryFailedDocumentExtraction } from "@/app/admin/runtime/actions";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
+import { listRecoverableFascicoloTerminalDocumentExtractions } from "@/server/documents/documentExtractionRetryAdmission";
+import { recoverFascicoloTerminalDocumentExtractionsAction } from "@/server/actions/fascicolo-document-extraction-recovery";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
@@ -282,6 +284,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const fascicoloRetryableAttempts = [...latestRetryableAttemptByVersion.values()].filter((attempt) =>
     attempt.documento.currentFileVersionId === attempt.documentFileVersionId
     && isRetryableDocumentExtractionFailure(attempt.failureCode));
+  const recoverableTerminalExtractions = role === "ADMIN"
+    && activeSection === "documents"
+    && detail.canonicalEnteId
+    ? await listRecoverableFascicoloTerminalDocumentExtractions({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : [];
   const pendingExtractionCount = documentExtractionQueue
     .filter((row) => row.status === "QUEUED")
     .reduce((sum, row) => sum + row._count.id, 0);
@@ -627,6 +637,30 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     <p className="mb-3 text-sm text-slate-700">Nessun job in attesa da elaborare: non è stato avviato nulla.</p>
                   ) : extractionNotice === "retry-queued" ? (
                     <p className="mb-3 text-sm text-green-800">Retry autorizzato e accodato. Verifica qui l&apos;esito dell&apos;estrazione; il file originale resta invariato.</p>
+                  ) : null}
+                  {role === "ADMIN" && recoverableTerminalExtractions.length > 0 ? (
+                    <form
+                      action={recoverFascicoloTerminalDocumentExtractionsAction}
+                      className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3"
+                    >
+                      <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                      <p className="mb-3 text-sm text-amber-950">
+                        {recoverableTerminalExtractions.length} estrazioni possono essere riprese in sicurezza.
+                        Verranno creati nuovi job auditati senza modificare lo storico dei tentativi precedenti.
+                      </p>
+                      <label className="mb-3 flex items-start gap-2 text-xs text-slate-700">
+                        <input
+                          type="checkbox"
+                          name="confirmation"
+                          value="RECOVER_FASCICOLO_DOCUMENT_EXTRACTIONS"
+                          required
+                        />
+                        Autorizzo il recupero delle versioni correnti; nessun provider AI verrà usato.
+                      </label>
+                      <SubmitButtonPending pendingLabel="Ripresa lettura...">
+                        Riprendi lettura documenti
+                      </SubmitButtonPending>
+                    </form>
                   ) : null}
                   {role === "ADMIN" && fascicoloRetryableAttempts.length > 0 ? (
                     <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3">

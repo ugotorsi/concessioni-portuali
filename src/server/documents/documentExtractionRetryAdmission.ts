@@ -16,6 +16,7 @@ import {
   verifyDocumentExtractionRetryPermit,
   type DocumentExtractionRetryPermit,
 } from "./documentExtractionRetryPermit";
+import { isRetryableDocumentExtractionFailure } from "./documentExtractionRetryability";
 
 const identifier = z.string().trim().min(1).max(256);
 const terminalRecoveryFailureCodes = new Set([
@@ -235,4 +236,120 @@ export async function ensureAuthorizedTerminalDocumentExtractionRecoveryJob(inpu
     reason,
   });
   return admitAsyncJob(buildAuthorizedRetryAdmission(permit, recoveryKey));
+}
+
+export interface RecoverableFascicoloTerminalExtraction {
+  readonly terminalJobId: string;
+  readonly failedAttemptId: string;
+}
+
+export async function listRecoverableFascicoloTerminalDocumentExtractions(input: {
+  tenantId: string;
+  procedimentoId: string;
+  limit?: number;
+}): Promise<RecoverableFascicoloTerminalExtraction[]> {
+  const limit = z.number().int().min(1).max(5).parse(input.limit ?? 5);
+  const jobs = await prisma.asyncJob.findMany({
+    where: {
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      operation: DOCUMENT_EXTRACTION_OPERATION,
+      status: "TERMINAL_FAILED",
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 50,
+    select: {
+      id: true,
+      failureCode: true,
+      inputReference: true,
+    },
+  });
+  const candidates = jobs.flatMap((job) => {
+    const metadata = referenceMetadata(job.inputReference);
+    return isRecoverableTerminalDocumentExtractionFailure(job.failureCode)
+      && typeof metadata?.retryAttemptId === "string"
+      && typeof metadata.retryPermitRef === "string"
+      ? [{
+          terminalJobId: job.id,
+          failedAttemptId: metadata.retryAttemptId,
+        }]
+      : [];
+  });
+  const attemptIds = [...new Set(candidates.map((candidate) => candidate.failedAttemptId))];
+  if (attemptIds.length === 0) return [];
+
+  const attempts = await prisma.documentExtractionAttempt.findMany({
+    where: {
+      id: { in: attemptIds },
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      outcome: "FAILED",
+      documento: { statoDocumento: "ATTIVO" },
+    },
+    select: {
+      id: true,
+      failureCode: true,
+      documentFileVersionId: true,
+      documento: {
+        select: { currentFileVersionId: true },
+      },
+    },
+  });
+  const eligibleAttemptIds = new Set(attempts.flatMap((attempt) =>
+    attempt.documento.currentFileVersionId === attempt.documentFileVersionId
+      && isRetryableDocumentExtractionFailure(attempt.failureCode)
+      ? [attempt.id]
+      : []));
+  const selected: RecoverableFascicoloTerminalExtraction[] = [];
+  const selectedAttemptIds = new Set<string>();
+  for (const candidate of candidates) {
+    if (
+      eligibleAttemptIds.has(candidate.failedAttemptId)
+      && !selectedAttemptIds.has(candidate.failedAttemptId)
+    ) {
+      selected.push(candidate);
+      selectedAttemptIds.add(candidate.failedAttemptId);
+    }
+    if (selected.length === limit) break;
+  }
+  return selected;
+}
+
+interface FascicoloTerminalRecoveryDependencies {
+  list: typeof listRecoverableFascicoloTerminalDocumentExtractions;
+  recover: typeof ensureAuthorizedTerminalDocumentExtractionRecoveryJob;
+}
+
+const defaultFascicoloTerminalRecoveryDependencies: FascicoloTerminalRecoveryDependencies = {
+  list: listRecoverableFascicoloTerminalDocumentExtractions,
+  recover: ensureAuthorizedTerminalDocumentExtractionRecoveryJob,
+};
+
+export async function ensureAuthorizedFascicoloTerminalDocumentExtractionRecoveries(
+  input: {
+    tenantId: string;
+    procedimentoId: string;
+    reason: string;
+    limit?: number;
+  },
+  dependencies: FascicoloTerminalRecoveryDependencies = defaultFascicoloTerminalRecoveryDependencies,
+) {
+  const targets = await dependencies.list({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    limit: input.limit,
+  });
+  const admissions = [];
+  for (const target of targets) {
+    admissions.push(await dependencies.recover({
+      terminalJobId: target.terminalJobId,
+      failedAttemptId: target.failedAttemptId,
+      reason: input.reason,
+    }));
+  }
+  return {
+    targetCount: targets.length,
+    createdJobCount: admissions.filter((admission) => admission.outcome === "CREATED").length,
+    reusedJobCount: admissions.filter((admission) => admission.outcome === "REUSED").length,
+  };
 }
