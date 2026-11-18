@@ -1069,6 +1069,8 @@ export async function retryFailedDocumentExtraction(formData: FormData): Promise
     },
   });
   revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${attempt.procedimentoId}`);
+  redirect(`/procedimenti/${encodeURIComponent(attempt.procedimentoId)}?section=documents&extraction=retry-queued`);
 }
 
 export async function startLegalAnalysisPipeline(formData: FormData): Promise<void> {

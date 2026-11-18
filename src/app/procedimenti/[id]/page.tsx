@@ -98,6 +98,8 @@ import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicol
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { extractQueuedProcedimentoDocumentsAction } from "@/server/actions/procedimento-document-extraction";
+import { retryFailedDocumentExtraction } from "@/app/admin/runtime/actions";
+import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
@@ -252,6 +254,34 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     },
     _count: { id: true },
   }) : [];
+  const retryableExtractionAttempts = role === "ADMIN" && activeSection === "documents"
+    ? await prisma.documentExtractionAttempt.findMany({
+        where: {
+          tenantId: detail.canonicalEnteId ?? "__NO_TENANT__",
+          procedimentoId: detail.procedimento.id,
+          outcome: "FAILED",
+          documento: { statoDocumento: "ATTIVO" },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 50,
+        select: {
+          id: true,
+          failureCode: true,
+          failureMessage: true,
+          documentFileVersionId: true,
+          documento: { select: { nome: true, currentFileVersionId: true } },
+        },
+      })
+    : [];
+  const latestRetryableAttemptByVersion = new Map<string, (typeof retryableExtractionAttempts)[number]>();
+  for (const attempt of retryableExtractionAttempts) {
+    if (!latestRetryableAttemptByVersion.has(attempt.documentFileVersionId)) {
+      latestRetryableAttemptByVersion.set(attempt.documentFileVersionId, attempt);
+    }
+  }
+  const fascicoloRetryableAttempts = [...latestRetryableAttemptByVersion.values()].filter((attempt) =>
+    attempt.documento.currentFileVersionId === attempt.documentFileVersionId
+    && isRetryableDocumentExtractionFailure(attempt.failureCode));
   const pendingExtractionCount = documentExtractionQueue
     .filter((row) => row.status === "QUEUED")
     .reduce((sum, row) => sum + row._count.id, 0);
@@ -547,8 +577,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <section aria-label="Contesto iniziale del fascicolo" className="rounded-md border border-slate-200 bg-white p-4">
                 <h2 className="text-base font-semibold text-slate-950">Contesto iniziale acquisito</h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Testo istruttorio fornito all'apertura del fascicolo. Non costituisce
-                  un'analisi AI e non sostituisce i documenti da caricare.
+                  Testo istruttorio fornito all&apos;apertura del fascicolo. Non costituisce
+                  un&apos;analisi AI e non sostituisce i documenti da caricare.
                 </p>
                 <details className="mt-3" open={activeSection === "overview"}>
                   <summary className="cursor-pointer text-sm font-medium text-[#173d4f]">Leggi il contesto e i quesiti</summary>
@@ -584,7 +614,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   </p>
                   {failedExtractionCount > 0 ? (
                     <p className="mb-3 rounded border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">
-                      L'estrazione di {failedExtractionCount} documenti non è riuscita. I job sono terminati
+                      L&apos;estrazione di {failedExtractionCount} documenti non è riuscita. I job sono terminati
                       e non possono essere ripetuti con questo pulsante. I file originali restano conservati.
                       È necessaria una correzione del parser e un nuovo tentativo autorizzato.
                     </p>
@@ -595,6 +625,46 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     <p className="mb-3 text-sm text-green-800">Job di estrazione conclusi correttamente.</p>
                   ) : extractionNotice === "none" ? (
                     <p className="mb-3 text-sm text-slate-700">Nessun job in attesa da elaborare: non è stato avviato nulla.</p>
+                  ) : extractionNotice === "retry-queued" ? (
+                    <p className="mb-3 text-sm text-green-800">Retry autorizzato e accodato. Verifica qui l&apos;esito dell&apos;estrazione; il file originale resta invariato.</p>
+                  ) : null}
+                  {role === "ADMIN" && fascicoloRetryableAttempts.length > 0 ? (
+                    <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3">
+                      <p className="mb-3 text-sm text-amber-950">
+                        Retry disponibile solo per ADMIN con MFA attiva. Ogni richiesta è motivata, auditata e limitata alla versione corrente del documento.
+                      </p>
+                      <div className="space-y-3">
+                        {fascicoloRetryableAttempts.map((attempt) => (
+                          <form
+                            key={attempt.id}
+                            action={retryFailedDocumentExtraction}
+                            className="grid gap-2 rounded border border-amber-200 bg-white p-3"
+                          >
+                            <input type="hidden" name="attemptId" value={attempt.id} />
+                            <p className="text-sm font-medium text-slate-900">
+                              {attempt.documento.nome} · {attempt.failureCode}
+                            </p>
+                            {attempt.failureCode === "DIRECT_PARSER_FAILURE" && attempt.failureMessage ? (
+                              <p className="text-xs text-slate-600">{attempt.failureMessage}</p>
+                            ) : null}
+                            <input
+                              name="reason"
+                              required
+                              minLength={10}
+                              placeholder="Motivazione del nuovo tentativo"
+                              className="h-9 rounded-md border border-slate-300 px-2 text-sm"
+                            />
+                            <label className="flex items-start gap-2 text-xs text-slate-700">
+                              <input type="checkbox" name="confirmation" value="RETRY_DOCUMENT_EXTRACTION" required />
+                              Autorizzo un solo nuovo tentativo locale per questa versione; nessun provider AI verrà usato.
+                            </label>
+                            <Button size="sm" variant="outline" type="submit">
+                              Autorizza retry e torna al fascicolo
+                            </Button>
+                          </form>
+                        ))}
+                      </div>
+                    </div>
                   ) : null}
                   {pendingExtractionCount > 0 ? (
                     <form action={extractQueuedProcedimentoDocumentsAction}>

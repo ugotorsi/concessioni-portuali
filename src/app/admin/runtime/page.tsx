@@ -988,7 +988,12 @@ export default async function RuntimeOperationsPage({
                   <TableCell>{attempt.documento.nome}<br /><code className="text-xs">{attempt.documentFileVersionId}</code></TableCell>
                   <TableCell>{attempt.procedimentoId}</TableCell>
                   <TableCell><code className="text-xs">{attempt.id}</code> · {formatDateIT(attempt.createdAt)}</TableCell>
-                  <TableCell>{attempt.failureCode}</TableCell>
+                  <TableCell>
+                    {attempt.failureCode}
+                    {attempt.failureCode === "DIRECT_PARSER_FAILURE" && attempt.failureMessage ? (
+                      <p className="mt-1 text-xs text-slate-600">{attempt.failureMessage}</p>
+                    ) : null}
+                  </TableCell>
                   <TableCell>
                     <form action={retryFailedDocumentExtraction} className="grid gap-2">
                       <input type="hidden" name="attemptId" value={attempt.id} />
