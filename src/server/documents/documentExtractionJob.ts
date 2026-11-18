@@ -17,7 +17,10 @@ import {
   type DocumentExtractionRetryAuthorization,
 } from "./documentExtraction";
 import { DOCUMENT_EXTRACTION_OPERATION } from "./documentExtractionAdmission";
-import { verifyDocumentExtractionRetryPermit } from "./documentExtractionRetryPermit";
+import {
+  DocumentExtractionRetryPermitError,
+  verifyDocumentExtractionRetryPermit,
+} from "./documentExtractionRetryPermit";
 
 export {
   DOCUMENT_EXTRACTION_OPERATION,
@@ -46,7 +49,10 @@ const referenceSchema = z.object({
 
 type DocumentExtractionReference = z.output<typeof referenceSchema>;
 
-export { ensureAuthorizedDocumentExtractionRetryJob } from "./documentExtractionRetryAdmission";
+export {
+  ensureAuthorizedDocumentExtractionRetryJob,
+  ensureAuthorizedTerminalDocumentExtractionRecoveryJob,
+} from "./documentExtractionRetryAdmission";
 
 export interface DocumentExtractionHandlerDependencies {
   loadJob(jobId: string): Promise<{
@@ -103,7 +109,16 @@ export function createDocumentExtractionHandler(
     operation: DOCUMENT_EXTRACTION_OPERATION,
     parseInput: (input) => referenceSchema.parse(input),
     async execute(input: DocumentExtractionReference, context: AsyncJobHandlerContext) {
-      const job = await dependencies.loadJob(context.jobId);
+      let job: Awaited<ReturnType<DocumentExtractionHandlerDependencies["loadJob"]>>;
+      try {
+        job = await dependencies.loadJob(context.jobId);
+      } catch {
+        throw new AsyncJobExecutionError(
+          "DEPENDENCY",
+          "DOCUMENT_EXTRACTION_JOB_LOOKUP_FAILED",
+          true,
+        );
+      }
       if (
         !job
         || job.operation !== DOCUMENT_EXTRACTION_OPERATION
@@ -127,27 +142,41 @@ export function createDocumentExtractionHandler(
             actorUserId: job.initiatingUserId,
             actorRole: job.actorRole,
           });
-        } catch {
-          throw new AsyncJobExecutionError("AUTHORIZATION", "DOCUMENT_EXTRACTION_RETRY_PERMIT_INVALID", false);
+        } catch (error) {
+          if (error instanceof DocumentExtractionRetryPermitError) {
+            throw new AsyncJobExecutionError(
+              "AUTHORIZATION",
+              "DOCUMENT_EXTRACTION_RETRY_PERMIT_INVALID",
+              false,
+            );
+          }
+          throw new AsyncJobExecutionError(
+            "DEPENDENCY",
+            "DOCUMENT_EXTRACTION_RETRY_PERMIT_VERIFICATION_FAILED",
+            true,
+          );
         }
       }
-      const result = await dependencies.extract({
-        documentoId: input.metadata.documentoId,
-        documentFileVersionId: input.referenceId,
-        tenantId: job.tenantId,
-        executionKey: context.jobId,
-        retryAuthorization: input.metadata.retryAttemptId && input.metadata.retryPermitRef
-          ? {
-              failedAttemptId: input.metadata.retryAttemptId,
-              authorizationId: input.metadata.retryPermitRef,
-            }
-          : null,
-        actor: {
-          userId: job.initiatingUserId,
-          userEmail: job.actorEmail,
-          userRole: job.actorRole,
-        },
-      }).catch((error: unknown) => {
+      let result: Awaited<ReturnType<DocumentExtractionHandlerDependencies["extract"]>>;
+      try {
+        result = await dependencies.extract({
+          documentoId: input.metadata.documentoId,
+          documentFileVersionId: input.referenceId,
+          tenantId: job.tenantId,
+          executionKey: context.jobId,
+          retryAuthorization: input.metadata.retryAttemptId && input.metadata.retryPermitRef
+            ? {
+                failedAttemptId: input.metadata.retryAttemptId,
+                authorizationId: input.metadata.retryPermitRef,
+              }
+            : null,
+          actor: {
+            userId: job.initiatingUserId,
+            userEmail: job.actorEmail,
+            userRole: job.actorRole,
+          },
+        });
+      } catch (error) {
         if (error instanceof DocumentExtractionAuthorityError) {
           throw new AsyncJobExecutionError(
             "AUTHORIZATION",
@@ -155,8 +184,13 @@ export function createDocumentExtractionHandler(
             false,
           );
         }
-        throw error;
-      });
+        if (error instanceof AsyncJobExecutionError) throw error;
+        throw new AsyncJobExecutionError(
+          "INTERNAL",
+          "DOCUMENT_EXTRACTION_EXECUTION_FAILED",
+          true,
+        );
+      }
       if (result.attempt.outcome !== "SUCCEEDED") {
         throw new AsyncJobExecutionError(
           "EXTRACTION",

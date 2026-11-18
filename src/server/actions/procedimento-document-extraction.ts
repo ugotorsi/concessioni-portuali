@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
+import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import { runDocumentExtractionJobById } from "@/server/documents/documentExtractionJob";
 
 const inputSchema = z.string().trim().regex(/^[A-Za-z0-9_-]{1,256}$/);
@@ -56,9 +57,9 @@ export async function extractQueuedProcedimentoDocumentsAction(formData: FormDat
       if (outcome.outcome === "SUCCEEDED") completed++;
     } catch (error) {
       console.error("bounded_document_extraction_failed", {
-        procedimentoId,
-        jobId: job.id,
-        code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+        code: error instanceof AsyncJobExecutionError
+          ? error.code
+          : "DOCUMENT_EXTRACTION_WORKER_FAILURE",
       });
     }
   }

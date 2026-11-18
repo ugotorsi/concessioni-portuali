@@ -23,6 +23,13 @@ export class AsyncJobExecutionError extends Error {
   }
 }
 
+function unhandledErrorCode(error: unknown): string {
+  if (error instanceof TypeError) return "UNEXPECTED_TYPE_ERROR";
+  if (error instanceof ReferenceError) return "UNEXPECTED_REFERENCE_ERROR";
+  if (error instanceof RangeError) return "UNEXPECTED_RANGE_ERROR";
+  return "UNEXPECTED_HANDLER_ERROR";
+}
+
 export interface DrainOneAsyncJobInput {
   workerId: string;
   leaseDurationMs: number;
@@ -129,7 +136,7 @@ async function executeClaimedAsyncJob(
     }
     const failure = error instanceof AsyncJobExecutionError
       ? error
-      : new AsyncJobExecutionError("INTERNAL", "UNHANDLED_ERROR", false);
+      : new AsyncJobExecutionError("INTERNAL", unhandledErrorCode(error), false);
     try {
       const failed = await failAsyncJob({
         ...lease(),
