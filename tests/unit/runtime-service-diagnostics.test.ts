@@ -195,4 +195,29 @@ describe("runtime service diagnostics", () => {
       }),
     ]));
   });
+
+  it("bounds an R2 probe that never settles", async () => {
+    const diagnosticsPromise = getRuntimeServiceDiagnostics({
+      DOCUMENT_STORAGE_BACKEND: "s3",
+      S3_ENDPOINT: "https://r2.example.test",
+      S3_REGION: "auto",
+      S3_BUCKET: "documents",
+      S3_ACCESS_KEY_ID: "a".repeat(32),
+      S3_SECRET_ACCESS_KEY: "b".repeat(64),
+    }, {
+      diagnosticTimeoutMs: 1,
+      fetch: vi.fn() as unknown as typeof fetch,
+      probeR2: vi.fn(() => new Promise<void>(() => undefined)),
+    });
+
+    await expect(diagnosticsPromise).resolves.toEqual(expect.objectContaining({
+      services: expect.arrayContaining([
+        expect.objectContaining({
+          id: "r2",
+          status: "UNREACHABLE",
+          code: "R2_BUCKET_TIMEOUT",
+        }),
+      ]),
+    }));
+  });
 });

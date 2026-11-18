@@ -40,10 +40,13 @@ export interface RuntimeServiceDiagnostics {
 }
 
 interface DiagnosticDependencies {
+  diagnosticTimeoutMs?: number;
   fetch?: typeof fetch;
   probeR2?: () => Promise<void>;
   verifyResearchConnectors?: typeof verifyAutomaticResearchConnectorReadiness;
 }
+
+const DIAGNOSTIC_TIMEOUT_MS = 8_000;
 
 function configured(
   environment: Readonly<Record<string, string | undefined>>,
@@ -104,7 +107,25 @@ async function fetchWithTimeout(
     ...init,
     cache: "no-store",
     redirect: "error",
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(DIAGNOSTIC_TIMEOUT_MS),
+  });
+}
+
+function withDiagnosticTimeout<T>(operation: Promise<T>, timeoutMs: number): Promise<T> {
+  const signal = AbortSignal.timeout(timeoutMs);
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    operation.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      },
+    );
   });
 }
 
@@ -264,6 +285,7 @@ async function defaultR2Probe(): Promise<void> {
 async function diagnoseR2(
   environment: Readonly<Record<string, string | undefined>>,
   probeR2: () => Promise<void>,
+  timeoutMs: number,
 ): Promise<RuntimeServiceDiagnostic> {
   if (
     environment.DOCUMENT_STORAGE_BACKEND !== "s3"
@@ -278,7 +300,7 @@ async function diagnoseR2(
     return result("r2", "NOT_CONFIGURED", "R2_CONFIGURATION_MISSING", "Configurazione R2 incompleta.");
   }
   try {
-    await probeR2();
+    await withDiagnosticTimeout(probeR2(), timeoutMs);
     return result(
       "r2",
       "READY",
@@ -287,6 +309,15 @@ async function diagnoseR2(
       r2ConfigurationMetrics(environment),
     );
   } catch (error) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return result(
+        "r2",
+        "UNREACHABLE",
+        "R2_BUCKET_TIMEOUT",
+        "Il bucket configurato non ha risposto entro il timeout diagnostico.",
+        r2ConfigurationMetrics(environment),
+      );
+    }
     const diagnostics = sanitizedS3ErrorDiagnostics(error);
     return result(
       "r2",
@@ -421,7 +452,11 @@ export async function getRuntimeServiceDiagnostics(
       environment.RENDER_WORKER_API_KEY,
       fetchImpl,
     ),
-    diagnoseR2(environment, dependencies.probeR2 ?? defaultR2Probe),
+    diagnoseR2(
+      environment,
+      dependencies.probeR2 ?? defaultR2Probe,
+      dependencies.diagnosticTimeoutMs ?? DIAGNOSTIC_TIMEOUT_MS,
+    ),
     diagnoseConnectors(
       environment,
       fetchImpl,
