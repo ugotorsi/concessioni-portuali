@@ -92,7 +92,7 @@
     "js-tiktoken": "1.0.21",
     "leaflet": "^1.9.4",
     "lucide-react": "latest",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "next-auth": "^4.24.15",
     "otpauth": "^9.5.2",
     "pdfjs-dist": "5.4.149",
