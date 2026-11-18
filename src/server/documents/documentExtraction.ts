@@ -135,6 +135,42 @@ export class DocumentExtractionAuthorityError extends Error {
   }
 }
 
+export class DocumentExtractionDependencyError extends Error {
+  readonly dependencyCode: string | null;
+
+  constructor(
+    readonly phase:
+      | "DOCUMENT_LOOKUP"
+      | "EXECUTION_ATTEMPT_LOOKUP"
+      | "CANONICAL_SUCCESS_LOOKUP"
+      | "RETRY_SOURCE_LOOKUP"
+      | "PERSISTENCE",
+    cause: unknown,
+  ) {
+    super(`DOCUMENT_EXTRACTION_${phase}_FAILED`);
+    this.name = "DocumentExtractionDependencyError";
+    this.dependencyCode = dependencyCode(cause);
+  }
+}
+
+function dependencyCode(error: unknown): string | null {
+  if (!error || typeof error !== "object" || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" && /^[A-Z0-9_]{1,64}$/.test(code) ? code : null;
+}
+
+async function runDependency<T>(
+  phase: DocumentExtractionDependencyError["phase"],
+  operation: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof DocumentExtractionAuthorityError) throw error;
+    throw new DocumentExtractionDependencyError(phase, error);
+  }
+}
+
 export interface ExtractDocumentFileVersionDependencies {
   loadDocument(documentoId: string): Promise<LoadedDocument | null>;
   findExecutionAttempt(executionKey: string): Promise<ExistingAttempt | null>;
@@ -586,7 +622,10 @@ async function extractDocumentFileVersionWithProfile(
   if (profile.ocrMode === "ENABLED" && !input.retryAuthorization) {
     throw new DocumentExtractionAuthorityError("OCR_AUTHORIZATION_REQUIRED");
   }
-  const document = await dependencies.loadDocument(input.documentoId);
+  const document = await runDependency(
+    "DOCUMENT_LOOKUP",
+    () => dependencies.loadDocument(input.documentoId),
+  );
   if (!document) {
     await dependencies.auditRejected({ ...input, code: "DOCUMENT_NOT_FOUND" });
     throw new DocumentExtractionAuthorityError("DOCUMENT_NOT_FOUND");
@@ -603,7 +642,10 @@ async function extractDocumentFileVersionWithProfile(
     throw error;
   }
 
-  const executionAttempt = await dependencies.findExecutionAttempt(input.executionKey);
+  const executionAttempt = await runDependency(
+    "EXECUTION_ATTEMPT_LOOKUP",
+    () => dependencies.findExecutionAttempt(input.executionKey),
+  );
   if (executionAttempt) {
     if (!sameAttemptScope(executionAttempt, source, profile.policyVersion)) {
       throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
@@ -611,9 +653,12 @@ async function extractDocumentFileVersionWithProfile(
     return { attempt: executionAttempt, reused: true };
   }
 
-  const canonicalSuccess = await dependencies.findCanonicalSuccess(
-    source.documentFileVersionId,
-    profile.policyVersion,
+  const canonicalSuccess = await runDependency(
+    "CANONICAL_SUCCESS_LOOKUP",
+    () => dependencies.findCanonicalSuccess(
+      source.documentFileVersionId,
+      profile.policyVersion,
+    ),
   );
   if (canonicalSuccess) {
     if (!sameAttemptScope(canonicalSuccess, source, profile.policyVersion)) {
@@ -623,8 +668,9 @@ async function extractDocumentFileVersionWithProfile(
   }
 
   if (input.retryAuthorization) {
-    const retrySource = await dependencies.loadRetryAttempt(
-      input.retryAuthorization.failedAttemptId,
+    const retrySource = await runDependency(
+      "RETRY_SOURCE_LOOKUP",
+      () => dependencies.loadRetryAttempt(input.retryAuthorization!.failedAttemptId),
     );
     if (!validRetrySource(retrySource, source, profile.policyVersion)) {
       throw new DocumentExtractionAuthorityError("RETRY_AUTHORIZATION_MISMATCH");
@@ -700,5 +746,8 @@ async function extractDocumentFileVersionWithProfile(
       failureMessage: error instanceof Error ? error.message.slice(0, 500) : "Technical extraction failed.",
     };
   }
-  return dependencies.persist(completed);
+  return runDependency(
+    "PERSISTENCE",
+    () => dependencies.persist(completed),
+  );
 }

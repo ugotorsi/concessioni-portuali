@@ -13,6 +13,7 @@ import { AsyncJobExecutionError, drainAsyncJobById } from "@/server/async-jobs/w
 import {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
   DocumentExtractionAuthorityError,
+  DocumentExtractionDependencyError,
   extractDocumentFileVersion,
   type DocumentExtractionRetryAuthorization,
 } from "./documentExtraction";
@@ -182,6 +183,18 @@ export function createDocumentExtractionHandler(
             "AUTHORIZATION",
             `DOCUMENT_EXTRACTION_${error.code}`,
             false,
+          );
+        }
+        if (error instanceof DocumentExtractionDependencyError) {
+          console.error("document_extraction_dependency_failed", {
+            jobId: context.jobId,
+            phase: error.phase,
+            dependencyCode: error.dependencyCode,
+          });
+          throw new AsyncJobExecutionError(
+            "DEPENDENCY",
+            `DOCUMENT_EXTRACTION_${error.phase}_FAILED`,
+            true,
           );
         }
         if (error instanceof AsyncJobExecutionError) throw error;

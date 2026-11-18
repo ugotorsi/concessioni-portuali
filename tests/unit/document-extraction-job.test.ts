@@ -11,6 +11,7 @@ import {
 import {
   buildDocumentExtractionAdmission as buildLightweightDocumentExtractionAdmission,
 } from "@/server/documents/documentExtractionAdmission";
+import { DocumentExtractionDependencyError } from "@/server/documents/documentExtraction";
 import { DocumentExtractionRetryPermitError } from "@/server/documents/documentExtractionRetryPermit";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 
@@ -211,6 +212,45 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       retryable: true,
     });
     expect(extract).not.toHaveBeenCalled();
+  });
+
+  it("reports a sanitized extraction dependency phase without leaking the cause", async () => {
+    const report = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const handler = createDocumentExtractionHandler({
+      loadJob: vi.fn().mockResolvedValue({
+        operation: DOCUMENT_EXTRACTION_OPERATION,
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        initiatingUserId: "user-1",
+        actorEmail: "admin@example.test",
+        actorRole: "ADMIN",
+      }),
+      verifyRetryPermit: vi.fn(),
+      extract: vi.fn().mockRejectedValue(new DocumentExtractionDependencyError(
+        "PERSISTENCE",
+        Object.assign(new Error("database URL contains secret data"), { code: "P2003" }),
+      )),
+      ensureFascicoloUpdate: vi.fn(),
+    });
+    const reference = handler.parseInput(normalizeAsyncJobAdmission(admission()).inputReference);
+
+    await expect(handler.execute(reference, {
+      jobId: "job-1",
+      correlationId: "document-extraction-test",
+      attempt: 1,
+      isCancellationRequested: vi.fn().mockResolvedValue(false),
+      heartbeat: vi.fn(),
+    })).rejects.toMatchObject({
+      category: "DEPENDENCY",
+      code: "DOCUMENT_EXTRACTION_PERSISTENCE_FAILED",
+      retryable: true,
+    });
+    expect(report).toHaveBeenCalledWith("document_extraction_dependency_failed", {
+      jobId: "job-1",
+      phase: "PERSISTENCE",
+      dependencyCode: "P2003",
+    });
+    expect(JSON.stringify(report.mock.calls)).not.toContain("database URL");
   });
 
   it("rejects an invented retry permit before extraction", async () => {

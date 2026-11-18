@@ -128,6 +128,29 @@ function harness() {
 describe("archived DocumentFileVersion extraction", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it.each([
+    ["findExecutionAttempt", "EXECUTION_ATTEMPT_LOOKUP"],
+    ["findCanonicalSuccess", "CANONICAL_SUCCESS_LOOKUP"],
+    ["persist", "PERSISTENCE"],
+  ] as const)("classifies an unexpected %s dependency failure", async (dependency, phase) => {
+    const dependencies = harness();
+    vi.mocked(dependencies[dependency]).mockRejectedValueOnce(
+      Object.assign(new Error("sensitive database detail"), { code: "P2022" }),
+    );
+
+    await expect(extractDocumentFileVersion({
+      documentoId: documentId,
+      documentFileVersionId: versionId,
+      tenantId,
+      executionKey,
+      actor,
+    }, dependencies)).rejects.toMatchObject({
+      name: "DocumentExtractionDependencyError",
+      phase,
+      dependencyCode: "P2022",
+    });
+  });
+
   it("extracts the current canonical version and preserves source provenance", async () => {
     const dependencies = harness();
     await expect(extractDocumentFileVersion({
