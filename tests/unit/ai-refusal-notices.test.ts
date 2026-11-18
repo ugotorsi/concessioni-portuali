@@ -17,6 +17,7 @@ function renderWorkbench(notice: string | null): string {
     confirmReferenceDateAction: noopAction,
     recoverMissionsAction: noopAction,
     startLegalAnalysisAction: noopAction,
+    activateQueuedAnalysisAction: noopAction,
     configureLegalDataHunterAction: noopAction,
     synchronizeProviderCredentialKeyAction: noopAction,
   }));

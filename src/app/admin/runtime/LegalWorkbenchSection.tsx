@@ -50,6 +50,7 @@ interface Props {
   confirmReferenceDateAction: (formData: FormData) => Promise<void>;
   recoverMissionsAction: (formData: FormData) => Promise<void>;
   startLegalAnalysisAction: (formData: FormData) => Promise<void>;
+  activateQueuedAnalysisAction: (formData: FormData) => Promise<void>;
   configureLegalDataHunterAction: (formData: FormData) => Promise<void>;
   synchronizeProviderCredentialKeyAction: () => Promise<void>;
 }
@@ -108,6 +109,7 @@ export function LegalWorkbenchSection({
   confirmReferenceDateAction,
   recoverMissionsAction,
   startLegalAnalysisAction,
+  activateQueuedAnalysisAction,
   configureLegalDataHunterAction,
   synchronizeProviderCredentialKeyAction,
 }: Props) {
@@ -242,7 +244,22 @@ export function LegalWorkbenchSection({
                           <TableCell><StatusBadge status={job.status} /></TableCell>
                           <TableCell className="font-mono text-xs">{job.purpose}</TableCell>
                           <TableCell>{job.completedAt ? formatDateIT(job.completedAt) : "—"}</TableCell>
-                          <TableCell className="font-mono text-xs">{job.failureCode ?? "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {job.failureCode ?? "—"}
+                            {job.status === "QUEUED" && job.purpose === "FASCICOLO_MANUAL_ANALYSIS" ? (
+                              <form action={activateQueuedAnalysisAction} className="mt-2 space-y-2 font-sans">
+                                <input type="hidden" name="jobId" value={job.id} />
+                                <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
+                                <label className="flex items-center gap-2 text-xs text-slate-700">
+                                  <input type="checkbox" name="confirmation" value="ACTIVATE_QUEUED_ANALYSIS" required />
+                                  Confermo l&apos;avvio del worker per questa analisi già accodata
+                                </label>
+                                <Button type="submit" size="sm" variant="secondary">
+                                  Avvia worker per analisi accodata
+                                </Button>
+                              </form>
+                            ) : null}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
