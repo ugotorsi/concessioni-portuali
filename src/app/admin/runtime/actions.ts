@@ -55,7 +55,10 @@ import {
 import { recoverCurrentKnowledgeResearchMissions, ResearchMissionRecoveryError } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-legal-analysis-pipeline";
-import { ensureAuthorizedDocumentExtractionRetryJob } from "@/server/documents/documentExtractionRetryAdmission";
+import {
+  ensureAuthorizedDocumentExtractionRetryJob,
+  ensureAuthorizedTerminalDocumentExtractionRecoveryJob,
+} from "@/server/documents/documentExtractionRetryAdmission";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import {
   readProviderCredentialKey,
@@ -1071,6 +1074,78 @@ export async function retryFailedDocumentExtraction(formData: FormData): Promise
   revalidatePath("/admin/runtime");
   revalidatePath(`/procedimenti/${attempt.procedimentoId}`);
   redirect(`/procedimenti/${encodeURIComponent(attempt.procedimentoId)}?section=documents&extraction=retry-queued`);
+}
+
+export async function recoverTerminalDocumentExtractionJob(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const terminalJobId = formData.get("jobId");
+  const reason = formData.get("reason");
+  if (typeof terminalJobId !== "string" || !terminalJobId.trim()) throw new Error("INVALID_JOB_ID");
+  if (typeof reason !== "string" || reason.trim().length < 10 || reason.trim().length > 500) {
+    throw new Error("RECOVERY_REASON_REQUIRED");
+  }
+  if (formData.get("confirmation") !== "RECOVER_TERMINAL_DOCUMENT_EXTRACTION") {
+    throw new Error("RECOVERY_CONFIRMATION_REQUIRED");
+  }
+  const job = await prisma.asyncJob.findUnique({
+    where: { id: terminalJobId.trim() },
+    select: {
+      operation: true,
+      status: true,
+      failureCode: true,
+      tenantId: true,
+      procedimentoId: true,
+      inputReference: true,
+    },
+  });
+  const inputReference = job?.inputReference && typeof job.inputReference === "object"
+    && !Array.isArray(job.inputReference)
+    ? job.inputReference as { metadata?: unknown }
+    : null;
+  const metadata = inputReference?.metadata && typeof inputReference.metadata === "object"
+    && !Array.isArray(inputReference.metadata)
+    ? inputReference.metadata as Record<string, unknown>
+    : null;
+  const failedAttemptId = metadata?.retryAttemptId;
+  if (
+    !job
+    || job.operation !== "DOCUMENT_EXTRACTION_V1"
+    || job.status !== "TERMINAL_FAILED"
+    || !job.tenantId
+    || !job.procedimentoId
+    || typeof failedAttemptId !== "string"
+  ) {
+    throw new Error("DOCUMENT_EXTRACTION_TERMINAL_RECOVERY_NOT_ELIGIBLE");
+  }
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, job.tenantId, { mode: "write", allowWhenEnteMissing: false });
+
+  const recovery = await ensureAuthorizedTerminalDocumentExtractionRecoveryJob({
+    terminalJobId: terminalJobId.trim(),
+    failedAttemptId,
+    reason: reason.trim(),
+  });
+  const activation = await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_EXTRACTION",
+    procedimentoId: job.procedimentoId,
+  });
+  await auditSuccess({
+    azione: "DOCUMENT_EXTRACTION_TERMINAL_RECOVERY_REQUESTED",
+    entita: "AsyncJob",
+    entitaId: terminalJobId.trim(),
+    enteId: job.tenantId,
+    actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+    metadata: {
+      failedAttemptId,
+      recoveryJobId: recovery.job.id,
+      admissionOutcome: recovery.outcome,
+      workerActivationOutcome: activation.outcome,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${job.procedimentoId}`);
+  redirect(`/procedimenti/${encodeURIComponent(job.procedimentoId)}?section=documents&extraction=recovery-queued`);
 }
 
 export async function startLegalAnalysisPipeline(formData: FormData): Promise<void> {

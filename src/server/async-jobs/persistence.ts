@@ -1003,6 +1003,9 @@ export async function retryTerminalAsyncJob(input: {
     if (current.status !== "TERMINAL_FAILED") {
       return { outcome: "NOT_RETRYABLE" as const, job: current };
     }
+    if (current.operation === "DOCUMENT_EXTRACTION_V1") {
+      return { outcome: "NOT_RETRYABLE" as const, job: current };
+    }
     if (current.purpose === SINGLE_ATTEMPT_V7_PURPOSE) {
       return { outcome: "NOT_RETRYABLE" as const, job: current };
     }

@@ -51,21 +51,24 @@ describe("isolated PDF direct-text extraction", () => {
     }
   }, 30_000);
 
-  it.each([
+  it.each([false, true])("extracts direct text from all five representative PDFs (isolated=%s)", async (isolatedDirectText) => {
+    const fixtures = [
     ["concessione", "Concessione demaniale portuale"],
     ["investimenti", "Piano degli investimenti e PEF"],
     ["canoni", "Canoni e solleciti di pagamento"],
     ["sopralluogo", "Verbale sopralluogo edilizia ambiente"],
     ["controdeduzioni", "Memoria di controdeduzioni"],
-  ])("extracts direct text from the %s fixture using the default in-process path", async (_label, text) => {
-    const adapter = new PdfJsExtractionAdapter();
-    expect(isIsolatedPdfDirectTextEnabled({ NODE_ENV: "production" })).toBe(false);
-    const session = await adapter.open(minimalPdf(text), 5);
-    try {
-      expect(session.pageCount).toBe(1);
-      expect(await session.pages[0]!.readText(10_000)).toContain(text);
-    } finally {
-      await session.close(1_000);
+    ] as const;
+    for (const [label, text] of fixtures) {
+      const adapter = new PdfJsExtractionAdapter({ isolatedDirectText });
+      expect(isIsolatedPdfDirectTextEnabled({ NODE_ENV: "production" })).toBe(false);
+      const session = await adapter.open(minimalPdf(text), 5);
+      try {
+        expect(session.pageCount, label).toBe(1);
+        expect(await session.pages[0]!.readText(10_000), label).toContain(text);
+      } finally {
+        await session.close(1_000);
+      }
     }
   }, 30_000);
 
