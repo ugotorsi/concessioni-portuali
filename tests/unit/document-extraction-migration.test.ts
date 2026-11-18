@@ -7,6 +7,9 @@ import { afterEach, describe, expect, it } from "vitest";
 const migration = readFileSync(resolve(
   "prisma/migrations/20261009_document_file_version_extraction/migration.sql",
 ), "utf8");
+const retryabilityMigration = readFileSync(resolve(
+  "prisma/migrations/20261118_document_extraction_retryability_alignment/migration.sql",
+), "utf8");
 const databases: PGlite[] = [];
 
 async function baseline() {
@@ -34,6 +37,7 @@ async function baseline() {
     );
   `);
   await database.exec(migration);
+  await database.exec(retryabilityMigration);
   return database;
 }
 
@@ -156,6 +160,42 @@ describe("document extraction additive migration", () => {
     await expect(database.exec(
       `UPDATE "DocumentExtractionAttempt" SET "failureMessage" = 'changed' WHERE "id" = 'attempt-failed-1'`,
     )).rejects.toThrow(/immutable/);
+  });
+
+  it.each([
+    "DIRECT_PARSER_FAILURE",
+    "PROVIDER_MISMATCH",
+    "BUCKET_MISMATCH",
+  ])("allows an audited retry after %s", async (failureCode) => {
+    const database = await baseline();
+    await seedSource(database);
+    await database.exec(attemptSql({
+      id: "attempt-failed",
+      outcome: "FAILED",
+      failureCode,
+    }));
+
+    await database.exec(attemptSql({
+      id: "attempt-retry",
+      retryOfAttemptId: "attempt-failed",
+      retryAuthorizationId: "retry-authorization",
+    }));
+  });
+
+  it("continues to reject retry sources outside the domain allowlist", async () => {
+    const database = await baseline();
+    await seedSource(database);
+    await database.exec(attemptSql({
+      id: "attempt-failed",
+      outcome: "FAILED",
+      failureCode: "INTEGRITY_SHA256_MISMATCH",
+    }));
+
+    await expect(database.exec(attemptSql({
+      id: "attempt-retry",
+      retryOfAttemptId: "attempt-failed",
+      retryAuthorizationId: "retry-authorization",
+    }))).rejects.toThrow(/retryable failed attempt/);
   });
 
   it("rejects duplicate execution identities and incomplete retry provenance", async () => {
