@@ -10,6 +10,15 @@ const queryMocks = vi.hoisted(() => ({
   getHumanReview: vi.fn(),
   getProcedimentoDetail: vi.fn(),
   getAutomaticWorkflow: vi.fn(),
+  getInitialIntake: vi.fn(),
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    fascicoloIntake: {
+      findFirst: queryMocks.getInitialIntake,
+    },
+  },
 }));
 
 vi.mock("@/server/queries/ai-fascicolo-trusted-review-materials", () => ({
@@ -265,6 +274,7 @@ function renderPanel(options: {
 describe("B2C9A Trusted Review read consumer panel V1", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    queryMocks.getInitialIntake.mockResolvedValue(null);
     queryMocks.getProcedimentoDetail.mockResolvedValue(procedimentoDetail);
     queryMocks.getMaterials.mockResolvedValue({
       procedimentoId: "procedimento-1",
