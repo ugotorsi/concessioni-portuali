@@ -26,9 +26,11 @@ describe("document extraction runtime diagnostics UI", () => {
 
   it("offers an ADMIN-only guided retry from the fascicolo and returns there after admission", () => {
     expect(fascicoloPage).toContain('role === "ADMIN" && fascicoloRetryableAttempts.length > 0');
-    expect(fascicoloPage).toContain("action={retryFailedDocumentExtraction}");
+    expect(fascicoloPage).toContain("recoverFascicoloTerminalDocumentExtractionAction");
+    expect(fascicoloPage).toContain("recoverableTerminalAttemptIds.has(attempt.id)");
     expect(fascicoloPage).toContain("Retry disponibile solo per ADMIN con MFA attiva.");
     expect(fascicoloPage).toContain("Autorizza retry e torna al fascicolo");
+    expect(fascicoloPage).toContain("Crea nuovo recovery e torna al fascicolo");
     expect(runtimeActions).toContain("const currentUser = await requireAdminWithMfa();");
     expect(runtimeActions).toContain(
       'redirect(`/procedimenti/${encodeURIComponent(attempt.procedimentoId)}?section=documents&extraction=retry-queued`)',

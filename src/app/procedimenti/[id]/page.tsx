@@ -101,7 +101,10 @@ import { extractQueuedProcedimentoDocumentsAction } from "@/server/actions/proce
 import { retryFailedDocumentExtraction } from "@/app/admin/runtime/actions";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { listRecoverableFascicoloTerminalDocumentExtractions } from "@/server/documents/documentExtractionRetryAdmission";
-import { recoverFascicoloTerminalDocumentExtractionsAction } from "@/server/actions/fascicolo-document-extraction-recovery";
+import {
+  recoverFascicoloTerminalDocumentExtractionAction,
+  recoverFascicoloTerminalDocumentExtractionsAction,
+} from "@/server/actions/fascicolo-document-extraction-recovery";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
@@ -292,6 +295,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         procedimentoId: detail.procedimento.id,
       })
     : [];
+  const recoverableTerminalAttemptIds = new Set(
+    recoverableTerminalExtractions.map((target) => target.failedAttemptId),
+  );
   const pendingExtractionCount = documentExtractionQueue
     .filter((row) => row.status === "QUEUED")
     .reduce((sum, row) => sum + row._count.id, 0);
@@ -671,10 +677,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                         {fascicoloRetryableAttempts.map((attempt) => (
                           <form
                             key={attempt.id}
-                            action={retryFailedDocumentExtraction}
+                            action={recoverableTerminalAttemptIds.has(attempt.id)
+                              ? recoverFascicoloTerminalDocumentExtractionAction
+                              : retryFailedDocumentExtraction}
                             className="grid gap-2 rounded border border-amber-200 bg-white p-3"
                           >
-                            <input type="hidden" name="attemptId" value={attempt.id} />
+                            <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                            <input
+                              type="hidden"
+                              name={recoverableTerminalAttemptIds.has(attempt.id) ? "failedAttemptId" : "attemptId"}
+                              value={attempt.id}
+                            />
                             <p className="text-sm font-medium text-slate-900">
                               {attempt.documento.nome} · {attempt.failureCode}
                             </p>
@@ -689,11 +702,20 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                               className="h-9 rounded-md border border-slate-300 px-2 text-sm"
                             />
                             <label className="flex items-start gap-2 text-xs text-slate-700">
-                              <input type="checkbox" name="confirmation" value="RETRY_DOCUMENT_EXTRACTION" required />
+                              <input
+                                type="checkbox"
+                                name="confirmation"
+                                value={recoverableTerminalAttemptIds.has(attempt.id)
+                                  ? "RECOVER_FASCICOLO_DOCUMENT_EXTRACTION"
+                                  : "RETRY_DOCUMENT_EXTRACTION"}
+                                required
+                              />
                               Autorizzo un solo nuovo tentativo locale per questa versione; nessun provider AI verrà usato.
                             </label>
                             <Button size="sm" variant="outline" type="submit">
-                              Autorizza retry e torna al fascicolo
+                              {recoverableTerminalAttemptIds.has(attempt.id)
+                                ? "Crea nuovo recovery e torna al fascicolo"
+                                : "Autorizza retry e torna al fascicolo"}
                             </Button>
                           </form>
                         ))}
