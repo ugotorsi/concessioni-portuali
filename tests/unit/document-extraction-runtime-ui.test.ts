@@ -34,4 +34,11 @@ describe("document extraction runtime diagnostics UI", () => {
       'redirect(`/procedimenti/${encodeURIComponent(attempt.procedimentoId)}?section=documents&extraction=retry-queued`)',
     );
   });
+
+  it("offers aggregate terminal recovery inside the fascicolo without exposing job identifiers", () => {
+    expect(fascicoloPage).toContain("recoverFascicoloTerminalDocumentExtractionsAction");
+    expect(fascicoloPage).toContain("Riprendi lettura documenti");
+    expect(fascicoloPage).toContain("nuovi job auditati senza modificare lo storico");
+    expect(fascicoloPage).not.toContain('name="jobId"');
+  });
 });
