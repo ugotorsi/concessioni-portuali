@@ -121,6 +121,17 @@ export async function GET(): Promise<Response> {
     && typeof application === "object"
     && (application as { oauth_resource?: unknown }).oauth_resource === "https://app.noetra.it/api/mcp"
   )).length;
+  const authorizedApplications = applications.map((application) => {
+    if (!application || typeof application !== "object") return null;
+    const record = application as {
+      oauth_resource?: unknown;
+      application?: { name?: unknown };
+    };
+    return {
+      resource: typeof record.oauth_resource === "string" ? record.oauth_resource : null,
+      name: typeof record.application?.name === "string" ? record.application.name : null,
+    };
+  });
 
   return Response.json({
     uniqueWorkosUser: true,
@@ -142,6 +153,7 @@ export async function GET(): Promise<Response> {
     activeWorkosOrganizationMembershipCount: activeMembershipCount,
     authorizedApplicationCount: applications.length,
     noetraAuthorizedApplicationCount,
+    authorizedApplications,
     activeSessionCount: sessions.length,
     priorBindingRestorable: priorExternalId !== null && priorExternalId.length <= 64,
     priorBindingFingerprint: priorExternalId
