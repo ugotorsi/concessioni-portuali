@@ -129,8 +129,19 @@ describe("GET /api/auth/workos/complete", () => {
   });
 
   it("maps provider HTTP and network failures to AUTH_UNAVAILABLE", async () => {
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 502 }));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    fetchMock.mockResolvedValueOnce(Response.json(
+      { error: "invalid_api_key", error_description: "provider secret" },
+      { status: 401 },
+    ));
     expect((await GET(request())).status).toBe(503);
+    expect(consoleError).toHaveBeenCalledWith(JSON.stringify({
+      event: "workos_oauth_completion_failure",
+      stage: "WORKOS_RESPONSE",
+      status: 401,
+      code: "invalid_api_key",
+    }));
+    expect(consoleError).not.toHaveBeenCalledWith(expect.stringContaining("provider secret"));
 
     fetchMock.mockRejectedValueOnce(new Error("provider secret"));
     const response = await GET(request());
