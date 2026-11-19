@@ -1,12 +1,20 @@
+import { createHash } from "node:crypto";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const findUserMock = vi.hoisted(() => vi.fn());
 const fetchMock = vi.hoisted(() => vi.fn());
+const auditSuccessMock = vi.hoisted(() => vi.fn());
+const auditFailureMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth", () => ({ getCurrentUser: getCurrentUserMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: { user: { findUnique: findUserMock } },
+}));
+vi.mock("@/server/audit/auditLog", () => ({
+  auditSuccess: auditSuccessMock,
+  auditFailure: auditFailureMock,
 }));
 
 import { GET } from "@/app/api/auth/workos/complete/route";
@@ -43,6 +51,8 @@ describe("GET /api/auth/workos/complete", () => {
     vi.stubGlobal("fetch", fetchMock);
     getCurrentUserMock.mockResolvedValue({ id: "user-local-1" });
     findUserMock.mockResolvedValue(localUser());
+    auditSuccessMock.mockResolvedValue(undefined);
+    auditFailureMock.mockResolvedValue(undefined);
     fetchMock.mockResolvedValue(Response.json({ redirect_uri: `${issuer}/oauth2/authorize/resume` }));
   });
 
@@ -200,6 +210,97 @@ describe("GET /api/auth/workos/complete", () => {
 
     expect((await GET(request())).status).toBe(503);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("rebinds only with an exact permit and preserves WorkOS identity relations", async () => {
+    const previousExternalId = "legacy-user-id";
+    vi.stubEnv(
+      "WORKOS_EXTERNAL_ID_REBIND_PERMIT",
+      `user-local-1:${createHash("sha256").update(previousExternalId).digest("hex")}`,
+    );
+    const list = (ids: string[]) => Response.json({ data: ids.map((id) => ({ id })) });
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ error: "email_not_available" }, { status: 400 }))
+      .mockResolvedValueOnce(Response.json({
+        data: [{
+          id: "user_01M7TEST",
+          email: "ada@example.test",
+          email_verified: true,
+          external_id: previousExternalId,
+        }],
+      }))
+      .mockResolvedValueOnce(list(["membership-1"]))
+      .mockResolvedValueOnce(list(["application-1"]))
+      .mockResolvedValueOnce(list([]))
+      .mockResolvedValueOnce(Response.json({
+        id: "user_01M7TEST",
+        external_id: "user-local-1",
+      }))
+      .mockResolvedValueOnce(list(["membership-1"]))
+      .mockResolvedValueOnce(list(["application-1"]))
+      .mockResolvedValueOnce(list([]))
+      .mockResolvedValueOnce(Response.json({ redirect_uri: `${issuer}/oauth2/authorize/resume` }));
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(302);
+    expect(fetchMock).toHaveBeenCalledTimes(10);
+    expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
+      azione: "WORKOS_EXTERNAL_ID_REBIND",
+      entita: "WorkosUser",
+      entitaId: "user_01M7TEST",
+      metadata: expect.objectContaining({
+        previousExternalId,
+        externalId: "user-local-1",
+      }),
+    }));
+    expect(auditFailureMock).not.toHaveBeenCalled();
+  });
+
+  it("restores the previous binding when a WorkOS identity relation changes", async () => {
+    const previousExternalId = "legacy-user-id";
+    vi.stubEnv(
+      "WORKOS_EXTERNAL_ID_REBIND_PERMIT",
+      `user-local-1:${createHash("sha256").update(previousExternalId).digest("hex")}`,
+    );
+    const list = (ids: string[]) => Response.json({ data: ids.map((id) => ({ id })) });
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ error: "email_not_available" }, { status: 400 }))
+      .mockResolvedValueOnce(Response.json({
+        data: [{
+          id: "user_01M7TEST",
+          email: "ada@example.test",
+          email_verified: true,
+          external_id: previousExternalId,
+        }],
+      }))
+      .mockResolvedValueOnce(list(["membership-1"]))
+      .mockResolvedValueOnce(list(["application-1"]))
+      .mockResolvedValueOnce(list([]))
+      .mockResolvedValueOnce(Response.json({
+        id: "user_01M7TEST",
+        external_id: "user-local-1",
+      }))
+      .mockResolvedValueOnce(list(["membership-1"]))
+      .mockResolvedValueOnce(list(["application-changed"]))
+      .mockResolvedValueOnce(list([]))
+      .mockResolvedValueOnce(Response.json({
+        id: "user_01M7TEST",
+        external_id: previousExternalId,
+      }));
+
+    expect((await GET(request())).status).toBe(503);
+    expect(fetchMock.mock.calls[9]?.[1]).toEqual(expect.objectContaining({
+      method: "PUT",
+      body: JSON.stringify({ external_id: previousExternalId }),
+    }));
+    expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
+      metadata: expect.objectContaining({
+        reason: "POSTCONDITION_FAILED",
+        rollbackSucceeded: true,
+      }),
+    }));
+    expect(auditSuccessMock).not.toHaveBeenCalled();
   });
 
   it.each([

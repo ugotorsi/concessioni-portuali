@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -142,5 +144,8 @@ export async function GET(): Promise<Response> {
     noetraAuthorizedApplicationCount,
     activeSessionCount: sessions.length,
     priorBindingRestorable: priorExternalId !== null && priorExternalId.length <= 64,
+    priorBindingFingerprint: priorExternalId
+      ? createHash("sha256").update(priorExternalId).digest("hex")
+      : null,
   }, { headers: { "Cache-Control": "no-store" } });
 }

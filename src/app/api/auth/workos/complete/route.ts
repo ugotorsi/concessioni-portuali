@@ -1,5 +1,8 @@
+import { createHash } from "node:crypto";
+
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { getResearchMcpAuthConfig, RESEARCH_MCP_TENANT_ID_CLAIM } from "@/server/legal-research/mcp-auth";
 
 export const runtime = "nodejs";
@@ -91,6 +94,17 @@ async function reconcileVerifiedWorkosUser(input: Readonly<{
     return { ok: false, reason: "EMAIL_UNVERIFIED" };
   }
   if (existingUser.external_id !== null && existingUser.external_id !== undefined) {
+    if (
+      typeof existingUser.external_id === "string"
+      && await rebindVerifiedWorkosUser({
+        apiKey: input.apiKey,
+        localUserId: input.localUserId,
+        workosUserId: existingUser.id,
+        previousExternalId: existingUser.external_id,
+      })
+    ) {
+      return { ok: true };
+    }
     return { ok: false, reason: "EXTERNAL_ID_CONFLICT" };
   }
 
@@ -108,6 +122,120 @@ async function reconcileVerifiedWorkosUser(input: Readonly<{
   return updatedUser.external_id === input.localUserId
     ? { ok: true }
     : { ok: false, reason: "UPDATE_MISMATCH" };
+}
+
+async function workosIdentitySnapshot(apiKey: string, workosUserId: string): Promise<string | null> {
+  const urls = [
+    `https://api.workos.com/user_management/organization_memberships?user_id=${encodeURIComponent(workosUserId)}&limit=100`,
+    `https://api.workos.com/user_management/users/${encodeURIComponent(workosUserId)}/authorized_applications`,
+    `https://api.workos.com/user_management/users/${encodeURIComponent(workosUserId)}/sessions`,
+  ];
+  const responses = await Promise.all(urls.map((url) => fetch(url, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+    cache: "no-store",
+  })));
+  if (responses.some((response) => !response.ok)) return null;
+  const lists = await Promise.all(responses.map(async (response) => {
+    const body = await response.json() as { data?: unknown };
+    if (!Array.isArray(body.data)) return null;
+    const ids = body.data.map((item) => (
+      item && typeof item === "object" && typeof (item as { id?: unknown }).id === "string"
+        ? (item as { id: string }).id
+        : null
+    ));
+    return ids.every((id): id is string => id !== null) ? ids.sort() : null;
+  }));
+  if (lists.some((list) => list === null)) return null;
+  return createHash("sha256").update(JSON.stringify(lists)).digest("hex");
+}
+
+async function rebindVerifiedWorkosUser(input: Readonly<{
+  apiKey: string;
+  localUserId: string;
+  workosUserId: string;
+  previousExternalId: string;
+}>): Promise<boolean> {
+  const previousFingerprint = createHash("sha256").update(input.previousExternalId).digest("hex");
+  if (
+    process.env.WORKOS_EXTERNAL_ID_REBIND_PERMIT
+    !== `${input.localUserId}:${previousFingerprint}`
+  ) {
+    return false;
+  }
+  const beforeSnapshot = await workosIdentitySnapshot(input.apiKey, input.workosUserId);
+  if (!beforeSnapshot) return false;
+
+  const userUrl = `https://api.workos.com/user_management/users/${encodeURIComponent(input.workosUserId)}`;
+  const update = (externalId: string) => fetch(userUrl, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${input.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ external_id: externalId }),
+    cache: "no-store",
+  });
+  const updateResponse = await update(input.localUserId);
+  if (!updateResponse.ok) {
+    await auditFailure({
+      azione: "WORKOS_EXTERNAL_ID_REBIND",
+      entita: "WorkosUser",
+      entitaId: input.workosUserId,
+      metadata: { reason: "UPDATE_REJECTED", previousFingerprint },
+    });
+    return false;
+  }
+  const updatedUser = await updateResponse.json() as { id?: unknown; external_id?: unknown };
+  const afterSnapshot = await workosIdentitySnapshot(input.apiKey, input.workosUserId);
+  if (
+    updatedUser.id !== input.workosUserId
+    || updatedUser.external_id !== input.localUserId
+    || afterSnapshot !== beforeSnapshot
+  ) {
+    const rollbackResponse = await update(input.previousExternalId);
+    await auditFailure({
+      azione: "WORKOS_EXTERNAL_ID_REBIND",
+      entita: "WorkosUser",
+      entitaId: input.workosUserId,
+      metadata: {
+        reason: "POSTCONDITION_FAILED",
+        previousExternalId: input.previousExternalId,
+        requestedExternalId: input.localUserId,
+        rollbackSucceeded: rollbackResponse.ok,
+        beforeSnapshot,
+        afterSnapshot,
+      },
+    });
+    return false;
+  }
+
+  try {
+    await auditSuccess({
+      azione: "WORKOS_EXTERNAL_ID_REBIND",
+      entita: "WorkosUser",
+      entitaId: input.workosUserId,
+      metadata: {
+        previousExternalId: input.previousExternalId,
+        externalId: input.localUserId,
+        invariantSnapshot: beforeSnapshot,
+      },
+    });
+    return true;
+  } catch {
+    const rollbackResponse = await update(input.previousExternalId);
+    await auditFailure({
+      azione: "WORKOS_EXTERNAL_ID_REBIND",
+      entita: "WorkosUser",
+      entitaId: input.workosUserId,
+      metadata: {
+        reason: "AUDIT_WRITE_FAILED",
+        previousExternalId: input.previousExternalId,
+        requestedExternalId: input.localUserId,
+        rollbackSucceeded: rollbackResponse.ok,
+      },
+    });
+    return false;
+  }
 }
 
 export async function GET(request: Request): Promise<Response> {
