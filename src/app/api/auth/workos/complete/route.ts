@@ -13,7 +13,7 @@ function unavailable(): Response {
 }
 
 function logCompletionFailure(input: Readonly<{
-  stage: "WORKOS_RESPONSE" | "WORKOS_PAYLOAD" | "WORKOS_REQUEST" | "REDIRECT_VALIDATION";
+  stage: "WORKOS_RESPONSE" | "WORKOS_PAYLOAD" | "WORKOS_REQUEST" | "IDENTITY_RECONCILIATION" | "REDIRECT_VALIDATION";
   status?: number;
   code?: string;
   category?: "API_CREDENTIAL" | "CONSENT_OPTIONS" | "EXTERNAL_AUTH_ID" | "USER" | "VALIDATION_OTHER";
@@ -52,6 +52,46 @@ async function workosErrorDetails(response: Response): Promise<Readonly<{
   }
 }
 
+async function reconcileVerifiedWorkosUser(input: Readonly<{
+  apiKey: string;
+  localUserId: string;
+  email: string;
+}>): Promise<boolean> {
+  const listUrl = new URL("https://api.workos.com/user_management/users");
+  listUrl.searchParams.set("email", input.email);
+  listUrl.searchParams.set("limit", "2");
+  const headers = { Authorization: `Bearer ${input.apiKey}` };
+  const listResponse = await fetch(listUrl, { headers, cache: "no-store" });
+  if (!listResponse.ok) return false;
+
+  const listBody = await listResponse.json() as { data?: unknown };
+  if (!Array.isArray(listBody.data) || listBody.data.length !== 1) return false;
+  const [existingUser] = listBody.data as Array<Record<string, unknown>>;
+  if (
+    typeof existingUser.id !== "string"
+    || !/^user_[A-Za-z0-9]{1,128}$/.test(existingUser.id)
+    || typeof existingUser.email !== "string"
+    || existingUser.email.toLowerCase() !== input.email.toLowerCase()
+    || existingUser.email_verified !== true
+    || (existingUser.external_id !== null && existingUser.external_id !== undefined)
+  ) {
+    return false;
+  }
+
+  const updateResponse = await fetch(
+    `https://api.workos.com/user_management/users/${encodeURIComponent(existingUser.id)}`,
+    {
+      method: "PUT",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ external_id: input.localUserId }),
+      cache: "no-store",
+    },
+  );
+  if (!updateResponse.ok) return false;
+  const updatedUser = await updateResponse.json() as { external_id?: unknown };
+  return updatedUser.external_id === input.localUserId;
+}
+
 export async function GET(request: Request): Promise<Response> {
   const config = getResearchMcpAuthConfig();
   const apiKey = process.env.WORKOS_API_KEY;
@@ -87,7 +127,7 @@ export async function GET(request: Request): Promise<Response> {
 
   let redirectUri: URL;
   try {
-    const completion = await fetch("https://api.workos.com/authkit/oauth2/complete", {
+    const complete = () => fetch("https://api.workos.com/authkit/oauth2/complete", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -108,14 +148,30 @@ export async function GET(request: Request): Promise<Response> {
       }),
       cache: "no-store",
     });
+    let completion = await complete();
     if (!completion.ok) {
       const details = await workosErrorDetails(completion);
-      logCompletionFailure({
-        stage: "WORKOS_RESPONSE",
-        status: completion.status,
-        ...details,
-      });
-      return unavailable();
+      if (details.code === "email_not_available") {
+        const reconciled = await reconcileVerifiedWorkosUser({
+          apiKey,
+          localUserId: user.id,
+          email: user.email,
+        });
+        if (reconciled) {
+          completion = await complete();
+        } else {
+          logCompletionFailure({ stage: "IDENTITY_RECONCILIATION" });
+        }
+      }
+      if (!completion.ok) {
+        const finalDetails = await workosErrorDetails(completion);
+        logCompletionFailure({
+          stage: "WORKOS_RESPONSE",
+          status: completion.status,
+          ...finalDetails,
+        });
+        return unavailable();
+      }
     }
 
     const body = await completion.json() as { redirect_uri?: unknown };

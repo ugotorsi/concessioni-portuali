@@ -150,6 +150,58 @@ describe("GET /api/auth/workos/complete", () => {
     expect(await response.text()).not.toContain("provider secret");
   });
 
+  it("reconciles one verified unbound WorkOS user before retrying completion", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ error: "email_not_available" }, { status: 400 }))
+      .mockResolvedValueOnce(Response.json({
+        data: [{
+          id: "user_01M7TEST",
+          email: "ada@example.test",
+          email_verified: true,
+          external_id: null,
+        }],
+      }))
+      .mockResolvedValueOnce(Response.json({ external_id: "user-local-1" }))
+      .mockResolvedValueOnce(Response.json({ redirect_uri: `${issuer}/oauth2/authorize/resume` }));
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe(`${issuer}/oauth2/authorize/resume`);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock.mock.calls[1]?.[0].toString()).toBe(
+      "https://api.workos.com/user_management/users?email=ada%40example.test&limit=2",
+    );
+    expect(fetchMock.mock.calls[2]).toEqual([
+      "https://api.workos.com/user_management/users/user_01M7TEST",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer workos_test_key",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ external_id: "user-local-1" }),
+        cache: "no-store",
+      },
+    ]);
+  });
+
+  it("does not relink a WorkOS user already bound to another identity", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ error: "email_not_available" }, { status: 400 }))
+      .mockResolvedValueOnce(Response.json({
+        data: [{
+          id: "user_01M7TEST",
+          email: "ada@example.test",
+          email_verified: true,
+          external_id: "another-user",
+        }],
+      }));
+
+    expect((await GET(request())).status).toBe(503);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     ["missing redirect", {}],
     ["malformed redirect", { redirect_uri: "not a URL" }],
