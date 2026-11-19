@@ -16,23 +16,39 @@ function logCompletionFailure(input: Readonly<{
   stage: "WORKOS_RESPONSE" | "WORKOS_PAYLOAD" | "WORKOS_REQUEST" | "REDIRECT_VALIDATION";
   status?: number;
   code?: string;
+  category?: "API_CREDENTIAL" | "CONSENT_OPTIONS" | "EXTERNAL_AUTH_ID" | "USER" | "VALIDATION_OTHER";
 }>): void {
   console.error(JSON.stringify({
     event: "workos_oauth_completion_failure",
     stage: input.stage,
     ...(input.status === undefined ? {} : { status: input.status }),
     ...(input.code ? { code: input.code } : {}),
+    ...(input.category ? { category: input.category } : {}),
   }));
 }
 
-async function workosErrorCode(response: Response): Promise<string | undefined> {
+async function workosErrorDetails(response: Response): Promise<Readonly<{
+  code?: string;
+  category?: "API_CREDENTIAL" | "CONSENT_OPTIONS" | "EXTERNAL_AUTH_ID" | "USER" | "VALIDATION_OTHER";
+}>> {
   try {
-    const body = await response.clone().json() as { error?: unknown };
-    return typeof body.error === "string" && /^[A-Za-z0-9_.-]{1,128}$/.test(body.error)
-      ? body.error
-      : undefined;
+    const body = await response.clone().json() as Record<string, unknown>;
+    const code = [body.error, body.code, body.error_code].find(
+      (value): value is string => typeof value === "string" && /^[A-Za-z0-9_.-]{1,128}$/.test(value),
+    );
+    const text = JSON.stringify(body).toLowerCase().replace(/[_-]/g, " ");
+    const category = text.includes("external_auth_id") || text.includes("external auth")
+      ? "EXTERNAL_AUTH_ID"
+      : text.includes("consent")
+        ? "CONSENT_OPTIONS"
+        : text.includes("api key") || text.includes("authentication")
+          ? "API_CREDENTIAL"
+          : text.includes("user")
+            ? "USER"
+            : "VALIDATION_OTHER";
+    return { code, category };
   } catch {
-    return undefined;
+    return {};
   }
 }
 
@@ -93,10 +109,11 @@ export async function GET(request: Request): Promise<Response> {
       cache: "no-store",
     });
     if (!completion.ok) {
+      const details = await workosErrorDetails(completion);
       logCompletionFailure({
         stage: "WORKOS_RESPONSE",
         status: completion.status,
-        code: await workosErrorCode(completion),
+        ...details,
       });
       return unavailable();
     }

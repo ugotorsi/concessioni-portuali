@@ -140,6 +140,7 @@ describe("GET /api/auth/workos/complete", () => {
       stage: "WORKOS_RESPONSE",
       status: 401,
       code: "invalid_api_key",
+      category: "API_CREDENTIAL",
     }));
     expect(consoleError).not.toHaveBeenCalledWith(expect.stringContaining("provider secret"));
 
