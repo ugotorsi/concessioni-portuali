@@ -7,6 +7,11 @@ const getCurrentKnowledgeRevisionMock = vi.hoisted(() => vi.fn());
 const buildPlansMock = vi.hoisted(() => vi.fn());
 const reconcileMock = vi.hoisted(() => vi.fn());
 const loadConfirmationsMock = vi.hoisted(() => vi.fn(async () => []));
+const isAutomationEnabledMock = vi.hoisted(() => vi.fn(async () => false));
+const autonomousResearchPlannerMock = vi.hoisted(() => vi.fn(() => vi.fn(() => ({
+  authorized: true,
+  workerActorId: "worker-1",
+}))));
 
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 vi.mock("@/server/fascicolo-knowledge/repository", () => ({
@@ -21,6 +26,12 @@ vi.mock("@/server/fascicolo-knowledge/researchMissionLifecycle", () => ({
 }));
 vi.mock("@/server/fascicolo-knowledge/referenceDateConfirmation", () => ({
   loadReferenceDateConfirmations: loadConfirmationsMock,
+}));
+vi.mock("@/server/automation/automationControl", () => ({
+  isAutomationEnabled: isAutomationEnabledMock,
+}));
+vi.mock("@/server/legal-research/automatic-research-policy", () => ({
+  autonomousResearchPlanner: autonomousResearchPlannerMock,
 }));
 vi.mock("@/server/legal-research/persisted-research-policy", () => ({
   effectiveResearchPolicyEnvironment: vi.fn(async () => ({
@@ -70,6 +81,29 @@ describe("recoverCurrentKnowledgeResearchMissions", () => {
     });
     expect(reconcileMock).toHaveBeenCalledWith(expect.objectContaining({
       assignedActorId: "user-1",
+    }));
+    expect(buildPlansMock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      autonomousResearch: undefined,
+    }));
+    expect(autonomousResearchPlannerMock).not.toHaveBeenCalled();
+  });
+
+  it("uses the autonomous planner only when persistent automation is ON", async () => {
+    isAutomationEnabledMock.mockResolvedValue(true);
+    prismaMock.user.findFirst.mockResolvedValue({ id: "user-1" });
+
+    await recoverCurrentKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      candidateActorId: "user-1",
+      requireValidCandidate: true,
+    });
+
+    expect(autonomousResearchPlannerMock).toHaveBeenCalledWith("tenant-1", {
+      AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "false",
+    });
+    expect(buildPlansMock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      autonomousResearch: expect.any(Function),
     }));
   });
 

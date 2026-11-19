@@ -2,6 +2,7 @@ import { autonomousResearchPlanner } from "@/server/legal-research/automatic-res
 import type { ResearchMission } from "@/server/legal-research/bridge";
 import { effectiveResearchPolicyEnvironment } from "@/server/legal-research/persisted-research-policy";
 import { prisma } from "@/lib/prisma";
+import { isAutomationEnabled } from "@/server/automation/automationControl";
 
 import {
   getCurrentKnowledgeRevision,
@@ -92,13 +93,16 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
   });
-  const autonomousResearch = input.autonomousResearch ?? autonomousResearchPlanner(
-    input.tenantId,
-    await effectiveResearchPolicyEnvironment({
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-    }),
-  );
+  let autonomousResearch = input.autonomousResearch;
+  if (!autonomousResearch && await isAutomationEnabled()) {
+    autonomousResearch = autonomousResearchPlanner(
+      input.tenantId,
+      await effectiveResearchPolicyEnvironment({
+        tenantId: input.tenantId,
+        procedimentoId: input.procedimentoId,
+      }),
+    );
+  }
   let plans;
   try {
     plans = buildKnowledgeResearchMissionPlans(revision, {
