@@ -17,6 +17,8 @@ function logCompletionFailure(input: Readonly<{
   status?: number;
   code?: string;
   category?: "API_CREDENTIAL" | "CONSENT_OPTIONS" | "EXTERNAL_AUTH_ID" | "USER" | "VALIDATION_OTHER";
+  reason?: "LIST_RESPONSE" | "LIST_CARDINALITY" | "INVALID_RECORD" | "EMAIL_UNVERIFIED"
+    | "EXTERNAL_ID_CONFLICT" | "UPDATE_RESPONSE" | "UPDATE_MISMATCH";
 }>): void {
   console.error(JSON.stringify({
     event: "workos_oauth_completion_failure",
@@ -24,6 +26,7 @@ function logCompletionFailure(input: Readonly<{
     ...(input.status === undefined ? {} : { status: input.status }),
     ...(input.code ? { code: input.code } : {}),
     ...(input.category ? { category: input.category } : {}),
+    ...(input.reason ? { reason: input.reason } : {}),
   }));
 }
 
@@ -56,26 +59,39 @@ async function reconcileVerifiedWorkosUser(input: Readonly<{
   apiKey: string;
   localUserId: string;
   email: string;
-}>): Promise<boolean> {
+}>): Promise<
+  | Readonly<{ ok: true }>
+  | Readonly<{
+    ok: false;
+    reason: "LIST_RESPONSE" | "LIST_CARDINALITY" | "INVALID_RECORD" | "EMAIL_UNVERIFIED"
+      | "EXTERNAL_ID_CONFLICT" | "UPDATE_RESPONSE" | "UPDATE_MISMATCH";
+  }>
+> {
   const listUrl = new URL("https://api.workos.com/user_management/users");
   listUrl.searchParams.set("email", input.email);
   listUrl.searchParams.set("limit", "2");
   const headers = { Authorization: `Bearer ${input.apiKey}` };
   const listResponse = await fetch(listUrl, { headers, cache: "no-store" });
-  if (!listResponse.ok) return false;
+  if (!listResponse.ok) return { ok: false, reason: "LIST_RESPONSE" };
 
   const listBody = await listResponse.json() as { data?: unknown };
-  if (!Array.isArray(listBody.data) || listBody.data.length !== 1) return false;
+  if (!Array.isArray(listBody.data) || listBody.data.length !== 1) {
+    return { ok: false, reason: "LIST_CARDINALITY" };
+  }
   const [existingUser] = listBody.data as Array<Record<string, unknown>>;
   if (
     typeof existingUser.id !== "string"
     || !/^user_[A-Za-z0-9]{1,128}$/.test(existingUser.id)
     || typeof existingUser.email !== "string"
     || existingUser.email.toLowerCase() !== input.email.toLowerCase()
-    || existingUser.email_verified !== true
-    || (existingUser.external_id !== null && existingUser.external_id !== undefined)
   ) {
-    return false;
+    return { ok: false, reason: "INVALID_RECORD" };
+  }
+  if (existingUser.email_verified !== true) {
+    return { ok: false, reason: "EMAIL_UNVERIFIED" };
+  }
+  if (existingUser.external_id !== null && existingUser.external_id !== undefined) {
+    return { ok: false, reason: "EXTERNAL_ID_CONFLICT" };
   }
 
   const updateResponse = await fetch(
@@ -87,9 +103,11 @@ async function reconcileVerifiedWorkosUser(input: Readonly<{
       cache: "no-store",
     },
   );
-  if (!updateResponse.ok) return false;
+  if (!updateResponse.ok) return { ok: false, reason: "UPDATE_RESPONSE" };
   const updatedUser = await updateResponse.json() as { external_id?: unknown };
-  return updatedUser.external_id === input.localUserId;
+  return updatedUser.external_id === input.localUserId
+    ? { ok: true }
+    : { ok: false, reason: "UPDATE_MISMATCH" };
 }
 
 export async function GET(request: Request): Promise<Response> {
@@ -152,15 +170,18 @@ export async function GET(request: Request): Promise<Response> {
     if (!completion.ok) {
       const details = await workosErrorDetails(completion);
       if (details.code === "email_not_available") {
-        const reconciled = await reconcileVerifiedWorkosUser({
+        const reconciliation = await reconcileVerifiedWorkosUser({
           apiKey,
           localUserId: user.id,
           email: user.email,
         });
-        if (reconciled) {
+        if (reconciliation.ok) {
           completion = await complete();
         } else {
-          logCompletionFailure({ stage: "IDENTITY_RECONCILIATION" });
+          logCompletionFailure({
+            stage: "IDENTITY_RECONCILIATION",
+            reason: reconciliation.reason,
+          });
         }
       }
       if (!completion.ok) {
