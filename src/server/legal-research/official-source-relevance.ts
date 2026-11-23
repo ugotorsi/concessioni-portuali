@@ -47,6 +47,7 @@ const NATIONAL_ACT_TYPES = [
   ["DECRETO LEGISLATIVO", "DECRETO_LEGISLATIVO"],
   ["DECRETO-LEGGE", "DECRETO_LEGGE"],
   ["DECRETO LEGGE", "DECRETO_LEGGE"],
+  ["REGIO DECRETO", "REGIO_DECRETO"],
   ["LEGGE", "LEGGE"],
 ] as const;
 
@@ -82,8 +83,9 @@ export function parseProviderLegislationReference(input: {
       year: discovered.year!,
     };
   }
-  // Only the act heading is considered: parenthetical subjects often cite other acts.
-  const title = head.toUpperCase();
+  // Prefer the explicit identifier; only the title heading is considered as a fallback because
+  // parenthetical subjects often cite unrelated acts.
+  const title = (input.officialIdentifier ?? head).split("(")[0].toUpperCase();
   if (/LEGGE\s+(REGIONALE|PROVINCIALE|COSTITUZIONALE)|REGIONE\s|PROVINCIA\s/.test(title)) return null;
   for (const [label, actType] of NATIONAL_ACT_TYPES) {
     const index = title.indexOf(label);
@@ -113,6 +115,7 @@ export function officialNormattivaUrl(input: {
   } catch {
     return { reason: "SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE" };
   }
+
   if (url.protocol !== "https:") return { reason: "SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE" };
   if (url.hostname === "www.normattiva.it") {
     return url.searchParams.get("atto.codiceRedazionale") === input.officialIdentifier
@@ -130,6 +133,35 @@ export function officialNormattivaUrl(input: {
     return { url: detail.toString() };
   }
   return { reason: "SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE" };
+}
+
+export function officialNormattivaUrlFromLookup(input: {
+  candidateSourceUrl?: string | null;
+  providerRecordId: string;
+  publishedAt: Date | null;
+}): { url: string } | { reason: OfficialSourceRelevanceReason } {
+  const candidate = officialNormattivaUrl({
+    sourceUrl: input.candidateSourceUrl,
+    officialIdentifier: input.providerRecordId,
+  });
+  if ("url" in candidate) return candidate;
+
+  let candidateHost: string | null = null;
+  try {
+    candidateHost = new URL(input.candidateSourceUrl ?? "").hostname;
+  } catch {
+    candidateHost = null;
+  }
+  if (candidateHost === "www.normattiva.it" || candidateHost === "www.gazzettaufficiale.it") {
+    return candidate;
+  }
+  if (!input.publishedAt || Number.isNaN(input.publishedAt.getTime())) {
+    return { reason: "SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE" };
+  }
+  const detail = new URL("https://www.normattiva.it/atto/caricaDettaglioAtto");
+  detail.searchParams.set("atto.dataPubblicazioneGazzetta", input.publishedAt.toISOString().slice(0, 10));
+  detail.searchParams.set("atto.codiceRedazionale", input.providerRecordId);
+  return { url: detail.toString() };
 }
 
 function normalized(value: string): string {
@@ -178,6 +210,7 @@ export function selectRelevantArticle(input: {
   articles: readonly Readonly<{ anchor: string; text: string; segments?: readonly string[] }>[];
   researchQuestion: string;
   actTitle: string | null;
+  candidateCitation?: string | null;
 }): RelevantArticle | null {
   const terms = [...new Set(normalized(input.researchQuestion)
     .split(/[^\p{L}\p{N}]+/u)
@@ -185,7 +218,14 @@ export function selectRelevantArticle(input: {
     .map((term) => term.slice(0, 7))
     .filter((term) => !NON_DISCRIMINATING_STEMS.has(term)))];
   const actInDomain = PORT_DOMAIN_MARKERS.test(normalized(input.actTitle ?? ""));
-  const ranked = input.articles
+  const citedArticle = /\bART(?:ICOLO)?\.?\s*(\d+[A-Z]*(?:[\s-]*(?:BIS|TER|QUATER))?)/i
+    .exec(input.candidateCitation ?? "")?.[1]
+    ?.replace(/[\s-]+/g, "_")
+    .toLowerCase();
+  const candidateArticles = citedArticle
+    ? input.articles.filter((article) => article.anchor.toLowerCase() === `art_${citedArticle}`)
+    : input.articles;
+  const ranked = candidateArticles
     .map((article) => {
       const text = normalized(article.text);
       const matchedTerms = articleSegments(article)
