@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext } from "@/lib/tenant-auth";
 import { isRetryableDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryability";
 import { isRecoverableTerminalDocumentExtractionFailure } from "@/server/documents/documentExtractionRetryAdmission";
 import { formatDateIT } from "@/lib/utils";
@@ -100,6 +101,10 @@ export default async function RuntimeOperationsPage({
 }) {
   await requireRole(["ADMIN"]);
   const adminUser = await requireAdminWithMfa();
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) {
+    throw new Error("TENANT_CONTEXT_REQUIRED");
+  }
   const resolvedSearchParams = await searchParams;
   const requestedProcedimentoId = resolvedSearchParams.procedimentoId;
   const requestedWorkbenchNotice = resolvedSearchParams.workbenchNotice;
@@ -150,7 +155,7 @@ export default async function RuntimeOperationsPage({
     }),
     prisma.procedimento.findMany({
       where: {
-        ...buildDatasetProcedimentoWhere(),
+        ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
         stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
       },
       orderBy: [

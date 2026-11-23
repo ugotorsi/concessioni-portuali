@@ -25,6 +25,19 @@ function datasetClassFilter(
     : "PROFESSIONAL";
 }
 
+export function isDatasetClassVisible(
+  datasetClass: DatasetClass,
+  scope = getDatasetScope(),
+): boolean {
+  if (scope === "ALL") {
+    return true;
+  }
+  if (scope === "SYNTHETIC") {
+    return datasetClass === "DEMO" || datasetClass === "E2E";
+  }
+  return datasetClass === "PROFESSIONAL";
+}
+
 export function buildDatasetConcessioneWhere(
   scope = getDatasetScope(),
 ): Prisma.ConcessioneWhereInput {
@@ -37,6 +50,14 @@ export function buildDatasetProcedimentoWhere(
 ): Prisma.ProcedimentoWhereInput {
   const datasetClass = datasetClassFilter(scope);
   return datasetClass ? { datasetClass } : {};
+}
+
+export function buildDatasetProcedimentoUniqueWhere(
+  id: string,
+  scope = getDatasetScope(),
+): Prisma.ProcedimentoWhereUniqueInput {
+  const datasetClass = datasetClassFilter(scope);
+  return datasetClass ? { id, datasetClass } : { id };
 }
 
 export function buildDatasetFascicoloIntakeWhere(

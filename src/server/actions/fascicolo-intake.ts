@@ -5,11 +5,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { DatasetClass } from "@/generated/prisma/client";
-import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
+import {
+  buildDatasetFascicoloIntakeWhere,
+  getDatasetScope,
+} from "@/lib/dataset-visibility";
 import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { prisma } from "@/lib/prisma";
-import { resolveTenantDatasetClass } from "@/lib/tenant";
+import { resolveStandaloneIntakeDatasetClass } from "@/lib/tenant";
 import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditSuccess } from "@/server/audit/auditLog";
 import { activateFascicoloIntake } from "@/server/fascicolo-intake/activation";
@@ -88,7 +91,10 @@ export async function createFascicoloIntakeAction(formData: FormData) {
     if (!ente) {
       throw new Error("Tenant predefinito non trovato.");
     }
-    datasetClass = resolveTenantDatasetClass(ente.codice);
+    datasetClass = resolveStandaloneIntakeDatasetClass({
+      tenantCode: ente.codice,
+      workspaceScope: tenantContext.datasetScope ?? getDatasetScope(),
+    });
   }
   if (!enteId) {
     throw new Error("Seleziona un tenant predefinito prima di creare un fascicolo senza concessione collegata.");
@@ -150,18 +156,21 @@ export async function activateFascicoloIntakeAction(formData: FormData) {
   }
 
   const fascicoloIntakeId = z.string().trim().min(1).parse(formData.get("fascicoloIntakeId"));
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) {
+    throw new Error("Contesto tenant autenticato richiesto.");
+  }
   const fascicolo = await prisma.fascicoloIntake.findFirst({
-    where: { id: fascicoloIntakeId, ...buildDatasetFascicoloIntakeWhere() },
+    where: {
+      id: fascicoloIntakeId,
+      ...buildDatasetFascicoloIntakeWhere(tenantContext.datasetScope),
+    },
     select: { id: true, enteId: true, concessioneId: true },
   });
   if (!fascicolo) {
     throw new Error("Fascicolo non trovato.");
   }
 
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) {
-    throw new Error("Contesto tenant autenticato richiesto.");
-  }
   requireTenantAccess(tenantContext, fascicolo.enteId, { mode: "write", allowWhenEnteMissing: false });
 
   const currentUser = await getCurrentUser();

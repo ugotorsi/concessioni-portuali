@@ -31,16 +31,16 @@ export async function GET(
     });
     return new Response("Forbidden", { status: 403 });
   }
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) return new Response("Unauthorized", { status: 401 });
   const snapshot = await prisma.structuredFascicoloReportSnapshot.findFirst({
     where: {
       id: snapshotId,
       procedimentoId: id,
-      procedimento: { is: buildDatasetProcedimentoWhere() },
+      procedimento: { is: buildDatasetProcedimentoWhere(tenantContext.datasetScope) },
     },
   });
   if (!snapshot) return new Response("Not found", { status: 404 });
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) return new Response("Unauthorized", { status: 401 });
   try {
     requireTenantAccess(tenantContext, snapshot.tenantId, { mode: "read", allowWhenEnteMissing: false });
   } catch {

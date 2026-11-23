@@ -58,6 +58,7 @@ describe("createFascicoloIntakeAction", () => {
       isAdmin: false,
       defaultTenantId: "ente-a",
       accessibleTenantIds: ["ente-a"],
+      datasetScope: "PROFESSIONAL",
     });
     prismaMock.ente.findUnique.mockResolvedValue({ codice: "ENTE-PROFESSIONALE" });
     prismaMock.fascicoloIntake.create.mockResolvedValue({
@@ -110,6 +111,14 @@ describe("createFascicoloIntakeAction", () => {
 
   it("classifica come DEMO un intake standalone creato nel tenant dimostrativo", async () => {
     prismaMock.ente.findUnique.mockResolvedValue({ codice: "DEMO-ENTE-ADSP" });
+    getCurrentTenantContextMock.mockResolvedValue({
+      userId: "user-1",
+      role: "ADMIN",
+      isAdmin: true,
+      defaultTenantId: "ente-a",
+      accessibleTenantIds: [],
+      datasetScope: "SYNTHETIC",
+    });
 
     await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(
       "REDIRECT:/procedimenti/fascicolo-1",
@@ -122,6 +131,15 @@ describe("createFascicoloIntakeAction", () => {
         concessioneId: null,
       }),
     });
+  });
+
+  it("rifiuta la creazione se tenant e workspace dataset non coincidono", async () => {
+    prismaMock.ente.findUnique.mockResolvedValue({ codice: "DEMO-ENTE-ADSP" });
+
+    await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(
+      "non appartiene al workspace dataset",
+    );
+    expect(prismaMock.fascicoloIntake.create).not.toHaveBeenCalled();
   });
 
   it("collega facoltativamente una concessione reale e ne usa il tenant", async () => {
@@ -193,6 +211,7 @@ describe("createFascicoloIntakeAction", () => {
       isAdmin: true,
       defaultTenantId: null,
       accessibleTenantIds: [],
+      datasetScope: "PROFESSIONAL",
     });
 
     await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(

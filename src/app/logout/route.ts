@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+
+import { DATASET_WORKSPACE_COOKIE } from "@/lib/dataset-workspace";
 import { NextResponse } from "next/server";
 
 import { getAuthSession } from "@/lib/next-auth";
@@ -22,6 +24,7 @@ export async function GET(request: Request) {
   const cookieStore = await cookies();
   cookieStore.delete("__Secure-noetra-preview.session-token");
   cookieStore.delete("next-auth.session-token");
+  cookieStore.delete(DATASET_WORKSPACE_COOKIE);
   cookieStore.delete("__Secure-next-auth.session-token");
   cookieStore.delete("next-auth.callback-url");
   cookieStore.delete("__Secure-next-auth.callback-url");

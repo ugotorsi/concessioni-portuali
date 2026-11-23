@@ -1,5 +1,6 @@
 import type { DemoRole } from "@/lib/auth";
 import type { DatasetClass } from "@/generated/prisma/client";
+import type { DatasetScope } from "@/lib/dataset-visibility";
 
 const TENANT_SCOPED_ROLES: DemoRole[] = [
   "OPERATORE_SOCIETA",
@@ -55,6 +56,23 @@ export function resolveTenantDatasetClass(tenantCode: string): DatasetClass {
     return "DEMO";
   }
   return "PROFESSIONAL";
+}
+
+export function resolveStandaloneIntakeDatasetClass(input: {
+  tenantCode: string;
+  workspaceScope: DatasetScope;
+}): DatasetClass {
+  const tenantDatasetClass = resolveTenantDatasetClass(input.tenantCode);
+  if (input.workspaceScope === "PROFESSIONAL" && tenantDatasetClass === "PROFESSIONAL") {
+    return tenantDatasetClass;
+  }
+  if (
+    input.workspaceScope === "SYNTHETIC"
+    && (tenantDatasetClass === "DEMO" || tenantDatasetClass === "E2E")
+  ) {
+    return tenantDatasetClass;
+  }
+  throw new Error("Il tenant predefinito non appartiene al workspace dataset selezionato.");
 }
 
 export function resolveDemoEnteCodeForConcessione(input: {

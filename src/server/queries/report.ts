@@ -244,7 +244,7 @@ function buildWhere(params: GetReportListParams): Prisma.ReportWhereInput {
 function buildConcessioneTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.ConcessioneWhereInput {
-  const datasetWhere = buildDatasetConcessioneWhere();
+  const datasetWhere = buildDatasetConcessioneWhere(tenantContext?.datasetScope);
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
     return datasetWhere;
   }

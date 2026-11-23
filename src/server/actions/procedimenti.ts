@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { canManageProcedimenti, canRegisterProcedimentoDecision, getCurrentUser, requireRole } from "@/lib/auth";
 import { Prisma } from "@/generated/prisma/client";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
@@ -748,7 +749,10 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
 
   const decorrenza = toAssignmentDate(parsed.data.decorrenza);
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: parsed.data.procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      parsed.data.procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: {
       id: true,
       enteId: true,
@@ -959,7 +963,10 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
   }
 
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: parsed.data.procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      parsed.data.procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: { id: true, enteId: true, concessioneId: true, tipologia: true },
   });
 
@@ -1146,7 +1153,10 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
   }
 
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: parsed.data.procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      parsed.data.procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: {
       id: true,
       enteId: true,

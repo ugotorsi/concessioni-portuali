@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getCurrentUser, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { buildFascicoloDocumentCorpusUpdateAdmission } from "@/server/ai/fascicoloAutomaticAnalysisJob";
@@ -32,11 +33,19 @@ export async function requestFascicoloAnalysisRefreshAction(formData: FormData):
     confirmed: formData.get("confirmed"),
   });
   const role = await requireRole(["ADMIN", "GIURIDICO"]);
-  const [user, tenantContext, procedimento] = await Promise.all([
+  const [user, tenantContext] = await Promise.all([
     getCurrentUser(),
     getCurrentTenantContext(),
-    prisma.procedimento.findUnique({ where: { id: input.procedimentoId }, select: { enteId: true, concessioneId: true } }),
   ]);
+  const procedimento = tenantContext
+    ? await prisma.procedimento.findFirst({
+      where: {
+        id: input.procedimentoId,
+        ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+      },
+      select: { enteId: true, concessioneId: true },
+    })
+    : null;
   if (!user || !tenantContext || !procedimento?.enteId) throw new Error("Procedimento, attore o tenant non disponibile.");
   requireTenantAccess(tenantContext, procedimento.enteId, { mode: "write", allowWhenEnteMissing: false });
   const audit = {

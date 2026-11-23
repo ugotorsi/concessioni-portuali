@@ -6,6 +6,7 @@ import {
   buildDatasetFascicoloIntakeWhere,
   buildDatasetProcedimentoWhere,
   getDatasetScope,
+  isDatasetClassVisible,
 } from "@/lib/dataset-visibility";
 
 describe("dataset visibility", () => {
@@ -65,5 +66,15 @@ describe("dataset visibility", () => {
   it("allows an explicit all-datasets administrative deployment", () => {
     expect(buildDatasetConcessioneWhere("ALL")).toEqual({});
     expect(buildDatasetDocumentoWhere("ALL")).toEqual({});
+  });
+
+  it("keeps professional, demo and E2E resources in disjoint selectable workspaces", () => {
+    expect(isDatasetClassVisible("PROFESSIONAL", "PROFESSIONAL")).toBe(true);
+    expect(isDatasetClassVisible("DEMO", "PROFESSIONAL")).toBe(false);
+    expect(isDatasetClassVisible("E2E", "PROFESSIONAL")).toBe(false);
+    expect(isDatasetClassVisible("PROFESSIONAL", "SYNTHETIC")).toBe(false);
+    expect(isDatasetClassVisible("DEMO", "SYNTHETIC")).toBe(true);
+    expect(isDatasetClassVisible("E2E", "SYNTHETIC")).toBe(true);
+    expect(isDatasetClassVisible("UNCLASSIFIED", "ALL")).toBe(true);
   });
 });

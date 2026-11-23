@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertSameTenant,
+  buildTenantConcessioneWhere,
   canReadTenantResource,
   canWriteTenantResource,
   requireTenantAccess,
@@ -73,5 +74,20 @@ describe("tenant auth helpers", () => {
     expect(() => requireTenantAccess(tenantUser, "ente-a", { mode: "write" })).not.toThrow();
     expect(() => assertSameTenant(tenantUser, "ente-x")).toThrow("Cross-tenant access denied.");
     expect(() => requireTenantAccess(tenantUser, "ente-x", { mode: "read" })).toThrow("Tenant access denied.");
+  });
+
+  it("combines tenant authorization with the selected dataset workspace", () => {
+    expect(buildTenantConcessioneWhere(ctx({
+      datasetScope: "PROFESSIONAL",
+    }))).toEqual({
+      datasetClass: "PROFESSIONAL",
+      enteId: { in: ["ente-a"] },
+    });
+    expect(buildTenantConcessioneWhere(ctx({
+      datasetScope: "SYNTHETIC",
+    }))).toEqual({
+      datasetClass: { in: ["DEMO", "E2E"] },
+      enteId: { in: ["ente-a"] },
+    });
   });
 });

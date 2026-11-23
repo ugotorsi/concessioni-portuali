@@ -29,7 +29,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const tenantContext = await getCurrentTenantContext();
-  const datasetConcessioneWhere = buildDatasetConcessioneWhere();
+  const datasetConcessioneWhere = buildDatasetConcessioneWhere(tenantContext?.datasetScope);
   const reportTenantWhere = (() => {
     if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
       return { concessione: { is: datasetConcessioneWhere } };

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
@@ -25,8 +26,11 @@ export async function extractQueuedProcedimentoDocumentsAction(formData: FormDat
   const tenant = await getCurrentTenantContext();
   if (!tenant) throw new Error("SESSION_REQUIRED");
 
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenant.datasetScope),
+    },
     select: { enteId: true },
   });
   if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");

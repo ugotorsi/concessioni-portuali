@@ -24,13 +24,20 @@ export async function requestExistingCorpusAnalysisAction(formData: FormData): P
   const actor = await requireAdminWithMfa();
   const procedimentoId = procedimentoIdSchema.parse(formData.get("procedimentoId"));
   const executionId = executionIdSchema.parse(formData.get("executionId"));
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("AUTHENTICATION_REQUIRED");
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId,
+      datasetClass: tenantContext.datasetScope === "SYNTHETIC"
+        ? { in: ["DEMO", "E2E"] }
+        : tenantContext.datasetScope === "ALL"
+          ? undefined
+          : "PROFESSIONAL",
+    },
     select: { enteId: true },
   });
   if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) throw new Error("AUTHENTICATION_REQUIRED");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,

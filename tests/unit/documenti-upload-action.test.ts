@@ -25,7 +25,7 @@ const txMock = vi.hoisted(() => ({
 }));
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn() },
-  documento: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+  documento: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
   $transaction: vi.fn(),
 }));
 
@@ -130,7 +130,7 @@ describe("createDocumentoUploadAction", () => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("ADMIN");
     canManageProcedimentiMock.mockReturnValue(true);
-    getCurrentTenantContextMock.mockResolvedValue({});
+    getCurrentTenantContextMock.mockResolvedValue({ datasetScope: "PROFESSIONAL" });
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
     requireTenantAccessMock.mockImplementation(() => undefined);
     prismaMock.documento.findUnique.mockResolvedValue({
@@ -138,8 +138,14 @@ describe("createDocumentoUploadAction", () => {
       enteId: "ente-1",
       concessione: { enteId: "ente-1" },
     });
+    prismaMock.documento.findFirst.mockResolvedValue({
+      id: "documento-1",
+      enteId: "ente-1",
+      concessione: { enteId: "ente-1" },
+    });
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedimento-1",
+      datasetClass: "PROFESSIONAL",
       enteId: "ente-1",
     });
     prismaMock.documento.create.mockResolvedValue({
@@ -183,7 +189,7 @@ describe("createDocumentoUploadAction", () => {
 
     await createDocumentoUploadAction(uploadFormData());
 
-    expect(requireTenantAccessMock).toHaveBeenCalledWith({}, "ente-1", {
+    expect(requireTenantAccessMock).toHaveBeenCalledWith({ datasetScope: "PROFESSIONAL" }, "ente-1", {
       mode: "write",
       allowWhenEnteMissing: false,
     });
@@ -264,12 +270,44 @@ describe("createDocumentoUploadAction", () => {
 
   it("rejects a procedure upload without authenticated tenant context before storage", async () => {
     getCurrentUserMock.mockResolvedValue(null);
-    getCurrentTenantContextMock.mockResolvedValue(null);
+    getCurrentTenantContextMock.mockResolvedValue({ datasetScope: "PROFESSIONAL" });
 
     await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Contesto tenant autenticato richiesto");
 
     expect(createNeutralIntakeMock).not.toHaveBeenCalled();
     expect(uploadDocumentMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a synthetic procedure upload from the professional workspace", async () => {
+    prismaMock.procedimento.findUnique.mockResolvedValue({
+      id: "procedimento-1",
+      datasetClass: "E2E",
+      enteId: "ente-1",
+    });
+
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow(
+      "Accesso dataset non consentito.",
+    );
+
+    expect(requireTenantAccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ datasetScope: "PROFESSIONAL" }),
+      "ente-1",
+      { mode: "write", allowWhenEnteMissing: false },
+    );
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+  });
+
+  it("allows a synthetic procedure upload only from the synthetic workspace", async () => {
+    getCurrentTenantContextMock.mockResolvedValue({ datasetScope: "SYNTHETIC" });
+    prismaMock.procedimento.findUnique.mockResolvedValue({
+      id: "procedimento-1",
+      datasetClass: "E2E",
+      enteId: "ente-1",
+    });
+
+    await createDocumentoUploadAction(uploadFormData());
+
+    expect(uploadDocumentMock).toHaveBeenCalledTimes(1);
   });
 
   it("rejects a role without procedure-management authority before storage", async () => {
@@ -553,10 +591,15 @@ describe("document archive and metadata audit actors", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("ADMIN");
-    getCurrentTenantContextMock.mockResolvedValue(null);
+    getCurrentTenantContextMock.mockResolvedValue({ datasetScope: "PROFESSIONAL" });
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
     requireTenantAccessMock.mockImplementation(() => undefined);
     prismaMock.documento.findUnique.mockResolvedValue({
+      id: "documento-1",
+      enteId: "ente-1",
+      concessione: { enteId: "ente-1" },
+    });
+    prismaMock.documento.findFirst.mockResolvedValue({
       id: "documento-1",
       enteId: "ente-1",
       concessione: { enteId: "ente-1" },

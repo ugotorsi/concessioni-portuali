@@ -380,7 +380,7 @@ function buildWhere(
     : {};
 
   return {
-    ...buildDatasetProcedimentoWhere(),
+    ...buildDatasetProcedimentoWhere(tenantContext?.datasetScope),
     ...tenantWhere,
     ...(search
       ? {
@@ -679,7 +679,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   const tenantContext = await getCurrentTenantContext();
 
   const procedimento = await prisma.procedimento.findFirst({
-    where: { id, ...buildDatasetProcedimentoWhere() },
+    where: { id, ...buildDatasetProcedimentoWhere(tenantContext?.datasetScope) },
     include: {
       decisioneProcedimento: {
         include: {

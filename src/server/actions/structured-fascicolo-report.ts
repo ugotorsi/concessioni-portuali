@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { canManageProcedimenti, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { persistStructuredFascicoloReport } from "@/server/fascicolo-report";
@@ -15,13 +16,16 @@ export async function archiveStructuredFascicoloReportAction(formData: FormData)
   const role = await requireRole();
   if (!canManageProcedimenti(role)) throw new Error("Profilo non autorizzato all'archiviazione del rapporto strutturato.");
   const input = inputSchema.parse({ procedimentoId: formData.get("procedimentoId") });
-  const [tenantContext, procedimento] = await Promise.all([
-    getCurrentTenantContext(),
-    prisma.procedimento.findUnique({
-      where: { id: input.procedimentoId },
+  const tenantContext = await getCurrentTenantContext();
+  const procedimento = tenantContext
+    ? await prisma.procedimento.findFirst({
+      where: {
+        id: input.procedimentoId,
+        ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+      },
       select: { enteId: true },
-    }),
-  ]);
+    })
+    : null;
   const tenantId = procedimento?.enteId;
   if (!tenantContext || !tenantId) throw new Error("Procedimento o tenant non disponibile.");
   requireTenantAccess(tenantContext, tenantId, { mode: "write", allowWhenEnteMissing: false });
