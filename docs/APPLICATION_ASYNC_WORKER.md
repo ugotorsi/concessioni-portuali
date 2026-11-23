@@ -78,6 +78,65 @@ the recovery and the V3 approval does not authorize V7 admission or provider spe
 11. Only after separate authorization, configure provider credentials, positive cost estimates, and enable provider execution.
 12. Remove canary allowlists only after queue, failure, latency, and cost observations are accepted.
 
+## Production single-job canary
+
+Preparation does not authorize admission or execution. Keep the application and OCR
+workers suspended until one synthetic proceeding, its tenant, provider, maximum budget,
+and exact application job have been approved together.
+
+The Production canary must use a purpose-built `E2E` or `DEMO` fascicolo when no
+consented professional fascicolo is available. A synthetic result proves the execution
+chain but must never be presented as evidence that real customer data were processed.
+Do not relabel historical fascicoli or duplicate an existing fascicolo to prepare the
+test.
+
+The application worker configuration must include all of the following:
+
+```text
+ASYNC_WORKER_TARGET_JOB_ID=<AUTHORIZED_JOB_ID>
+ASYNC_WORKER_TARGET_TENANT_ID=<AUTHORIZED_TENANT_ID>
+ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST=<AUTHORIZED_PROCEDIMENTO_ID>
+ASYNC_WORKER_OPERATION_ALLOWLIST=FASCICOLO.AUTOMATIC_ANALYSIS_V1
+ASYNC_WORKER_DEDICATED_MODE=true
+ASYNC_WORKER_CONCURRENCY=1
+ASYNC_WORKER_MAX_PROCESSED_JOBS=1
+ASYNC_WORKER_EXIT_ON_IDLE=true
+ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false
+ASYNC_WORKER_CALLER_ENVIRONMENT=production
+ASYNC_WORKER_REQUIRED_CALLER_ENVIRONMENT=production
+```
+
+Before resuming the service, verify by ID that the job is `QUEUED` or `RETRY_WAIT`,
+belongs to the same tenant and proceeding, has the approved provider and budget, and
+has no competing active job. The targeted runtime uses `claimAsyncJobById`; it does not
+fall back to the generic queue. A completed, missing, mismatched, or unavailable target
+therefore exits idle without claiming any of the historical jobs.
+
+The end-to-end evidence package must cover:
+
+1. document upload, immutable file version, storage identity, and audit actor;
+2. direct extraction or explicitly authorized OCR, page evidence, and classification;
+3. structured knowledge identities, evidence links, relations, and contradictions;
+4. the one provider call, cost reservation/settlement, and automatic worker exit;
+5. legal missions and connector evidence, distinguishing located sources from
+   officially verified full text;
+6. motivated closure of unavailable evidence without inventing citations or changing
+   mission history;
+7. structured report, admin/user rendering, and PDF generated from the same current
+   knowledge and source state;
+8. legal-quality review: every conclusion traceable to documents or sources, correct
+   temporal applicability, contradictions exposed, questions addressed, and verified
+   facts kept distinct from hypotheses and unresolved gaps;
+9. post-run proof that no other job changed state and that both workers are suspended
+   again.
+
+One authorization can cover the entire bounded operation: admission and one-shot
+execution of the specified job for the specified synthetic tenant and proceeding,
+the named provider and maximum EUR budget, and the temporary targeted Render
+configuration/resume followed by automatic exit and re-suspension. It does not authorize
+general queue activation, OCR unless separately included in the same bounded target, or
+use of customer data.
+
 ## NOETRA V7 controlled Selvara collaudo
 
 The first V7 Selvara attempt used approval
@@ -587,7 +646,7 @@ Use one service instance per unique `ASYNC_WORKER_ID`. Horizontal processes and 
 
 ## Health And Operations
 
-The admin-only health endpoint is `/api/admin/runtime-health`; the admin technical page is `/admin/runtime`. They expose worker freshness, queue depth, oldest pending age, running/failed jobs, stale leases, last success, migration compatibility, configured caps, and cost reservations. They never expose job payloads.
+The admin-only health endpoint is `/api/admin/runtime-health`; the admin technical page is `/admin/runtime`. They expose worker freshness, queue depth, oldest pending age, running/failed jobs, cancellation requests, stale leases, last success, migration compatibility, configured caps, and cost reservations. `runningJobs` counts only `RUNNING`; `cancellationRequestedJobs` is reported separately because it represents a pending terminal transition rather than active execution. Expired leases in either state remain visible in `staleLeases` because the queue reconciles both. They never expose job payloads.
 
 Terminal failures remain visible in `AsyncJob`. Admin retry adds one allowed attempt, preserves `attemptCount`, clears sanitized failure codes, and writes an audit event. Dependencies with terminal parents remain queued with `DEPENDENCY_TERMINAL_FAILURE` for operator inspection.
 

@@ -1,4 +1,5 @@
 import type { DemoRole } from "@/lib/auth";
+import type { DatasetClass } from "@/generated/prisma/client";
 
 const TENANT_SCOPED_ROLES: DemoRole[] = [
   "OPERATORE_SOCIETA",
@@ -43,6 +44,17 @@ export function resolveTenantLabel(ente: TenantLike | null | undefined): string 
 
 export function isTenantScopedRole(role: DemoRole): boolean {
   return TENANT_SCOPED_ROLES.includes(role);
+}
+
+export function resolveTenantDatasetClass(tenantCode: string): DatasetClass {
+  const normalized = tenantCode.trim().toUpperCase();
+  if (normalized === "E2E" || normalized.startsWith("E2E-")) {
+    return "E2E";
+  }
+  if (normalized === "DEMO" || normalized.startsWith("DEMO-")) {
+    return "DEMO";
+  }
+  return "PROFESSIONAL";
 }
 
 export function resolveDemoEnteCodeForConcessione(input: {

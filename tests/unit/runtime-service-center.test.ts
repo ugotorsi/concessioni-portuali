@@ -7,6 +7,7 @@ const health = {
   databaseConnected: true,
   queueDepth: 0,
   runningJobs: 0,
+  cancellationRequestedJobs: 0,
   failedJobs: 0,
   staleLeases: 0,
   oldestPendingAgeSeconds: null,

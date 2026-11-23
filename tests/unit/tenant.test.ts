@@ -4,6 +4,7 @@ import {
   getDefaultTenantMembership,
   isTenantScopedRole,
   resolveDemoEnteCodeForConcessione,
+  resolveTenantDatasetClass,
   resolveTenantLabel,
   type TenantMembershipLike,
 } from "@/lib/tenant";
@@ -60,6 +61,12 @@ describe("tenant baseline helpers", () => {
       "Comune costiero demo (DEMO-COMUNE-COSTIERO)",
     );
     expect(resolveTenantLabel(null)).toBe("Ente non assegnato");
+  });
+
+  it("classifies explicitly marked synthetic tenants without promoting them to professional data", () => {
+    expect(resolveTenantDatasetClass("DEMO-ENTE-ADSP")).toBe("DEMO");
+    expect(resolveTenantDatasetClass("e2e-canary")).toBe("E2E");
+    expect(resolveTenantDatasetClass("ENTE-PROFESSIONALE")).toBe("PROFESSIONAL");
   });
 
   it("keeps ADMIN non tenant-scoped and backoffice demo roles tenant-scoped", () => {

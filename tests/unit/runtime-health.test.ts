@@ -9,7 +9,7 @@ function executor(rows: unknown[]): RuntimeSqlExecutor & { query: ReturnType<typ
 describe("Lotto 8 runtime health", () => {
   it("reports queued work without a live worker as unavailable", async () => {
     const db = executor([{
-      queueDepth: 4, runningJobs: 0, failedJobs: 0, staleLeases: 0,
+      queueDepth: 4, runningJobs: 0, cancellationRequestedJobs: 0, failedJobs: 0, staleLeases: 0,
       oldestPendingAgeSeconds: 80, activeWorkers: 0, lastSuccessfulJobAt: null,
       migrationCompatible: true,
     }]);
@@ -21,11 +21,33 @@ describe("Lotto 8 runtime health", () => {
 
   it("reports stale leases or failed jobs as degraded", async () => {
     const db = executor([{
-      queueDepth: 0, runningJobs: 1, failedJobs: 1, staleLeases: 1,
+      queueDepth: 0, runningJobs: 1, cancellationRequestedJobs: 0, failedJobs: 1, staleLeases: 1,
       oldestPendingAgeSeconds: null, activeWorkers: 1, lastSuccessfulJobAt: null,
       migrationCompatible: true,
     }]);
     await expect(getRuntimeHealthSnapshot(60, db)).resolves.toMatchObject({ status: "DEGRADED" });
+  });
+
+  it("reports cancellation requests separately from running work", async () => {
+    const db = executor([{
+      queueDepth: 0, runningJobs: 0, cancellationRequestedJobs: 1, failedJobs: 0, staleLeases: 0,
+      oldestPendingAgeSeconds: null, activeWorkers: 0, lastSuccessfulJobAt: null,
+      migrationCompatible: true,
+    }]);
+
+    await expect(getRuntimeHealthSnapshot(60, db)).resolves.toMatchObject({
+      runningJobs: 0,
+      cancellationRequestedJobs: 1,
+    });
+    expect(db.query.mock.calls[0]?.[0]).toContain(
+      `WHERE "status"='CANCELLATION_REQUESTED') AS "cancellationRequestedJobs"`,
+    );
+    expect(db.query.mock.calls[0]?.[0]).not.toContain(
+      `WHERE "status" IN ('RUNNING','CANCELLATION_REQUESTED')) AS "runningJobs"`,
+    );
+    expect(db.query.mock.calls[0]?.[0]).toContain(
+      `"status" IN ('RUNNING','CANCELLATION_REQUESTED') AND "leaseExpiresAt" <= CURRENT_TIMESTAMP`,
+    );
   });
 
   it("degrades instead of failing when the migrations table is missing", async () => {
@@ -35,7 +57,7 @@ describe("Lotto 8 runtime health", () => {
     const query = vi.fn()
       .mockResolvedValueOnce({
         rows: [{
-          queueDepth: 0, runningJobs: 0, failedJobs: 0, staleLeases: 0,
+          queueDepth: 0, runningJobs: 0, cancellationRequestedJobs: 0, failedJobs: 0, staleLeases: 0,
           oldestPendingAgeSeconds: null, activeWorkers: 1, lastSuccessfulJobAt: null,
         }],
       })
@@ -52,7 +74,7 @@ describe("Lotto 8 runtime health", () => {
     const query = vi.fn()
       .mockResolvedValueOnce({
         rows: [{
-          queueDepth: 0, runningJobs: 0, failedJobs: 0, staleLeases: 0,
+          queueDepth: 0, runningJobs: 0, cancellationRequestedJobs: 0, failedJobs: 0, staleLeases: 0,
           oldestPendingAgeSeconds: null, activeWorkers: 1, lastSuccessfulJobAt: null,
         }],
       })

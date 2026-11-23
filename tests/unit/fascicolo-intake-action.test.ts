@@ -11,6 +11,7 @@ const activateFascicoloIntakeMock = vi.hoisted(() => vi.fn());
 
 const prismaMock = vi.hoisted(() => ({
   concessione: { findUnique: vi.fn() },
+  ente: { findUnique: vi.fn() },
   fascicoloIntake: { create: vi.fn(), findUnique: vi.fn() },
 }));
 
@@ -58,6 +59,7 @@ describe("createFascicoloIntakeAction", () => {
       defaultTenantId: "ente-a",
       accessibleTenantIds: ["ente-a"],
     });
+    prismaMock.ente.findUnique.mockResolvedValue({ codice: "ENTE-PROFESSIONALE" });
     prismaMock.fascicoloIntake.create.mockResolvedValue({
       id: "fascicolo-1",
       tipologiaConcessione: "MARITTIMA_TURISTICO_RICREATIVA",
@@ -104,6 +106,22 @@ describe("createFascicoloIntakeAction", () => {
 
     expect(uploadDocumentMock).not.toHaveBeenCalled();
     expect(activateFascicoloIntakeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("classifica come DEMO un intake standalone creato nel tenant dimostrativo", async () => {
+    prismaMock.ente.findUnique.mockResolvedValue({ codice: "DEMO-ENTE-ADSP" });
+
+    await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(
+      "REDIRECT:/procedimenti/fascicolo-1",
+    );
+
+    expect(prismaMock.fascicoloIntake.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        datasetClass: "DEMO",
+        enteId: "ente-a",
+        concessioneId: null,
+      }),
+    });
   });
 
   it("collega facoltativamente una concessione reale e ne usa il tenant", async () => {
