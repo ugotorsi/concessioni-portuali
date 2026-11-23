@@ -12,6 +12,7 @@ type IntakeAdmissionRecord = {
   receivedByRole: string;
   initiatingUserRole: string | null;
   receivedAt: Date;
+  procedimentoId?: string | null;
 };
 
 export function buildNeutralIntakeExtractionAdmission(
@@ -32,6 +33,7 @@ export function buildNeutralIntakeExtractionAdmission(
     logicalOperationId: intake.id,
     purpose: NEUTRAL_INTAKE_EXTRACTION_PURPOSE,
     correlationId: intake.idempotencyKey,
+    ...(intake.procedimentoId ? { procedimentoId: intake.procedimentoId } : {}),
     policyDecisionRef: authenticated ? null : "NEUTRAL_INTAKE_SYSTEM_ADMISSION_V1",
     inputReference: {
       referenceType: "NEUTRAL_INTAKE",

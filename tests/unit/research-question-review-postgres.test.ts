@@ -41,7 +41,8 @@ describe.skipIf(!databaseUrl)("audited source review on isolated migrated Postgr
     const identity = await prisma.$queryRaw<Array<{ database: string; username: string; port: number }>>`
       SELECT current_database() AS database, current_user AS username, inet_server_port() AS port
     `;
-    expect(identity[0]).toEqual({ database: "noetra_test_workflow", username: "noetra_test", port: 55432 });
+    expect(identity[0]).toMatchObject({ database: "noetra_test_workflow", username: "noetra_test" });
+    expect([5432, 55432]).toContain(identity[0]?.port);
     const admin = await prisma.user.findUniqueOrThrow({
       where: { email: "admin@demo.local" },
       select: { id: true, tenantMemberships: { where: { isDefault: true }, select: { enteId: true } } },

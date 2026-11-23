@@ -289,17 +289,27 @@ export function deriveResearchQuestionCoverage(input: {
   gaps: readonly ResearchCoverageGap[];
 } {
   const state = executionState(input.missionStatus);
-  if (input.results.length === 0 && ["DEFERRED", "PENDING", "IN_PROGRESS"].includes(state)) {
+  const evidenceGaps = [...new Set(input.evidenceGapKeys ?? [])]
+    .map((key) => ({ kind: "INSUFFICIENT_RESULT" as const, key }));
+  if (input.results.length === 0
+    && (["PENDING", "IN_PROGRESS"].includes(state)
+      || (state === "DEFERRED" && evidenceGaps.length === 0))) {
     return { executionState: state, status: "NOT_RESEARCHED", conflicting: false, coveredElementKeys: [], gaps: [] };
   }
   if (input.results.length === 0) {
-    return { executionState: state, status: "NO_RESULTS", conflicting: false, coveredElementKeys: [], gaps: [] };
+    return {
+      executionState: state,
+      status: "NO_RESULTS",
+      conflicting: false,
+      coveredElementKeys: [],
+      gaps: evidenceGaps,
+    };
   }
   const effective = input.results.filter((result) => result.classificationReviewStatus !== "REJECTED");
   const directions = new Set(effective.map((result) => result.supportDirection));
   const conflicting = directions.has("SUPPORTS") && directions.has("OPPOSES");
   const gaps: ResearchCoverageGap[] = [
-    ...(input.evidenceGapKeys ?? []).map((key) => ({ kind: "INSUFFICIENT_RESULT" as const, key })),
+    ...evidenceGaps,
     ...effective.flatMap((result) => result.unresolvedAspectKeys.map((key) => ({ kind: "MISSING_ASPECT" as const, key }))),
     ...effective.filter((result) => deriveResearchResultSourceState(result.candidateSnapshot) === "DISCOVERED")
       .map((result) => ({ kind: "UNVERIFIED_SOURCE" as const, key: result.candidateId })),

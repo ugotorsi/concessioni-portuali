@@ -988,7 +988,13 @@ function projectQuestion(
   ])].sort();
   const limitations = [...new Set([
     ...(item.status === "AI_PROPOSED" ? ["QUESTION_NOT_HUMAN_CONFIRMED"] : []),
-    ...(mission?.status === "COMPLETED" ? [] : ["RESEARCH_NOT_COMPLETED"]),
+    ...(mission?.status === "COMPLETED"
+      ? []
+      : mission?.status === "DEFERRED"
+        ? ["RESEARCH_COMPLETED_PARTIALLY"]
+        : mission?.status === "BUDGET_EXHAUSTED"
+          ? ["RESEARCH_BUDGET_EXHAUSTED"]
+          : ["RESEARCH_NOT_COMPLETED"]),
     ...(favorableAuthorities.length > 0 && contraryAuthorities.length === 0 ? ["NO_USABLE_CONTRARY_AUTHORITY"] : []),
     ...(results.some((result) => result.classificationReviewStatus !== "REJECTED"
       && !hasProfessionalSourceClassification(result)) ? [UNREVIEWED_SOURCE_NOTICE] : []),

@@ -48,6 +48,8 @@ function professionalNote(value: string): string | null {
     NO_USABLE_CONTRARY_AUTHORITY: "Per una o più questioni non risultano fonti contrarie utilizzabili.",
     NO_USABLE_SOURCE: "Non risultano fonti utilizzabili per una delle questioni.",
     QUESTION_NOT_HUMAN_CONFIRMED: "Una o più questioni richiedono conferma professionale.",
+    RESEARCH_BUDGET_EXHAUSTED: "Una o più ricerche si sono concluse al limite del budget autorizzato; gli esiti restano parziali.",
+    RESEARCH_COMPLETED_PARTIALLY: "Una o più ricerche si sono concluse con verifiche parziali motivate; le lacune indicate restano aperte.",
     RESEARCH_NOT_COMPLETED: "Una o più ricerche non risultano completate.",
     RESEARCH_STATE_CHANGED: "Lo stato delle ricerche è cambiato dopo la generazione.",
     REPORT_PROJECTION_CHANGED: "I criteri di rappresentazione del rapporto sono cambiati dopo la generazione.",
