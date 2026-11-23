@@ -31,6 +31,7 @@ function hit(overrides: Record<string, unknown> = {}) {
 describe("B2C12 Block 3B.6C Normattiva provider", () => {
   it.each([
     ["LEGGE", "LEGGE"],
+    ["REGIO_DECRETO", "REGIO DECRETO"],
     ["DECRETO_LEGGE", "DECRETO-LEGGE"],
     ["DECRETO_LEGISLATIVO", "DECRETO LEGISLATIVO"],
     ["DECRETO_PRESIDENTE_REPUBBLICA", "DECRETO DEL PRESIDENTE DELLA REPUBBLICA"],
