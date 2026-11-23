@@ -15,7 +15,7 @@ import type { AuthorityCandidate } from "./bridge";
 import {
   type OfficialSourceRelevance,
   type OfficialSourceRelevanceReason,
-  officialNormattivaUrl,
+  officialNormattivaUrlFromLookup,
   officialSourceRelevance,
   parseProviderLegislationReference,
   selectRelevantArticle,
@@ -29,7 +29,7 @@ import {
 } from "./source-chain";
 import { persistSourceChainAssessment, retireUsableSourceAssessments } from "./source-chain-persistence";
 
-const MAX_OFFICIAL_DOCUMENT_BYTES = 2 * 1024 * 1024;
+const MAX_OFFICIAL_DOCUMENT_BYTES = 8 * 1024 * 1024;
 const NORMATTIVA_AKN_ENDPOINT = "https://www.normattiva.it/do/atto/caricaAKN";
 
 type CandidateRow = Readonly<{
@@ -87,7 +87,12 @@ function xmlText(value: string): string {
     .trim();
 }
 
-function citationAnchor(xml: string, researchQuestion: string, actTitle: string | null) {
+function citationAnchor(
+  xml: string,
+  researchQuestion: string,
+  actTitle: string | null,
+  candidateCitation: string | null,
+) {
   const articles = [...xml.matchAll(/<article\b[^>]*\beId="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)]
     .map((match) => {
       // Normattiva editorial notes cite unrelated acts and must not drive pertinence.
@@ -106,6 +111,7 @@ function citationAnchor(xml: string, researchQuestion: string, actTitle: string 
     articles,
     researchQuestion,
     actTitle: [actTitle, docTitle ? xmlText(docTitle) : null].filter(Boolean).join(" ") || null,
+    candidateCitation,
   });
 }
 
@@ -158,6 +164,7 @@ export async function acquireNormattivaAkn(input: {
   referenceDate: Date;
   researchQuestion: string;
   actTitle: string | null;
+  candidateCitation: string | null;
 }): Promise<AknEvidence> {
   if (!input.publicationDate) throw new Error("NORMATTIVA_PUBLICATION_DATE_MISSING");
   const detailUrl = new URL(input.candidateUrl);
@@ -202,7 +209,12 @@ export async function acquireNormattivaAkn(input: {
     }
     const expression = /<FRBRExpression>[\s\S]*?<FRBRuri\s+value="([^"]+)"[\s\S]*?<FRBRdate\s+date="(\d{4}-\d{2}-\d{2})"/.exec(xml);
     if (!expression) throw new Error("NORMATTIVA_AKN_EXPRESSION_MISSING");
-    const anchor = citationAnchor(xml, input.researchQuestion, input.actTitle);
+    const anchor = citationAnchor(
+      xml,
+      input.researchQuestion,
+      input.actTitle,
+      input.candidateCitation,
+    );
     return {
       bytes,
       contentSha256: sha256(bytes),
@@ -400,7 +412,7 @@ async function persistVerifiedNormattivaSource(input: {
   const temporal = await persistTemporalAssessment(temporalInput, temporalResult);
   const exact = evaluateExactRetrieval({
     sourceType: input.providerHit.sourceType ?? undefined,
-    canonicalIdentifier: input.candidate.officialIdentifier,
+    canonicalIdentifier: input.providerHit.providerRecordId,
     title: input.candidate.title,
     sourceUrl: input.candidate.sourceUrl,
     officiality: "OFFICIAL",
@@ -583,33 +595,39 @@ export async function verifyOfficialResearchSources(input: {
     const notVerifiable = (reason: OfficialSourceRelevanceReason, extra: { officialUrl?: string; failureCode?: string } = {}) => (
       markRows(rows, officialSourceRelevance({ status: "NON_VERIFICABILE", reason, checkedAt, ...extra }))
     );
-    const official = officialNormattivaUrl(item);
-    if ("reason" in official) {
-      await notVerifiable(official.reason);
-      continue;
-    }
     const reference = parseProviderLegislationReference(item);
     if (!reference || !provider.supports(reference)) {
-      await notVerifiable("LEGISLATIVE_REFERENCE_NOT_RECOGNIZED", { officialUrl: official.url });
+      await notVerifiable("LEGISLATIVE_REFERENCE_NOT_RECOGNIZED");
       continue;
     }
     if (acquisitions >= input.maxAcquisitions) {
-      await notVerifiable("OFFICIAL_ACQUISITION_LIMIT_REACHED", { officialUrl: official.url });
+      await notVerifiable("OFFICIAL_ACQUISITION_LIMIT_REACHED");
       continue;
     }
     acquisitions += 1;
     checked += 1;
+    let officialUrl: string | undefined;
     try {
       const lookup = await provider.lookup(reference);
       if (lookup.status !== "FOUND_UNIQUE") {
-        await notVerifiable("OFFICIAL_LOOKUP_NOT_UNIQUE", { officialUrl: official.url });
+        await notVerifiable("OFFICIAL_LOOKUP_NOT_UNIQUE");
         continue;
       }
       const hit = lookup.hits[0];
-      if (hit.documentKind !== "LEGISLATION" || hit.providerRecordId !== item.officialIdentifier) {
-        await notVerifiable("OFFICIAL_IDENTITY_MISMATCH", { officialUrl: official.url });
+      if (hit.documentKind !== "LEGISLATION") {
+        await notVerifiable("OFFICIAL_IDENTITY_MISMATCH");
         continue;
       }
+      const official = officialNormattivaUrlFromLookup({
+        candidateSourceUrl: item.sourceUrl,
+        providerRecordId: hit.providerRecordId,
+        publishedAt: hit.publishedAt,
+      });
+      if ("reason" in official) {
+        await notVerifiable(official.reason);
+        continue;
+      }
+      officialUrl = official.url;
       const evidence = await acquireNormattivaAkn({
         candidateUrl: official.url,
         providerRecordId: hit.providerRecordId,
@@ -617,6 +635,7 @@ export async function verifyOfficialResearchSources(input: {
         referenceDate: mission.referenceDate,
         researchQuestion: mission.researchQuestion,
         actTitle: hit.title ?? item.title ?? null,
+        candidateCitation: [item.title, item.officialIdentifier].filter(Boolean).join(" "),
       });
       verified += 1;
       if (!evidence.citationAnchor || !evidence.relevantText) {
@@ -641,7 +660,7 @@ export async function verifyOfficialResearchSources(input: {
       }
     } catch (error) {
       await notVerifiable("OFFICIAL_ACQUISITION_FAILED", {
-        officialUrl: official.url,
+        officialUrl,
         failureCode: error instanceof Error ? error.message : "UNKNOWN",
       });
     }

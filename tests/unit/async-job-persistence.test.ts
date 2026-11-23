@@ -234,6 +234,9 @@ describe("B2C9 generic async job persistence", () => {
     const sql = claimQuery.strings.join(" ");
     expect(sql).toContain('"operation" IN (');
     expect(sql).toContain('FROM "NeutralIntakeDestination"');
+    expect(sql).toContain("'NEUTRAL_INTAKE_CLASSIFICATION_V1'");
+    expect(sql).toContain("'LEGAL_REFERENCE_DISCOVERY_V1'");
+    expect(sql).toContain('FROM "LegalReferenceOfficialLookup"');
     expect(sql).toContain('"inputReference"#>>\'{metadata,procedimentoId}\'');
     expect(sql).toContain('FROM "AutomaticFascicoloReportMission"');
   });

@@ -390,6 +390,31 @@ describe("deterministic structured fascicolo report", () => {
       }
     });
 
+  it("reports a deferred execution as a concluded partial verification, not as pending research", () => {
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({
+        status: "DEFERRED",
+        coverageStatus: "NO_RESULTS",
+        sourceGaps: ["MISSING_OFFICIAL_TEXT"],
+        results: [],
+      })],
+    });
+
+    const question = report.payload.legalIssues[0].questions[0];
+    expect(question).toMatchObject({
+      missionStatus: "DEFERRED",
+      coverageStatus: "NO_RESULTS",
+      gaps: expect.arrayContaining(["MISSING_OFFICIAL_TEXT", "NO_USABLE_SOURCE"]),
+      limitations: expect.arrayContaining(["RESEARCH_COMPLETED_PARTIALLY"]),
+    });
+    expect(question.limitations).not.toContain("RESEARCH_NOT_COMPLETED");
+    expect(question.favorableAuthorities).toEqual([]);
+    expect(question.contraryAuthorities).toEqual([]);
+  });
+
   it("includes an independently reviewed contrary source from its own adverse mission", () => {
       const contrary = {
         ...mission().results[1],

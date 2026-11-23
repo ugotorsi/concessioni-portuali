@@ -20,6 +20,10 @@ import type {
   AsyncJobTerminalFailureResolution,
 } from "./registry";
 import { resetDocumentAnalysisActivationInTransaction } from "./documentAnalysisActivationPersistence";
+import {
+  applicationProcedimentoScope,
+  childApplicationProcedimentoScope,
+} from "./applicationScopeSql";
 
 const identifier = z.string().trim().min(1).max(256);
 const jobId = identifier;
@@ -274,70 +278,14 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
   const operationExclusion = operationBlocklist.length > 0
     ? Prisma.sql`AND "operation" NOT IN (${Prisma.join(operationBlocklist)})`
     : Prisma.empty;
-  const procedimentoScope = procedimentoAllowlist.length > 0
-    ? Prisma.sql`AND (
-        "procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-        OR
-        (
-          "operation" = 'NEUTRAL_INTAKE_EXTRACTION_V1'
-          AND EXISTS (
-            SELECT 1 FROM "NeutralIntakeDestination" AS destination
-            WHERE destination."neutralIntakeId" = "inputReference"->>'referenceId'
-              AND destination."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-          )
-        )
-        OR (
-          "operation" = 'FASCICOLO.AUTOMATIC_ANALYSIS_V1'
-          AND "inputReference"#>>'{metadata,procedimentoId}' IN (${Prisma.join(procedimentoAllowlist)})
-        )
-        OR (
-          "operation" = 'LEGAL_RESEARCH.EXECUTE_V1'
-          AND EXISTS (
-            SELECT 1
-            FROM "AutomaticFascicoloReportMission" AS report_mission
-            JOIN "AutomaticFascicoloReport" AS report
-              ON report."id" = report_mission."reportId"
-            WHERE report_mission."missionId" = "inputReference"->>'referenceId'
-              AND report."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-          )
-        )
-      )`
-    : Prisma.empty;
+  const procedimentoScope = applicationProcedimentoScope(procedimentoAllowlist);
   const childOperationScope = operationAllowlist.length > 0
     ? Prisma.sql`AND child."operation" IN (${Prisma.join(operationAllowlist)})`
     : Prisma.empty;
   const childOperationExclusion = operationBlocklist.length > 0
     ? Prisma.sql`AND child."operation" NOT IN (${Prisma.join(operationBlocklist)})`
     : Prisma.empty;
-  const childProcedimentoScope = procedimentoAllowlist.length > 0
-    ? Prisma.sql`AND (
-        child."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-        OR
-        (
-          child."operation" = 'NEUTRAL_INTAKE_EXTRACTION_V1'
-          AND EXISTS (
-            SELECT 1 FROM "NeutralIntakeDestination" AS destination
-            WHERE destination."neutralIntakeId" = child."inputReference"->>'referenceId'
-              AND destination."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-          )
-        )
-        OR (
-          child."operation" = 'FASCICOLO.AUTOMATIC_ANALYSIS_V1'
-          AND child."inputReference"#>>'{metadata,procedimentoId}' IN (${Prisma.join(procedimentoAllowlist)})
-        )
-        OR (
-          child."operation" = 'LEGAL_RESEARCH.EXECUTE_V1'
-          AND EXISTS (
-            SELECT 1
-            FROM "AutomaticFascicoloReportMission" AS report_mission
-            JOIN "AutomaticFascicoloReport" AS report
-              ON report."id" = report_mission."reportId"
-            WHERE report_mission."missionId" = child."inputReference"->>'referenceId'
-              AND report."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
-          )
-        )
-      )`
-    : Prisma.empty;
+  const childProcedimentoScope = childApplicationProcedimentoScope(procedimentoAllowlist);
 
   await reconcileGuardedExpiredJobs(input, {
     operationScope,

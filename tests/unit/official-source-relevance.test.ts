@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   officialNormattivaUrl,
+  officialNormattivaUrlFromLookup,
   officialSourceRelevance,
   parseProviderLegislationReference,
   readOfficialSourceRelevance,
@@ -17,6 +18,8 @@ describe("parseProviderLegislationReference", () => {
       .toMatchObject({ kind: "LEGISLATION", actType: "LEGGE", actNumber: "443", year: 2001 });
     expect(parseProviderLegislationReference({ title: "Court of Italy, DECRETO LEGISLATIVO 15 luglio 2015, n. 112 (Attuazione della direttiva 2012/34/UE)" }))
       .toMatchObject({ actType: "DECRETO_LEGISLATIVO", actNumber: "112", year: 2015 });
+    expect(parseProviderLegislationReference({ officialIdentifier: "art. 47 regio decreto n. 327 del 30 giugno 1942" }))
+      .toMatchObject({ actType: "REGIO_DECRETO", actNumber: "327", year: 1942 });
   });
 
   it("excludes regional acts and acts cited only in the subject", () => {
@@ -44,6 +47,35 @@ describe("officialNormattivaUrl", () => {
   });
 });
 
+describe("officialNormattivaUrlFromLookup", () => {
+  it("builds an official detail URL for an exact citation discovered on a secondary provider", () => {
+    const result = officialNormattivaUrlFromLookup({
+      candidateSourceUrl: "https://simpliciter.ai/app/normativa/it/r.d/1942/327/47/",
+      providerRecordId: "042U0327",
+      publishedAt: new Date("1942-04-18T00:00:00.000Z"),
+    });
+
+    expect(result).toEqual({ url: expect.stringContaining("atto.codiceRedazionale=042U0327") });
+    expect((result as { url: string }).url).toContain("atto.dataPubblicazioneGazzetta=1942-04-18");
+  });
+
+  it("does not replace a conflicting URL that already claims to be official", () => {
+    expect(officialNormattivaUrlFromLookup({
+      candidateSourceUrl: "https://www.normattiva.it/atto/caricaDettaglioAtto?atto.codiceRedazionale=OTHER",
+      providerRecordId: "042U0327",
+      publishedAt: new Date("1942-04-18T00:00:00.000Z"),
+    })).toEqual({ reason: "OFFICIAL_IDENTITY_MISMATCH" });
+  });
+
+  it("requires the official publication date when the candidate URL is secondary", () => {
+    expect(officialNormattivaUrlFromLookup({
+      candidateSourceUrl: "https://example.com/act",
+      providerRecordId: "042U0327",
+      publishedAt: null,
+    })).toEqual({ reason: "SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE" });
+  });
+});
+
 describe("selectRelevantArticle", () => {
   it("rejects an article outside the port domain even when it mentions concessions", () => {
     expect(selectRelevantArticle({
@@ -62,8 +94,21 @@ describe("selectRelevantArticle", () => {
         { anchor: "art_18", text: "Le concessioni di aree demaniali sono subordinate alla prestazione di garanzia, anche assicurativa; il rinnovo è disposto previa verifica." },
       ],
     });
+
     expect(selected).toMatchObject({ section: "Art. 18", anchor: "art_18" });
     expect(selected!.matchedTerms.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("does not substitute a different article when the candidate cites one explicitly", () => {
+    expect(selectRelevantArticle({
+      researchQuestion: "Quali titoli servono per opere non autorizzate su area demaniale in concessione?",
+      actTitle: "Testo unico delle disposizioni legislative e regolamentari in materia edilizia",
+      candidateCitation: "D.P.R. 380/2001, art. 8",
+      articles: [
+        { anchor: "art_7", text: "Il permesso disciplina opere non autorizzate su area demaniale in concessione." },
+        { anchor: "art_8", text: "Disciplina dell'attività edilizia delle pubbliche amministrazioni." },
+      ],
+    })).toBeNull();
   });
 
   it("rejects an in-domain article matching fewer than two discriminating terms", () => {

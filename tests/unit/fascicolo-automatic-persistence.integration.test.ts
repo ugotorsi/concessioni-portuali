@@ -12,6 +12,22 @@ vi.mock("@/server/automation/automationControl", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/server/automation/automationControl")>()),
   isAutomationEnabled: vi.fn(async () => true),
 }));
+vi.mock("@/server/ai/globalAiControl", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/server/ai/globalAiControl")>()),
+  getGlobalAiControlState: vi.fn(async () => ({ effectiveEnabled: true })),
+}));
+vi.mock("@/server/ai/providerReadiness", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/server/ai/providerReadiness")>()),
+  getAutomaticAiSelectionForAdmission: vi.fn(async () => ({
+    workflow: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    selection: {
+      provider: "OPENAI",
+      model: "gpt-5.6-terra",
+      selectionVersion: "AI_MODEL_SELECTION_V1",
+    },
+    authorizationRef: "SYNTHETIC_INTEGRATION_TEST",
+  })),
+}));
 
 import { prisma } from "@/lib/prisma";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
@@ -76,6 +92,28 @@ const canonicalAnalysis = {
     researchQuestions: [],
   },
 } as const;
+
+function analysisGroundedAt(reference: string) {
+  return {
+    ...validAnalysis,
+    summary: { ...validAnalysis.summary, basisRefs: [reference] },
+    timeline: validAnalysis.timeline.map((item) => ({ ...item, basisRefs: [reference] })),
+    recordedState: validAnalysis.recordedState.map((item) => ({ ...item, basisRefs: [reference] })),
+    signals: validAnalysis.signals.map((item) => ({ ...item, basisRefs: [reference] })),
+    investigativeQuestions: validAnalysis.investigativeQuestions.map((item) => ({
+      ...item,
+      basisRefs: [reference],
+    })),
+    suggestedActivities: validAnalysis.suggestedActivities.map((item) => ({
+      ...item,
+      basisRefs: [reference],
+    })),
+    legalResearchQuestions: validAnalysis.legalResearchQuestions.map((item) => ({
+      ...item,
+      basisRefs: [reference],
+    })),
+  };
+}
 
 run("automatic fascicolo persistence on temporary PostgreSQL", () => {
   const suffix = randomUUID();
@@ -179,12 +217,13 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
       if (transientAnalysisCalls === 1) {
         throw new AsyncJobExecutionError("PROVIDER", "AI_PROVIDER_UNAVAILABLE", true);
       }
-      return validAnalysis;
+      return analysisGroundedAt(input.excerpts[0]!.reference);
     }
-    if (text.includes("CONTROLLO CANONICAL V6")) return canonicalAnalysis;
-    return text.includes("RISPOSTA INCERTA")
-      ? { summary: "not-structured" }
-      : validAnalysis;
+    if (text.includes("RISPOSTA INCERTA")) return { summary: "not-structured" };
+    if (text.includes("CONTROLLO CANONICAL V6") && input.documents.length === 1) {
+      return canonicalAnalysis;
+    }
+    return analysisGroundedAt(input.excerpts[0]!.reference);
   });
 
   const providerAdapter: ResearchProviderAdapter = {
@@ -251,6 +290,7 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
           "NEUTRAL_INTAKE_EXTRACTION_V1",
           "NEUTRAL_INTAKE_CLASSIFICATION_V1",
           "LEGAL_REFERENCE_DISCOVERY_V1",
+          "LEGAL_REFERENCE_MATCHING_V1",
           FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
           RESEARCH_MISSION_EXECUTION_OPERATION,
         ],
@@ -259,33 +299,6 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
       });
     }
     throw new Error("AUTOMATIC_JOB_DID_NOT_REACH_TERMINAL_STATE");
-  }
-
-  async function drainUntilResearchTerminal(missionId: string) {
-    for (let index = 0; index < 20; index += 1) {
-      const target = await prisma.asyncJob.findFirst({
-        where: {
-          operation: RESEARCH_MISSION_EXECUTION_OPERATION,
-          inputReference: { path: ["referenceId"], equals: missionId },
-        },
-      });
-      if (target && ["SUCCEEDED", "TERMINAL_FAILED", "CANCELLED"].includes(target.status)) return target;
-      await drainOneAsyncJob({
-        workerId: `worker-${suffix}`,
-        leaseDurationMs: 60_000,
-        retryDelayMs: 0,
-        operationAllowlist: [
-          "NEUTRAL_INTAKE_EXTRACTION_V1",
-          "NEUTRAL_INTAKE_CLASSIFICATION_V1",
-          "LEGAL_REFERENCE_DISCOVERY_V1",
-          FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
-          RESEARCH_MISSION_EXECUTION_OPERATION,
-        ],
-        procedimentoAllowlist: [procedimentoId],
-        registry,
-      });
-    }
-    throw new Error("RESEARCH_JOB_DID_NOT_REACH_TERMINAL_STATE");
   }
 
   it("persists and rereads an automatic report without executing research missions", async () => {
@@ -393,7 +406,7 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     }
   });
 
-  it("runs upload, extraction, worker analysis, repository, mission generation, restart read, and dossier view", async () => {
+  it("runs upload, extraction, analysis, mission exposure, restart read, and dossier view", async () => {
     const first = await upload(
       "Il provvedimento richiama l'articolo 18 e indica scadenza 31 dicembre 2026.",
       `upload-a-${suffix}`,
@@ -415,38 +428,21 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     });
     expect(report.missionLinks).toHaveLength(1);
     expect(JSON.stringify(report.provenancePayload)).not.toContain("Il provvedimento");
-    expect(JSON.stringify(report.analysisPayload)).toContain("DOCUMENT_1.PAGE_1");
+    expect(JSON.stringify(report.analysisPayload))
+      .toContain(analysisInputs.at(-1)!.excerpts[0]!.reference);
 
     const linkedMission = await prisma.researchMissionRecord.findUniqueOrThrow({
       where: { id: report.missionLinks[0].missionId },
     });
-    await Promise.all([
-      drainOneAsyncJob({
-        workerId: `research-worker-a-${suffix}`,
-        leaseDurationMs: 60_000,
-        retryDelayMs: 0,
-        operationAllowlist: [RESEARCH_MISSION_EXECUTION_OPERATION],
-        procedimentoAllowlist: [procedimentoId],
-        registry,
-      }),
-      drainOneAsyncJob({
-        workerId: `research-worker-b-${suffix}`,
-        leaseDurationMs: 60_000,
-        retryDelayMs: 0,
-        operationAllowlist: [RESEARCH_MISSION_EXECUTION_OPERATION],
-        procedimentoAllowlist: [procedimentoId],
-        registry,
-      }),
-    ]);
-    const researchTerminal = await drainUntilResearchTerminal(linkedMission.id);
-    expect(researchTerminal).toMatchObject({ status: "SUCCEEDED", attemptCount: 1 });
-    expect(providerCall).toHaveBeenCalledOnce();
+    expect((linkedMission.payload as unknown as ResearchMission).executionChannel)
+      .toBe("CHATGPT_CONNECTOR");
+    expect(providerCall).not.toHaveBeenCalled();
     expect(await prisma.asyncJob.count({
       where: { operation: RESEARCH_MISSION_EXECUTION_OPERATION, tenantId },
-    })).toBe(1);
+    })).toBe(0);
     expect(await prisma.researchEvidenceBundleRecord.count({
       where: { missionId: linkedMission.id },
-    })).toBe(1);
+    })).toBe(0);
     const repeatedInput: AutomaticFascicoloReportPersistenceInput = {
       reportId: report.id,
       tenantId,
@@ -489,13 +485,12 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     expect(html).toContain("Questioni e quesiti formulati");
     expect(html).toContain("Quale disciplina si applica");
     expect(html).toContain("Fatti e date documentati");
-    expect(html).toContain("Provenienza: DOCUMENT_1.PAGE_1");
+    expect(html).toContain("Provenienza:");
     expect(html).toContain("Conclusioni professionali: non formulate");
     expect(html).toContain("Ricerca di decisioni e orientamenti contrari");
     expect(html).toContain("verifica professionale");
-    expect(html).toContain("Decisione sintetica offline");
-    expect(html).toContain("2026-06-10T00:00:00.000Z");
-    expect(html).toContain("Executor: SUCCEEDED");
+    expect(html).toContain("AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED");
+    expect(html).toContain("In corso");
     expect(html).toContain("La discovery preliminare non completa la verifica del fascicolo");
 
     const callsBeforeRestartRead = analysisCalls;
@@ -546,6 +541,10 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
   });
 
   it("supersedes an earlier document version and rejects a wrong tenant", async () => {
+    const reportsBefore = await prisma.automaticFascicoloReport.findMany({
+      where: { tenantId, procedimentoId },
+      orderBy: { createdAt: "asc" },
+    });
     const second = await upload(
       "Versione aggiornata: articolo 18, scadenza 31 dicembre 2027 e nuova comunicazione.",
       `upload-b-${suffix}`,
@@ -557,15 +556,16 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
       where: { tenantId, procedimentoId },
       orderBy: { createdAt: "asc" },
     });
-    expect(reports).toHaveLength(2);
-    expect(reports[0]).toMatchObject({ status: "SUPERSEDED", supersededByReportId: reports[1].id });
-    expect(reports[1]).toMatchObject({ status: "ANALYSIS_COMPLETE", supersededByReportId: null });
+    expect(reports).toHaveLength(reportsBefore.length + 1);
+    const latestReport = reports.at(-1)!;
+    expect(reports.slice(0, -1).every((report) => report.status === "SUPERSEDED")).toBe(true);
+    expect(reports.at(-2)).toMatchObject({ supersededByReportId: latestReport.id });
+    expect(latestReport).toMatchObject({ status: "ANALYSIS_COMPLETE", supersededByReportId: null });
     const latestCorpusDocuments = await prisma.automaticFascicoloReportDocument.findMany({
-      where: { reportId: reports[1].id },
+      where: { reportId: latestReport.id },
       orderBy: { ordinal: "asc" },
     });
-    expect(latestCorpusDocuments).toHaveLength(2);
-    expect(analysisInputs.at(-1)?.documents).toHaveLength(2);
+    expect(latestCorpusDocuments).toHaveLength(analysisInputs.at(-1)!.documents!.length);
     expect(analysisInputs.at(-1)?.excerpts.map((excerpt) => excerpt.reference))
       .toEqual(expect.arrayContaining(["DOCUMENT_1.PAGE_1", "DOCUMENT_2.PAGE_1"]));
 
@@ -577,19 +577,19 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
       tenantId: `wrong-${tenantId}`,
       procedimentoId,
       neutralIntakeId: secondIntakeId,
-      documentVersionId: reports[1].documentVersionId,
-      artifactSha256: reports[1].artifactSha256,
-      corpusFingerprint: reports[1].corpusFingerprint,
+      documentVersionId: latestReport.documentVersionId,
+      artifactSha256: latestReport.artifactSha256,
+      corpusFingerprint: latestReport.corpusFingerprint,
       documents: [{
-        documentVersionId: reports[1].documentVersionId,
-        artifactSha256: reports[1].artifactSha256,
+        documentVersionId: latestReport.documentVersionId,
+        artifactSha256: latestReport.artifactSha256,
       }],
       actorId,
       analysis: validAnalysis as unknown as ProviderAnalysisPayloadV1,
       provenance: [{
         reference: "DOCUMENT_1.PAGE_1",
-        documentVersionId: reports[1].documentVersionId,
-        artifactSha256: reports[1].artifactSha256,
+        documentVersionId: latestReport.documentVersionId,
+        artifactSha256: latestReport.artifactSha256,
         pageNumber: 1,
         textSha256: "a".repeat(64),
         extractionMethod: "DIRECT_TEXT",

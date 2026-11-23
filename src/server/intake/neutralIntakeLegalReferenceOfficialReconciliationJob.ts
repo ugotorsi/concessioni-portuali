@@ -108,6 +108,7 @@ export function buildLegalReferenceOfficialReconciliationAdmission(
     logicalOperationId: logicalOperationId(lookupId),
     purpose: LEGAL_REFERENCE_OFFICIAL_RECONCILIATION_PURPOSE,
     correlationId: provenance.correlationId,
+    ...(provenance.procedimentoId ? { procedimentoId: provenance.procedimentoId } : {}),
     policyDecisionRef: provenance.policyDecisionRef,
     inputReference: {
       referenceType: "LEGAL_REFERENCE_OFFICIAL_RECONCILIATION",

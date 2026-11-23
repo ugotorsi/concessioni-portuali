@@ -39,6 +39,7 @@ type MatchingReference = z.output<typeof referenceSchema>;
 
 type SourceJobProvenance = {
   tenantId: string | null;
+  procedimentoId?: string | null;
   admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
   initiatingUserId: string | null;
   actorId: string;
@@ -66,6 +67,7 @@ export function buildLegalReferenceMatchingAdmission(
     logicalOperationId: logicalOperationId(input.neutralIntakeId, input.extractionAttemptId),
     purpose: LEGAL_REFERENCE_MATCHING_PURPOSE,
     correlationId: provenance.correlationId,
+    ...(provenance.procedimentoId ? { procedimentoId: provenance.procedimentoId } : {}),
     policyDecisionRef: provenance.policyDecisionRef,
     inputReference: {
       referenceType: "LEGAL_REFERENCE_MATCHING",
@@ -145,6 +147,7 @@ export async function ensureLegalReferenceMatchingJobInTransaction(
     { neutralIntakeId: input.neutralIntakeId, extractionAttemptId: input.extractionAttemptId },
     {
       tenantId: sourceJob.tenantId,
+      procedimentoId: sourceJob.procedimentoId,
       admissionType: sourceJob.admissionType,
       initiatingUserId: sourceJob.initiatingUserId,
       actorId: sourceJob.actorId,
@@ -178,6 +181,7 @@ export async function matchLegalReferencesInTransaction(
       select: {
         operation: true,
         tenantId: true,
+        procedimentoId: true,
         admissionType: true,
         initiatingUserId: true,
         actorId: true,
@@ -285,6 +289,7 @@ export async function matchLegalReferencesInTransaction(
   await tx.legalReferenceMatch.createMany({ data, skipDuplicates: true });
   const provenance: OfficialLookupSourceJob = {
     tenantId: job.tenantId,
+    procedimentoId: job.procedimentoId,
     admissionType: job.admissionType,
     initiatingUserId: job.initiatingUserId,
     actorId: job.actorId,

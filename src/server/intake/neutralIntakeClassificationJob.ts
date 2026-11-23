@@ -47,6 +47,7 @@ type ClassificationReference = z.output<typeof referenceSchema>;
 
 type SourceJobProvenance = {
   tenantId: string | null;
+  procedimentoId?: string | null;
   admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
   initiatingUserId: string | null;
   actorId: string;
@@ -89,6 +90,7 @@ export function buildNeutralIntakeClassificationAdmission(
     logicalOperationId: logicalOperationId(evidence),
     purpose: NEUTRAL_INTAKE_CLASSIFICATION_PURPOSE,
     correlationId: provenance.correlationId,
+    ...(provenance.procedimentoId ? { procedimentoId: provenance.procedimentoId } : {}),
     policyDecisionRef: provenance.policyDecisionRef,
     inputReference: {
       referenceType: "NEUTRAL_INTAKE_CLASSIFICATION",
@@ -161,7 +163,10 @@ export async function ensureNeutralIntakeClassificationJobInTransaction(
 ) {
   const [sourceJob, intake, latestAttempt] = await Promise.all([
     tx.asyncJob.findUnique({ where: { id: input.sourceJobId } }),
-    tx.neutralIntake.findUnique({ where: { id: input.neutralIntakeId }, select: { id: true, enteId: true, status: true } }),
+    tx.neutralIntake.findUnique({
+      where: { id: input.neutralIntakeId },
+      select: { id: true, enteId: true, status: true, destination: { select: { procedimentoId: true } } },
+    }),
     tx.neutralIntakeExtractionAttempt.findFirst({
       where: { neutralIntakeId: input.neutralIntakeId, outcome: "SUCCEEDED" },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
@@ -183,6 +188,7 @@ export async function ensureNeutralIntakeClassificationJobInTransaction(
     asEvidence(latestAttempt),
     {
       tenantId: sourceJob.tenantId,
+      procedimentoId: intake.destination?.procedimentoId ?? null,
       admissionType: sourceJob.admissionType,
       initiatingUserId: sourceJob.initiatingUserId,
       actorId: sourceJob.actorId,

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import { createHash } from "node:crypto";
+import { SELVARA_V3_RECOVERY_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 
 const databaseUrl = process.env.POSTGRES_INTEGRATION_DATABASE_URL;
 const describePostgres = databaseUrl ? describe : describe.skip;
@@ -23,6 +24,8 @@ describePostgres("document analysis activation on PostgreSQL", () => {
     RENDER_APPLICATION_WORKER_SERVICE_ID: "srv-postgresintegration",
     RENDER_WORKER_API_KEY: "local-test-key",
   };
+  const jobHash = (value: string, suffix: string) =>
+    createHash("sha256").update(`${value}:${suffix}`).digest("hex");
 
   function target(applicationJobId: string, tenantId = tenantOne, procedimentoId = procedureOne) {
     return {
@@ -44,8 +47,8 @@ describePostgres("document analysis activation on PostgreSQL", () => {
     return prisma.asyncJob.create({
       data: {
         id: input.id,
-        idempotencyKey: input.id.padEnd(64, "0").slice(0, 64),
-        requestFingerprint: input.id.padEnd(64, "1").slice(0, 64),
+        idempotencyKey: jobHash(input.id, "idempotency"),
+        requestFingerprint: jobHash(input.id, "request"),
         operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
         logicalOperationId: `logical-${input.id}`,
         purpose: "FASCICOLO_AUTOMATIC_ANALYSIS",
@@ -185,8 +188,8 @@ describePostgres("document analysis activation on PostgreSQL", () => {
     const applicationJobId = recovery.applicationJobId;
     const target = {
       applicationJobId,
-      tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
-      procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+      tenantId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
+      procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
     };
     const renderJob = {
       id: recovery.renderJobId,
@@ -279,15 +282,15 @@ describePostgres("document analysis activation on PostgreSQL", () => {
     try {
       await prisma.ente.create({
         data: {
-          id: SELVARA_PILOT_AUTHORIZATION.tenantId,
+          id: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
           nome: "Isolated PostgreSQL Selvara Tenant",
           codice: "PG-SELVARA-RECOVERY",
         },
       });
       await prisma.procedimento.create({
         data: {
-          id: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
-          enteId: SELVARA_PILOT_AUTHORIZATION.tenantId,
+          id: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
+          enteId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
           tipologia: "ALTRO",
           stato: "DA_AVVIARE",
         },
@@ -295,24 +298,24 @@ describePostgres("document analysis activation on PostgreSQL", () => {
       await prisma.asyncJob.create({
         data: {
           id: applicationJobId,
-          idempotencyKey: "selvara-recovery-postgres".padEnd(64, "0"),
-          requestFingerprint: "selvara-recovery-postgres".padEnd(64, "1"),
-          operation: SELVARA_PILOT_AUTHORIZATION.operation,
+          idempotencyKey: jobHash(applicationJobId, "idempotency"),
+          requestFingerprint: jobHash(applicationJobId, "request"),
+          operation: SELVARA_V3_RECOVERY_AUTHORIZATION.operation,
           logicalOperationId: "isolated-postgres-selvara-recovery",
-          purpose: SELVARA_PILOT_AUTHORIZATION.purpose,
+          purpose: SELVARA_V3_RECOVERY_AUTHORIZATION.purpose,
           correlationId: "isolated-postgres-selvara-recovery",
           inputReference: {
             referenceType: "FASCICOLO_DOCUMENT_CORPUS",
-            referenceId: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+            referenceId: SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint,
             referenceVersion: "V1",
             metadata: {
-              procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
-              corpusHash: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+              procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
+              corpusHash: SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint,
             },
           },
           admissionType: "AUTHENTICATED_USER",
-          tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
-          procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+          tenantId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
+          procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
           initiatingUserId: userId,
           actorId: userId,
           actorEmail: "postgres-activation@example.test",
@@ -372,10 +375,10 @@ describePostgres("document analysis activation on PostgreSQL", () => {
       });
       await prisma.asyncJob.deleteMany({ where: { id: applicationJobId } });
       await prisma.procedimento.deleteMany({
-        where: { id: SELVARA_PILOT_AUTHORIZATION.procedimentoId },
+        where: { id: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId },
       });
       await prisma.ente.deleteMany({
-        where: { id: SELVARA_PILOT_AUTHORIZATION.tenantId },
+        where: { id: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId },
       });
     }
   });

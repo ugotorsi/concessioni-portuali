@@ -33,6 +33,7 @@ type DiscoveryReference = z.output<typeof referenceSchema>;
 
 type SourceJobProvenance = {
   tenantId: string | null;
+  procedimentoId?: string | null;
   admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
   initiatingUserId: string | null;
   actorId: string;
@@ -60,6 +61,7 @@ export function buildLegalReferenceDiscoveryAdmission(
     logicalOperationId: logicalOperationId(input.neutralIntakeId, input.extractionAttemptId),
     purpose: LEGAL_REFERENCE_DISCOVERY_PURPOSE,
     correlationId: provenance.correlationId,
+    ...(provenance.procedimentoId ? { procedimentoId: provenance.procedimentoId } : {}),
     policyDecisionRef: provenance.policyDecisionRef,
     inputReference: {
       referenceType: "LEGAL_REFERENCE_DISCOVERY",
@@ -108,7 +110,7 @@ export async function ensureLegalReferenceDiscoveryJobInTransaction(
         id: true,
         enteId: true,
         destination: {
-          select: { procedimento: { select: { enteId: true } } },
+          select: { procedimentoId: true, procedimento: { select: { enteId: true } } },
         },
       },
     }),
@@ -141,6 +143,7 @@ export async function ensureLegalReferenceDiscoveryJobInTransaction(
     { neutralIntakeId: intake.id, extractionAttemptId: extractionAttempt.id },
     {
       tenantId: sourceJob.tenantId,
+      procedimentoId: intake.destination.procedimentoId,
       admissionType: sourceJob.admissionType,
       initiatingUserId: sourceJob.initiatingUserId,
       actorId: sourceJob.actorId,

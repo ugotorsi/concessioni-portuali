@@ -45,6 +45,7 @@ type LookupReference = z.output<typeof referenceSchema>;
 
 export type OfficialLookupSourceJob = {
   tenantId: string | null;
+  procedimentoId?: string | null;
   admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
   initiatingUserId: string | null;
   actorId: string;
@@ -76,6 +77,7 @@ export function buildLegalReferenceOfficialLookupAdmission(
     logicalOperationId: officialLookupLogicalOperationId(mentionId, provider),
     purpose: LEGAL_REFERENCE_OFFICIAL_LOOKUP_PURPOSE,
     correlationId: provenance.correlationId,
+    ...(provenance.procedimentoId ? { procedimentoId: provenance.procedimentoId } : {}),
     policyDecisionRef: provenance.policyDecisionRef,
     inputReference: {
       referenceType: "LEGAL_REFERENCE_OFFICIAL_LOOKUP",
@@ -135,6 +137,7 @@ async function prepareLookup(
         operation: true,
         logicalOperationId: true,
         tenantId: true,
+        procedimentoId: true,
         admissionType: true,
         initiatingUserId: true,
         actorId: true,
@@ -189,6 +192,7 @@ async function prepareLookup(
   });
   const provenance: OfficialLookupSourceJob = {
     tenantId: job.tenantId,
+    procedimentoId: job.procedimentoId,
     admissionType: job.admissionType,
     initiatingUserId: job.initiatingUserId,
     actorId: job.actorId,

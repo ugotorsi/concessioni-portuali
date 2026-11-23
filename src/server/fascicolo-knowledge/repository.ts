@@ -544,7 +544,13 @@ export async function reconcileAndPromoteKnowledgeRevision(
     const itemRows: Array<Record<string, unknown>> = [];
     const evidenceRows: Array<Record<string, unknown>> = [];
     const relationRows: Array<Record<string, unknown>> = [];
-    const itemIdBySemanticKey = new Map<string, string>();
+    const targetItems = (await tx.query<Pick<ItemRow, "id" | "semanticKey">>(`
+      SELECT "id", "semanticKey" FROM "FascicoloKnowledgeItem"
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "revisionId" = $3
+    `, [input.tenantId, input.procedimentoId, input.revisionId])).rows;
+    const itemIdBySemanticKey = new Map(
+      targetItems.map((item) => [item.semanticKey, item.id]),
+    );
     for (const entry of reconciliation) {
       if (!entry.candidate || !entry.nextStatus) {
         classifications.push({

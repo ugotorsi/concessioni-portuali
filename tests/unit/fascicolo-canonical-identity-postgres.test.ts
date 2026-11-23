@@ -1170,7 +1170,7 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
         trustedText: sourceText,
         itemKnowledge: knowledge("citazione inesistente", "firmato oggi"),
         itemEvidence: validEvidence,
-        errorCode: "CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED",
+        errorCode: "STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE",
       },
       {
         name: "hash-mismatch",
@@ -1184,7 +1184,7 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
         trustedText: sourceText,
         itemKnowledge: knowledge("o", "firmato oggi"),
         itemEvidence: validEvidence,
-        errorCode: "CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED",
+        errorCode: "STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE",
       },
     ] as const;
     for (const invalid of invalidCases) {

@@ -13,9 +13,11 @@ on:
       - "src/server/ai/**"
       - "src/server/async-jobs/**"
       - "src/server/documents/**"
+      - "src/server/fascicolo-report/**"
       - "src/server/intake/**"
       - "src/server/legal-research/**"
       - "src/server/queries/**"
+      - "src/components/procedimenti/FascicoloReport.tsx"
       - "tests/unit/ai-fascicolo-snapshot.test.ts"
       - "tests/unit/document-*.test.ts"
       - "tests/unit/fascicolo-automatic-*.test.ts"
@@ -23,6 +25,8 @@ on:
       - "tests/unit/legal-research-*.test.ts"
       - "tests/unit/neutral-intake-technical-extractor.test.ts"
       - "tests/unit/research-assisted-verification-route.test.ts"
+      - "tests/unit/research-question-results-pglite.test.ts"
+      - "tests/unit/structured-fascicolo-report.test.ts"
       - "tests/unit/trusted-research-mission-route.test.ts"
 
 permissions:

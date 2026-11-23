@@ -247,6 +247,7 @@ async function createNeutralIntakeWithExtractionJobInTransaction(
     buildNeutralIntakeExtractionAdmission({
       ...intakeResult.intake,
       initiatingUserRole: initiatingUser?.ruolo ?? null,
+      procedimentoId: destinationResult?.destination.procedimentoId ?? null,
     }),
   );
   return { ...intakeResult, destination: destinationResult?.destination ?? null, extractionJob: extractionJob.job };
