@@ -32,8 +32,19 @@ vi.mock("@/server/queries/ai-fascicolo-human-review", () => ({
 vi.mock("@/lib/auth", async (importOriginal) => ({
   ...await importOriginal<typeof import("@/lib/auth")>(),
   requireRole: vi.fn().mockResolvedValue("VIEWER_ADSP"),
+  getCurrentUser: vi.fn().mockResolvedValue({
+    id: "viewer-1",
+    role: "VIEWER_ADSP",
+    mfaVerified: false,
+  }),
   canManageProcedimenti: vi.fn().mockReturnValue(false),
   canRegisterProcedimentoDecision: vi.fn().mockReturnValue(false),
+}));
+
+vi.mock("@/lib/tenant-auth", () => ({
+  getCurrentTenantContext: vi.fn().mockResolvedValue({
+    datasetScope: "PROFESSIONAL",
+  }),
 }));
 
 vi.mock("@/lib/procedimento-checklist", async (importOriginal) => ({

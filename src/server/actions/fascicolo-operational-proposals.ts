@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { canManageCriticita, canManageProcedimenti, getCurrentUser, requireRole, type DemoRole } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure } from "@/server/audit/auditLog";
@@ -104,14 +105,17 @@ interface AuthorizedScope {
 
 async function authorizedScope(procedimentoId: string): Promise<AuthorizedScope> {
   const role = await requireRole();
-  const [user, tenantContext, procedimento] = await Promise.all([
+  const [user, tenantContext] = await Promise.all([
     getCurrentUser(),
     getCurrentTenantContext(),
-    prisma.procedimento.findUnique({
-      where: { id: procedimentoId },
-      select: { enteId: true, concessioneId: true },
-    }),
   ]);
+  const procedimento = await prisma.procedimento.findUnique({
+    where: buildDatasetProcedimentoUniqueWhere(
+      procedimentoId,
+      tenantContext?.datasetScope,
+    ),
+    select: { enteId: true, concessioneId: true },
+  });
   const tenantId = procedimento?.enteId;
   if (!user || !tenantContext || !tenantId || !procedimento) throw new Error("Procedimento, attore o tenant non disponibile.");
   requireTenantAccess(tenantContext, tenantId, { mode: "write", allowWhenEnteMissing: false });

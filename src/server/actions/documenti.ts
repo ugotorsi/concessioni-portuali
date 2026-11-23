@@ -7,6 +7,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import type { DatasetClass } from "@/generated/prisma/client";
+import {
+  buildDatasetDocumentoWhere,
+  isDatasetClassVisible,
+} from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -66,13 +71,14 @@ async function resolveLinkedTenantForDocumento(input: {
   sopralluogoId?: string;
   pagamentoId?: string;
   reportId?: string;
-}): Promise<{ enteId: string | null }> {
+}): Promise<{ enteId: string | null; datasetClass: DatasetClass | null }> {
   const candidateTenantIds = new Set<string>();
+  const candidateDatasetClasses = new Set<DatasetClass>();
 
   if (input.concessioneId) {
     const concessione = await prisma.concessione.findUnique({
       where: { id: input.concessioneId },
-      select: { id: true, enteId: true },
+      select: { id: true, datasetClass: true, enteId: true },
     });
     if (!concessione) {
       throw new Error("Concessione collegata non trovata.");
@@ -80,12 +86,16 @@ async function resolveLinkedTenantForDocumento(input: {
     if (concessione.enteId) {
       candidateTenantIds.add(concessione.enteId);
     }
+    candidateDatasetClasses.add(concessione.datasetClass);
   }
 
   if (input.criticitaId) {
     const criticita = await prisma.criticita.findUnique({
       where: { id: input.criticitaId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: {
+        id: true,
+        concessione: { select: { datasetClass: true, enteId: true } },
+      },
     });
     if (!criticita) {
       throw new Error("Criticita collegata non trovata.");
@@ -93,23 +103,28 @@ async function resolveLinkedTenantForDocumento(input: {
     if (criticita.concessione.enteId) {
       candidateTenantIds.add(criticita.concessione.enteId);
     }
+    candidateDatasetClasses.add(criticita.concessione.datasetClass);
   }
 
   if (input.procedimentoId) {
     const procedimento = await prisma.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { id: true, enteId: true },
+      select: { id: true, datasetClass: true, enteId: true },
     });
     if (!procedimento) {
       throw new Error("Procedimento collegato non trovato.");
     }
     candidateTenantIds.add(procedimento.enteId);
+    candidateDatasetClasses.add(procedimento.datasetClass);
   }
 
   if (input.sopralluogoId) {
     const sopralluogo = await prisma.sopralluogo.findUnique({
       where: { id: input.sopralluogoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: {
+        id: true,
+        concessione: { select: { datasetClass: true, enteId: true } },
+      },
     });
     if (!sopralluogo) {
       throw new Error("Sopralluogo collegato non trovato.");
@@ -117,12 +132,16 @@ async function resolveLinkedTenantForDocumento(input: {
     if (sopralluogo.concessione.enteId) {
       candidateTenantIds.add(sopralluogo.concessione.enteId);
     }
+    candidateDatasetClasses.add(sopralluogo.concessione.datasetClass);
   }
 
   if (input.pagamentoId) {
     const pagamento = await prisma.pagamento.findUnique({
       where: { id: input.pagamentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: {
+        id: true,
+        concessione: { select: { datasetClass: true, enteId: true } },
+      },
     });
     if (!pagamento) {
       throw new Error("Pagamento collegato non trovato.");
@@ -130,6 +149,7 @@ async function resolveLinkedTenantForDocumento(input: {
     if (pagamento.concessione.enteId) {
       candidateTenantIds.add(pagamento.concessione.enteId);
     }
+    candidateDatasetClasses.add(pagamento.concessione.datasetClass);
   }
 
   if (input.reportId) {
@@ -140,6 +160,7 @@ async function resolveLinkedTenantForDocumento(input: {
         enteId: true,
         concessione: {
           select: {
+            datasetClass: true,
             enteId: true,
           },
         },
@@ -154,14 +175,21 @@ async function resolveLinkedTenantForDocumento(input: {
     if (report.concessione?.enteId) {
       candidateTenantIds.add(report.concessione.enteId);
     }
+    if (report.concessione) {
+      candidateDatasetClasses.add(report.concessione.datasetClass);
+    }
   }
 
   if (candidateTenantIds.size > 1) {
     throw new Error("Entita collegate appartenenti a tenant diversi non consentite.");
   }
+  if (candidateDatasetClasses.size > 1) {
+    throw new Error("Entita collegate appartenenti a dataset diversi non consentite.");
+  }
 
   return {
     enteId: candidateTenantIds.values().next().value ?? null,
+    datasetClass: candidateDatasetClasses.values().next().value ?? null,
   };
 }
 
@@ -281,6 +309,25 @@ export async function createDocumentoUploadAction(formData: FormData) {
       });
       throw new Error("Accesso tenant non consentito.");
     }
+    if (
+      !linkedTenant.datasetClass
+      || !isDatasetClassVisible(linkedTenant.datasetClass, tenantContext.datasetScope)
+    ) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        concessioneId: payload.concessioneId ?? null,
+        enteId: canonicalEnteId,
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          actionType: "DOCUMENT_UPLOAD",
+          reason: "CROSS_DATASET_BLOCKED",
+          datasetClass: linkedTenant.datasetClass,
+          datasetScope: tenantContext.datasetScope,
+        },
+      });
+      throw new Error("Accesso dataset non consentito.");
+    }
   }
 
   const uploaded = await uploadDocument({
@@ -356,8 +403,13 @@ export async function archiveDocumentoAction(formData: FormData) {
   const currentUser = await getCurrentUser();
   const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
 
-  const existing = await prisma.documento.findUnique({
-    where: { id: parsed.data.id },
+  const tenantContext = await getCurrentTenantContext();
+  const existing = tenantContext
+    ? await prisma.documento.findFirst({
+      where: {
+        id: parsed.data.id,
+        ...buildDatasetDocumentoWhere(tenantContext.datasetScope),
+      },
     select: {
       id: true,
       enteId: true,
@@ -367,14 +419,14 @@ export async function archiveDocumentoAction(formData: FormData) {
         },
       },
     },
-  });
+    })
+    : null;
 
   if (!existing) {
     throw new Error("Documento non trovato.");
   }
 
   const resourceEnteId = existing.enteId ?? existing.concessione?.enteId ?? null;
-  const tenantContext = await getCurrentTenantContext();
   if (tenantContext) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
@@ -552,9 +604,15 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
 
   const currentUser = await getCurrentUser();
   const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
-
-  const existing = await prisma.documento.findUnique({
-    where: { id: parsed.data.id },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) {
+    throw new Error("Contesto tenant autenticato richiesto.");
+  }
+  const existing = await prisma.documento.findFirst({
+    where: {
+      id: parsed.data.id,
+      ...buildDatasetDocumentoWhere(tenantContext.datasetScope),
+    },
     select: {
       id: true,
       enteId: true,
@@ -571,27 +629,24 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
   }
 
   const resourceEnteId = existing.enteId ?? existing.concessione?.enteId ?? null;
-  const tenantContext = await getCurrentTenantContext();
-  if (tenantContext) {
-    try {
-      requireTenantAccess(tenantContext, resourceEnteId, {
-        mode: "write",
-        allowWhenEnteMissing: false,
-      });
-    } catch {
-      await auditFailure({
-        azione: "AUTHZ_DENIED",
-        entita: "Documento",
-        entitaId: parsed.data.id,
-        enteId: resourceEnteId,
-        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
-        metadata: {
-          actionType: "DOCUMENT_METADATA_UPDATE",
-          reason: "CROSS_TENANT_BLOCKED",
-        },
-      });
-      throw new Error("Accesso tenant non consentito.");
-    }
+  try {
+    requireTenantAccess(tenantContext, resourceEnteId, {
+      mode: "write",
+      allowWhenEnteMissing: false,
+    });
+  } catch {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Documento",
+      entitaId: parsed.data.id,
+      enteId: resourceEnteId,
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        actionType: "DOCUMENT_METADATA_UPDATE",
+        reason: "CROSS_TENANT_BLOCKED",
+      },
+    });
+    throw new Error("Accesso tenant non consentito.");
   }
 
   const updated = await prisma.documento.update({

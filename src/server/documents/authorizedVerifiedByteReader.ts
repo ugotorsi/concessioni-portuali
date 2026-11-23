@@ -233,7 +233,7 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
   const documento = await prisma.documento.findFirst({
     where: {
       id: input.documentoId,
-      ...buildDatasetDocumentoWhere(),
+      ...buildDatasetDocumentoWhere(tenantContext.datasetScope),
     },
     select: {
       id: true,

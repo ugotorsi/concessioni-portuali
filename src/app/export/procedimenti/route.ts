@@ -34,7 +34,7 @@ export async function GET(request: Request): Promise<Response> {
 
   const rows = await prisma.procedimento.findMany({
     where: {
-      ...buildDatasetProcedimentoWhere(),
+      ...buildDatasetProcedimentoWhere(tenantContext?.datasetScope),
       ...(hasConcessioneTenantScope
         ? { concessione: concessioneTenantWhere }
         : {}),

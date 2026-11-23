@@ -11,7 +11,10 @@ vi.mock("@/lib/auth", () => ({
 }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    procedimento: { findUnique: procedimentoFindUniqueMock },
+    procedimento: {
+      findFirst: procedimentoFindUniqueMock,
+      findUnique: procedimentoFindUniqueMock,
+    },
   },
 }));
 vi.mock("@/lib/tenant-auth", () => ({

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireAdminWithMfa } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
@@ -55,13 +56,16 @@ export async function updateFascicoloAiPolicyAction(formData: FormData): Promise
     throw new Error("FASCICOLO_AI_POLICY_CONFIRMATION_REQUIRED");
   }
   const procedimentoId = idSchema.parse(formData.get("procedimentoId"));
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("AUTHENTICATION_REQUIRED");
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
     select: { enteId: true },
   });
   if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) throw new Error("AUTHENTICATION_REQUIRED");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,

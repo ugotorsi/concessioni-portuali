@@ -4,8 +4,12 @@ import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth"
 import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 
 export async function getFascicoloIntakeDetail(id: string) {
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) {
+    return null;
+  }
   const fascicolo = await prisma.fascicoloIntake.findFirst({
-    where: { id, ...buildDatasetFascicoloIntakeWhere() },
+    where: { id, ...buildDatasetFascicoloIntakeWhere(tenantContext.datasetScope) },
     include: {
       concessione: { select: { id: true, numeroAtto: true } },
       procedimento: { select: { id: true } },
@@ -19,10 +23,6 @@ export async function getFascicoloIntakeDetail(id: string) {
     return null;
   }
 
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) {
-    return null;
-  }
   try {
     requireTenantAccess(tenantContext, fascicolo.enteId, {
       mode: "read",
@@ -49,7 +49,7 @@ export async function getFascicoliIntakeList(input: { search?: string; concessio
 
   return prisma.fascicoloIntake.findMany({
     where: {
-      ...buildDatasetFascicoloIntakeWhere(),
+      ...buildDatasetFascicoloIntakeWhere(tenantContext.datasetScope),
       procedimentoId: null,
       ...(tenantContext.isAdmin ? {} : { enteId: { in: tenantContext.accessibleTenantIds } }),
       ...(input.concessioneId ? { concessioneId: input.concessioneId } : {}),

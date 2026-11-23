@@ -5,6 +5,10 @@ import {
   buildDatasetProcedimentoWhere,
 } from "../../src/lib/dataset-visibility";
 import { prisma } from "../../src/lib/prisma";
+import {
+  activateFascicoloIntake,
+  FascicoloIntakeActivationError,
+} from "../../src/server/fascicolo-intake/activation";
 
 const PROFESSIONAL_CONCESSION_ID = "dataset-validation-professional-concession";
 const PROFESSIONAL_PROCEDIMENTO_ID = "dataset-validation-professional-procedimento";
@@ -14,6 +18,8 @@ const E2E_CONCESSION_ID = "dataset-validation-e2e-concession";
 const E2E_PROCEDIMENTO_ID = "dataset-validation-e2e-procedimento";
 const E2E_INTAKE_ID = "dataset-validation-e2e-intake";
 const E2E_DOCUMENT_ID = "dataset-validation-e2e-document";
+const E2E_ACTIVATION_INTAKE_ID = "dataset-validation-e2e-activation-intake";
+const MISMATCHED_INTAKE_ID = "dataset-validation-mismatched-intake";
 
 function assertIsolatedDatabase() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -110,8 +116,45 @@ async function main() {
         tipologiaConcessione: "PORTUALE_ADSP",
         oggettoFascicolo: "Validazione E2E",
       },
+      {
+        id: E2E_ACTIVATION_INTAKE_ID,
+        datasetClass: "E2E",
+        enteId: ente.id,
+        tipologiaConcessione: "PORTUALE_ADSP",
+        oggettoFascicolo: "Validazione attivazione E2E",
+      },
+      {
+        id: MISMATCHED_INTAKE_ID,
+        datasetClass: "E2E",
+        enteId: ente.id,
+        concessioneId: PROFESSIONAL_CONCESSION_ID,
+        tipologiaConcessione: "PORTUALE_ADSP",
+        oggettoFascicolo: "Validazione incoerenza dataset",
+      },
     ],
   });
+  const activation = await activateFascicoloIntake({
+    fascicoloIntakeId: E2E_ACTIVATION_INTAKE_ID,
+    tenantId: ente.id,
+  });
+  const activatedProcedimento = await prisma.procedimento.findUniqueOrThrow({
+    where: { id: activation.procedimento.id },
+    select: { datasetClass: true },
+  });
+  if (activation.outcome !== "CREATED" || activatedProcedimento.datasetClass !== "E2E") {
+    throw new Error("Synthetic intake activation did not preserve the E2E dataset class.");
+  }
+  try {
+    await activateFascicoloIntake({
+      fascicoloIntakeId: MISMATCHED_INTAKE_ID,
+      tenantId: ente.id,
+    });
+    throw new Error("Mismatched intake and concession dataset classes were accepted.");
+  } catch (error) {
+    if (!(error instanceof FascicoloIntakeActivationError)) {
+      throw error;
+    }
+  }
   await prisma.documento.createMany({
     data: [
       {
@@ -215,6 +258,8 @@ async function main() {
     synthetic: {
       concessioni: syntheticConcessions.length,
       validationDocuments: syntheticDocuments.length,
+      activatedProcedimentoDatasetClass: activatedProcedimento.datasetClass,
+      mismatchedActivationRejected: true,
     },
     all: { concessioni: allConcessions },
   }, null, 2));

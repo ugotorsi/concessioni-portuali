@@ -4,6 +4,7 @@ import {
   getDefaultTenantMembership,
   isTenantScopedRole,
   resolveDemoEnteCodeForConcessione,
+  resolveStandaloneIntakeDatasetClass,
   resolveTenantDatasetClass,
   resolveTenantLabel,
   type TenantMembershipLike,
@@ -67,6 +68,29 @@ describe("tenant baseline helpers", () => {
     expect(resolveTenantDatasetClass("DEMO-ENTE-ADSP")).toBe("DEMO");
     expect(resolveTenantDatasetClass("e2e-canary")).toBe("E2E");
     expect(resolveTenantDatasetClass("ENTE-PROFESSIONALE")).toBe("PROFESSIONAL");
+  });
+
+  it("requires standalone intake classification to match the selected workspace", () => {
+    expect(resolveStandaloneIntakeDatasetClass({
+      tenantCode: "ENTE-PROFESSIONALE",
+      workspaceScope: "PROFESSIONAL",
+    })).toBe("PROFESSIONAL");
+    expect(resolveStandaloneIntakeDatasetClass({
+      tenantCode: "DEMO-ENTE-ADSP",
+      workspaceScope: "SYNTHETIC",
+    })).toBe("DEMO");
+    expect(resolveStandaloneIntakeDatasetClass({
+      tenantCode: "E2E-CANARY",
+      workspaceScope: "SYNTHETIC",
+    })).toBe("E2E");
+    expect(() => resolveStandaloneIntakeDatasetClass({
+      tenantCode: "DEMO-ENTE-ADSP",
+      workspaceScope: "PROFESSIONAL",
+    })).toThrow("non appartiene");
+    expect(() => resolveStandaloneIntakeDatasetClass({
+      tenantCode: "ENTE-PROFESSIONALE",
+      workspaceScope: "SYNTHETIC",
+    })).toThrow("non appartiene");
   });
 
   it("keeps ADMIN non tenant-scoped and backoffice demo roles tenant-scoped", () => {

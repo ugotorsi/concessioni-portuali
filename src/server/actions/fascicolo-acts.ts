@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure } from "@/server/audit/auditLog";
@@ -76,19 +77,22 @@ const archiveDuplicatesSchema = scopeSchema.extend({
 
 async function authorizedScope(procedimentoId: string): Promise<{ scope: ActDraftScope; actor: ActDraftActor; label: string; responsabile: string | null; unita: string | null }> {
   const role = await requireRole();
-  const [user, tenantContext, procedimento] = await Promise.all([
+  const [user, tenantContext] = await Promise.all([
     getCurrentUser(),
     getCurrentTenantContext(),
-    prisma.procedimento.findUnique({
-      where: { id: procedimentoId },
-      select: {
-        enteId: true,
-        concessioneId: true,
-        responsabileProcedimentoNome: true,
-        unitaOrganizzativaResponsabile: true,
-      },
-    }),
   ]);
+  const procedimento = await prisma.procedimento.findUnique({
+    where: buildDatasetProcedimentoUniqueWhere(
+      procedimentoId,
+      tenantContext?.datasetScope,
+    ),
+    select: {
+      enteId: true,
+      concessioneId: true,
+      responsabileProcedimentoNome: true,
+      unitaOrganizzativaResponsabile: true,
+    },
+  });
   if (!user || !tenantContext || !procedimento?.enteId) throw new Error("Procedimento, attore o tenant non disponibile.");
   requireTenantAccess(tenantContext, procedimento.enteId, { mode: "write", allowWhenEnteMissing: false });
   const scope = { tenantId: procedimento.enteId, procedimentoId, concessioneId: procedimento.concessioneId };

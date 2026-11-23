@@ -1,5 +1,10 @@
 import { getCurrentUser, type DemoRole } from "@/lib/auth";
-import { buildDatasetConcessioneWhere } from "@/lib/dataset-visibility";
+import {
+  buildDatasetConcessioneWhere,
+  getDatasetScope,
+  type DatasetScope,
+} from "@/lib/dataset-visibility";
+import { resolveCurrentDatasetScope } from "@/lib/dataset-workspace";
 import { prisma } from "@/lib/prisma";
 import { getDefaultTenantMembership, isTenantScopedRole, type TenantMembershipLike } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
@@ -11,6 +16,7 @@ export interface CurrentTenantContext {
   tenantMemberships: TenantMembershipLike[];
   defaultTenantId: string | null;
   accessibleTenantIds: string[];
+  datasetScope?: DatasetScope;
 }
 
 export function resolveAccessibleTenantIds(input: {
@@ -133,6 +139,7 @@ export async function getCurrentTenantContext(): Promise<CurrentTenantContext | 
     tenantMemberships,
     defaultTenantId: defaultMembership?.enteId ?? null,
     accessibleTenantIds,
+    datasetScope: await resolveCurrentDatasetScope(user),
   };
 }
 
@@ -141,10 +148,13 @@ export function isTenantContextConstrained(context: CurrentTenantContext): boole
 }
 
 export function buildTenantConcessioneWhere(
-  context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role"> | null,
+  context: (
+    Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role">
+    & Partial<Pick<CurrentTenantContext, "datasetScope">>
+  ) | null,
   options?: { allowWhenEnteMissing?: boolean },
 ): Prisma.ConcessioneWhereInput {
-  const datasetWhere = buildDatasetConcessioneWhere();
+  const datasetWhere = buildDatasetConcessioneWhere(context?.datasetScope ?? getDatasetScope());
   if (!context || context.isAdmin || !isTenantScopedRole(context.role)) {
     return datasetWhere;
   }
@@ -177,12 +187,12 @@ export function resolveResourceTenantId(input: {
 }
 
 export async function requireConcessioneTenantAccess(
-  context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role">,
+  context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role" | "datasetScope">,
   concessioneId: string,
   options?: { mode?: "read" | "write"; allowWhenEnteMissing?: boolean },
 ): Promise<{ id: string; enteId: string | null }> {
   const concessione = await prisma.concessione.findFirst({
-    where: { id: concessioneId, ...buildDatasetConcessioneWhere() },
+    where: { id: concessioneId, ...buildDatasetConcessioneWhere(context.datasetScope) },
     select: {
       id: true,
       enteId: true,

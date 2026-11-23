@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
 import {
@@ -163,13 +164,16 @@ export async function runManualFascicoloAnalysis(formData: FormData): Promise<vo
   if (formData.get("confirmation") !== "RUN_MANUAL_FASCICOLO_ANALYSIS") {
     throw new Error("MANUAL_ANALYSIS_CONFIRMATION_REQUIRED");
   }
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId.trim() },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId.trim(),
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
     select: { id: true, enteId: true },
   });
   if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,
@@ -235,6 +239,7 @@ export async function runManualTenantBatchAnalysis(formData: FormData): Promise<
   });
   const procedimenti = await prisma.procedimento.findMany({
     where: {
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
       enteId: tenantId.trim(),
       stato: { in: [...ACTIVE_PROCEDIMENTO_STATES] },
     },
@@ -1158,13 +1163,16 @@ export async function startLegalAnalysisPipeline(formData: FormData): Promise<vo
   if (formData.get("confirmation") !== "START_LEGAL_ANALYSIS") {
     throw new Error("LEGAL_ANALYSIS_CONFIRMATION_REQUIRED");
   }
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId.trim() },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId.trim(),
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
     select: { id: true, enteId: true },
   });
   if (!procedimento?.enteId) throw new Error("PROCEDIMENTO_NOT_FOUND");
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,
@@ -1245,6 +1253,17 @@ export async function activateQueuedLegalAnalysisJob(formData: FormData): Promis
   }
   const tenantContext = await getCurrentTenantContext();
   if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: procedimentoId,
+      enteId: job.tenantId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
+    select: { id: true },
+  });
+  if (!procedimento) {
+    throw new Error("QUEUED_ANALYSIS_DATASET_NOT_ELIGIBLE");
+  }
   requireTenantAccess(tenantContext, job.tenantId, {
     mode: "write",
     allowWhenEnteMissing: false,

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   requireAdminWithMfa: vi.fn(),
-  procedimentoFindUnique: vi.fn(),
+  procedimentoFindFirst: vi.fn(),
   getCurrentTenantContext: vi.fn(),
   requireTenantAccess: vi.fn(),
   requestExistingCorpusAnalysis: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock("@/lib/auth", () => ({
 }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    procedimento: { findUnique: mocks.procedimentoFindUnique },
+    procedimento: { findFirst: mocks.procedimentoFindFirst },
   },
 }));
 vi.mock("@/lib/tenant-auth", () => ({
@@ -70,12 +70,13 @@ describe("existing corpus analysis action", () => {
       role: "ADMIN",
       mfaVerified: true,
     });
-    mocks.procedimentoFindUnique.mockResolvedValue({ enteId: "tenant-a" });
+    mocks.procedimentoFindFirst.mockResolvedValue({ enteId: "tenant-a" });
     mocks.getCurrentTenantContext.mockResolvedValue({
       userId: "admin-a",
       role: "ADMIN",
       isAdmin: true,
       accessibleTenantIds: [],
+      datasetScope: "PROFESSIONAL",
     });
     mocks.requestExistingCorpusAnalysis.mockResolvedValue({
       admission: { outcome: "CREATED", job: { id: "analysis-job-a" } },
@@ -88,15 +89,18 @@ describe("existing corpus analysis action", () => {
 
     await expect(requestExistingCorpusAnalysisAction(formData()))
       .rejects.toThrow("ADMIN_REQUIRED");
-    expect(mocks.procedimentoFindUnique).not.toHaveBeenCalled();
+    expect(mocks.procedimentoFindFirst).not.toHaveBeenCalled();
     expect(mocks.requestExistingCorpusAnalysis).not.toHaveBeenCalled();
   });
 
   it("checks tenant write authority and passes only the canonical scope", async () => {
     await expect(requestExistingCorpusAnalysisAction(formData())).resolves.toBeUndefined();
 
-    expect(mocks.procedimentoFindUnique).toHaveBeenCalledWith({
-      where: { id: "procedure-a" },
+    expect(mocks.procedimentoFindFirst).toHaveBeenCalledWith({
+      where: {
+        id: "procedure-a",
+        datasetClass: "PROFESSIONAL",
+      },
       select: { enteId: true },
     });
     expect(mocks.requireTenantAccess).toHaveBeenCalledWith(

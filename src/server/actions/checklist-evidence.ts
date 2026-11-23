@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import {
   CHECKLIST_ITEM_CODES,
   getChecklistContraddittorioItems,
@@ -72,8 +73,12 @@ export async function createChecklistEvidenceAction(formData: FormData) {
     documentoId: formData.get("documentoId"),
     checklistItemCode: formData.get("checklistItemCode"),
   });
+  const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: parsed.procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      parsed.procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: {
       id: true,
       enteId: true,
@@ -86,7 +91,6 @@ export async function createChecklistEvidenceAction(formData: FormData) {
     throw new Error("Procedimento o tenant canonico non disponibile.");
   }
 
-  const tenantContext = await getCurrentTenantContext();
   if (tenantContext) {
     requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
   }

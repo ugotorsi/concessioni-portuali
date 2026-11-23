@@ -237,8 +237,11 @@ sola radice non appartiene alla vista attiva. Le tre colonne hanno default di sc
 migrazione e backfill. `UNCLASSIFIED` è escluso sia da `PROFESSIONAL` sia da `SYNTHETIC` ed è
 visibile solo con la vista amministrativa controllata `ALL`.
 
-`NOETRA_DATASET_SCOPE=PROFESSIONAL` è il default fail-closed; un deployment demo separato deve
-richiedere esplicitamente `SYNTHETIC`.
+`NOETRA_DATASET_SCOPE=PROFESSIONAL` è il default fail-closed. Un deployment demo separato può
+richiedere esplicitamente `SYNTHETIC`; nello stesso deployment un ADMIN con MFA può selezionare
+temporaneamente il workspace sintetico tramite una preferenza firmata, legata all'utente,
+HTTP-only e con scadenza. La selezione non ammette `ALL`, viene auditata e non sostituisce i
+filtri server-side su letture e mutazioni.
 
 Il filtro è applicato ai read-model condivisi che alimentano dashboard, concessioni,
 concessionari, verticali, mappa, criticità, scadenze, pagamenti, sopralluoghi, fascicoli,

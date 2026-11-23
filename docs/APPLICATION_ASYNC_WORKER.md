@@ -90,6 +90,27 @@ chain but must never be presented as evidence that real customer data were proce
 Do not relabel historical fascicoli or duplicate an existing fascicolo to prepare the
 test.
 
+An ADMIN with verified MFA must first select **Collaudo sintetico** in the application
+header. The selection is stored in a signed, user-bound, HTTP-only cookie for at most
+eight hours; it never enables the administrative `ALL` scope. The default remains the
+deployment scope (`PROFESSIONAL` when unset or invalid). Switching workspace is audited.
+
+Standalone intake creation is fail-closed:
+
+- the professional workspace accepts only tenants without `DEMO-`/`E2E-` markers and
+  persists `PROFESSIONAL`;
+- the synthetic workspace accepts only `DEMO-*` or `E2E-*` tenants and persists the
+  corresponding class;
+- linked concessions must already belong to the selected workspace and the intake,
+  proceeding and concession classes must remain equal during activation;
+- document upload, extraction, AI admission, legal-pipeline activation, report access
+  and exports reapply the selected dataset scope on the server. Hiding a row in the UI
+  is not treated as authorization.
+
+This permits a synthetic canary on the existing application deployment without changing
+`NOETRA_DATASET_SCOPE`, exposing professional rows in the synthetic workspace, or
+creating a second project or database.
+
 The application worker configuration must include all of the following:
 
 ```text

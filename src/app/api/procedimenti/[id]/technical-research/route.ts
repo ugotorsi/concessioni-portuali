@@ -49,13 +49,16 @@ async function getAccessibleProcedure(
   expectedUserId: string,
   mode: "read" | "write",
 ) {
-  const [tenantContext, procedimento] = await Promise.all([
-    getCurrentTenantContext(),
-    prisma.procedimento.findFirst({
-      where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() },
+  const tenantContext = await getCurrentTenantContext();
+  const procedimento = tenantContext
+    ? await prisma.procedimento.findFirst({
+      where: {
+        id: procedimentoId,
+        ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+      },
       select: { id: true, enteId: true },
-    }),
-  ]);
+    })
+    : null;
   if (!procedimento) return { kind: "ERROR", response: jsonError("Procedure not found.", 404) } as const;
   try {
     if (!tenantContext || tenantContext.userId !== expectedUserId) {

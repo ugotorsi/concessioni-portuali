@@ -21,19 +21,19 @@ describe("dataset access boundaries", () => {
     );
 
     expect(procedureQuery).toContain(
-      "where: { id, ...buildDatasetProcedimentoWhere() }",
+      "where: { id, ...buildDatasetProcedimentoWhere(tenantContext?.datasetScope) }",
     );
     expect(technicalApi).toContain(
-      "where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() }",
+      "...buildDatasetProcedimentoWhere(tenantContext.datasetScope)",
     );
     expect(structuredExport).toContain(
-      "procedimento: { is: buildDatasetProcedimentoWhere() }",
+      "procedimento: { is: buildDatasetProcedimentoWhere(tenantContext.datasetScope) }",
     );
     expect(reportExport).toContain(
-      "where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() }",
+      "...buildDatasetProcedimentoWhere(tenantContext.datasetScope)",
     );
     expect(actExport).toContain(
-      "where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() }",
+      "...buildDatasetProcedimentoWhere(tenantContext.datasetScope)",
     );
   });
 
@@ -45,11 +45,17 @@ describe("dataset access boundaries", () => {
     const reportExport = source("src/app/export/report/route.ts");
     const tenantAuth = source("src/lib/tenant-auth.ts");
 
-    expect(byteReader).toContain("...buildDatasetDocumentoWhere()");
-    expect(procedureExport).toContain("...buildDatasetProcedimentoWhere()");
-    expect(reportExport).toContain("buildDatasetConcessioneWhere()");
+    expect(byteReader).toContain(
+      "...buildDatasetDocumentoWhere(tenantContext.datasetScope)",
+    );
+    expect(procedureExport).toContain(
+      "...buildDatasetProcedimentoWhere(tenantContext?.datasetScope)",
+    );
+    expect(reportExport).toContain(
+      "buildDatasetConcessioneWhere(tenantContext?.datasetScope)",
+    );
     expect(tenantAuth).toContain(
-      "where: { id: concessioneId, ...buildDatasetConcessioneWhere() }",
+      "...buildDatasetConcessioneWhere(context.datasetScope)",
     );
   });
 });

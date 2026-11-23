@@ -41,6 +41,7 @@ const txMock = vi.hoisted(() => ({
       id: "procedimento-1",
       enteId: "ente-1",
       concessioneId: "concessione-1",
+      datasetClass: "PROFESSIONAL",
     })),
   },
   neutralIntakeDestination: {
@@ -89,6 +90,7 @@ const prismaMock = vi.hoisted(() => ({
       id: "procedimento-1",
       enteId: "ente-1",
       concessioneId: "concessione-1",
+      datasetClass: "PROFESSIONAL",
     })),
   },
 }));
@@ -226,7 +228,11 @@ describe("primary Procedimento direct upload", () => {
     state.physicalStorageWrites = 0;
     requireRoleMock.mockResolvedValue("GIURIDICO");
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "user@example.test", role: "GIURIDICO" });
-    getTenantContextMock.mockResolvedValue({ userId: "user-1", accessibleTenantIds: ["ente-1"] });
+    getTenantContextMock.mockResolvedValue({
+      userId: "user-1",
+      accessibleTenantIds: ["ente-1"],
+      datasetScope: "PROFESSIONAL",
+    });
     requireTenantAccessMock.mockImplementation(() => undefined);
     runTransactionMock.mockImplementation(async (work) => work(txMock));
     admitJobMock.mockResolvedValue({ outcome: "CREATED", job: { id: "extraction-job-1" } });

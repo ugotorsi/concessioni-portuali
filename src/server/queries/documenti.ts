@@ -101,7 +101,7 @@ function buildWhere(params: GetDocumentiListParams): Prisma.DocumentoWhereInput 
 function buildDocumentoTenantWhere(
   tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
 ): Prisma.DocumentoWhereInput {
-  const datasetWhere = buildDatasetDocumentoWhere();
+  const datasetWhere = buildDatasetDocumentoWhere(tenantContext?.datasetScope);
   if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
     return datasetWhere;
   }

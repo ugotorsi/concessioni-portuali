@@ -65,6 +65,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
+import { getCurrentTenantContext } from "@/lib/tenant-auth";
 import {
   isExistingCorpusAnalysisRequestEnabled,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
@@ -230,6 +231,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const duplicateDocumentUpload = documentUpload === "duplicate";
   const detail = await getProcedimentoDetail(id);
   const fascicoloIntake = detail ? null : await getFascicoloIntakeDetail(id);
+  const tenantContext = await getCurrentTenantContext();
 
   if (fascicoloIntake?.procedimento) {
     redirect(`/procedimenti/${fascicoloIntake.procedimento.id}`);
@@ -540,7 +542,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           where: {
             procedimentoId: detail.procedimento.id,
             enteId: detail.canonicalEnteId,
-            ...buildDatasetFascicoloIntakeWhere(),
+            ...buildDatasetFascicoloIntakeWhere(tenantContext?.datasetScope),
           },
           select: {
             oggettoFascicolo: true,

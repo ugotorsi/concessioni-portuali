@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
@@ -25,7 +26,10 @@ function resolvePersistedUserId(currentUserId: string): string | null {
 async function requireProcedimentoWriteAccess(procedimentoId: string) {
   const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: { id: true, enteId: true, concessioneId: true },
   });
 

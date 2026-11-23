@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireUserWithMfa } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
@@ -32,14 +33,17 @@ const idSchema = z.string().trim().min(1).max(256);
 const PAID_RESEARCH_CONFIRMATION = "AUTORIZZO_RICERCA_ENTRO_IL_BUDGET_CONFIGURATO";
 
 async function requireProfessionalQuestionAccess(procedimentoId: string) {
-  const [user, tenantContext, procedimento] = await Promise.all([
+  const [user, tenantContext] = await Promise.all([
     requireUserWithMfa(["ADMIN", "GIURIDICO"]),
     getCurrentTenantContext(),
-    prisma.procedimento.findUnique({
-      where: { id: procedimentoId },
-      select: { id: true, enteId: true },
-    }),
   ]);
+  const procedimento = await prisma.procedimento.findUnique({
+    where: buildDatasetProcedimentoUniqueWhere(
+      procedimentoId,
+      tenantContext?.datasetScope,
+    ),
+    select: { id: true, enteId: true },
+  });
   if (!tenantContext || !procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",

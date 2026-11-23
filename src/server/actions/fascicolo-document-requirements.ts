@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoUniqueWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
@@ -47,8 +48,12 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
     throw new Error("Utente non autenticato.");
   }
 
+  const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
-    where: { id: parsed.procedimentoId },
+    where: buildDatasetProcedimentoUniqueWhere(
+      parsed.procedimentoId,
+      tenantContext?.datasetScope,
+    ),
     select: {
       id: true,
       enteId: true,
@@ -67,7 +72,6 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
     throw new Error("Procedimento o tenant canonico non disponibile.");
   }
 
-  const tenantContext = await getCurrentTenantContext();
   if (tenantContext) {
     requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
   }

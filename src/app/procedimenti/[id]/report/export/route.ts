@@ -27,14 +27,17 @@ export async function GET(
   if (!role) return new Response("Unauthorized", { status: 401 });
   if (!canExportOperationalData(role)) return new Response("Forbidden", { status: 403 });
 
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) return new Response("Unauthorized", { status: 401 });
   const procedimento = await prisma.procedimento.findFirst({
-    where: { id: procedimentoId, ...buildDatasetProcedimentoWhere() },
+    where: {
+      id: procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
     select: { id: true, enteId: true },
   });
   if (!procedimento) return new Response("Not found", { status: 404 });
 
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext) return new Response("Unauthorized", { status: 401 });
   try {
     requireTenantAccess(tenantContext, procedimento.enteId, {
       mode: "read",

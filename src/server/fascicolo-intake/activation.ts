@@ -44,9 +44,14 @@ export async function activateFascicoloIntake(input: {
     if (intake.procedimentoId) {
       const existing = await tx.procedimento.findUnique({
         where: { id: intake.procedimentoId },
-        select: { id: true, enteId: true, concessioneId: true },
+        select: { id: true, datasetClass: true, enteId: true, concessioneId: true },
       });
-      if (!existing || existing.enteId !== intake.enteId || existing.concessioneId !== intake.concessioneId) {
+      if (
+        !existing
+        || existing.datasetClass !== intake.datasetClass
+        || existing.enteId !== intake.enteId
+        || existing.concessioneId !== intake.concessioneId
+      ) {
         throw new FascicoloIntakeActivationError("Collegamento operativo del fascicolo non coerente.");
       }
       await ensureDefaultProcedimentoBudgetPolicy({
@@ -60,9 +65,13 @@ export async function activateFascicoloIntake(input: {
     if (intake.concessioneId) {
       const concessione = await tx.concessione.findUnique({
         where: { id: intake.concessioneId },
-        select: { enteId: true },
+        select: { datasetClass: true, enteId: true },
       });
-      if (!concessione || concessione.enteId !== intake.enteId) {
+      if (
+        !concessione
+        || concessione.datasetClass !== intake.datasetClass
+        || concessione.enteId !== intake.enteId
+      ) {
         throw new FascicoloIntakeActivationError("Concessione del fascicolo non coerente con il tenant.");
       }
     }
@@ -84,10 +93,11 @@ export async function activateFascicoloIntake(input: {
 
     const procedimento = await tx.procedimento.findUnique({
       where: { id: procedimentoId },
-      select: { id: true, enteId: true, concessioneId: true },
+      select: { id: true, datasetClass: true, enteId: true, concessioneId: true },
     });
     if (
       !procedimento
+      || procedimento.datasetClass !== intake.datasetClass
       || procedimento.enteId !== intake.enteId
       || procedimento.concessioneId !== intake.concessioneId
     ) {

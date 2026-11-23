@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
+import { buildDatasetProcedimentoWhere } from "@/lib/dataset-visibility";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditSuccess } from "@/server/audit/auditLog";
@@ -35,16 +36,19 @@ export async function recoverFascicoloDocumentExtractionsAction(formData: FormDa
   const input = inputSchema.parse({
     procedimentoId: formData.get("procedimentoId"),
   });
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: input.procedimentoId },
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext || tenantContext.userId !== currentUser.id) {
+    throw new Error("Contesto tenant autenticato richiesto.");
+  }
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: input.procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
     select: { id: true, enteId: true },
   });
   if (!procedimento) {
     throw new Error("Fascicolo non disponibile.");
-  }
-  const tenantContext = await getCurrentTenantContext();
-  if (!tenantContext || tenantContext.userId !== currentUser.id) {
-    throw new Error("Contesto tenant autenticato richiesto.");
   }
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
@@ -83,15 +87,18 @@ export async function recoverFascicoloTerminalDocumentExtractionsAction(formData
   if (formData.get("confirmation") !== "RECOVER_FASCICOLO_DOCUMENT_EXTRACTIONS") {
     throw new Error("Conferma del recupero documentale richiesta.");
   }
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: input.procedimentoId },
-    select: { id: true, enteId: true },
-  });
-  if (!procedimento) throw new Error("Fascicolo non disponibile.");
   const tenantContext = await getCurrentTenantContext();
   if (!tenantContext || tenantContext.userId !== currentUser.id) {
     throw new Error("Contesto tenant autenticato richiesto.");
   }
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: input.procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento) throw new Error("Fascicolo non disponibile.");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,
@@ -139,15 +146,18 @@ export async function recoverFascicoloTerminalDocumentExtractionAction(formData:
   if (formData.get("confirmation") !== "RECOVER_FASCICOLO_DOCUMENT_EXTRACTION") {
     throw new Error("Conferma del recupero documentale richiesta.");
   }
-  const procedimento = await prisma.procedimento.findUnique({
-    where: { id: input.procedimentoId },
-    select: { id: true, enteId: true },
-  });
-  if (!procedimento) throw new Error("Fascicolo non disponibile.");
   const tenantContext = await getCurrentTenantContext();
   if (!tenantContext || tenantContext.userId !== currentUser.id) {
     throw new Error("Contesto tenant autenticato richiesto.");
   }
+  const procedimento = await prisma.procedimento.findFirst({
+    where: {
+      id: input.procedimentoId,
+      ...buildDatasetProcedimentoWhere(tenantContext.datasetScope),
+    },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento) throw new Error("Fascicolo non disponibile.");
   requireTenantAccess(tenantContext, procedimento.enteId, {
     mode: "write",
     allowWhenEnteMissing: false,
