@@ -621,6 +621,35 @@ describe("inactive canonical identity service", () => {
     })).rejects.toMatchObject({ code });
   });
 
+  it.each([
+    {
+      index: "fascicolo_knowledge_item_revision_semantic_uq",
+      code: "SEMANTIC_KEY_COLLISION",
+    },
+    {
+      index: "fascicolo_knowledge_item_revision_identity_uq",
+      code: "TARGET_IDENTITY_POSITION_TAKEN",
+    },
+  ])("normalizes adapter index uniqueness to $code", async ({ index, code }) => {
+    const error = new Prisma.PrismaClientKnownRequestError("raw unique collision", {
+      code: "P2010",
+      clientVersion: "7.10.1",
+      meta: {
+        driverAdapterError: {
+          cause: {
+            kind: "UniqueConstraintViolation",
+            constraint: { index },
+          },
+        },
+      },
+    });
+    await expect(createVerifiedKnowledgeIdentity(input(), {
+      transaction: async () => {
+        throw error;
+      },
+    })).rejects.toMatchObject({ code });
+  });
+
   it("retries only deterministic raw-query primary-key races", () => {
     const rawUnique = (fields: string[]) => new Prisma.PrismaClientKnownRequestError("raw unique collision", {
       code: "P2010",

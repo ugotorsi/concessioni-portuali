@@ -182,10 +182,11 @@ function uniqueConstraintFields(error: unknown): readonly string[] | null {
   if (cause?.kind !== "UniqueConstraintViolation") return null;
   const constraint = objectRecord(cause.constraint);
   const fields = constraint?.fields;
-  return Array.isArray(fields)
-    ? fields.filter((value): value is string => typeof value === "string")
-      .map((value) => value.replace(/^"(.*)"$/, "$1"))
-    : [];
+  if (Array.isArray(fields)) {
+    return fields.filter((value): value is string => typeof value === "string")
+      .map((value) => value.replace(/^"(.*)"$/, "$1"));
+  }
+  return typeof constraint?.index === "string" ? [constraint.index] : [];
 }
 
 export function isRetryableCanonicalIdentityPersistenceError(error: unknown): boolean {
