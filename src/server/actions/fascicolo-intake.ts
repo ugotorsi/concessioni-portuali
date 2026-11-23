@@ -9,6 +9,7 @@ import { buildDatasetFascicoloIntakeWhere } from "@/lib/dataset-visibility";
 import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantDatasetClass } from "@/lib/tenant";
 import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditSuccess } from "@/server/audit/auditLog";
 import { activateFascicoloIntake } from "@/server/fascicolo-intake/activation";
@@ -79,6 +80,15 @@ export async function createFascicoloIntakeAction(formData: FormData) {
     });
     enteId = concessione?.enteId ?? null;
     datasetClass = concessione?.datasetClass ?? "UNCLASSIFIED";
+  } else if (enteId) {
+    const ente = await prisma.ente.findUnique({
+      where: { id: enteId },
+      select: { codice: true },
+    });
+    if (!ente) {
+      throw new Error("Tenant predefinito non trovato.");
+    }
+    datasetClass = resolveTenantDatasetClass(ente.codice);
   }
   if (!enteId) {
     throw new Error("Seleziona un tenant predefinito prima di creare un fascicolo senza concessione collegata.");

@@ -716,10 +716,11 @@ export default async function RuntimeOperationsPage({
       />
 
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">
-        <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <div><dt className="text-xs text-slate-500">Unità attive</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.activeWorkers}</dd></div>
           <div><dt className="text-xs text-slate-500">In attesa</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.queueDepth}</dd><p className="text-xs text-slate-500">Attesa massima {health.oldestPendingAgeSeconds ?? 0}s</p></div>
           <div><dt className="text-xs text-slate-500">In elaborazione</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.runningJobs}</dd></div>
+          <div><dt className="text-xs text-slate-500">Cancellazione richiesta</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.cancellationRequestedJobs}</dd></div>
           <div><dt className="text-xs text-slate-500">Da recuperare</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.staleLeases}</dd></div>
         </dl>
       </section>

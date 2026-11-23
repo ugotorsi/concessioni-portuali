@@ -61,6 +61,7 @@ export interface RuntimeHealthSnapshot {
   databaseConnected: boolean;
   queueDepth: number;
   runningJobs: number;
+  cancellationRequestedJobs: number;
   failedJobs: number;
   staleLeases: number;
   oldestPendingAgeSeconds: number | null;
@@ -104,6 +105,7 @@ export async function getRuntimeHealthSnapshot(
   const result = await executor.query<{
     queueDepth: number;
     runningJobs: number;
+    cancellationRequestedJobs: number;
     failedJobs: number;
     staleLeases: number;
     oldestPendingAgeSeconds: number | null;
@@ -112,9 +114,10 @@ export async function getRuntimeHealthSnapshot(
   }>(`
     SELECT
       (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status" IN ('QUEUED','RETRY_WAIT')) AS "queueDepth",
-      (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status" IN ('RUNNING','CANCELLATION_REQUESTED')) AS "runningJobs",
+      (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status"='RUNNING') AS "runningJobs",
+      (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status"='CANCELLATION_REQUESTED') AS "cancellationRequestedJobs",
       (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status"='TERMINAL_FAILED') AS "failedJobs",
-      (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status"='RUNNING' AND "leaseExpiresAt" <= CURRENT_TIMESTAMP) AS "staleLeases",
+      (SELECT COUNT(*)::int FROM "AsyncJob" WHERE "status" IN ('RUNNING','CANCELLATION_REQUESTED') AND "leaseExpiresAt" <= CURRENT_TIMESTAMP) AS "staleLeases",
       (SELECT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP-MIN("createdAt"))::int FROM "AsyncJob" WHERE "status" IN ('QUEUED','RETRY_WAIT')) AS "oldestPendingAgeSeconds",
       (SELECT COUNT(*)::int FROM "RuntimeWorkerHeartbeat" WHERE "status"='RUNNING' AND "lastSeenAt" > CURRENT_TIMESTAMP-($1*INTERVAL '1 second')) AS "activeWorkers",
       (SELECT MAX("completedAt") FROM "AsyncJob" WHERE "status"='SUCCEEDED') AS "lastSuccessfulJobAt"
@@ -134,6 +137,7 @@ export async function getRuntimeHealthSnapshot(
     databaseConnected: true,
     queueDepth: row.queueDepth,
     runningJobs: row.runningJobs,
+    cancellationRequestedJobs: row.cancellationRequestedJobs,
     failedJobs: row.failedJobs,
     staleLeases: row.staleLeases,
     oldestPendingAgeSeconds: row.oldestPendingAgeSeconds,
