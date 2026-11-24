@@ -10,6 +10,7 @@ import {
 } from "@/components/procedimenti/AiFascicoloTrustedReviewPanel";
 import { AiFascicoloTrustedReviewGenerationControl } from "@/components/procedimenti/AiFascicoloTrustedReviewGenerationControl";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
+import { DatasetClassificationRepairPanel } from "@/components/procedimenti/DatasetClassificationRepairPanel";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
@@ -110,6 +111,7 @@ import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analys
 import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listProfessionalLegalQuestions } from "@/server/legal-research/professional-questions";
 import { listStructuredFascicoloReportSnapshots, persistStructuredFascicoloReport } from "@/server/fascicolo-report";
+import { previewDatasetClassificationRepair } from "@/server/dataset-classification/repair";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
@@ -244,6 +246,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   if (!detail) {
     notFound();
   }
+
+  const datasetClassificationRepairPlan = role === "ADMIN"
+    ? await previewDatasetClassificationRepair(detail.procedimento.id)
+    : null;
+  const datasetClassificationRepairPanel = datasetClassificationRepairPlan?.changes.length
+    ? <DatasetClassificationRepairPanel plan={datasetClassificationRepairPlan} />
+    : null;
 
   const processingItems = await getFascicoloProcessingItems(detail.procedimento.id);
   const documentCorpus = detail.canonicalEnteId
@@ -591,6 +600,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         activeSection={activeSection}
         notice={(
           <div className="space-y-3">
+            {datasetClassificationRepairPanel}
             {initialIntake?.contestoIniziale ? (
               <section aria-label="Contesto iniziale del fascicolo" className="rounded-md border border-slate-200 bg-white p-4">
                 <h2 className="text-base font-semibold text-slate-950">Contesto iniziale acquisito</h2>
@@ -1146,9 +1156,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       model={overview}
       basePath={`/procedimenti/${detail.procedimento.id}`}
       activeSection={activeSection}
-      notice={duplicateDocumentUpload ? (
-        <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-          Documento già presente nel fascicolo.
+      notice={datasetClassificationRepairPanel || duplicateDocumentUpload ? (
+        <div className="space-y-3">
+          {datasetClassificationRepairPanel}
+          {duplicateDocumentUpload ? (
+            <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              Documento già presente nel fascicolo.
+            </div>
+          ) : null}
         </div>
       ) : null}
     >

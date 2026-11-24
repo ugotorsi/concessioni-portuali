@@ -110,6 +110,17 @@ Standalone intake creation is fail-closed:
   and exports reapply the selected dataset scope on the server. Hiding a row in the UI
   is not treated as authorization.
 
+Legacy roots that predate these rules are not inferred or rewritten automatically. When
+an ADMIN with verified MFA opens a visible proceeding whose root classes conflict with
+the tenant marker, the application offers an explicit dataset-classification repair.
+The repair derives the only permitted target from the tenant code, fingerprints the full
+standalone or concession aggregate, updates all connected dataset roots in one serializable
+transaction, including intake roots connected directly to the concession or through one
+of its proceedings, and appends the hash-chained audit record in that same transaction. Documents,
+file versions, extraction attempts, knowledge, jobs, reports, research history, and prior
+audit records remain unchanged. Stale fingerprints, cross-tenant aggregates, partial root
+updates, and already aligned roots are rejected.
+
 This permits a synthetic canary on the existing application deployment without changing
 `NOETRA_DATASET_SCOPE`, exposing professional rows in the synthetic workspace, or
 creating a second project or database.
