@@ -30,6 +30,6 @@ describe("LogoutButton", () => {
     (button?.props as { onClick: () => void }).onClick();
 
     expect(signOutMock).toHaveBeenCalledOnce();
-    expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/login" });
+    expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/logout" });
   });
 });

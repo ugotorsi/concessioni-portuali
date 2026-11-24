@@ -2,8 +2,8 @@ import { format } from "date-fns";
 import { CalendarDays, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+import { DatasetWorkspaceSelector } from "@/components/layout/DatasetWorkspaceSelector";
 import type { DatasetScope } from "@/lib/dataset-visibility";
-import { selectDatasetWorkspaceAction } from "@/server/actions/dataset-workspace";
 
 interface TopbarProps {
   title: string;
@@ -23,8 +23,6 @@ export function Topbar({
   canSelectDatasetScope = false,
 }: TopbarProps) {
   const today = format(new Date(), "dd/MM/yyyy");
-  const selectedScope = datasetScope === "SYNTHETIC" ? "SYNTHETIC" : "PROFESSIONAL";
-  const nextScope = selectedScope === "SYNTHETIC" ? "PROFESSIONAL" : "SYNTHETIC";
 
   return (
     <header className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
@@ -40,21 +38,7 @@ export function Topbar({
         </div>
         <div className="flex shrink-0 items-center gap-3 text-xs text-slate-600">
           {canSelectDatasetScope ? (
-            <form action={selectDatasetWorkspaceAction}>
-              <input type="hidden" name="scope" value={nextScope} />
-              <input
-                type="hidden"
-                name="confirmation"
-                value={`SELECT_DATASET_WORKSPACE_${nextScope}`}
-              />
-              <button
-                type="submit"
-                className="rounded-full border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]"
-                title={`Passa al workspace ${nextScope === "SYNTHETIC" ? "di collaudo sintetico" : "professionale"}`}
-              >
-                {selectedScope === "SYNTHETIC" ? "Collaudo sintetico" : "Dati professionali"}
-              </button>
-            </form>
+            <DatasetWorkspaceSelector datasetScope={datasetScope} />
           ) : null}
           <div className="hidden items-center gap-1.5 md:flex">
             <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />

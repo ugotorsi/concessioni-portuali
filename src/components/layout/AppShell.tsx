@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { getCurrentUser, getRoleDescription, getRoleLabel, requireRole } from "@/lib/auth";
 import { getCurrentTenantContext } from "@/lib/tenant-auth";
+import { DatasetWorkspaceConsistencyGuard } from "@/components/layout/DatasetWorkspaceConsistencyGuard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 
@@ -20,6 +21,9 @@ export async function AppShell({ children, title, subtitle }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-900 lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
+      {tenantContext?.datasetScope ? (
+        <DatasetWorkspaceConsistencyGuard datasetScope={tenantContext.datasetScope} />
+      ) : null}
       <Sidebar role={role} roleLabel={getRoleLabel(role)} />
       <div className="flex min-h-screen min-w-0 flex-col">
         <Topbar

@@ -94,6 +94,9 @@ An ADMIN with verified MFA must first select **Collaudo sintetico** in the appli
 header. The selection is stored in a signed, user-bound, HTTP-only cookie for at most
 eight hours; it never enables the administrative `ALL` scope. The default remains the
 deployment scope (`PROFESSIONAL` when unset or invalid). Switching workspace is audited.
+The signed cookie remains the only server-side authorization input. A non-authoritative
+browser notice invalidates the root route cache and reloads other open tabs so that cached
+labels and result sets cannot remain on the previous workspace after a selection changes.
 
 Standalone intake creation is fail-closed:
 
