@@ -5,6 +5,7 @@ import {
   DATASET_WORKSPACE_TTL_SECONDS,
   verifyDatasetWorkspaceToken,
 } from "@/lib/dataset-workspace";
+import { parseDatasetWorkspaceSelectionNotice } from "@/lib/dataset-workspace-browser";
 
 const secret = "dataset-workspace-test-secret-value-with-32-bytes";
 const now = new Date("2026-11-23T18:00:00.000Z");
@@ -53,5 +54,23 @@ describe("dataset workspace token", () => {
       secret,
       now: new Date(now.getTime() + DATASET_WORKSPACE_TTL_SECONDS * 1_000),
     })).toBeNull();
+  });
+
+  it("accepts only current professional or synthetic browser notices", () => {
+    const expiresAt = now.getTime() + 60_000;
+
+    expect(parseDatasetWorkspaceSelectionNotice(
+      JSON.stringify({ scope: "SYNTHETIC", expiresAt }),
+      now.getTime(),
+    )).toEqual({ scope: "SYNTHETIC", expiresAt });
+    expect(parseDatasetWorkspaceSelectionNotice(
+      JSON.stringify({ scope: "ALL", expiresAt }),
+      now.getTime(),
+    )).toBeNull();
+    expect(parseDatasetWorkspaceSelectionNotice(
+      JSON.stringify({ scope: "PROFESSIONAL", expiresAt: now.getTime() }),
+      now.getTime(),
+    )).toBeNull();
+    expect(parseDatasetWorkspaceSelectionNotice("not-json", now.getTime())).toBeNull();
   });
 });
